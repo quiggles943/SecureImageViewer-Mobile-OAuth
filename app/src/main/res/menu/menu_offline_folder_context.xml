@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+<item android:id="@+id/offline_folder_sync"
+    android:title="Sync"
+    android:icon="@drawable/ic_baseline_sync_24"
+    app:showAsAction="always"
+    />
+    <item android:id="@+id/add_to_folder"
+        android:icon="@android:drawable/ic_menu_add"
+        android:title="Add File" />
+
+</menu>

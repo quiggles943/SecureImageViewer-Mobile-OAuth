@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceCategory android:title="@string/web_server_header">
+    <Preference android:title="Scan Config Code" app:key="configcode"/>
+
+    <EditTextPreference
+        app:key="url"
+        app:title="@string/url_title"
+        app:useSimpleSummaryProvider="true" />
+
+    <EditTextPreference
+        app:key="port"
+        app:title="@string/port_title"
+        app:useSimpleSummaryProvider="true"/>
+    <!--<ListPreference
+        app:defaultValue="reply"
+        app:entries="@array/reply_entries"
+        app:entryValues="@array/reply_values"
+        app:key="reply"
+        app:title="@string/reply_title"
+        app:useSimpleSummaryProvider="true" />-->
+    <SwitchPreferenceCompat
+        app:key="https_toggle"
+        app:title="@string/https_toggle_title" />
+    <ListPreference
+        app:defaultValue="api_version"
+        app:entries="@array/api_version_entries"
+        app:entryValues="@array/api_version_values"
+        app:key="api_version"
+        app:title="@string/api_version_title"
+        app:useSimpleSummaryProvider="true" />
+</PreferenceCategory>
+</PreferenceScreen>

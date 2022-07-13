@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+<PreferenceCategory android:title="@string/storage_header">
+    <Preference android:title="Reset storage"
+        android:summary="Delete all files stored locally" app:key="file_reset"/>
+</PreferenceCategory>
+</PreferenceScreen>

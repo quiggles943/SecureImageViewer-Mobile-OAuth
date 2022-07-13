@@ -1,0 +1,26 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory app:title="@string/sso_settings_header">
+        <Preference android:title="@string/sso_fragment_header" app:key="sso"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/web_server_header">
+        <Preference android:title="@string/web_server_settings_button" app:key="server_settings"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Database Settings">
+        <Preference
+            app:title="@string/update_catagory_title"
+            app:key="updateCatagoryButton"
+            app:summary="@string/update_catagory_summary"/>
+        <Preference
+            app:title="@string/update_subject_title"
+            app:key="updateSubjectButton"
+            app:summary="@string/update_subject_summary"/>
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/storage_header">
+        <Preference android:title="@string/storage_settings_button" app:key="storage_settings"/>
+    </PreferenceCategory>
+
+</PreferenceScreen>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    android:id="@+id/online_folder_list_coordinator"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+        <GridView
+            android:id="@+id/folderListView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:numColumns="2"
+            tools:layout_editor_absoluteX="86dp"
+            tools:layout_editor_absoluteY="82dp" />
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
