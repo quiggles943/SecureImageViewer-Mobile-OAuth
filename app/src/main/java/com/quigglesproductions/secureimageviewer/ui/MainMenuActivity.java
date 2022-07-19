@@ -40,6 +40,7 @@ public class MainMenuActivity extends SecureActivity {
     AuthState authState;
     Context context;
     SharedPreferences tokenPref;
+    Button imageViewerBtn;
     AuthorizationServiceConfiguration serviceConfig;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,20 +54,11 @@ public class MainMenuActivity extends SecureActivity {
         tokenPref = context.getSharedPreferences(
                 "token", Context.MODE_PRIVATE);
         Button settingsBtn = findViewById(R.id.settingsButton);
-        Button imageViewerBtn = findViewById(R.id.image_viewer_btn);
-        if(!AuthManager.getInstance().isConfigured())
+        imageViewerBtn = findViewById(R.id.image_viewer_btn);
+        if(!isConnectedToServer())
         {
             imageViewerBtn.setEnabled(false);
             imageViewerBtn.setAlpha(.5f);
-            AuthManager.getInstance().setRegistrationCallback(new AuthManager.RegistrationCallback(){
-                @Override
-                public void onRegistered() {
-                    if(AuthManager.isOnline(context)) {
-                        imageViewerBtn.setEnabled(true);
-                        imageViewerBtn.setAlpha(1f);
-                    }
-                }
-            });
         }
         else {
             imageViewerBtn.setEnabled(true);
@@ -97,6 +89,33 @@ public class MainMenuActivity extends SecureActivity {
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(!isConnectedToServer())
+        {
+            imageViewerBtn.setEnabled(false);
+            imageViewerBtn.setAlpha(.5f);
+        }
+        else {
+            imageViewerBtn.setEnabled(true);
+            imageViewerBtn.setAlpha(1f);
+        }
+    }
+
+    @Override
+    public void onConnectionRestored() {
+        super.onConnectionRestored();
+        imageViewerBtn.setEnabled(true);
+        imageViewerBtn.setAlpha(1f);
+    }
+
+    @Override
+    public void onConnectionLost() {
+        super.onConnectionLost();
+        imageViewerBtn.setEnabled(false);
+        imageViewerBtn.setAlpha(.5f);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

@@ -1,17 +1,11 @@
 package com.quigglesproductions.secureimageviewer.apprequest.downloaders;
 
-import android.content.ContentValues;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.quigglesproductions.secureimageviewer.api.ApiRequestType;
-import com.quigglesproductions.secureimageviewer.api.url.UrlBuilder;
 import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
-import com.quigglesproductions.secureimageviewer.database.DatabaseHelper;
-import com.quigglesproductions.secureimageviewer.models.FileModel;
 import com.quigglesproductions.secureimageviewer.models.SubjectModel;
 
 import java.io.BufferedReader;
@@ -34,7 +28,7 @@ public class SubjectDownloadTask extends AsyncTask<Void,SubjectModel,DownloaderR
         HttpURLConnection connection = null;
         ArrayList<SubjectModel> subjectModels = null;
         try {
-            URL url = new URL(RequestManager.getInstance().getUrlManager().getSubjectUrl());
+            URL url = new URL(RequestManager.getInstance().getUrlManager().getSubjectUrlString());
             //URL url = new URL(urlBuilder.getUrl(ApiRequestType.SUBJECT_LIST));
             connection = (HttpURLConnection) url.openConnection();
             connection.setUseCaches(false);

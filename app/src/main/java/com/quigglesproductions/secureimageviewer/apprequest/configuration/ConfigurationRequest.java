@@ -41,7 +41,7 @@ public class ConfigurationRequest extends AsyncTask<String,Void,ConfigurationRes
                 Gson gson = new Gson();
                 RequestConfigurationEndpoints endpoints = gson.fromJson(result,RequestConfigurationEndpoints.class);
                 ConfigurationResponse response = new ConfigurationResponse(endpoints);
-                callback.onFetchConfigurationCompleted(new RequestServiceConfiguration(context,endpoints),null);
+                //callback.onFetchConfigurationCompleted(new RequestServiceConfiguration(context,endpoints),null);
                 return response;
             }
 
@@ -54,5 +54,11 @@ public class ConfigurationRequest extends AsyncTask<String,Void,ConfigurationRes
             callback.onFetchConfigurationCompleted(null,exception);
             return response;
         }
+    }
+
+    @Override
+    protected void onPostExecute(ConfigurationResponse configurationResponse) {
+        super.onPostExecute(configurationResponse);
+        callback.onFetchConfigurationCompleted(new RequestServiceConfiguration(context,configurationResponse.getEndpoints()),configurationResponse.getException());
     }
 }

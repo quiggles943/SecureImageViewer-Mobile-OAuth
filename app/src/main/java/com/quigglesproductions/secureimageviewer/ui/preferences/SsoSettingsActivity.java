@@ -1,11 +1,13 @@
 package com.quigglesproductions.secureimageviewer.ui.preferences;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
 import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
@@ -19,10 +21,12 @@ import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
 import com.quigglesproductions.secureimageviewer.models.oauth.UserInfo;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
 
-public class SsoSettingsActivity  extends SecureActivity {
+import net.openid.appauth.AuthorizationException;
 
+public class SsoSettingsActivity  extends SecureActivity {
+    private static final int RC_AUTH = 5;
     private Context context;
-    TextView username,state,user_id;
+    TextView username,state;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,7 +34,6 @@ public class SsoSettingsActivity  extends SecureActivity {
         setContentView(R.layout.activity_settings_sso);
         username = findViewById(R.id.sso_username);
         state = findViewById(R.id.sso_state);
-        user_id = findViewById(R.id.sso_id);
         if (savedInstanceState == null) {
             getSupportFragmentManager()
                     .beginTransaction()
@@ -50,16 +53,34 @@ public class SsoSettingsActivity  extends SecureActivity {
         UserInfo userInfo = AuthManager.getInstance().getUserInfo();
         if(userInfo != null) {
             username.setText(userInfo.UserName);
-            user_id.setText(userInfo.UserId);
             //state.setText("Logged In");
         }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(resultCode == -1) {
+            if (requestCode == RC_AUTH) {
+                AuthManager.getInstance().retrieveUserInfo(context);
+                ((SsoSettingsActivity)context).updateUserInfo();
+            }
+        }
+        else
+        {
+            AuthorizationException ex = AuthorizationException.fromIntent(data);
+            String errorMsg = "Unable to authenticate: "+ex.errorDescription;
+            Toast.makeText(context,errorMsg,Toast.LENGTH_SHORT).show();
+        }
+
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                NavUtils.navigateUpFromSameTask(this);
+                onBackPressed();
+                //NavUtils.navigateUpFromSameTask(this);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

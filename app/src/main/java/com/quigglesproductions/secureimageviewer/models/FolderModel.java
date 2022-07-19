@@ -1,6 +1,10 @@
 package com.quigglesproductions.secureimageviewer.models;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.icu.text.CaseMap;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -9,7 +13,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class FolderModel {
+public class FolderModel implements Parcelable {
 
     private int ID;
     @SerializedName("FOLDER_ID")
@@ -53,6 +57,26 @@ public class FolderModel {
         this.fileCount = fileCount;
         itemList = new ArrayList<>();
         downloadTime = downloadDate;
+    }
+
+    public FolderModel(Parcel in){
+        String[] data = new String[13];
+        in.readStringArray(data);
+        ID = Integer.valueOf(data[0]);
+        onlineId = Integer.valueOf(data[1]);
+        encodedName = data[2];
+        normalName = data[3];
+        contentType = data[4];
+        uri = data[5];
+        folderSize = Integer.valueOf(data[6]);
+        onlineFileCount = Integer.valueOf(data[7]);
+        isSecure = Integer.valueOf(data[8]) == 0?false:true;
+        onlineDefaultSubject = Integer.valueOf(data[9]);
+        onlineThumbnailId = Integer.valueOf(data[10]);
+        fileCount = Integer.valueOf(data[11]);
+        downloadTime = new Date(data[12]);
+
+        itemList = new ArrayList<>();
     }
 
     public int getId(){
@@ -130,4 +154,34 @@ public class FolderModel {
     public Date getDownloadTime() {
         return downloadTime;
     }
+
+    public int describeContents(){
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeStringArray(new String[] {String.valueOf(this.ID),
+                String.valueOf(this.onlineId),
+                this.encodedName,
+                this.normalName,
+                this.contentType,
+                this.uri,
+                String.valueOf(this.folderSize),
+                String.valueOf(this.onlineFileCount),
+                String.valueOf(this.isSecure?1:0),
+                String.valueOf(this.onlineDefaultSubject),
+                String.valueOf(this.onlineThumbnailId),
+                String.valueOf(this.fileCount),
+                this.downloadTime.toString()});
+    }
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+        public FolderModel createFromParcel(Parcel in) {
+            return new FolderModel(in);
+        }
+
+        public FolderModel[] newArray(int size) {
+            return new FolderModel[size];
+        }
+    };
 }

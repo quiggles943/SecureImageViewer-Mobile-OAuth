@@ -18,7 +18,7 @@ import net.openid.appauth.AuthorizationService;
 import net.openid.appauth.TokenResponse;
 
 public class SsoSettingsFragment extends PreferenceFragmentCompat {
-    private static final int RC_AUTH = 5;
+
     Context context;
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -46,22 +46,14 @@ public class SsoSettingsFragment extends PreferenceFragmentCompat {
             }
         });
 
-    }
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if(resultCode == -1) {
-            if (requestCode == RC_AUTH) {
-                AuthManager.getInstance().retrieveUserInfo(context);
-                ((SsoSettingsActivity)context).updateUserInfo();
+        androidx.preference.Preference ssoTokenPreference  = getPreferenceManager().findPreference("ssoToken");
+        ssoTokenPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.settings_sso,new SsoTokenFragment(),"SsoTokenFrag").addToBackStack(null).commit();
+                return true;
             }
-        }
-        else
-        {
-            AuthorizationException ex = AuthorizationException.fromIntent(data);
-            String errorMsg = "Unable to authenticate: "+ex.errorDescription;
-            Toast.makeText(context,errorMsg,Toast.LENGTH_SHORT).show();
-        }
+        });
 
     }
 }

@@ -32,6 +32,7 @@ public class FileModel implements ItemBaseModel {
     public boolean isEncrypted;
     @SerializedName("FILE_CONTENT_TYPE")
     public String contentType;
+    public ArtistModel artist;
     public ArrayList<SubjectModel> Subjects;
     public ArrayList<CatagoryModel> Catagories;
 
@@ -41,8 +42,7 @@ public class FileModel implements ItemBaseModel {
     File thumbnailFile;
     Bitmap image;
     Bitmap thumbnailImage;
-    String folderName;
-    String artistName ="Placeholder artist";
+    String folderName;;
     boolean isUploaded;
 
     public FileModel(String name, String base64Name){
@@ -152,7 +152,10 @@ public class FileModel implements ItemBaseModel {
     }
 
     public String getArtistName(){
-        return artistName;
+        if(artist == null)
+            return "";
+        else
+            return artist.name;
     }
 
     public String getCatagoryListString(){
@@ -218,5 +221,11 @@ public class FileModel implements ItemBaseModel {
 
     public void setContentType(String contentType) {
         this.contentType = contentType;
+    }
+    public ArrayList<SubjectModel> getSubjects(){
+        return this.Subjects;
+    }
+    public ArrayList<CatagoryModel> getCatagories(){
+        return this.Catagories;
     }
 }

@@ -1,7 +1,5 @@
 package com.quigglesproductions.secureimageviewer.appauth;
 
-import android.app.Activity;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -9,28 +7,16 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Parcelable;
 import android.util.Log;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.ActivityResultRegistry;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.quigglesproductions.secureimageviewer.Downloaders.UserInfoDownloader;
-import com.quigglesproductions.secureimageviewer.api.ApiRequestType;
-import com.quigglesproductions.secureimageviewer.login.BaseLogin;
-import com.quigglesproductions.secureimageviewer.login.LoginActivity;
-import com.quigglesproductions.secureimageviewer.managers.FolderManager;
 import com.quigglesproductions.secureimageviewer.models.oauth.UserInfo;
 import com.quigglesproductions.secureimageviewer.registration.RegistrationId;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
-import com.quigglesproductions.secureimageviewer.ui.splash.SplashScreenActivity;
 
 import net.openid.appauth.AuthState;
 import net.openid.appauth.AuthorizationException;
@@ -44,10 +30,11 @@ import net.openid.appauth.TokenResponse;
 
 import org.json.JSONException;
 
-import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -57,13 +44,14 @@ public class AuthManager{
     private static final AuthManager instance = new AuthManager();
     private Context rootContext;
     public String MY_CLIENT_ID = "10887ebe-29e9-45db-b739-56ef6919ea34";
+    private static String scope = "read write";
     private static final Uri MY_REDIRECT_URI = Uri.parse("siv://oauth2redirect");
     public static final String AUTHMANAGER_PREF_NAME = "com.secureimageviewer.preference.authmanager";
     public static final String TOKEN_PREF = "com.secureimageviewer.preference.authmanager.token";
     public static final String USERINFO_PREF ="com.secureimageviewer.preference.authmanager.userinfo";
 
     public static final int AUTH_RESULT_CODE = 54895316;
-    private AuthState authState;
+    private ViewerAuthState authState;
     private AuthorizationService authService;
     private UserInfo userInfo;
     private AuthorizationServiceConfiguration serviceConfig;
@@ -114,22 +102,25 @@ public class AuthManager{
         registrationComplete();
     }
     public void ConfigureAuthManager(@NonNull AuthorizationServiceConfiguration configuration){
+        boolean stateOverwritten = false;
         tokenPref = getTokenPref();
         authService = new AuthorizationService(rootContext);
         String authStateString = getTokenPref().getString(TOKEN_PREF,null);
         serviceConfig = configuration;
+        String accessToken = null;
+        String refreshToken = null;
         if(authStateString != null){
             try {
-                authState = AuthState.jsonDeserialize(authStateString);
+                authState = ViewerAuthState.jsonDeserialize(authStateString);
+                refreshToken = authState.getRefreshToken();
+                accessToken = authState.getAccessToken();
                 if(serviceConfig != null) {
                     if (authState.getAuthorizationServiceConfiguration() == null)
-                        authState = new AuthState(serviceConfig);
+                        authState = new ViewerAuthState(serviceConfig);
                     else if (!authState.getAuthorizationServiceConfiguration().toJsonString().equals(configuration.toJsonString())) {
-                        authState = new AuthState(serviceConfig);
+                        authState = new ViewerAuthState(serviceConfig);
                     }
                 }
-                else
-                    authState = new AuthState();
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -137,15 +128,23 @@ public class AuthManager{
         else
         {
             if(serviceConfig != null)
-                authState = new AuthState(serviceConfig);
+                authState = new ViewerAuthState(serviceConfig);
             else
-                authState = new AuthState();
+                authState = new ViewerAuthState();
+        }
+        if(stateOverwritten && refreshToken != null) {
+            TokenRequest.Builder reqbuilder = new TokenRequest.Builder(serviceConfig,MY_CLIENT_ID);
+            reqbuilder.setScope(scope);
+            TokenResponse.Builder builder = new TokenResponse.Builder(reqbuilder.build());
+            builder.setAccessToken(accessToken);
+            builder.setRefreshToken(refreshToken);
+            authState.update(builder.build(), null);
         }
         setAuthState(authState);
         setAuthService(authService);
         saveAuthState(rootContext);
         loadRegistrationId();
-
+        isConfigured = true;
         registrationComplete();
     }
 
@@ -156,7 +155,10 @@ public class AuthManager{
         }
     }
 
-    public void setAuthState(AuthState newAuthState) {
+    public void setAuthState(ViewerAuthState newAuthState) {
+        if(newAuthState == null)
+            authState = null;
+        else
         authState = newAuthState;
     }
 
@@ -227,7 +229,8 @@ public class AuthManager{
     private void saveAuthState(@NonNull Context context){
         //SharedPreferences tokenPref  = context.getSharedPreferences(AUTHMANAGER_PREF_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = getTokenPref().edit();
-        editor.putString(TOKEN_PREF,authState.jsonSerializeString());
+        String jsonString = authState.jsonSerializeString();
+        editor.putString(TOKEN_PREF,jsonString);
         editor.apply();
     }
     private AuthState loadAuthState(){
@@ -235,7 +238,7 @@ public class AuthManager{
         if(jsonString == null)
             return null;
         try {
-            AuthState loadedAuthState = AuthState.jsonDeserialize(jsonString);
+            ViewerAuthState loadedAuthState = ViewerAuthState.jsonDeserialize(jsonString);
             authState = loadedAuthState;
             return authState;
         } catch (JSONException e) {
@@ -263,6 +266,8 @@ public class AuthManager{
                         new AuthorizationService.TokenResponseCallback() {
                             @Override
                             public void onTokenRequestCompleted(@Nullable TokenResponse response, @Nullable AuthorizationException ex) {
+                                long refreshExpirationSeconds = Long.decode(response.additionalParameters.get("refresh_expires_in"));
+                                authState.setRefreshTokenExpirationTime(refreshExpirationSeconds);
                                 authState.update(response,ex);
                                 saveAuthState(context);
                                 callback.onTokenRequestCompleted(response,ex);
@@ -335,7 +340,7 @@ public class AuthManager{
                         ResponseTypeValues.CODE, // the response_type value: we want a code
                         MY_REDIRECT_URI);
         AuthorizationRequest authRequest = authRequestBuilder
-                .setScope("read write")
+                .setScope(scope)
                 .build();
         return authService.getAuthorizationRequestIntent(authRequest);
     }
@@ -345,7 +350,7 @@ public class AuthManager{
             return new State(State.LOGGED_OUT);
         if(authState.getNeedsTokenRefresh())
             return new State(State.NEEDS_REFRESH);
-        if(authState.getAccessToken() != null)
+        if(authState.getAccessToken() != null || !authState.getNeedsTokenRefresh())
             return new State(State.UP_TO_DATE);
         else
             return new State(-1);
@@ -376,19 +381,17 @@ public class AuthManager{
         return true;
     }
 
-    public static boolean isOnline(Context context) {
+    public static void isOnline(Context context,AuthAvailableCallback callback) {
         ConnectivityManager cm =
                 (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
         if(netInfo != null && netInfo.isConnectedOrConnecting())
         {
-            if(AuthManager.getInstance().isAvailable())
-                return true;
-            else
-                return false;
+            AuthManager.getInstance().getIsAvailable(callback);
         }
-        return false;
-        //return netInfo != null && netInfo.isConnectedOrConnecting();
+        else {
+            callback.requestComplete(false, null);
+        }
     }
 
     public RegistrationId getRegistrationID() {
@@ -418,16 +421,8 @@ public class AuthManager{
         return isConfigured;
     }
 
-    public boolean isAvailable(){
-        try {
-            return new GetAvailable().execute("https://quigleyid.ddns.net/v1/health/available").get();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-            return false;
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            return false;
-        }
+    public void getIsAvailable(AuthAvailableCallback callback){
+            new GetAvailable(callback).execute("https://quigleyid.ddns.net/v1/health/available");
     }
 
     public boolean hasValidConfiguration() {
@@ -446,6 +441,44 @@ public class AuthManager{
         SharedPreferences.Editor editor = getRegistrationPref().edit();
         editor.putString("uuid",deviceId);
     }
+
+    public void getTokenInfo(){
+        TokenInfo tokenInfo = new TokenInfo();
+        tokenInfo.accessTokenExpirationTime = new Date(authState.getAccessTokenExpirationTime());
+        //tokenInfo.refreshTokenExpirationTime = new Date(authState.getr());
+    }
+
+    public Date getAccessTokenExpirationDate() {
+        if(authState.getAccessTokenExpirationTime() == null)
+            return null;
+        return new Date(authState.getAccessTokenExpirationTime());
+    }
+
+    public Date getRefreshExpirationDate() {
+        return authState.getRefreshTokenExpirationDate();
+    }
+
+    public String getRefreshTokenExpirationDateString() {
+        Date date = getRefreshExpirationDate();
+        if(date == null)
+            return null;
+        SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+        return format.format(date);
+    }
+
+    public String getAccessTokenExpirationDateString() {
+        Date date = getAccessTokenExpirationDate();
+        if(date == null)
+            return null;
+        SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+        return format.format(date);
+    }
+
+    public class TokenInfo{
+        public Date accessTokenExpirationTime;
+        public Date refreshTokenExpirationTime;
+    }
+
 
     public class State{
         public static final int LOGGED_OUT = 0;
@@ -475,28 +508,58 @@ public class AuthManager{
         }
     }
 
-    public class GetAvailable extends AsyncTask<String,Void,Boolean> {
+    public class GetAvailable extends AsyncTask<String,Void, GetAvailable.AvailabilityRequestResult> {
+
+        AuthAvailableCallback callback;
+        public GetAvailable(AuthAvailableCallback callback) {
+            this.callback = callback;
+        }
 
         @Override
-        protected Boolean doInBackground(String... strings) {
+        protected GetAvailable.AvailabilityRequestResult doInBackground(String... strings) {
             HttpURLConnection connection = null;
             try {
                 URL url = new URL(strings[0]);
                 connection = (HttpURLConnection) url.openConnection();
                 connection.setUseCaches(false);
                 connection.setConnectTimeout(4000);
-                connection.setReadTimeout(5000);
+                connection.setReadTimeout(4000);
                 Log.d("Get-Request", url.toString());
                 int responseCode = connection.getResponseCode();
-                if(responseCode == 204)
-                    return true;
-                else
-                    return false;
+                if(responseCode == 204) {
+                    return new AvailabilityRequestResult(true);
+                }
+                else {
+                    return new AvailabilityRequestResult(false);
+                }
             } catch (Exception e) {
                 e.printStackTrace();
-                return false;
+                Log.e("AuthAvailability",e.getMessage());
+                return new AvailabilityRequestResult(false,e);
             }
 
         }
+
+        @Override
+        protected void onPostExecute(AvailabilityRequestResult result) {
+            super.onPostExecute(result);
+            callback.requestComplete(result.success,result.error);
+        }
+
+        public class AvailabilityRequestResult{
+            boolean success;
+            Exception error;
+            public AvailabilityRequestResult(boolean result){
+                this.success = result;
+            }
+            public AvailabilityRequestResult(boolean result, Exception exception){
+                success = result;
+                error = exception;
+            }
+        }
+    }
+
+    public interface AuthAvailableCallback{
+        void requestComplete(boolean available,Exception ex);
     }
 }

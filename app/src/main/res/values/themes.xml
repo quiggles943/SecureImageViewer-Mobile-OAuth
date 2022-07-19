@@ -19,11 +19,9 @@
         <item name="colorPrimary">@color/purple_500</item>
         <item name="colorPrimaryVariant">@color/black</item>
         <item name="colorOnPrimary">@color/white</item>
-        <item name="android:windowBackground">
-            @drawable/background_splash
-        </item>
         <item name="android:windowActivityTransitions">true</item>
         <item name="splashIcon">@drawable/ic_icon</item>
+        <item name="android:textColor">@color/text_grey</item>
         <!--<item name="android:windowEnterTransition">@android:transition/explode</item>
         <item name="android:windowExitTransition">@android:transition/explode</item>-->
     </style>

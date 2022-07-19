@@ -1,14 +1,11 @@
 package com.quigglesproductions.secureimageviewer.apprequest.downloaders;
 
-import android.content.Context;
-import android.graphics.Bitmap;
 import android.os.AsyncTask;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
 import com.quigglesproductions.secureimageviewer.models.FolderModel;
-import com.quigglesproductions.secureimageviewer.ui.onlinefolderlist.OnlineFolderListAdapter;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -28,7 +25,7 @@ public class FolderListDownloadTask extends AsyncTask<String, FolderModel, Array
     @Override
     protected ArrayList<FolderModel> doInBackground(String... strings) {
         try {
-            String urlString = RequestManager.getInstance().getUrlManager().getFolderListUrl();
+            String urlString = RequestManager.getInstance().getUrlManager().getFolderListUrlString();
             URL url = new URL(urlString);
             HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
             connection.setRequestProperty("Authorization","Bearer "+strings[0]);

@@ -16,6 +16,9 @@ import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.ActionBar;
+import androidx.core.app.NavUtils;
+
 import com.google.android.material.snackbar.Snackbar;
 import com.quigglesproductions.secureimageviewer.R;
 import com.quigglesproductions.secureimageviewer.database.DatabaseHelper;
@@ -55,13 +58,13 @@ public class FolderListActivity extends SecureActivity {
         folderView = (GridView) findViewById(R.id.folderView);
 
         int orientation = getResources().getConfiguration().orientation;
-        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        /*if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
             // In landscape
             folderView.setNumColumns(4);
         } else {
             // In portrait
             folderView.setNumColumns(2);
-        }
+        }*/
         VolleySingleton.getInstance(context).setDownloadFolderCompleteCallback(new VolleySingleton.FolderDownloadCompleteCallback(){
             @Override
             public void onComplete(FolderModel folder) {
@@ -69,10 +72,16 @@ public class FolderListActivity extends SecureActivity {
                 gridAdapter.setFolderAsDownloaded(folder);
             }
         });
-        gridAdapter = new FolderGridAdapter(context, new ArrayList<FolderModel>());
+        if(savedInstanceState != null) {
+            ArrayList<FolderModel> items = savedInstanceState.getParcelableArrayList("myAdapter");
+            gridAdapter = new FolderGridAdapter(context,items);
+        }
+        else {
+            gridAdapter = new FolderGridAdapter(context, new ArrayList<FolderModel>());
+            folderLoader = new FolderLoader(context,gridAdapter);
+            folderLoader.execute();
+        }
         folderView.setAdapter(gridAdapter);
-        folderLoader = new FolderLoader(context,gridAdapter);
-        folderLoader.execute();
         folderView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
@@ -86,6 +95,10 @@ public class FolderListActivity extends SecureActivity {
             }
         });
         registerForContextMenu(folderView);
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
 
     }
 
@@ -111,7 +124,13 @@ public class FolderListActivity extends SecureActivity {
                 // add stuff here
                 FolderModel folder = (FolderModel)folderView.getItemAtPosition(info.position);
                 NotificationManager.getInstance().showSnackbar("Folder '"+folder.getName()+"' selected for deletion", Snackbar.LENGTH_SHORT);
-                FolderManager.getInstance().removeLocalFolder(folder);
+                AsyncTask.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        FolderManager.getInstance().removeLocalFolder(folder);
+                    }
+                });
+                //FolderManager.getInstance().removeLocalFolder(folder);
                 gridAdapter.removeItem(folder);
                 gridAdapter.notifyDataSetChanged();
                 return true;
@@ -127,6 +146,23 @@ public class FolderListActivity extends SecureActivity {
         folderLoader = new FolderLoader(context, gridAdapter);
         folderLoader.execute();
         //gridAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle state) {
+        super.onSaveInstanceState(state);
+        state.putParcelableArrayList("myAdapter", gridAdapter.getItems());
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     public class FolderLoader extends AsyncTask<Void,Integer, Void> {

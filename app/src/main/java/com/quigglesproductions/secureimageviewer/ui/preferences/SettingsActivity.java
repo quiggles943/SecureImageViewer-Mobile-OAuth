@@ -25,6 +25,7 @@ import com.quigglesproductions.secureimageviewer.barcodescanner.BarcodeCaptureAc
 import com.quigglesproductions.secureimageviewer.database.DatabaseHandler;
 import com.quigglesproductions.secureimageviewer.database.DatabaseHelper;
 import com.quigglesproductions.secureimageviewer.managers.NotificationManager;
+import com.quigglesproductions.secureimageviewer.models.ArtistModel;
 import com.quigglesproductions.secureimageviewer.models.CatagoryModel;
 import com.quigglesproductions.secureimageviewer.models.SubjectModel;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
@@ -61,20 +62,11 @@ public class SettingsActivity extends SecureActivity {
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey);
-            androidx.preference.Preference ssoLoginPreference  = getPreferenceManager().findPreference("sso");
-            ssoLoginPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            androidx.preference.Preference networkPreference  = getPreferenceManager().findPreference("network_settings");
+            networkPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    Intent intent = new Intent(getContext(),SsoSettingsActivity.class);
-                    startActivity(intent);
-                    return true;
-                }
-            });
-            androidx.preference.Preference webApiPreference  = getPreferenceManager().findPreference("server_settings");
-            webApiPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                @Override
-                public boolean onPreferenceClick(Preference preference) {
-                    Intent intent = new Intent(getContext(),WebSettingsActivity.class);
+                    Intent intent = new Intent(getContext(),NetworkSettingsActivity.class);
                     startActivity(intent);
                     return true;
                 }
@@ -85,6 +77,36 @@ public class SettingsActivity extends SecureActivity {
                 public boolean onPreferenceClick(Preference preference) {
                     Intent intent = new Intent(getContext(),StorageSettingsActivity.class);
                     startActivity(intent);
+                    return true;
+                }
+            });
+            androidx.preference.Preference artistUpdatePreference = getPreferenceManager().findPreference("updateArtistButton");
+            artistUpdatePreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    NotificationManager.getInstance().showSnackbar("Downloading artists", Snackbar.LENGTH_SHORT);
+                    AuthManager.getInstance().performActionWithFreshTokens(getContext(), new AuthState.AuthStateAction() {
+                        @Override
+                        public void execute(@Nullable String accessToken, @Nullable String idToken, @Nullable AuthorizationException ex) {
+                            RequestManager.getInstance().getRequestService().getArtists(accessToken, new RequestManager.RequestResultCallback<ArrayList<ArtistModel>, Exception>() {
+                                @Override
+                                public void RequestResultRetrieved(ArrayList<ArtistModel> result, Exception exception) {
+                                    if(result != null){
+                                        DatabaseHandler.getInstance().clearArtists();
+                                        for(ArtistModel artist:result) {
+                                            DatabaseHandler.getInstance().addArtist(artist);
+                                        }
+                                        if(exception != null)
+                                            NotificationManager.getInstance().showSnackbar("Artists downloaded with errors", Snackbar.LENGTH_SHORT);
+                                        else
+                                            NotificationManager.getInstance().showSnackbar("Artists downloaded successfully", Snackbar.LENGTH_SHORT);
+                                    }
+                                }
+                            });
+                            //subjectDownloader.execute(accessToken);
+                        }
+                    });
+
                     return true;
                 }
             });

@@ -2,6 +2,9 @@ package com.quigglesproductions.secureimageviewer.apprequest.configuration.url;
 
 import com.quigglesproductions.secureimageviewer.apprequest.configuration.RequestConfigurationEndpoints;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 public class UrlManager {
     private String baseUrl;
     private String fileEndpoint;
@@ -23,25 +26,44 @@ public class UrlManager {
         artistEndpoint = endpoints.artist_endpoint;
     }
 
-    public String getBaseUrl() {
+    public String getBaseUrlString() {
         return baseUrl+endSeparator;
     }
-    public String getFileUrl(){
+    public String getFileUrlString(){
         return baseUrl+fileEndpoint+endSeparator;
     }
-    public String getFolderUrl(){
+    public String getFolderUrlString(){
         return baseUrl+folderEndpoint+endSeparator;
     }
-    public String getFolderListUrl(){
+    public String getFolderListUrlString(){
         return baseUrl+folderListEndpoint+endSeparator;
     }
-    public String getSubjectUrl(){
+    public String getSubjectUrlString(){
         return baseUrl+subjectEndpoint+endSeparator;
     }
-    public String getCatagoryUrl(){
+    public String getCatagoryUrlString(){
         return baseUrl+catagoryEndpoint+endSeparator;
     }
-    public String getArtistUrl(){
+    public String getArtistUrlString(){
         return baseUrl+artistEndpoint+endSeparator;
+    }
+
+    public URL getFileUrl() throws MalformedURLException {
+        return new URL(getFileUrlString());
+    }
+    public URL getFolderUrl() throws MalformedURLException {
+        return new URL(getFolderUrlString());
+    }
+    public URL getFolderListUrl() throws MalformedURLException {
+        return new URL(getFolderListUrlString());
+    }
+    public URL getSubjectUrl() throws MalformedURLException {
+        return new URL(getSubjectUrlString());
+    }
+    public URL getCatagoryUrl() throws MalformedURLException {
+        return new URL(getCatagoryUrlString());
+    }
+    public URL getArtistUrl() throws MalformedURLException {
+        return new URL(getArtistUrlString());
     }
 }

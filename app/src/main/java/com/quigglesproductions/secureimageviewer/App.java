@@ -19,7 +19,7 @@ public class App extends Application {
         super.onCreate();
         context = this;
         initializeSingletons();
-        initializeRequestmanager();
+        //initializeRequestmanager();
     }
 
     private void initializeSingletons(){

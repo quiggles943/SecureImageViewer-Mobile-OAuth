@@ -2,6 +2,7 @@ package com.quigglesproductions.secureimageviewer.ui.onlinefolderlist;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.DownloadManager;
@@ -48,16 +49,17 @@ public class OnlineFolderListActivity extends SecureActivity {
         context = this;
         gson = new Gson();
         setContentView(R.layout.activity_online_folder_list);
+        setTitle("Online Viewer");
         folderView = (GridView) findViewById(R.id.folderListView);
 
         int orientation = getResources().getConfiguration().orientation;
-        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        /*if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
             // In landscape
             folderView.setNumColumns(4);
         } else {
             // In portrait
             folderView.setNumColumns(2);
-        }
+        }*/
         adapter = new OnlineFolderListAdapter(context);
         folderView.setAdapter(adapter);
         AuthManager.getInstance().performActionWithFreshTokens(this, new AuthState.AuthStateAction() {
@@ -95,6 +97,10 @@ public class OnlineFolderListActivity extends SecureActivity {
             }
         });
         registerForContextMenu(folderView);
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
     }
 
     @Override
@@ -155,6 +161,9 @@ public class OnlineFolderListActivity extends SecureActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
             case R.id.app_bar_search:
                 return true;
             case R.id.app_recent_files:

@@ -13,4 +13,11 @@ public class ConfigurationResponse {
         this.exception = exception;
         success = false;
     }
+
+    public RequestConfigurationEndpoints getEndpoints(){
+        return this.endpoints;
+    }
+    public RequestConfigurationException getException(){
+        return this.exception;
+    }
 }

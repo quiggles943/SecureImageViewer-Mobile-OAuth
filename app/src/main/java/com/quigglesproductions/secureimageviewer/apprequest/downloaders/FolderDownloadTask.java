@@ -17,8 +17,10 @@ import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
 import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
 import com.quigglesproductions.secureimageviewer.database.DatabaseHandler;
 import com.quigglesproductions.secureimageviewer.database.DatabaseHelper;
+import com.quigglesproductions.secureimageviewer.models.CatagoryModel;
 import com.quigglesproductions.secureimageviewer.models.FileModel;
 import com.quigglesproductions.secureimageviewer.models.FolderModel;
+import com.quigglesproductions.secureimageviewer.models.SubjectModel;
 import com.quigglesproductions.secureimageviewer.notifications.NotificationChannels;
 import com.quigglesproductions.secureimageviewer.notifications.NotificationHelper;
 import com.quigglesproductions.secureimageviewer.notifications.NotificationIds;
@@ -95,7 +97,7 @@ public  class FolderDownloadTask {
         @Override
         protected DownloaderResult<ArrayList<FileDownloadRequest>> doInBackground(Integer... ids) {
             try {
-                String urlString = RequestManager.getInstance().getUrlManager().getFolderUrl() + ids[0] + "/files";
+                String urlString = RequestManager.getInstance().getUrlManager().getFolderUrlString() + ids[0] + "/files";
                 //String urlString = "https://quigleyserver.ddns.net:14500/api/v1/folder/" + ids[0] + "/files";
                 URL url = new URL(urlString);
                 HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
@@ -117,6 +119,12 @@ public  class FolderDownloadTask {
                     ArrayList<FileModel> files = gson.fromJson(result, listType);
                     for (FileModel file : files) {
                         file.setIsUploaded(true);
+                        for(SubjectModel subject:file.getSubjects()){
+                            DatabaseHandler.getInstance().addSubjectToFile(subject,file);
+                        }
+                        for(CatagoryModel catagory:file.getCatagories()){
+                            DatabaseHandler.getInstance().addCatagorytoFile(catagory,file);
+                        }
                         AuthManager.getInstance().performActionWithFreshTokens(context, new AuthState.AuthStateAction() {
                             @Override
                             public void execute(@Nullable String accessToken, @Nullable String idToken, @Nullable AuthorizationException ex) {
@@ -199,7 +207,7 @@ public  class FolderDownloadTask {
         @Override
         protected DownloaderResult<FolderModel> doInBackground(Integer... ids) {
             try {
-                String urlString = RequestManager.getInstance().getUrlManager().getFolderUrl() + ids[0];
+                String urlString = RequestManager.getInstance().getUrlManager().getFolderUrlString() + ids[0];
                 //String urlString = "https://quigleyserver.ddns.net:14500/api/v1/folder/" + ids[0];
                 URL url = new URL(urlString);
                 HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();

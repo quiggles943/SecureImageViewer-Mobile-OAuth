@@ -5,6 +5,7 @@ import android.content.Context;
 import com.android.volley.VolleyError;
 import com.quigglesproductions.secureimageviewer.apprequest.configuration.RequestConfigurationException;
 import com.quigglesproductions.secureimageviewer.apprequest.configuration.RequestServiceConfiguration;
+import com.quigglesproductions.secureimageviewer.apprequest.downloaders.ArtistDownloadTask;
 import com.quigglesproductions.secureimageviewer.apprequest.downloaders.CatagoryDownloadTask;
 import com.quigglesproductions.secureimageviewer.apprequest.downloaders.DownloadCompleteCallback;
 import com.quigglesproductions.secureimageviewer.apprequest.downloaders.FileUploadTask;
@@ -13,11 +14,13 @@ import com.quigglesproductions.secureimageviewer.apprequest.downloaders.FolderLi
 import com.quigglesproductions.secureimageviewer.apprequest.downloaders.OnlineFolderRetrievalTask;
 import com.quigglesproductions.secureimageviewer.apprequest.downloaders.RecentFileDownloader;
 import com.quigglesproductions.secureimageviewer.apprequest.downloaders.SubjectDownloadTask;
+import com.quigglesproductions.secureimageviewer.models.ArtistModel;
 import com.quigglesproductions.secureimageviewer.models.CatagoryModel;
 import com.quigglesproductions.secureimageviewer.models.FileModel;
 import com.quigglesproductions.secureimageviewer.models.FolderModel;
 import com.quigglesproductions.secureimageviewer.models.SubjectModel;
 
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 
 public class RequestService {
@@ -76,6 +79,16 @@ public class RequestService {
             }
         });
         uploadTask.execute(item);
+    }
+
+    public void getArtists(String accessToken,RequestManager.RequestResultCallback<ArrayList<ArtistModel>,Exception> resultCallback){
+        ArtistDownloadTask artistDownloadTask = new ArtistDownloadTask(accessToken, new DownloadCompleteCallback<ArrayList<ArtistModel>, Exception>() {
+            @Override
+            public void downloadComplete(ArrayList<ArtistModel> result, Exception error) {
+                resultCallback.RequestResultRetrieved(result, error);
+            }
+        });
+        artistDownloadTask.execute();
     }
 
     public void getSubjects(String accessToken,RequestManager.RequestResultCallback<ArrayList<SubjectModel>,Exception> resultCallback){

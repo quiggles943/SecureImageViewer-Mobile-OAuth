@@ -7,7 +7,6 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
 import com.quigglesproductions.secureimageviewer.models.CatagoryModel;
-import com.quigglesproductions.secureimageviewer.models.SubjectModel;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -29,7 +28,7 @@ public class CatagoryDownloadTask extends AsyncTask<Void, CatagoryModel,Download
         HttpURLConnection connection = null;
         ArrayList<CatagoryModel> subjectModels = null;
         try {
-            URL url = new URL(RequestManager.getInstance().getUrlManager().getCatagoryUrl());
+            URL url = new URL(RequestManager.getInstance().getUrlManager().getCatagoryUrlString());
             //URL url = new URL(urlBuilder.getUrl(ApiRequestType.SUBJECT_LIST));
             connection = (HttpURLConnection) url.openConnection();
             connection.setUseCaches(false);

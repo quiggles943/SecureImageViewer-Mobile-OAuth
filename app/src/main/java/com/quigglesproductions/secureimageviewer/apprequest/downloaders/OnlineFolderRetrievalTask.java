@@ -7,7 +7,6 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
 import com.quigglesproductions.secureimageviewer.models.FileModel;
-import com.quigglesproductions.secureimageviewer.ui.onlinefolderview.OnlineFolderViewAdapter;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -31,7 +30,7 @@ public class OnlineFolderRetrievalTask extends AsyncTask<Integer, FileModel, Dow
     @Override
     protected DownloaderResult<ArrayList<FileModel>> doInBackground(Integer... ids) {
         try {
-            String urlString = RequestManager.getInstance().getUrlManager().getFolderUrl()+ids[0]+"/files";
+            String urlString = RequestManager.getInstance().getUrlManager().getFolderUrlString()+ids[0]+"/files";
             //String urlString = "https://quigleyserver.ddns.net:14500/api/v1/folder/"+ids[0]+"/files";
             URL url = new URL(urlString);
             HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,6 +40,10 @@ public class FolderGridAdapter extends BaseAdapter
     public void setFolderAsDownloaded(FolderModel folder) {
         folders.get(folders.indexOf(folder)).isDownloading = false;
         notifyDataSetChanged();
+    }
+
+    public ArrayList<? extends Parcelable> getItems() {
+        return folders;
     }
 
     static class ViewHolder{
@@ -77,6 +82,7 @@ public class FolderGridAdapter extends BaseAdapter
             LayoutInflater inflater = (LayoutInflater)
                     mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             gridView = inflater.inflate(R.layout.foldergrid_layout, null);
+        }
             ViewHolder viewHolder = new ViewHolder();
             viewHolder.text = gridView.findViewById(R.id.grid_item_label);
             viewHolder.image = gridView.findViewById(R.id.grid_item_image);
@@ -89,7 +95,7 @@ public class FolderGridAdapter extends BaseAdapter
                 gridView.setEnabled(true);
                 gridView.setAlpha(1f);
             }
-        }
+        //}
         ViewHolder holder = (ViewHolder) gridView.getTag();
         holder.text.setText(folder.getName()+" ("+folder.fileCount+")");
         /*if(holder.image.getTag() != null) {

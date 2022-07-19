@@ -52,7 +52,7 @@ public class FileUploadTask extends AsyncTask<FileModel,Void,DownloaderResult<Ar
     }
 
     private FileModel sendFileModel(FileModel fileModel) throws Exception {
-        String urlString = RequestManager.getInstance().getUrlManager().getFileUrl();
+        String urlString = RequestManager.getInstance().getUrlManager().getFileUrlString();
         //String urlString = "https://quigleyserver.ddns.net:14500/api/v1/device/register";
         URL url = new URL(urlString);
         HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
@@ -87,7 +87,7 @@ public class FileUploadTask extends AsyncTask<FileModel,Void,DownloaderResult<Ar
     }
 
     private FileModel sendFileContent(FileModel fileModel) throws Exception {
-        String urlString = RequestManager.getInstance().getUrlManager().getFileUrl()+fileModel.getOnlineId()+"/content";
+        String urlString = RequestManager.getInstance().getUrlManager().getFileUrlString()+fileModel.getOnlineId()+"/content";
         //String urlString = "https://quigleyserver.ddns.net:14500/api/v1/device/register";
         URL url = new URL(urlString);
         HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();

@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
-    public static final int DATABASE_VERSION = 18;
+    public static final int DATABASE_VERSION = 19;
     public static final String DATABASE_NAME = "imagedatabase.db";
 
     public DatabaseHelper(Context context) {
@@ -17,6 +17,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(SysFile.SQL_CREATE_ENTRIES);
         db.execSQL(SysFolder.SQL_CREATE_ENTRIES);
+        db.execSQL(SysArtist.SQL_CREATE_ENTRIES);
         db.execSQL(SysSubject.SQL_CREATE_ENTRIES);
         db.execSQL(SysFileSubject.SQL_CREATE_ENTRIES);
         db.execSQL(SysCatagory.SQL_CREATE_ENTRIES);
@@ -28,6 +29,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL(SysFile.SQL_DELETE_ENTRIES);
         db.execSQL(SysFolder.SQL_DELETE_ENTRIES);
+        db.execSQL(SysArtist.SQL_DELETE_ENTRIES);
         db.execSQL(SysSubject.SQL_DELETE_ENTRIES);
         db.execSQL(SysFileSubject.SQL_DELETE_ENTRIES);
         db.execSQL(SysCatagory.SQL_DELETE_ENTRIES);
@@ -98,6 +100,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         private static final String SQL_DELETE_ENTRIES =
                 "DROP TABLE IF EXISTS " + SysFolder.TABLE_NAME;
+    }
+
+    public static class SysArtist implements BaseColumns {
+        public static final String TABLE_NAME = "SYS_ARTIST";
+        public static final String COLUMN_ONLINE_ID = "ARTIST_ONLINE_ID";
+        public static final String COLUMN_NAME = "ARTIST_NAME";
+
+        private static final String SQL_CREATE_ENTRIES =
+                "CREATE TABLE " + SysArtist.TABLE_NAME + " (" +
+                        SysArtist._ID + " INTEGER PRIMARY KEY," +
+                        SysArtist.COLUMN_ONLINE_ID+ " INTEGER," +
+                        SysArtist.COLUMN_NAME + " TEXT)";
+
+        private static final String SQL_DELETE_ENTRIES =
+                "DROP TABLE IF EXISTS " + SysArtist.TABLE_NAME;
     }
 
     public static class SysSubject implements BaseColumns {

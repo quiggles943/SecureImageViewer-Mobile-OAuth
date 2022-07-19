@@ -16,7 +16,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SecureImageViewer">
         <activity
-            android:name=".ui.splash.SplashScreenActivity"
+            android:name=".ui.splash.NewSplashScreenActivity"
             android:launchMode="singleTask"
             android:noHistory="true"
             android:theme="@style/SplashScreenTheme">
@@ -69,6 +69,13 @@
             android:label="SSO Settings">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.preferences.NetworkSettingsActivity" />
+        </activity>
+        <activity
+            android:name=".ui.preferences.NetworkSettingsActivity"
+            android:label="Network Settings">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.preferences.SettingsActivity" />
         </activity>
         <activity
@@ -76,7 +83,7 @@
             android:label="Web Api Settings">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.preferences.SettingsActivity" />
+                android:value=".ui.preferences.NetworkSettingsActivity" />
         </activity>
         <activity
             android:name=".ui.preferences.StorageSettingsActivity"

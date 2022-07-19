@@ -10,4 +10,5 @@
     <color name="transparent">#00FFFFFF</color>
     <color name="selected">#743F51B5</color>
     <color name="translucent">#F2000000</color>
+    <color name="text_grey">@android:color/darker_gray</color>
 </resources>

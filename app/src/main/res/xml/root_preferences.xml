@@ -1,15 +1,14 @@
 <PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <PreferenceCategory app:title="@string/sso_settings_header">
-        <Preference android:title="@string/sso_fragment_header" app:key="sso"/>
-    </PreferenceCategory>
-
-    <PreferenceCategory app:title="@string/web_server_header">
-        <Preference android:title="@string/web_server_settings_button" app:key="server_settings"/>
+    <PreferenceCategory app:title="Network">
+        <Preference app:title="Network Settings" app:key="network_settings"/>
     </PreferenceCategory>
 
     <PreferenceCategory android:title="Database Settings">
+        <Preference
+            app:title="@string/update_artist_title"
+            app:key="updateArtistButton"
+            app:summary="@string/update_artist_summary"/>
         <Preference
             app:title="@string/update_catagory_title"
             app:key="updateCatagoryButton"

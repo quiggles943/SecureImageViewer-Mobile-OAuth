@@ -7,9 +7,9 @@
             app:summary="@string/sso_login_summary"/>
     </PreferenceCategory>
     <PreferenceCategory app:title="@string/sso_config_header">
-<Preference app:title="View config"
-    app:key="ssoConfigSummary"
-    app:summary="View SSO config settings"/>
+        <Preference app:title="View config"
+            app:key="ssoConfigSummary"
+            app:summary="View SSO config settings"/>
         <Preference app:title="View Token"
             app:key="ssoToken"
             app:summary="View SSO token information"/>

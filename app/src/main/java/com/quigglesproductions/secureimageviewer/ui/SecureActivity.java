@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
@@ -23,6 +25,7 @@ import com.google.gson.Gson;
 import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
 import com.quigglesproductions.secureimageviewer.barcodescanner.BarcodeCaptureActivity;
 import com.quigglesproductions.secureimageviewer.managers.NotificationManager;
+import com.quigglesproductions.secureimageviewer.managers.ViewerConnectivityManager;
 import com.quigglesproductions.secureimageviewer.models.WebServerConfig;
 import com.quigglesproductions.secureimageviewer.ui.preferences.SsoSettingsActivity;
 
@@ -41,11 +44,24 @@ public class SecureActivity extends AppCompatActivity {
     Context context;
     public static final int RC_BARCODE_CAPTURE = 9001;
     public static final int PICKFILE_RESULT_CODE = 546;
+    public static final int BIOMETRIC_ENROLLMENT = 7844;
+    public static final int INTENT_AUTHENTICATE = 5;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         context = this;
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
+        ViewerConnectivityManager.getInstance().setCallback(new ViewerConnectivityManager.ViewerConnectivityCallback() {
+            @Override
+            public void connectionEstablished() {
+                onConnectionRestored();
+            }
+
+            @Override
+            public void connectionLost() {
+                onConnectionLost();
+            }
+        });
         NotificationManager.getInstance().setNotificationCallback(new NotificationManager.NotificationCallback(){
             @Override
             public void triggerSnackbar(String text, int duration) {
@@ -63,6 +79,17 @@ public class SecureActivity extends AppCompatActivity {
     }
     @Override
     protected void onResume() {
+        ViewerConnectivityManager.getInstance().setCallback(new ViewerConnectivityManager.ViewerConnectivityCallback() {
+            @Override
+            public void connectionEstablished() {
+                onConnectionRestored();
+            }
+
+            @Override
+            public void connectionLost() {
+                onConnectionLost();
+            }
+        });
         NotificationManager.getInstance().setNotificationCallback(new NotificationManager.NotificationCallback(){
             @Override
             public void triggerSnackbar(String text, int duration) {
@@ -109,6 +136,14 @@ public class SecureActivity extends AppCompatActivity {
         toast.show();
     }
 
+    public void onConnectionRestored(){
+
+    }
+
+    public void onConnectionLost(){
+
+    }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -120,26 +155,42 @@ public class SecureActivity extends AppCompatActivity {
                 AuthManager.getInstance().getToken(context, resp, ex, new AuthorizationService.TokenResponseCallback() {
                     @Override
                     public void onTokenRequestCompleted(@Nullable TokenResponse response, @Nullable AuthorizationException ex) {
-                        AuthManager.getInstance().updateAuthState(context, response, ex);
-                        AuthManager.getInstance().retrieveUserInfo(context);
+                        //AuthManager.getInstance().updateAuthState(context, response, ex);
+                        //AuthManager.getInstance().retrieveUserInfo(context);
                         if(AuthManager.getInstance().hasDelayedAction())
                         {
                             AuthManager.getInstance().performActionWithFreshTokens(context,AuthManager.getInstance().getDelayedAction());
                         }
-                        //AuthManager.getInstance().retrieveUserInfo(context);
-                        //((SsoSettingsActivity)context).updateUserInfo();
                     }
                 });
                 break;
             case RC_BARCODE_CAPTURE:
-                Barcode barcode = data.getParcelableExtra(BarcodeCaptureActivity.BarcodeObject);
-                final String scanResult = barcode.displayValue;
-                Gson gson = new Gson();
-                WebServerConfig config = gson.fromJson(scanResult, WebServerConfig.class);
-                Log.d("QR Code",scanResult);
-                Toast.makeText(getBaseContext(),"QR code scanned",Toast.LENGTH_SHORT).show();
+                if(data != null) {
+                    Barcode barcode = data.getParcelableExtra(BarcodeCaptureActivity.BarcodeObject);
+                    final String scanResult = barcode.displayValue;
+                    Gson gson = new Gson();
+                    WebServerConfig config = gson.fromJson(scanResult, WebServerConfig.class);
+                    Log.d("QR Code", scanResult);
+                    Toast.makeText(getBaseContext(), "QR code scanned", Toast.LENGTH_SHORT).show();
+                }
                 break;
         }
 
+    }
+
+    public boolean isConnectedToServer(){
+        return ViewerConnectivityManager.getInstance().isConnected();
+    }
+
+    public boolean isNetworkAvailable() {
+        ConnectivityManager cm =
+                (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        if(netInfo != null && netInfo.isConnectedOrConnecting())
+        {
+            return true;
+        }
+        return false;
+        //return netInfo != null && netInfo.isConnectedOrConnecting();
     }
 }

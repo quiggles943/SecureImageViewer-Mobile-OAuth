@@ -5,10 +5,10 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
-import android.os.AsyncTask;
 import android.text.TextUtils;
 
 import com.quigglesproductions.secureimageviewer.managers.FolderManager;
+import com.quigglesproductions.secureimageviewer.models.ArtistModel;
 import com.quigglesproductions.secureimageviewer.models.CatagoryModel;
 import com.quigglesproductions.secureimageviewer.models.FileModel;
 import com.quigglesproductions.secureimageviewer.models.FolderModel;
@@ -254,13 +254,14 @@ public class DatabaseHandler {
             item.setContentType(contentType);
             item.setIsUploaded(isUploaded);
             item.setFolderName(folder.getName());
-            AsyncTask.execute(new Runnable() {
+            /*AsyncTask.execute(new Runnable() {
                 @Override
                 public void run() {
                     item.Subjects = getSubjectsForFile(item);
                     item.Catagories = getCatagoriesForFile(item);
                 }
-            });
+            });*/
+            item.artist = getArtistFromOnlineId(item.onlineArtistId);
             item.Subjects = getSubjectsForFile(item);
             item.Catagories = getCatagoriesForFile(item);
             files.add(item);
@@ -285,8 +286,41 @@ public class DatabaseHandler {
         return true;
     }
 
+    public ArtistModel getArtistFromOnlineId(int onlineId) {
+        String[] projection = {
+                DatabaseHelper.SysArtist._ID,
+                DatabaseHelper.SysArtist.COLUMN_ONLINE_ID,
+                DatabaseHelper.SysArtist.COLUMN_NAME,
+        };
+// How you want the results sorted in the resulting Cursor
+        String sortOrder =
+                DatabaseHelper.SysArtist.COLUMN_NAME + " ASC";
+        String where = DatabaseHelper.SysArtist.COLUMN_ONLINE_ID+" = "+onlineId;
+
+        Cursor cursor = database.query(
+                DatabaseHelper.SysArtist.TABLE_NAME,   // The table to query
+                projection,             // The array of columns to return (pass null to get all)
+                where,              // The columns for the WHERE clause
+                null,          // The values for the WHERE clause
+                null,                   // don't group the rows
+                null,                   // don't filter by row groups
+                sortOrder               // The sort order
+        );
+        //ObservableArrayList<ItemFolder> folders = new ObservableArrayList<>();
+        while (cursor.moveToNext()) {
+            String name = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.SysArtist.COLUMN_NAME));
+            int id = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.SysArtist._ID));
+            ArtistModel artist = new ArtistModel();
+            artist.id = id;
+            artist.onlineId = onlineId;
+            artist.name = name;
+            return artist;
+        }
+        return null;
+    }
+
     public ArrayList<CatagoryModel> getCatagoriesForFile(FileModel item) {
-        return getCatagoriesForFile(item.getId());
+        return getCatagoriesForFile(item.getOnlineId());
     }
 
     public ArrayList<CatagoryModel> getCatagoriesForFile(int fileId) {
@@ -312,13 +346,15 @@ public class DatabaseHandler {
         }
         cursor.close();
         if(catagoryIds.size()>0){
-            Cursor cursor2 = database.rawQuery("SELECT "+DatabaseHelper.SysCatagory._ID+", "+DatabaseHelper.SysCatagory.COLUMN_NAME+" FROM "+DatabaseHelper.SysCatagory.TABLE_NAME+" WHERE "+DatabaseHelper.SysCatagory._ID+" IN ("+ TextUtils.join(",",catagoryIds) +")",null);
+            Cursor cursor2 = database.rawQuery("SELECT "+DatabaseHelper.SysCatagory._ID+", "+DatabaseHelper.SysCatagory.COLUMN_NAME+", "+DatabaseHelper.SysCatagory.COLUMN_ONLINE_ID+" FROM "+DatabaseHelper.SysCatagory.TABLE_NAME+" WHERE "+DatabaseHelper.SysCatagory.COLUMN_ONLINE_ID+" IN ("+ TextUtils.join(",",catagoryIds) +")",null);
             ArrayList<CatagoryModel> catagories = new ArrayList<>();
             while (cursor2.moveToNext()) {
                 int catagoryId = cursor2.getInt(cursor2.getColumnIndexOrThrow(DatabaseHelper.SysCatagory._ID));
+                int onlineId = cursor2.getInt(cursor2.getColumnIndexOrThrow(DatabaseHelper.SysCatagory.COLUMN_ONLINE_ID));
                 String catagoryName = cursor2.getString(cursor2.getColumnIndexOrThrow(DatabaseHelper.SysCatagory.COLUMN_NAME));
                 CatagoryModel catagoryModel = new CatagoryModel();
-                catagoryModel.onlineId = catagoryId;
+                catagoryModel.id = catagoryId;
+                catagoryModel.onlineId = onlineId;
                 catagoryModel.name = catagoryName;
                 catagories.add(catagoryModel);
             }
@@ -328,7 +364,7 @@ public class DatabaseHandler {
         return null;
     }
     public ArrayList<SubjectModel> getSubjectsForFile(FileModel file){
-        return getSubjectsForFile(file.getId());
+        return getSubjectsForFile(file.getOnlineId());
     }
 
     public ArrayList<SubjectModel> getSubjectsForFile(int fileId){
@@ -355,14 +391,16 @@ public class DatabaseHandler {
         cursor.close();
         String subjectIdList = "";
         if(subjectIds.size()>0){
-            Cursor cursor2 = database.rawQuery("SELECT "+DatabaseHelper.SysSubject._ID+", "+DatabaseHelper.SysSubject.COLUMN_NAME+" FROM "+DatabaseHelper.SysSubject.TABLE_NAME+" WHERE "+DatabaseHelper.SysSubject._ID+" IN ("+ TextUtils.join(",",subjectIds) +")",null);
+            Cursor cursor2 = database.rawQuery("SELECT "+DatabaseHelper.SysSubject._ID+", "+DatabaseHelper.SysSubject.COLUMN_NAME+", "+DatabaseHelper.SysSubject.COLUMN_ONLINE_ID+" FROM "+DatabaseHelper.SysSubject.TABLE_NAME+" WHERE "+DatabaseHelper.SysSubject.COLUMN_ONLINE_ID+" IN ("+ TextUtils.join(",",subjectIds) +")",null);
             ArrayList<SubjectModel> subjects = new ArrayList<>();
             while (cursor2.moveToNext()) {
                 int subjectId = cursor2.getInt(cursor2.getColumnIndexOrThrow(DatabaseHelper.SysSubject._ID));
                 String subjectName = cursor2.getString(cursor2.getColumnIndexOrThrow(DatabaseHelper.SysSubject.COLUMN_NAME));
+                int onlineId = cursor2.getInt(cursor2.getColumnIndexOrThrow(DatabaseHelper.SysSubject.COLUMN_ONLINE_ID));
                 SubjectModel subjectModel = new SubjectModel();
-                subjectModel.onlineId = subjectId;
+                subjectModel.id = subjectId;
                 subjectModel.name = subjectName;
+                subjectModel.onlineId = onlineId;
                 subjects.add(subjectModel);
             }
             cursor2.close();
@@ -564,12 +602,77 @@ public class DatabaseHandler {
         }
         return folders;
     }
+
+    public SubjectModel getSubjectByOnlineId(int onlineId){
+        String[] projection = {
+                DatabaseHelper.SysSubject._ID,
+                DatabaseHelper.SysSubject.COLUMN_ONLINE_ID,
+                DatabaseHelper.SysSubject.COLUMN_NAME,
+        };
+// How you want the results sorted in the resulting Cursor
+        String sortOrder =
+                DatabaseHelper.SysSubject.COLUMN_NAME + " ASC";
+        String where = DatabaseHelper.SysSubject.COLUMN_ONLINE_ID+" = "+onlineId;
+        Cursor cursor = database.query(
+                DatabaseHelper.SysSubject.TABLE_NAME,   // The table to query
+                projection,             // The array of columns to return (pass null to get all)
+                where,              // The columns for the WHERE clause
+                null,          // The values for the WHERE clause
+                null,                   // don't group the rows
+                null,                   // don't filter by row groups
+                sortOrder               // The sort order
+        );
+        SubjectModel subjectModel = null;
+        //ObservableArrayList<ItemFolder> folders = new ObservableArrayList<>();
+        while (cursor.moveToNext()) {
+            int id = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.SysSubject._ID));
+            String subjectName = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.SysSubject.COLUMN_NAME));
+            subjectModel = new SubjectModel();
+            subjectModel.onlineId = onlineId;
+            subjectModel.id = id;
+            subjectModel.name = subjectName;
+        }
+        return subjectModel;
+    }
+    public CatagoryModel getCatagoryByOnlineId(int onlineId){
+        String[] projection = {
+                DatabaseHelper.SysCatagory._ID,
+                DatabaseHelper.SysCatagory.COLUMN_ONLINE_ID,
+                DatabaseHelper.SysCatagory.COLUMN_NAME,
+        };
+// How you want the results sorted in the resulting Cursor
+        String sortOrder =
+                DatabaseHelper.SysCatagory.COLUMN_NAME + " ASC";
+        String where = DatabaseHelper.SysCatagory.COLUMN_ONLINE_ID+" = "+onlineId;
+        Cursor cursor = database.query(
+                DatabaseHelper.SysCatagory.TABLE_NAME,   // The table to query
+                projection,             // The array of columns to return (pass null to get all)
+                where,              // The columns for the WHERE clause
+                null,          // The values for the WHERE clause
+                null,                   // don't group the rows
+                null,                   // don't filter by row groups
+                sortOrder               // The sort order
+        );
+        CatagoryModel catagoryModel = null;
+        //ObservableArrayList<ItemFolder> folders = new ObservableArrayList<>();
+        while (cursor.moveToNext()) {
+            int id = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.SysCatagory._ID));
+            String catagoryName = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.SysCatagory.COLUMN_NAME));
+            catagoryModel = new CatagoryModel();
+            catagoryModel.onlineId = onlineId;
+            catagoryModel.id = id;
+            catagoryModel.name = catagoryName;
+        }
+        return catagoryModel;
+    }
     public void clearFiles() {
         database.delete(DatabaseHelper.SysFile.TABLE_NAME,"",null);
     }
 
     public void deleteFile(FileModel file) {
         database.delete(DatabaseHelper.SysFile.TABLE_NAME, DatabaseHelper.SysFile._ID+" = ?",new String[]{String.valueOf(file.getId())});
+        database.delete(DatabaseHelper.SysFileSubject.TABLE_NAME,DatabaseHelper.SysFileSubject.COLUMN_FILE_ID+" =?",new String[]{String.valueOf(file.getOnlineId())});
+        database.delete(DatabaseHelper.SysFileCatagory.TABLE_NAME,DatabaseHelper.SysFileCatagory.COLUMN_FILE_ID+" =?",new String[]{String.valueOf(file.getOnlineId())});
     }
 
     public void deleteFolder(FolderModel folder) {
@@ -625,5 +728,44 @@ public class DatabaseHandler {
 
     public void clearCatagories() {
         database.delete(DatabaseHelper.SysCatagory.TABLE_NAME,null,null);
+    }
+
+    public int addSubjectToFile(SubjectModel subject, FileModel file) {
+        SubjectModel existing = getSubjectByOnlineId(subject.onlineId);
+        if(existing == null)
+            subject = addSubject(subject);
+        else
+            subject = existing;
+        ContentValues values = new ContentValues();
+        values.put(DatabaseHelper.SysFileSubject.COLUMN_SUBJECT_ID,subject.onlineId);
+        values.put(DatabaseHelper.SysFileSubject.COLUMN_FILE_ID,file.getOnlineId());
+        int newRowId = (int) database.insertWithOnConflict(DatabaseHelper.SysFileSubject.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_IGNORE);
+        return newRowId;
+    }
+
+    public int addCatagorytoFile(CatagoryModel catagory, FileModel file) {
+        CatagoryModel existing = getCatagoryByOnlineId(catagory.onlineId);
+        if(existing == null)
+            catagory = addCatagory(catagory);
+        else
+            catagory = existing;
+        ContentValues values = new ContentValues();
+        values.put(DatabaseHelper.SysFileCatagory.COLUMN_CATAGORY_ID,catagory.onlineId);
+        values.put(DatabaseHelper.SysFileCatagory.COLUMN_FILE_ID,file.getOnlineId());
+        int newRowId = (int) database.insertWithOnConflict(DatabaseHelper.SysFileCatagory.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_IGNORE);
+        return newRowId;
+    }
+
+    public ArtistModel addArtist(ArtistModel artist) {
+        ContentValues values = new ContentValues();
+        values.put(DatabaseHelper.SysArtist.COLUMN_ONLINE_ID,artist.onlineId);
+        values.put(DatabaseHelper.SysArtist.COLUMN_NAME,artist.name);
+        int newRowId = (int) database.insertWithOnConflict(DatabaseHelper.SysArtist.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_IGNORE);
+        artist.setId(newRowId);
+        return artist;
+    }
+
+    public void clearArtists() {
+        database.delete(DatabaseHelper.SysArtist.TABLE_NAME,null,null);
     }
 }

@@ -63,4 +63,6 @@
     <string name="ok">OK</string>
     <string name="close">Close</string>
     <string name="title_activity_test">Test</string>
+    <string name="update_artist_title">Update artist listing</string>
+    <string name="update_artist_summary">Updates the artist listing</string>
 </resources>

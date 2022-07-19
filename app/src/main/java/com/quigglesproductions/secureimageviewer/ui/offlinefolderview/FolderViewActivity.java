@@ -20,6 +20,7 @@ import android.widget.GridView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.google.gson.Gson;
@@ -97,7 +98,10 @@ public class FolderViewActivity extends SecureActivity  {
             }
         });
         registerForContextMenu(gridview);
-
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
 
     }
 
@@ -111,6 +115,9 @@ public class FolderViewActivity extends SecureActivity  {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()){
+            case android.R.id.home:
+                onBackPressed();
+                break;
             case R.id.offline_folder_sync:
                 Snackbar snackbar = Snackbar.make(findViewById(R.id.offline_folder_layout),"Folder sync in progress",Snackbar.LENGTH_SHORT);
                 snackbar.show();
@@ -145,7 +152,6 @@ public class FolderViewActivity extends SecureActivity  {
         FileModel selectedFile = adapter.getItem(item.getItemId());
         switch (item.getGroupId()){
             case CONTEXTMENU_INFO:
-                Toast.makeText(context,"Info Selected",Toast.LENGTH_SHORT).show();
                 new ItemInfoDialog(adapter.getItem(item.getItemId())).show(getSupportFragmentManager(),ItemInfoDialog.TAG);
                 break;
             case CONTEXTMENU_SET_THUMBNAIL:
