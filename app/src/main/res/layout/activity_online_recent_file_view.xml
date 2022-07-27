@@ -6,11 +6,18 @@
     android:layout_height="match_parent"
     tools:context=".ui.onlinefolderlist.OnlineFolderListActivity">
 
-    <GridView
+    <!--<GridView
         android:id="@+id/recentFilesView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:numColumns="2"
+        tools:layout_editor_absoluteX="86dp"
+        tools:layout_editor_absoluteY="82dp" />-->
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recentFilesViewRecycler"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         tools:layout_editor_absoluteX="86dp"
         tools:layout_editor_absoluteY="82dp" />
 

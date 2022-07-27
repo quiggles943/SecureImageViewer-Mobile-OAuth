@@ -9,16 +9,24 @@ import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager.widget.ViewPager;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.quigglesproductions.secureimageviewer.R;
+import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
+import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
+import com.quigglesproductions.secureimageviewer.database.DatabaseHandler;
+import com.quigglesproductions.secureimageviewer.database.DatabaseHelper;
 import com.quigglesproductions.secureimageviewer.models.FileModel;
 import com.quigglesproductions.secureimageviewer.models.FolderModel;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
 import com.quigglesproductions.secureimageviewer.utils.ImageUtils;
+
+import net.openid.appauth.AuthState;
+import net.openid.appauth.AuthorizationException;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -37,12 +45,13 @@ public class ImageViewActivity extends SecureActivity implements ViewPager.OnPag
         //FolderModel folder = gson.fromJson(getIntent().getStringExtra("folder"), FolderModel.class);
         Type listType = new TypeToken<ArrayList<FileModel>>(){}.getType();
         ArrayList<FileModel> files = gson.fromJson(getIntent().getStringExtra("fileList"),listType);
+        FolderModel selectedFolder = getIntent().getParcelableExtra("folder");
         int selectedPosition = (int) getIntent().getIntExtra("position",0);
         mPager = (ViewPager) findViewById(R.id.view_pager);
         fileName = findViewById(R.id.file_name);
         topLayout = findViewById(R.id.topLinearLayout);
-        mViewPagerAdapter = new ViewPagerAdapter(ImageViewActivity.this, files);
-
+        mViewPagerAdapter = new ViewPagerAdapter(ImageViewActivity.this);
+        mViewPagerAdapter.addFiles(files);
         mViewPagerAdapter.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -53,11 +62,11 @@ public class ImageViewActivity extends SecureActivity implements ViewPager.OnPag
                     topLayout.setVisibility(View.VISIBLE);
             }
         });
-
-        // Adding the Adapter to the ViewPager
         mPager.setAdapter(mViewPagerAdapter);
         mPager.addOnPageChangeListener(this);
         mPager.setCurrentItem(selectedPosition);
+        // Adding the Adapter to the ViewPager
+
         getWindow().setStatusBarColor(Color.TRANSPARENT);
         getWindow().setNavigationBarColor(Color.TRANSPARENT);
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);

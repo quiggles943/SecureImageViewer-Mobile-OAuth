@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/grid_item_image"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:contentDescription="Folder Thumbnail"
+        android:scaleType="centerCrop"
+        app:layout_constrainedHeight="false"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintBottom_toBottomOf="@+id/grid_item_label"
+        app:layout_constraintDimensionRatio="1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"></ImageView>
+
+    <TextView
+        android:id="@+id/grid_item_label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/grid_item_image"
+        android:layout_alignParentEnd="true"
+        android:background="#80000000"
+        android:paddingStart="5dp"
+        android:paddingEnd="0dp"
+        android:text="@+id/label"
+        android:textColor="@color/white"
+        android:textSize="9pt"
+        app:layout_constraintBottom_toBottomOf="parent"></TextView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

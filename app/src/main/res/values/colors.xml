@@ -8,7 +8,9 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="transparent">#00FFFFFF</color>
-    <color name="selected">#743F51B5</color>
+    <color name="selected">#7458DEFF</color>
     <color name="translucent">#F2000000</color>
     <color name="text_grey">@android:color/darker_gray</color>
+    <color name="progressBar_overlay_background">#804E4E4E</color>
+    <color name="reauthenticate">#B8800F</color>
 </resources>

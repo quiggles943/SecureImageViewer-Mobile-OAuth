@@ -37,7 +37,7 @@ public class DatabaseHandler {
             singleton = new DatabaseHandler();
         return singleton;
     }
-    public void setContext(Context context){
+    public void setRootContext(Context context){
         this.context = context.getApplicationContext();
         this.database = new DatabaseHelper(context).getWritableDatabase();
     }
@@ -49,7 +49,8 @@ public class DatabaseHandler {
                 DatabaseHelper.ViewFolder.COLUMN_REAL_NAME,
                 DatabaseHelper.ViewFolder.COLUMN_FILE_COUNT,
                 DatabaseHelper.ViewFolder.COLUMN_THUMBNAIL_IMAGE,
-                DatabaseHelper.ViewFolder.COLUMN_UPDATE_TIME
+                DatabaseHelper.ViewFolder.COLUMN_UPDATE_TIME,
+                DatabaseHelper.ViewFolder.COLUMN_STATUS
         };
 // How you want the results sorted in the resulting Cursor
         String sortOrder =
@@ -74,7 +75,12 @@ public class DatabaseHandler {
             String downloadTime = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.ViewFolder.COLUMN_UPDATE_TIME));
             Date downloadDate = convertStringToDate(downloadTime);
             File folderFile = new File(context.getFilesDir() + File.separator +".Pictures"+File.separator+folderId);
-            FolderModel folder = new FolderModel(folderId,onlineId, folderName, fileCount,downloadDate);
+            String statusString = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.ViewFolder.COLUMN_STATUS));
+            FolderModel.Status status = FolderModel.Status.UNKNOWN;
+            if(statusString != null && statusString.length()>0) {
+                status = FolderModel.Status.valueOf(statusString);
+            }
+            FolderModel folder = new FolderModel(folderId,onlineId, folderName, fileCount,downloadDate,status);
             folder.setFolderFile(folderFile);
             if (folderThumbnailId >0)
                 folder.setThumbnailFile(new File(context.getFilesDir() + File.separator +".Pictures"+File.separator+folderId+File.separator+".thumbnails"+File.separator+ folderThumbnailId));
@@ -426,14 +432,15 @@ public class DatabaseHandler {
         values.put(DatabaseHelper.SysFolder.COLUMN_DEFAULT_SUBJECT,folder.onlineDefaultSubject);
         values.put(DatabaseHelper.SysFolder.COLUMN_IS_SECURE,folder.isSecure);
         values.put(DatabaseHelper.SysFolder.COLUMN_THUMBNAIL_IMAGE,folder.onlineThumbnailId);
+        values.put(DatabaseHelper.SysFolder.COLUMN_STATUS,folder.getStatus().toString());
         SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
         String dateString = format.format(new Date());
         values.put(DatabaseHelper.SysFolder.COLUMN_UPDATE_TIME,dateString);
-        if(getFolderById(folder.getOnlineId()) == null) {
+        if(getFolderById(folder.getId()) == null) {
             return (int) database.insertWithOnConflict(DatabaseHelper.SysFolder.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_IGNORE);
         }
         else{
-            database.update(DatabaseHelper.SysFolder.TABLE_NAME, values, "FILE_ONLINE_ID=?", new String[]{folder.getId() + ""});  // number 1 is the _id here, update to variable for your code
+            database.update(DatabaseHelper.SysFolder.TABLE_NAME, values, "_ID=?", new String[]{folder.getId() + ""});  // number 1 is the _id here, update to variable for your code
             return -1;
         }
     }
@@ -503,7 +510,8 @@ public class DatabaseHandler {
                 DatabaseHelper.ViewFolder.COLUMN_REAL_NAME,
                 DatabaseHelper.ViewFolder.COLUMN_FILE_COUNT,
                 DatabaseHelper.ViewFolder.COLUMN_THUMBNAIL_IMAGE,
-                DatabaseHelper.ViewFolder.COLUMN_UPDATE_TIME
+                DatabaseHelper.ViewFolder.COLUMN_UPDATE_TIME,
+                DatabaseHelper.ViewFolder.COLUMN_STATUS
         };
 // How you want the results sorted in the resulting Cursor
         String sortOrder =
@@ -529,7 +537,11 @@ public class DatabaseHandler {
             String downloadTime = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.ViewFolder.COLUMN_UPDATE_TIME));
             Date downloadDate = convertStringToDate(downloadTime);
             File folderFile = new File(context.getFilesDir() + File.separator +".Pictures"+File.separator+folderId);
-            FolderModel folder = new FolderModel(id,onlineId, folderName, fileCount,downloadDate);
+            String statusString = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.ViewFolder.COLUMN_STATUS));
+            FolderModel.Status status = FolderModel.Status.UNKNOWN;
+            if(statusString != null && statusString.length()>0)
+                status = FolderModel.Status.valueOf(statusString);
+            FolderModel folder = new FolderModel(id,onlineId, folderName, fileCount,downloadDate,status);
             folder.setFolderFile(folderFile);
             if (folderThumbnailId >0)
                 folder.setThumbnailFile(new File(context.getFilesDir() + File.separator +".Pictures"+File.separator+folderId+File.separator+".thumbnails"+File.separator+ folderThumbnailId));
@@ -549,7 +561,8 @@ public class DatabaseHandler {
                 DatabaseHelper.ViewFolder.COLUMN_REAL_NAME,
                 DatabaseHelper.ViewFolder.COLUMN_FILE_COUNT,
                 DatabaseHelper.ViewFolder.COLUMN_THUMBNAIL_IMAGE,
-                DatabaseHelper.ViewFolder.COLUMN_UPDATE_TIME
+                DatabaseHelper.ViewFolder.COLUMN_UPDATE_TIME,
+                DatabaseHelper.ViewFolder.COLUMN_STATUS
         };
 // How you want the results sorted in the resulting Cursor
         String sortOrder =
@@ -582,7 +595,11 @@ public class DatabaseHandler {
                 }
             }
             File folderFile = new File(context.getFilesDir() + File.separator +".Pictures"+File.separator+folderId);
-            FolderModel folder = new FolderModel(folderId,onlineFolderId, folderName, fileCount,downloadDate);
+            String statusString = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.ViewFolder.COLUMN_STATUS));
+            FolderModel.Status status = FolderModel.Status.UNKNOWN;
+            if(statusString != null && statusString.length()>0)
+                status = FolderModel.Status.valueOf(statusString);
+            FolderModel folder = new FolderModel(folderId,onlineFolderId, folderName, fileCount,downloadDate,status);
             folder.setFolderFile(folderFile);
 
             if(new File(folder.getFolderFile(), ".thumbnail").exists())

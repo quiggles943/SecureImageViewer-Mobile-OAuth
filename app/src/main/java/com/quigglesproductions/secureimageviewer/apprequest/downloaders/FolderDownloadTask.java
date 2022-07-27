@@ -43,19 +43,21 @@ import javax.net.ssl.HttpsURLConnection;
 
 public  class FolderDownloadTask {
     public static void getFolderForDownload(Context context, FolderModel folderModel, String accessToken, DownloadCompleteCallback<FolderModel, ArrayList<VolleyError>> callback){
-        NotificationCompat.Builder notification = NotificationHelper.getInstance().createNotification(NotificationChannels.DOWNLOAD);
+        //NotificationCompat.Builder notification = NotificationHelper.getInstance().createNotification(NotificationChannels.DOWNLOAD);
         FolderInfoDownloader infoDownloader = new FolderInfoDownloader(context, accessToken, new DownloadCompleteCallback<FolderModel,Exception>() {
             @Override
             public void downloadComplete(FolderModel folder, Exception error) {
                 FolderModel dbFolder = DatabaseHandler.getInstance().getFolderByOnlineId(folder.getOnlineId());
+                folder.setStatus(FolderModel.Status.DOWNLOADING);
                 if( dbFolder == null) {
                     folder.setId(DatabaseHandler.getInstance().insertOrUpdateFolder(folder));
-                    FolderFileDownloader downloader = new FolderFileDownloader(context,folder,accessToken,notification);
+                    FolderFileDownloader downloader = new FolderFileDownloader(context,folder,accessToken);
                     downloader.setCallback(callback);
                     downloader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,folderModel.getOnlineId());
                 }
                 else {
-                    FolderFileDownloader downloader = new FolderFileDownloader(context,dbFolder,accessToken,notification);
+                    DatabaseHandler.getInstance().insertOrUpdateFolder(folder);
+                    FolderFileDownloader downloader = new FolderFileDownloader(context,dbFolder,accessToken);
                     downloader.setCallback(callback);
                     downloader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,folderModel.getOnlineId());
                 }
@@ -71,17 +73,15 @@ public  class FolderDownloadTask {
         FolderModel folder;
         private DatabaseHandler dbHandler;
         private DatabaseHelper dbHelper;
-        NotificationCompat.Builder loadingNotification = null;
         private DownloadCompleteCallback callback;
         private ArrayList<FileDownloadRequest> requests;
 
-        public FolderFileDownloader(Context context, FolderModel folder, String accessToken, NotificationCompat.Builder notification) {
+        public FolderFileDownloader(Context context, FolderModel folder, String accessToken) {
             this.context = context;
             this.accessToken = accessToken;
             this.folder = folder;
             dbHelper = new DatabaseHelper(context);
             dbHandler = new DatabaseHandler(context, dbHelper.getWritableDatabase());
-            this.loadingNotification = notification;
             requests = new ArrayList<>();
         }
 
@@ -117,6 +117,7 @@ public  class FolderDownloadTask {
                     Type listType = new TypeToken<ArrayList<FileModel>>() {
                     }.getType();
                     ArrayList<FileModel> files = gson.fromJson(result, listType);
+                    folder.fileCount = files.size();
                     for (FileModel file : files) {
                         file.setIsUploaded(true);
                         for(SubjectModel subject:file.getSubjects()){
@@ -159,7 +160,7 @@ public  class FolderDownloadTask {
             download.setFolderCompleteCallback(new FolderDownload.FolderDownloadCallback() {
                 @Override
                 public void downloadComplete(FolderModel folder, ArrayList<VolleyError> errors) {
-                    NotificationHelper.getInstance().cancelNotification(NotificationIds.FOLDER_DOWNLOAD_PROGRESS);
+                    //NotificationHelper.getInstance().cancelNotification(NotificationIds.FOLDER_DOWNLOAD_PROGRESS);
                     if (callback != null) {
                         callback.downloadComplete(folder,errors);
                     }

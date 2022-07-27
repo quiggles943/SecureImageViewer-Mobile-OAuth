@@ -8,7 +8,7 @@
         android:id="@+id/folderView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:numColumns="@integer/column_count"
+        android:numColumns="@integer/column_count_folderlist"
         tools:layout_editor_absoluteX="86dp"
         tools:layout_editor_absoluteY="82dp" />
 

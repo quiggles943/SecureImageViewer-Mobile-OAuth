@@ -25,9 +25,13 @@ import com.google.gson.Gson;
 import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
 import com.quigglesproductions.secureimageviewer.barcodescanner.BarcodeCaptureActivity;
 import com.quigglesproductions.secureimageviewer.managers.NotificationManager;
+import com.quigglesproductions.secureimageviewer.managers.SecurityManager;
 import com.quigglesproductions.secureimageviewer.managers.ViewerConnectivityManager;
+import com.quigglesproductions.secureimageviewer.models.LoginModel;
 import com.quigglesproductions.secureimageviewer.models.WebServerConfig;
+import com.quigglesproductions.secureimageviewer.ui.login.LoginActivity;
 import com.quigglesproductions.secureimageviewer.ui.preferences.SsoSettingsActivity;
+import com.quigglesproductions.secureimageviewer.ui.splash.NewSplashScreenActivity;
 
 import net.openid.appauth.AuthorizationException;
 import net.openid.appauth.AuthorizationResponse;
@@ -73,6 +77,11 @@ public class SecureActivity extends AppCompatActivity {
                 showToast(context,text,duration);
             }
         });
+        if(!SecurityManager.getInstance().isUserAuthenticated()){
+            if(!LoginActivity.class.isInstance(this) && !NewSplashScreenActivity.class.isInstance(this)){
+                authenticateUser();
+            }
+        }
         //preferences=PreferenceManager.getDefaultSharedPreferences(this);
         //isLoggedIn =preferences.getBoolean("loggedIn",false);
         //ProcessLifecycleOwner.get().getLifecycle().addObserver(this);
@@ -101,6 +110,11 @@ public class SecureActivity extends AppCompatActivity {
                 showToast(context,text,duration);
             }
         });
+        if(!SecurityManager.getInstance().isUserAuthenticated()){
+            if(!LoginActivity.class.isInstance(this) && !NewSplashScreenActivity.class.isInstance(this)){
+                authenticateUser();
+            }
+        }
         //SharedPreferences preferences= PreferenceManager.getDefaultSharedPreferences(this);
         //boolean isLoggedIn =preferences.getBoolean("loggedIn",false);
         /*if(!isLoggedIn) {
@@ -121,6 +135,14 @@ public class SecureActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
 
+
+    }
+
+    private void authenticateUser(){
+        Intent passthroughIntent = getIntent();
+        Intent loginIntent = new Intent(this, LoginActivity.class);
+        loginIntent.putExtra(LoginActivity.EXTRA_PASSTHROUGH_INTENT, passthroughIntent);
+        startActivityForResult(loginIntent,SecurityManager.LOGIN);
     }
 
     public void showSnackbar(Context context, String text, int length){
@@ -173,6 +195,19 @@ public class SecureActivity extends AppCompatActivity {
                     Log.d("QR Code", scanResult);
                     Toast.makeText(getBaseContext(), "QR code scanned", Toast.LENGTH_SHORT).show();
                 }
+                break;
+            case SecurityManager.LOGIN:
+                if(data != null){
+                    LoginModel model = data.getParcelableExtra(SecurityManager.LoginObject);
+                    Intent passthrough = data.getParcelableExtra(LoginActivity.EXTRA_PASSTHROUGH_INTENT);
+                    if(model != null){
+                        SecurityManager.getInstance().setLogin(model);
+                        //startActivity(passthrough);
+                        //finish();
+                    }
+                }
+                else
+                    finish();
                 break;
         }
 

@@ -2,6 +2,7 @@ package com.quigglesproductions.secureimageviewer.ui.onlinefolderlist;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.os.Parcelable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,6 +32,15 @@ public class OnlineFolderListAdapter  extends BaseAdapter
     private Context mContext;
     private ArrayList<FolderModel> folders;
     private Glide glide;
+
+    public ArrayList<? extends Parcelable> getItems() {
+        return folders;
+    }
+
+    public void setItems(ArrayList<FolderModel> items) {
+        folders = items;
+        notifyDataSetChanged();
+    }
 
     static class ViewHolder{
         public TextView text;
@@ -67,7 +77,7 @@ public class OnlineFolderListAdapter  extends BaseAdapter
         if (gridView == null) {
             LayoutInflater inflater = (LayoutInflater)
                     mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            gridView = inflater.inflate(R.layout.foldergrid_layout, null);
+            gridView = inflater.inflate(R.layout.foldergrid_layout_constrained, null);
             ViewHolder viewHolder = new ViewHolder();
             viewHolder.text = gridView.findViewById(R.id.grid_item_label);
             viewHolder.image = gridView.findViewById(R.id.grid_item_image);

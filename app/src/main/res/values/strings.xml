@@ -65,4 +65,7 @@
     <string name="title_activity_test">Test</string>
     <string name="update_artist_title">Update artist listing</string>
     <string name="update_artist_summary">Updates the artist listing</string>
+    <string name="authservice_connecting">Connecting to Auth Service</string>
+    <string name="requestservice_connecting">Connecting to Request Service</string>
+    <string name="service_connected">Connected</string>
 </resources>

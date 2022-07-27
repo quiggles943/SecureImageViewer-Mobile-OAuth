@@ -10,6 +10,7 @@ import com.android.volley.toolbox.Volley;
 import com.quigglesproductions.secureimageviewer.R;
 import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
 import com.quigglesproductions.secureimageviewer.login.LoginActivity;
+import com.quigglesproductions.secureimageviewer.managers.ViewerConnectivityManager;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
 import com.quigglesproductions.secureimageviewer.ui.offlinefolderlist.FolderListActivity;
 import com.quigglesproductions.secureimageviewer.ui.onlinefolderlist.OnlineFolderListActivity;
@@ -59,6 +60,7 @@ public class MainMenuActivity extends SecureActivity {
         {
             imageViewerBtn.setEnabled(false);
             imageViewerBtn.setAlpha(.5f);
+            ViewerConnectivityManager.refreshNetworkConnection();
         }
         else {
             imageViewerBtn.setEnabled(true);

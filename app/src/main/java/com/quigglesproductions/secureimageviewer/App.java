@@ -4,20 +4,28 @@ import android.app.Application;
 import android.content.Context;
 
 import androidx.annotation.Nullable;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleObserver;
+import androidx.lifecycle.OnLifecycleEvent;
+import androidx.lifecycle.ProcessLifecycleOwner;
 
+import com.gu.toolargetool.TooLargeTool;
 import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
 import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
 import com.quigglesproductions.secureimageviewer.apprequest.configuration.RequestConfigurationException;
 import com.quigglesproductions.secureimageviewer.apprequest.configuration.RequestServiceConfiguration;
 import com.quigglesproductions.secureimageviewer.database.DatabaseHandler;
 import com.quigglesproductions.secureimageviewer.managers.FolderManager;
+import com.quigglesproductions.secureimageviewer.managers.SecurityManager;
 
-public class App extends Application {
+public class App extends Application implements LifecycleObserver {
     Context context;
     @Override
     public void onCreate() {
         super.onCreate();
         context = this;
+        ProcessLifecycleOwner.get().getLifecycle().addObserver(this);
+        TooLargeTool.startLogging(this);
         initializeSingletons();
         //initializeRequestmanager();
     }
@@ -25,9 +33,11 @@ public class App extends Application {
     private void initializeSingletons(){
         // Initialize Singletons.
         AuthManager.getInstance().ConfigureAuthManager(context.getApplicationContext());
-        FolderManager.getInstance().setContext(context.getApplicationContext());
+        FolderManager.getInstance().setRootContext(context.getApplicationContext());
         RequestManager.getInstance().setRootContext(context.getApplicationContext());
-        DatabaseHandler.getInstance().setContext(context.getApplicationContext());
+        DatabaseHandler.getInstance().setRootContext(context.getApplicationContext());
+        SecurityManager.getInstance().setRootContext(context.getApplicationContext());
+
     }
 
     private void initializeRequestmanager(){
@@ -43,5 +53,15 @@ public class App extends Application {
                 }
             });
         }
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
+    public void onAppBackgrounded() {
+        if(SecurityManager.getInstance().getLoginModel() != null)
+            SecurityManager.getInstance().getLoginModel().setAuthenticated(false);
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_START)
+    public void onAppForegrounded() {
     }
 }

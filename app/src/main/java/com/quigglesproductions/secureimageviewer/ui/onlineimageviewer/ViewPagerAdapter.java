@@ -35,8 +35,7 @@ public class ViewPagerAdapter extends PagerAdapter {
     // Context object
     Context context;
 
-    ArrayList<FileModel> files;
-
+    ArrayList<FileModel> files = new ArrayList<>();
     // Layout Inflater
     LayoutInflater mLayoutInflater;
 
@@ -44,10 +43,15 @@ public class ViewPagerAdapter extends PagerAdapter {
 
 
     // Viewpager Constructor
-    public ViewPagerAdapter(Context context, ArrayList<FileModel> files) {
+    public ViewPagerAdapter(Context context) {
         this.context = context;
-        this.files = files;
         mLayoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    }
+
+    public void addFiles(ArrayList<FileModel> fileModels){
+        files.clear();
+        files.addAll(fileModels);
+        notifyDataSetChanged();
     }
 
     @Override

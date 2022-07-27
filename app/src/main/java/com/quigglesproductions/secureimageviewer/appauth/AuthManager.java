@@ -159,7 +159,7 @@ public class AuthManager{
         if(newAuthState == null)
             authState = null;
         else
-        authState = newAuthState;
+            authState = newAuthState;
     }
 
     public void setRegistrationId(RegistrationId registrationId){
@@ -176,6 +176,32 @@ public class AuthManager{
     }
     private void setDelayedAction(AuthState.AuthStateAction action){
         delayedAction = action;
+    }
+
+    public void performActionWithFreshTokens(@NonNull AuthState.AuthStateAction action){
+        Map<String, String> additionalParams = new HashMap<String,String>();
+        additionalParams.put("X-Request-Id", UUID.randomUUID().toString());
+        authState.performActionWithFreshTokens(authService,additionalParams, new AuthState.AuthStateAction() {
+            @Override
+            public void execute(@Nullable String accessToken, @Nullable String idToken, @Nullable AuthorizationException ex) {
+                if (ex != null) {
+                    switch (ex.type){
+                        case AuthorizationException.TYPE_OAUTH_AUTHORIZATION_ERROR:
+                        case AuthorizationException.TYPE_OAUTH_TOKEN_ERROR:
+                            setDelayedAction(action);
+                            requestLogin(rootContext);
+                            break;
+                    }
+
+
+                } else {
+                    authState.performActionWithFreshTokens(authService, action);
+                }
+                SharedPreferences.Editor editor = getTokenPref().edit();
+                editor.putString(TOKEN_PREF, authState.jsonSerializeString());
+                editor.apply();
+            }
+        });
     }
 
     public void performActionWithFreshTokens(@NonNull Context context, @NonNull AuthState.AuthStateAction action){

@@ -1,19 +1,28 @@
 package com.quigglesproductions.secureimageviewer.ui.offlinefolderlist;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+import androidx.core.view.ViewCompat;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
@@ -21,38 +30,76 @@ import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.signature.ObjectKey;
+import com.google.android.material.shape.MaterialShapeDrawable;
 import com.quigglesproductions.secureimageviewer.R;
 import com.quigglesproductions.secureimageviewer.models.FolderModel;
 import com.quigglesproductions.secureimageviewer.volley.VolleySingleton;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 public class FolderGridAdapter extends BaseAdapter
 {
     private Context mContext;
     private ArrayList<FolderModel> folders;
+    private GridView gridView;
     private Glide glide;
+    private AdapterView.OnItemClickListener onItemClickListener;
+    private OnItemSelectionChangedListener onItemSelectionChangedListener;
+    private ArrayList<Integer> selectedFolders = new ArrayList<>();
+    private boolean multiSelect;
 
     public void removeItem(FolderModel folder) {
         folders.remove(folder);
     }
 
     public void setFolderAsDownloaded(FolderModel folder) {
-        folders.get(folders.indexOf(folder)).isDownloading = false;
-        notifyDataSetChanged();
+        FolderModel searchedFolder = folders.stream().filter(x -> x.getId() == folder.getId()).findFirst().orElse(null);
+        if(searchedFolder != null){
+            int position = folders.indexOf(searchedFolder);
+            folders.remove(position);
+            folders.add(position,folder);
+            View v = gridView.getChildAt(position);
+            if(v == null)
+                return;
+            getView(position,v,gridView);
+        }
+    }
+
+    public void setOnItemClickListener(AdapterView.OnItemClickListener listener){
+        onItemClickListener = listener;
+    }
+
+    public void setOnItemSelectionChangedlistenr(OnItemSelectionChangedListener listener){
+        onItemSelectionChangedListener = listener;
     }
 
     public ArrayList<? extends Parcelable> getItems() {
         return folders;
     }
 
+    public void setMultiSelect(boolean multiSelect) {
+        this.multiSelect = multiSelect;
+        if(!multiSelect) {
+            selectedFolders.clear();
+            notifyDataSetChanged();
+        }
+    }
+
+    public boolean isMultiSelect() {
+        return multiSelect;
+    }
+
     static class ViewHolder{
         public TextView text;
         public ImageView image;
     }
-    public FolderGridAdapter(Context c, ArrayList<FolderModel> folders)
+    public FolderGridAdapter(Context c, ArrayList<FolderModel> folders, GridView gridView)
     {
         mContext = c;
+        this.gridView = gridView;
         this.folders = folders;
     }
 
@@ -66,6 +113,10 @@ public class FolderGridAdapter extends BaseAdapter
     {
         return folders.get(position);
     }
+    public int getItemPosition(FolderModel folder){
+        int index = folders.indexOf(folder);
+        return index;
+    }
     @Override
     public long getItemId(int position)
     {
@@ -77,30 +128,54 @@ public class FolderGridAdapter extends BaseAdapter
     {
         FolderModel folder = folders.get(position);
 
-        View gridView = convertView;
-        if (gridView == null) {
+        View itemView = convertView;
+        if (itemView == null) {
             LayoutInflater inflater = (LayoutInflater)
                     mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            gridView = inflater.inflate(R.layout.foldergrid_layout, null);
+            itemView = inflater.inflate(R.layout.foldergrid_layout_constrained, null);
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(v.isEnabled()) {
+                        int pos = gridView.getPositionForView(v);
+                        if(multiSelect){
+                            if(selectedFolders.contains(pos)) {
+                                int index = selectedFolders.indexOf(pos);
+                                selectedFolders.remove(index);
+                            }
+                            else
+                                selectedFolders.add(pos);
+                            onItemSelectionChangedListener.OnChange(selectedFolders);
+                            getView(pos,v,gridView);
+                        }
+                        else {
+                            onItemClickListener.onItemClick(gridView, v, pos, 0);
+                        }
+                    }
+                }
+            });
         }
             ViewHolder viewHolder = new ViewHolder();
-            viewHolder.text = gridView.findViewById(R.id.grid_item_label);
-            viewHolder.image = gridView.findViewById(R.id.grid_item_image);
-            gridView.setTag(viewHolder);
-            if(folder.isDownloading){
-                gridView.setEnabled(false);
-                gridView.setAlpha(.5f);
+            viewHolder.text = itemView.findViewById(R.id.grid_item_label);
+            viewHolder.image = itemView.findViewById(R.id.grid_item_image);
+            itemView.setTag(viewHolder);
+            if(folder.getIsDownloading()){
+                itemView.setEnabled(false);
+                itemView.setAlpha(.5f);
             }
             else{
-                gridView.setEnabled(true);
-                gridView.setAlpha(1f);
+                itemView.setEnabled(true);
+                itemView.setAlpha(1f);
             }
+            if(selectedFolders.contains(position)) {
+                viewHolder.image.setColorFilter(ContextCompat.getColor(mContext, R.color.selected), PorterDuff.Mode.SRC_ATOP);
+            }
+            else
+                viewHolder.image.setColorFilter(null);
+            //itemView.setBackgroundColor(isItemSelectedAtPosition(position)? mContext.getResources().getColor(R.color.selected)  : Color.TRANSPARENT);
         //}
-        ViewHolder holder = (ViewHolder) gridView.getTag();
+        ViewHolder holder = (ViewHolder) itemView.getTag();
         holder.text.setText(folder.getName()+" ("+folder.fileCount+")");
-        /*if(holder.image.getTag() != null) {
-            ((ThumbnailGetter) holder.image.getTag()).cancel(true);
-        }*/
         Glide.with(mContext).addDefaultRequestListener(new RequestListener<Object>() {
             @Override
             public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Object> target, boolean isFirstResource) {
@@ -114,7 +189,7 @@ public class FolderGridAdapter extends BaseAdapter
                 return false;
             }
         }).load(folder.getThumbnailFile()).signature(new ObjectKey(folder.getDownloadTime())).into(holder.image);
-        return gridView;
+        return itemView;
     }
 
     @Override
@@ -123,6 +198,16 @@ public class FolderGridAdapter extends BaseAdapter
         //folders = User.getCurrent().FolderManager.getFolderList();
     }
 
+    /*public boolean isItemSelected(FolderModel folder){
+        if(selectedFolders.contains(folder))
+            return true;
+        else
+            return false;
+    }
+    public boolean isItemSelectedAtPosition(int position){
+        FolderModel folder = folders.get(position);
+        return isItemSelected(folder);
+    }*/
     public void addItem(FolderModel folder) {
         folder.isDownloading = !VolleySingleton.getInstance(mContext).getIsFolderDownloadComplete(folder);
         folders.add(folder);
@@ -132,7 +217,10 @@ public class FolderGridAdapter extends BaseAdapter
         folders.clear();
     }
 
-    class ThumbnailGetter extends AsyncTask<FolderModel, Void, Bitmap> {
+    public interface OnItemSelectionChangedListener{
+        void OnChange(List<Integer> selectedItems);
+    }
+    /*class ThumbnailGetter extends AsyncTask<FolderModel, Void, Bitmap> {
         private ImageView iv;
         private Context context;
 
@@ -165,5 +253,5 @@ public class FolderGridAdapter extends BaseAdapter
             }
             return null;
         }
-    }
+    }*/
 }

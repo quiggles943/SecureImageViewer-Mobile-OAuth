@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/menu_download_selection_recent_files"
+        android:title="Recents"
+        app:showAsAction="always"/>
+    <item
+        android:visible="false"
+        android:icon="@android:drawable/stat_sys_download"
+        android:id="@+id/menu_download_selection_btn"
+        app:showAsAction="always"
+        android:title="Item" />
+</menu>

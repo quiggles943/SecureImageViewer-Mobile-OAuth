@@ -9,6 +9,8 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 
 import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.gson.Gson;
 import com.quigglesproductions.secureimageviewer.Downloaders.OnlineFolderDownloader;
@@ -17,6 +19,7 @@ import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
 import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
 import com.quigglesproductions.secureimageviewer.models.FileModel;
 import com.quigglesproductions.secureimageviewer.models.FolderModel;
+import com.quigglesproductions.secureimageviewer.recycler.RecyclerItemClickListener;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
 import com.quigglesproductions.secureimageviewer.ui.onlinefolderview.OnlineFolderViewAdapter;
 import com.quigglesproductions.secureimageviewer.ui.onlineimageviewer.ImageViewActivity;
@@ -28,8 +31,10 @@ import java.util.ArrayList;
 
 public class OnlineRecentFilesViewActivity extends SecureActivity {
     Context context;
-    private GridView filesView;
-    private OnlineRecentFilesViewAdapter adapter;
+    //private GridView filesView;
+    //private OnlineRecentFilesViewAdapter adapter;
+    private RecyclerView recyclerView;
+    private RecentFilesRecyclerViewAdapter rvAdapter;
     private ArrayList<FileModel> files;
     Gson gson;
     @Override
@@ -38,19 +43,9 @@ public class OnlineRecentFilesViewActivity extends SecureActivity {
         context = this;
         gson = new Gson();
         setContentView(R.layout.activity_online_recent_file_view);
-        filesView = (GridView) findViewById(R.id.recentFilesView);
+        recyclerView = findViewById(R.id.recentFilesViewRecycler);
         Intent intent = getIntent();
-        String folderName = intent.getStringExtra("folderName");
-        int orientation = getResources().getConfiguration().orientation;
-        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            // In landscape
-            filesView.setNumColumns(5);
-        } else {
-            // In portrait
-            filesView.setNumColumns(3);
-        }
-        adapter = new OnlineRecentFilesViewAdapter(context);
-        filesView.setAdapter(adapter);
+
         AuthManager.getInstance().performActionWithFreshTokens(this, new AuthState.AuthStateAction() {
             @Override
             public void execute(@Nullable String accessToken, @Nullable String idToken, @Nullable AuthorizationException ex) {
@@ -63,9 +58,10 @@ public class OnlineRecentFilesViewActivity extends SecureActivity {
                         public void RequestResultRetrieved(ArrayList<FileModel> result, Exception exception) {
                             if(result != null) {
                                 files = result;
-                                for (FileModel file : result) {
-                                    adapter.add(file);
-                                }
+                                rvAdapter = new RecentFilesRecyclerViewAdapter(context,result);
+                                recyclerView.setAdapter(rvAdapter);
+                                int columns = getResources().getInteger(R.integer.column_count_filelist);
+                                recyclerView.setLayoutManager(new GridLayoutManager(context,columns));
                             }
                         }
 
@@ -75,16 +71,21 @@ public class OnlineRecentFilesViewActivity extends SecureActivity {
             }
         });
         setTitle("Recents");
-        filesView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        recyclerView.addOnItemTouchListener(new RecyclerItemClickListener(context, recyclerView, new RecyclerItemClickListener.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                FileModel item = adapter.getItem(position);
+            public void onItemClick(View view, int position) {
+                FileModel selectedFile = rvAdapter.getItem(position);
                 Intent intent = new Intent(context, ImageViewActivity.class);
                 intent.putExtra("position",position);
                 intent.putExtra("fileList",gson.toJson(files));
-                intent.putExtra("folderId", id);
                 startActivity(intent);
             }
-        });
+
+            @Override
+            public void onLongItemClick(View view, int position) {
+                FileModel selectedFile = rvAdapter.getItem(position);
+
+            }
+        }));
     }
 }

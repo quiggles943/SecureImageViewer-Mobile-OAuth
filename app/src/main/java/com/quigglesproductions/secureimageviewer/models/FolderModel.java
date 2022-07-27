@@ -1,12 +1,17 @@
 package com.quigglesproductions.secureimageviewer.models;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.icu.text.CaseMap;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import androidx.annotation.Nullable;
+
 import com.google.gson.annotations.SerializedName;
+import com.quigglesproductions.secureimageviewer.database.DatabaseHelper;
+import com.quigglesproductions.secureimageviewer.managers.FolderManager;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -43,13 +48,15 @@ public class FolderModel implements Parcelable {
     private ArrayList<FileModel> itemList;
     private Date downloadTime;
 
+    private Status status;
+
     public boolean isDownloading = false;
 
     public FolderModel(){
         itemList = new ArrayList<>();
     }
 
-    public FolderModel(int id,int onlineId, String name, int fileCount,Date downloadDate)
+    public FolderModel(int id,int onlineId, String name, int fileCount,Date downloadDate,Status status)
     {
         this.ID = id;
         this.onlineId = onlineId;
@@ -57,6 +64,7 @@ public class FolderModel implements Parcelable {
         this.fileCount = fileCount;
         itemList = new ArrayList<>();
         downloadTime = downloadDate;
+        this.status = status;
     }
 
     public FolderModel(Parcel in){
@@ -68,13 +76,16 @@ public class FolderModel implements Parcelable {
         normalName = data[3];
         contentType = data[4];
         uri = data[5];
-        folderSize = Integer.valueOf(data[6]);
+        folderSize = Long.valueOf(data[6]);
         onlineFileCount = Integer.valueOf(data[7]);
         isSecure = Integer.valueOf(data[8]) == 0?false:true;
         onlineDefaultSubject = Integer.valueOf(data[9]);
         onlineThumbnailId = Integer.valueOf(data[10]);
         fileCount = Integer.valueOf(data[11]);
-        downloadTime = new Date(data[12]);
+        if(data[12] != null)
+            downloadTime = new Date(data[12]);
+        else
+            downloadTime = null;
 
         itemList = new ArrayList<>();
     }
@@ -139,7 +150,7 @@ public class FolderModel implements Parcelable {
         itemList = items;
     }
 
-    public List<FileModel> getItems() {
+    public ArrayList<FileModel> getItems() {
         return itemList;
     }
 
@@ -152,13 +163,33 @@ public class FolderModel implements Parcelable {
     }
 
     public Date getDownloadTime() {
-        return downloadTime;
+        if(downloadTime == null)
+            return new Date();
+        else
+            return downloadTime;
     }
 
     public int describeContents(){
         return 0;
     }
-
+    public String getDownloadTimeString(){
+        if(downloadTime == null)
+            return null;
+        else
+            return downloadTime.toString();
+    }
+    public Status getStatus() {
+        return this.status;
+    }
+    public void setStatus(Status status){
+        this.status = status;
+    }
+    public boolean getIsDownloading(){
+        if(status == Status.DOWNLOADING)
+            return true;
+        else
+            return false;
+    }
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeStringArray(new String[] {String.valueOf(this.ID),
@@ -173,7 +204,7 @@ public class FolderModel implements Parcelable {
                 String.valueOf(this.onlineDefaultSubject),
                 String.valueOf(this.onlineThumbnailId),
                 String.valueOf(this.fileCount),
-                this.downloadTime.toString()});
+                this.getDownloadTimeString()});
     }
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
         public FolderModel createFromParcel(Parcel in) {
@@ -184,4 +215,37 @@ public class FolderModel implements Parcelable {
             return new FolderModel[size];
         }
     };
+
+    public void setFileInfo(Context context) {
+        File folderFile = new File(context.getFilesDir() + File.separator +".Pictures"+File.separator+getId());
+        setFolderFile(folderFile);
+
+        if(new File(getFolderFile(), ".thumbnail").exists())
+        {
+            File thumbnailFile = new File(getFolderFile(), ".thumbnail");
+            setThumbnailFile(thumbnailFile);
+        }
+        else if (onlineThumbnailId >0) {
+            File thumbnailFile = FolderManager.getInstance().getThumbnailFileFromOnlineId(onlineThumbnailId);
+            setThumbnailFile(thumbnailFile);
+        }else {
+            setThumbnailFile(null);
+        }
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        FolderModel comparison = (FolderModel) obj;
+        if(this.getName() == comparison.getName() && this.getId() == comparison.getId())
+            return true;
+        else
+            return false;
+    }
+
+    public enum Status{
+        DOWNLOADED,
+        DOWNLOADING,
+        ONLINE_ONLY,
+        UNKNOWN
+    }
 }

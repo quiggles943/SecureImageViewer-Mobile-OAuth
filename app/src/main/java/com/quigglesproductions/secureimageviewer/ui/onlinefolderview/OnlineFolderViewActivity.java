@@ -2,12 +2,16 @@ package com.quigglesproductions.secureimageviewer.ui.onlinefolderview;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.content.res.Configuration;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -31,6 +35,7 @@ import java.util.ArrayList;
 public class OnlineFolderViewActivity extends SecureActivity {
     Context context;
     private GridView folderView;
+    private ProgressBar onlineProgressBar;
     private OnlineFolderViewAdapter adapter;
     int folderId;
     Gson gson;
@@ -41,21 +46,15 @@ public class OnlineFolderViewActivity extends SecureActivity {
         context = this;
         gson = new Gson();
         setContentView(R.layout.activity_online_folder_view);
+        onlineProgressBar = findViewById(R.id.online_folder_view_progressbar);
         folderView = (GridView) findViewById(R.id.folderView);
         Intent intent = getIntent();
         folderId = intent.getIntExtra("folderId",0);
         String folderName = intent.getStringExtra("folderName");
         selectedFolder = gson.fromJson(intent.getStringExtra("folder"),FolderModel.class);
-        int orientation = getResources().getConfiguration().orientation;
-        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            // In landscape
-            folderView.setNumColumns(5);
-        } else {
-            // In portrait
-            folderView.setNumColumns(3);
-        }
         adapter = new OnlineFolderViewAdapter(context,selectedFolder);
         folderView.setAdapter(adapter);
+        onlineProgressBar.setVisibility(View.VISIBLE);
         AuthManager.getInstance().performActionWithFreshTokens(this, new AuthState.AuthStateAction() {
             @Override
             public void execute(@Nullable String accessToken, @Nullable String idToken, @Nullable AuthorizationException ex) {
@@ -66,14 +65,21 @@ public class OnlineFolderViewActivity extends SecureActivity {
                     RequestManager.getInstance().getRequestService().getFolderFiles(accessToken, folderId, new RequestManager.RequestResultCallback<ArrayList<FileModel>, Exception>() {
                         @Override
                         public void RequestResultRetrieved(ArrayList<FileModel> result, Exception exception) {
+                            if(exception != null){
+                                onlineProgressBar.setIndeterminate(false);
+                                onlineProgressBar.setMax(1);
+                                onlineProgressBar.setProgress(1);
+                                onlineProgressBar.setProgressTintList(ColorStateList.valueOf(Color.RED));
+                                onlineProgressBar.setProgressTintMode(PorterDuff.Mode.MULTIPLY);
+                            }
                             if(result != null){
                                 selectedFolder.setItems(result);
                                 adapter.setFiles(result);
+                                onlineProgressBar.setVisibility(View.INVISIBLE);
                             }
+
                         }
                     });
-                    //new OnlineFolderDownloader(context,adapter,accessToken).execute(folderId);
-
                 }
             }
         });
@@ -84,7 +90,10 @@ public class OnlineFolderViewActivity extends SecureActivity {
                 FileModel item = adapter.getItem(position);
                 Intent intent = new Intent(context, ImageViewActivity.class);
                 intent.putExtra("position",position);
-                intent.putExtra("fileList",gson.toJson(selectedFolder.getItems()));
+                intent.putExtra("folder",selectedFolder);
+                //intent.putExtra("selectedFile",gson.toJson(item));
+                String fileListString = gson.toJson(selectedFolder.getItems());
+                intent.putExtra("fileList",fileListString);
                 intent.putExtra("folderId", id);
                 startActivity(intent);
             }

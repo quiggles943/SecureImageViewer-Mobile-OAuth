@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
-    public static final int DATABASE_VERSION = 19;
+    public static final int DATABASE_VERSION = 20;
     public static final String DATABASE_NAME = "imagedatabase.db";
 
     public DatabaseHelper(Context context) {
@@ -85,6 +85,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         public static final String COLUMN_THUMBNAIL_IMAGE = "FOLDER_THUMBNAIL_IMAGE";
         public static final String COLUMN_DEFAULT_SUBJECT = "FOLDER_DEFAULT_SUBJECT";
         public static final String COLUMN_UPDATE_TIME = "FOLDER_UPDATE_TIME";
+        public static final String COLUMN_STATUS = "FOLDER_STATUS";
 
         private static final String SQL_CREATE_ENTRIES =
                 "CREATE TABLE " + SysFolder.TABLE_NAME + " (" +
@@ -96,6 +97,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         SysFolder.COLUMN_CONTENT_TYPE + " TEXT," +
                         SysFolder.COLUMN_THUMBNAIL_IMAGE + " INTEGER," +
                         SysFolder.COLUMN_UPDATE_TIME+" TEXT,"+
+                        SysFolder.COLUMN_STATUS+" TEXT,"+
                         SysFolder.COLUMN_DEFAULT_SUBJECT + " INTEGER)";
 
         private static final String SQL_DELETE_ENTRIES =
@@ -188,6 +190,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         public static final String COLUMN_FILE_COUNT = "FOLDER_FILE_COUNT";
         public static final String COLUMN_THUMBNAIL_IMAGE = "FOLDER_THUMBNAIL_IMAGE";
         public static final String COLUMN_UPDATE_TIME = "FOLDER_UPDATE_TIME";
+        public static final String COLUMN_STATUS = "FOLDER_STATUS";
 
         private static final String SQL_CREATE_ENTRIES =
                 "CREATE VIEW " + ViewFolder.VIEW_NAME + " AS SELECT " +
@@ -203,6 +206,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         //SysFolder.COLUMN_THUMBNAIL_IMAGE + ", " +
                         SysFolder.COLUMN_DEFAULT_SUBJECT +", " +
                         SysFolder.COLUMN_UPDATE_TIME +", " +
+                        SysFolder.COLUMN_STATUS +", " +
                         SysFolder._ID +" , " +
                         SysFolder.COLUMN_ONLINE_ID + " FROM "+SysFolder.TABLE_NAME+" FOLDER";
 

@@ -51,7 +51,9 @@ public class RequestManager {
     public RequestService getRequestService() {
         return this.requestService;
     }
-    public UrlManager getUrlManager(){ return this.requestService.getRequestServiceConfiguration().getUrlManager(); }
+    public UrlManager getUrlManager(){
+        return this.requestService.getRequestServiceConfiguration().getUrlManager();
+    }
 
     public interface RequestResultCallback<T,V>{
         public void RequestResultRetrieved(T result,V exception);

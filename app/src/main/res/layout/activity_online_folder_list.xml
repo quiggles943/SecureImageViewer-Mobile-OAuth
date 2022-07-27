@@ -1,16 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    android:id="@+id/online_folder_list_coordinator"
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/online_folder_list_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-
-        <GridView
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/online_folder_list_swipe_container">
+        <!--<GridView
             android:id="@+id/folderListView"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:numColumns="@integer/column_count_folderlist"
+            android:choiceMode="multipleChoice"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>-->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/folderRecyclerListView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:numColumns="@integer/column_count"
-            tools:layout_editor_absoluteX="86dp"
-            tools:layout_editor_absoluteY="82dp" />
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+            android:layout_height="0dp"
+            android:numColumns="@integer/column_count_folderlist"
+            android:choiceMode="multipleChoice"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+        <!--<ProgressBar
+            android:id="@+id/online_folder_list_progressbar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:background="@color/translucent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:indeterminate="true"
+            android:visibility="visible" />-->
+</RelativeLayout>

@@ -75,15 +75,7 @@ public class FolderViewActivity extends SecureActivity  {
         itemList = databaseHandler.getFilesInFolder(selectedFolder);
         selectedFolder.setItems(itemList);
         GridView gridview = findViewById(R.id.file_gridview);
-        int orientation = getResources().getConfiguration().orientation;
-        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            // In landscape
-            gridview.setNumColumns(6);
-        } else {
-            // In portrait
-            gridview.setNumColumns(3);
-        }
-            adapter = new ImageGridAdapter(context,selectedFolder.getItems());
+        adapter = new ImageGridAdapter(context,selectedFolder.getItems());
         gridview.setAdapter(adapter);
         registerForContextMenu(gridview);
         gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {

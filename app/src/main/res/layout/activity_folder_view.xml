@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/offline_folder_layout"
+    android:numColumns="@integer/column_count_filelist"
     tools:context=".ui.offlinefolderview.FolderViewActivity">
 
     <include layout="@layout/content_folder_view" />

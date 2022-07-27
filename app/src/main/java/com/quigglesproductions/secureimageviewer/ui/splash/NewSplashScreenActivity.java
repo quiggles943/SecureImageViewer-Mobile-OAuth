@@ -12,8 +12,10 @@ import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.transition.Fade;
 import android.util.Log;
@@ -36,17 +38,24 @@ import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
 import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
 import com.quigglesproductions.secureimageviewer.apprequest.configuration.RequestConfigurationException;
 import com.quigglesproductions.secureimageviewer.apprequest.configuration.RequestServiceConfiguration;
-import com.quigglesproductions.secureimageviewer.login.LoginActivity;
 import com.quigglesproductions.secureimageviewer.managers.NotificationManager;
+import com.quigglesproductions.secureimageviewer.managers.SecurityManager;
 import com.quigglesproductions.secureimageviewer.managers.ViewerConnectivityManager;
+import com.quigglesproductions.secureimageviewer.models.LoginModel;
 import com.quigglesproductions.secureimageviewer.notifications.NotificationHelper;
 import com.quigglesproductions.secureimageviewer.ui.MainMenuActivity;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
+import com.quigglesproductions.secureimageviewer.ui.filesend.FileSendActivity;
 
 import net.openid.appauth.AuthorizationException;
 import net.openid.appauth.AuthorizationServiceConfiguration;
 
+import java.util.ArrayList;
 import java.util.concurrent.Executor;
+
+import static android.content.Intent.ACTION_MAIN;
+import static android.content.Intent.ACTION_SEND;
+import static android.content.Intent.ACTION_SEND_MULTIPLE;
 
 public class NewSplashScreenActivity extends SecureActivity {
     public static final String MAIN_CHANNEL_ID = "MainChannel";
@@ -70,12 +79,39 @@ public class NewSplashScreenActivity extends SecureActivity {
         fingerprintIcon = findViewById(R.id.splash_fingerprint_icon);
         infoTextView.setText("Starting up");
         context = this;
-        doFirstRunCheckup();
+        Intent intent = getIntent();
+        switch (intent.getAction()){
+            case ACTION_SEND:
+                fileSendSingle();
+                break;
+            case ACTION_SEND_MULTIPLE:
+                fileSendMultiple();
+                break;
+            case ACTION_MAIN:
+                normalStart();
+                break;
+        }
+    }
+    private void fileSendSingle(){
+        Uri uri = (Uri) getIntent().getParcelableExtra(Intent.EXTRA_STREAM);
+        Intent intent = new Intent(this, FileSendActivity.class);
+        intent.putExtra(Intent.EXTRA_STREAM,uri);
+        intent.setAction(ACTION_SEND);
+        SecurityManager.getInstance().setupBiometrics(this,intent);
+        //setupBiometrics(intent);
+    }
+    private void fileSendMultiple(){
+        ArrayList<Uri> uris = getIntent().getParcelableArrayListExtra(Intent.EXTRA_STREAM);
+        Intent intent = new Intent(this, FileSendActivity.class);
+        intent.setAction(ACTION_SEND_MULTIPLE);
+        intent.putExtra(Intent.EXTRA_STREAM,uris);
+        SecurityManager.getInstance().setupBiometrics(this,intent);
+        //setupBiometrics(intent);
     }
 
-    private void doFirstRunCheckup() {
+    private void normalStart() {
         NotificationHelper.getInstance(this).createNotificationChannels();
-        infoTextView.setText("Connecting to Auth Service");
+        infoTextView.setText(R.string.authservice_connecting);
         AuthManager.isOnline(context, new AuthManager.AuthAvailableCallback() {
             @Override
             public void requestComplete(boolean available, Exception ex) {
@@ -84,29 +120,27 @@ public class NewSplashScreenActivity extends SecureActivity {
 
                         @Override
                         public void onFetchConfigurationCompleted(@Nullable AuthorizationServiceConfiguration serviceConfiguration, @Nullable AuthorizationException ex) {
-                            //AuthManager.getInstance().ConfigureAuthManager(serviceConfiguration);
-                            infoTextView.setText("Connecting to Request Service");
+                            infoTextView.setText(R.string.requestservice_connecting);
                             RequestManager.getInstance().checkForConfiguration(configUrl, new RequestServiceConfiguration.RetrieveConfigurationCallback() {
                                 @Override
                                 public void onFetchConfigurationCompleted(@Nullable RequestServiceConfiguration serviceConfiguration, @Nullable RequestConfigurationException ex) {
-                                    //if(ex != null)
-                                    //NotificationManager.getInstance().showToast("Unable to connect to file server", Toast.LENGTH_SHORT);
                                     RequestManager.getInstance().ConfigureRequestManager(serviceConfiguration, ex);
                                     ViewerConnectivityManager.getInstance().networkConnected();
-                                    infoTextView.setText("Connected");
+                                    infoTextView.setText(R.string.service_connected);
                                     progressBar.setIndeterminate(false);
                                     progressBar.setMax(1);
                                     progressBar.setProgress(1);
                                     fingerprintIcon.setVisibility(View.VISIBLE);
                                     setupNetworkCallback();
-                                    setupBiometrics();
+                                    Intent intent = new Intent(context,MainMenuActivity.class);
+                                    SecurityManager.getInstance().setupBiometrics((SecureActivity)context,intent);
+                                    //setupBiometrics(intent);
                                 }
                             });
                         }
                     });
                 }
                 else{
-                    //NotificationManager.getInstance().showSnackbar("Unable to connect", Snackbar.LENGTH_SHORT);
                     registerNetworkCallback();
                 }
             }
@@ -122,7 +156,9 @@ public class NewSplashScreenActivity extends SecureActivity {
         progressBar.setProgressTintList(ColorStateList.valueOf(Color.RED));
         progressBar.setProgressTintMode(PorterDuff.Mode.MULTIPLY);
         fingerprintIcon.setVisibility(View.VISIBLE);
-        setupBiometrics();
+        Intent intent = new Intent(this,MainMenuActivity.class);
+        SecurityManager.getInstance().setupBiometrics(this,intent);
+        //setupBiometrics(intent);
         //startActivity(new Intent(NewSplashScreenActivity.this, LoginActivity.class));
         //finish();
     }
@@ -146,7 +182,7 @@ public class NewSplashScreenActivity extends SecureActivity {
                                         if (ex == null) {
                                             RequestManager.getInstance().ConfigureRequestManager(serviceConfiguration, ex);
                                             ViewerConnectivityManager.getInstance().networkConnected();
-                                            NotificationManager.getInstance().showSnackbar("Connected", Snackbar.LENGTH_SHORT);
+                                            NotificationManager.getInstance().showSnackbar(getResources().getString(R.string.service_connected), Snackbar.LENGTH_SHORT);
                                         }
                                     }
                                 });
@@ -194,7 +230,7 @@ public class NewSplashScreenActivity extends SecureActivity {
         }
     }
 
-    private void setupBiometrics(){
+    /*private void setupBiometrics(Intent intent){
         Executor executor;
         BiometricPrompt biometricPrompt;
         BiometricPrompt.PromptInfo promptInfo;
@@ -230,8 +266,12 @@ public class NewSplashScreenActivity extends SecureActivity {
                     SharedPreferences.Editor editor = preferences.edit();
                     editor.putBoolean("loggedIn", true);
                     editor.commit();
+                    LoginModel loginModel = new LoginModel();
+                    loginModel.setAuthenticated(true);
+                    loginModel.setLoggedIn(true);
+                    SecurityManager.getInstance().setLogin(loginModel);
                     if (isTaskRoot()) {
-                        Intent intent = new Intent(context, MainMenuActivity.class);
+                        //Intent intent = new Intent(context, clazz);
                         startActivity(intent);
                         //attemptTokenRefresh();
                     } else
@@ -261,9 +301,9 @@ public class NewSplashScreenActivity extends SecureActivity {
             }
             else
             {
-                Intent intent = new Intent(context, MainMenuActivity.class);
+                //Intent intent = new Intent(context, MainMenuActivity.class);
                 startActivity(intent);
             }
         }
-    }
+    }*/
 }

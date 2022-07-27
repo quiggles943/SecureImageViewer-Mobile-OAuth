@@ -1,5 +1,7 @@
 package com.quigglesproductions.secureimageviewer.ui.offlinefolderlist;
 
+import android.app.SearchManager;
+import android.app.SearchableInfo;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -9,18 +11,22 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
+import android.widget.SearchView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.core.app.NavUtils;
 
+import com.android.volley.VolleyError;
 import com.google.android.material.snackbar.Snackbar;
 import com.quigglesproductions.secureimageviewer.R;
+import com.quigglesproductions.secureimageviewer.apprequest.RequestService;
 import com.quigglesproductions.secureimageviewer.database.DatabaseHelper;
 import com.quigglesproductions.secureimageviewer.managers.FolderManager;
 import com.quigglesproductions.secureimageviewer.managers.NotificationManager;
@@ -28,12 +34,14 @@ import com.quigglesproductions.secureimageviewer.models.FolderModel;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
 import com.quigglesproductions.secureimageviewer.ui.offlinefolderview.FolderViewActivity;
 import com.quigglesproductions.secureimageviewer.volley.VolleySingleton;
+import com.quigglesproductions.secureimageviewer.volley.manager.DownloadManager;
 
 import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class FolderListActivity extends SecureActivity {
     private static final int CONTEXTMENU_INFO = 0;
@@ -52,37 +60,22 @@ public class FolderListActivity extends SecureActivity {
         super.onCreate(savedInstanceState);
 
         context = this;
-        //dbHelper = new DatabaseHelper(context);
-        //ObservableArrayList<ItemFolder> folders = getFoldersDb();
         setContentView(R.layout.activity_folder_list);
         folderView = (GridView) findViewById(R.id.folderView);
-
-        int orientation = getResources().getConfiguration().orientation;
-        /*if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            // In landscape
-            folderView.setNumColumns(4);
-        } else {
-            // In portrait
-            folderView.setNumColumns(2);
-        }*/
-        VolleySingleton.getInstance(context).setDownloadFolderCompleteCallback(new VolleySingleton.FolderDownloadCompleteCallback(){
+        FolderManager.getInstance().setDownloadCompleteCallback(new FolderManager.DownloadResultCallback<RequestService.DownloadRequest<FolderModel>, ArrayList<VolleyError>>() {
             @Override
-            public void onComplete(FolderModel folder) {
-                super.onComplete(folder);
-                gridAdapter.setFolderAsDownloaded(folder);
+            public void ResultReceived(RequestService.DownloadRequest<FolderModel> result, ArrayList<VolleyError> exception) {
+                if(result.getStatus() == RequestService.DownloadRequest.RequestStatus.COMPLETE || result.getStatus() == RequestService.DownloadRequest.RequestStatus.COMPLETE_WITH_ERROR) {
+                    result.getObject().setFileInfo(context);
+                    gridAdapter.setFolderAsDownloaded(result.getObject());
+                }
             }
         });
-        if(savedInstanceState != null) {
-            ArrayList<FolderModel> items = savedInstanceState.getParcelableArrayList("myAdapter");
-            gridAdapter = new FolderGridAdapter(context,items);
-        }
-        else {
-            gridAdapter = new FolderGridAdapter(context, new ArrayList<FolderModel>());
-            folderLoader = new FolderLoader(context,gridAdapter);
-            folderLoader.execute();
-        }
+        gridAdapter = new FolderGridAdapter(context, new ArrayList<FolderModel>(),folderView);
+        folderLoader = new FolderLoader(context,gridAdapter);
+        folderLoader.execute();
         folderView.setAdapter(gridAdapter);
-        folderView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        gridAdapter.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
                 // TODO Auto-generated method stub
@@ -94,6 +87,26 @@ public class FolderListActivity extends SecureActivity {
                 startActivity(intent);
             }
         });
+        gridAdapter.setOnItemSelectionChangedlistenr(new FolderGridAdapter.OnItemSelectionChangedListener() {
+            @Override
+            public void OnChange(List<Integer> selectedItems) {
+
+            }
+        });
+        /*folderView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                // TODO Auto-generated method stub
+                FolderModel value = gridAdapter.getItem(position);
+                if(value.getIsDownloading())
+                    return;
+                Intent intent = new Intent(context, FolderViewActivity.class);
+                intent.putExtra("folderId",value.getId());
+                intent.putExtra("folderName",value.getName());
+                //intent.putExtra("folder", value);
+                startActivity(intent);
+            }
+        });*/
         registerForContextMenu(folderView);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
@@ -115,6 +128,15 @@ public class FolderListActivity extends SecureActivity {
             //inflater.inflate(R.menu.menu_offline_folder_context, menu);
         }
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_offline_folder, menu);
+        return true;
+    }
+
+
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
@@ -160,6 +182,15 @@ public class FolderListActivity extends SecureActivity {
             case android.R.id.home:
                 onBackPressed();
                 return true;
+            case R.id.offline_folder_multiselect:
+                if(gridAdapter.isMultiSelect()) {
+                    item.setTitle("Single");
+                    gridAdapter.setMultiSelect(false);
+                }else {
+                    item.setTitle("Multi");
+                    gridAdapter.setMultiSelect(true);
+                }
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -186,7 +217,8 @@ public class FolderListActivity extends SecureActivity {
                     DatabaseHelper.ViewFolder.COLUMN_REAL_NAME,
                     DatabaseHelper.ViewFolder.COLUMN_FILE_COUNT,
                     DatabaseHelper.ViewFolder.COLUMN_THUMBNAIL_IMAGE,
-                    DatabaseHelper.ViewFolder.COLUMN_UPDATE_TIME
+                    DatabaseHelper.ViewFolder.COLUMN_UPDATE_TIME,
+                    DatabaseHelper.ViewFolder.COLUMN_STATUS,
             };
 // How you want the results sorted in the resulting Cursor
             String sortOrder =
@@ -219,7 +251,11 @@ public class FolderListActivity extends SecureActivity {
                     }
                 }
                 File folderFile = new File(context.getFilesDir() + File.separator +".Pictures"+File.separator+folderId);
-                FolderModel folder = new FolderModel(folderId,onlineFolderId, folderName, fileCount,downloadDate);
+                String statusString = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.ViewFolder.COLUMN_STATUS));
+                FolderModel.Status status = FolderModel.Status.UNKNOWN;
+                if(statusString != null && statusString.length()>0)
+                    status = FolderModel.Status.valueOf(statusString);
+                FolderModel folder = new FolderModel(folderId,onlineFolderId, folderName, fileCount,downloadDate,status);
                 folder.setFolderFile(folderFile);
 
                 if(new File(folder.getFolderFile(), ".thumbnail").exists())

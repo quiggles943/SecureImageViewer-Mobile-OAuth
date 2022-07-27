@@ -70,28 +70,7 @@ public class NetworkSettingsActivity   extends SecureActivity {
             networkRefresh.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    AuthManager.getInstance().checkForConfiguration("https://quigleyid.ddns.net/v1/oauth2/metadata", new AuthorizationServiceConfiguration.RetrieveConfigurationCallback() {
-                        @Override
-                        public void onFetchConfigurationCompleted(@Nullable AuthorizationServiceConfiguration serviceConfiguration, @Nullable AuthorizationException ex) {
-                            if (ex == null) {
-                                RequestManager.getInstance().checkForConfiguration("https://quigleyserver.ddns.net:14500/api/v1/info/metadata", new RequestServiceConfiguration.RetrieveConfigurationCallback() {
-                                    @Override
-                                    public void onFetchConfigurationCompleted(@Nullable RequestServiceConfiguration serviceConfiguration, @Nullable RequestConfigurationException ex) {
-                                        //if(ex != null)
-                                        //NotificationManager.getInstance().showToast("Unable to connect to file server", Toast.LENGTH_SHORT);
-                                        if (ex == null) {
-                                            RequestManager.getInstance().ConfigureRequestManager(serviceConfiguration, ex);
-                                            ViewerConnectivityManager.getInstance().networkConnected();
-                                            NotificationManager.getInstance().showSnackbar("Web refresh successful", Snackbar.LENGTH_SHORT);
-                                        }
-                                    }
-                                });
-                            } else {
-                                Log.e("AuthConfig", ex.errorDescription, ex);
-                            }
-
-                        }
-                    });
+                    ViewerConnectivityManager.refreshNetworkConnection();
                     return true;
                 }
             });

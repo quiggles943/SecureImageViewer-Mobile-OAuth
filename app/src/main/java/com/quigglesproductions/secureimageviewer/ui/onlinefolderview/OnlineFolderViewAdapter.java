@@ -73,7 +73,7 @@ public class OnlineFolderViewAdapter  extends BaseAdapter
         {
             LayoutInflater inflater = (LayoutInflater)
                     mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            gridView = inflater.inflate(R.layout.filegrid_layout, null);
+            gridView = inflater.inflate(R.layout.filegrid_layout_constrained, null);
             ImageView imageView = (ImageView)gridView.findViewById(R.id.grid_item_image);
             gridView.setTag(imageView);
         }

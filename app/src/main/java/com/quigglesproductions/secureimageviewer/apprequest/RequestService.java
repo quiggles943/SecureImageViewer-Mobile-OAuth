@@ -1,6 +1,7 @@
 package com.quigglesproductions.secureimageviewer.apprequest;
 
 import android.content.Context;
+import android.os.Parcelable;
 
 import com.android.volley.VolleyError;
 import com.quigglesproductions.secureimageviewer.apprequest.configuration.RequestConfigurationException;
@@ -14,6 +15,7 @@ import com.quigglesproductions.secureimageviewer.apprequest.downloaders.FolderLi
 import com.quigglesproductions.secureimageviewer.apprequest.downloaders.OnlineFolderRetrievalTask;
 import com.quigglesproductions.secureimageviewer.apprequest.downloaders.RecentFileDownloader;
 import com.quigglesproductions.secureimageviewer.apprequest.downloaders.SubjectDownloadTask;
+import com.quigglesproductions.secureimageviewer.database.DatabaseHandler;
 import com.quigglesproductions.secureimageviewer.models.ArtistModel;
 import com.quigglesproductions.secureimageviewer.models.CatagoryModel;
 import com.quigglesproductions.secureimageviewer.models.FileModel;
@@ -42,6 +44,23 @@ public class RequestService {
             @Override
             public void downloadComplete(FolderModel folder, ArrayList<VolleyError> volleyErrors) {
                 resultCallback.RequestResultRetrieved(folder,volleyErrors);
+            }
+        });
+    }
+    public void getFolderForDownload(DownloadRequest request, String accessToken, RequestManager.RequestResultCallback<DownloadRequest,ArrayList<VolleyError>> resultCallback){
+        request.setStatus(DownloadRequest.RequestStatus.IN_PROGRESS);
+        FolderDownloadTask.getFolderForDownload(context, (FolderModel) request.object, accessToken, new DownloadCompleteCallback<FolderModel, ArrayList<VolleyError>>() {
+            @Override
+            public void downloadComplete(FolderModel folder, ArrayList<VolleyError> volleyErrors) {
+                folder.isDownloading = false;
+                folder.setStatus(FolderModel.Status.DOWNLOADED);
+                DatabaseHandler.getInstance().insertOrUpdateFolder(folder);
+                request.updateObject(folder);
+                if(volleyErrors != null && volleyErrors.size()>0){
+                    for(VolleyError error:volleyErrors)
+                        request.addException(error);
+                }
+                resultCallback.RequestResultRetrieved(request,volleyErrors);
             }
         });
     }
@@ -109,5 +128,49 @@ public class RequestService {
             }
         });
         downloadTask.execute();
+    }
+
+    public static class DownloadRequest<T>{
+        private RequestStatus status;
+        private T object;
+        private boolean inProgress;
+        private ArrayList<Exception> exceptions = new ArrayList<>();
+        public DownloadRequest(T object){
+            this.object = object;
+            status = RequestStatus.READY;
+        }
+
+        public void addException(Exception ex){
+            exceptions.add(ex);
+        }
+        public T getObject() {
+            return object;
+        }
+
+        public RequestStatus getStatus() {
+            return status;
+        }
+
+        public DownloadRequest setStatus(RequestStatus status) {
+            this.status = status;
+            return this;
+        }
+
+        public DownloadRequest updateObject(T object) {
+            this.object = object;
+            return this;
+        }
+
+        public ArrayList<Exception> getExceptions(){
+            return exceptions;
+        }
+
+        public enum RequestStatus{
+            READY,
+            IN_PROGRESS,
+            COMPLETE,
+            COMPLETE_WITH_ERROR,
+            FAILED
+        }
     }
 }
