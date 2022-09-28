@@ -4,26 +4,21 @@ import android.content.Context;
 import android.os.AsyncTask;
 
 import androidx.annotation.Nullable;
-import androidx.core.app.NotificationCompat;
 
 import com.android.volley.Request;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.RequestFuture;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.quigglesproductions.secureimageviewer.api.ApiRequestType;
-import com.quigglesproductions.secureimageviewer.api.url.UrlBuilder;
 import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
 import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
 import com.quigglesproductions.secureimageviewer.database.DatabaseHandler;
 import com.quigglesproductions.secureimageviewer.database.DatabaseHelper;
 import com.quigglesproductions.secureimageviewer.models.CatagoryModel;
-import com.quigglesproductions.secureimageviewer.models.FileModel;
-import com.quigglesproductions.secureimageviewer.models.FolderModel;
+import com.quigglesproductions.secureimageviewer.models.file.FileModel;
+import com.quigglesproductions.secureimageviewer.models.folder.FolderModel;
 import com.quigglesproductions.secureimageviewer.models.SubjectModel;
-import com.quigglesproductions.secureimageviewer.notifications.NotificationChannels;
-import com.quigglesproductions.secureimageviewer.notifications.NotificationHelper;
-import com.quigglesproductions.secureimageviewer.notifications.NotificationIds;
+import com.quigglesproductions.secureimageviewer.models.folder.OfflineFolderModel;
 import com.quigglesproductions.secureimageviewer.volley.manager.DownloadManager;
 import com.quigglesproductions.secureimageviewer.volley.manager.downloadtypes.FolderDownload;
 import com.quigglesproductions.secureimageviewer.volley.requests.FileDownloadRequest;
@@ -44,9 +39,9 @@ import javax.net.ssl.HttpsURLConnection;
 public  class FolderDownloadTask {
     public static void getFolderForDownload(Context context, FolderModel folderModel, String accessToken, DownloadCompleteCallback<FolderModel, ArrayList<VolleyError>> callback){
         //NotificationCompat.Builder notification = NotificationHelper.getInstance().createNotification(NotificationChannels.DOWNLOAD);
-        FolderInfoDownloader infoDownloader = new FolderInfoDownloader(context, accessToken, new DownloadCompleteCallback<FolderModel,Exception>() {
+        FolderInfoDownloader infoDownloader = new FolderInfoDownloader(context, accessToken, new DownloadCompleteCallback<OfflineFolderModel,Exception>() {
             @Override
-            public void downloadComplete(FolderModel folder, Exception error) {
+            public void downloadComplete(OfflineFolderModel folder, Exception error) {
                 FolderModel dbFolder = DatabaseHandler.getInstance().getFolderByOnlineId(folder.getOnlineId());
                 folder.setStatus(FolderModel.Status.DOWNLOADING);
                 if( dbFolder == null) {
@@ -178,14 +173,15 @@ public  class FolderDownloadTask {
         }
         private FileDownloadRequest createFileDownloadRequest(FileModel downloadFile,String accessToken){
             RequestManager.getInstance().getUrlManager();
-            UrlBuilder urlBuilder = new UrlBuilder(context);
+            String fileUrl = RequestManager.getInstance().getUrlManager().getFileUrlString();
+            fileUrl = fileUrl+downloadFile.getOnlineId()+"/content";
             FileDownloadRequest.Builder builder = new FileDownloadRequest.Builder(context);
             builder.setFile(downloadFile);
             HashMap<String,String> params = new HashMap<>();
             builder.setParameters(params);
             builder.setMethod(Request.Method.GET);
-            String url = urlBuilder.getUrl(ApiRequestType.FILE_CONTENT, downloadFile.getOnlineId());
-            builder.setUrl(url);
+            //String url = urlBuilder.getUrl(ApiRequestType.FILE_CONTENT, downloadFile.getOnlineId());
+            builder.setUrl(fileUrl);
             RequestFuture<byte[]> future = RequestFuture.newFuture();
             builder.setFuture(future);
             builder.setAccessToken(accessToken);
@@ -194,19 +190,19 @@ public  class FolderDownloadTask {
         }
     }
 
-    protected static class FolderInfoDownloader extends AsyncTask<Integer, FolderModel, DownloaderResult<FolderModel>> {
+    protected static class FolderInfoDownloader extends AsyncTask<Integer, FolderModel, DownloaderResult<OfflineFolderModel>> {
         Context context;
         String accessToken;
-        DownloadCompleteCallback<FolderModel,Exception> callback;
+        DownloadCompleteCallback<OfflineFolderModel,Exception> callback;
 
-        public FolderInfoDownloader(Context context, String accessToken,DownloadCompleteCallback<FolderModel,Exception> callback) {
+        public FolderInfoDownloader(Context context, String accessToken,DownloadCompleteCallback<OfflineFolderModel,Exception> callback) {
             this.context = context;
             this.accessToken = accessToken;
             this.callback = callback;
         }
 
         @Override
-        protected DownloaderResult<FolderModel> doInBackground(Integer... ids) {
+        protected DownloaderResult<OfflineFolderModel> doInBackground(Integer... ids) {
             try {
                 String urlString = RequestManager.getInstance().getUrlManager().getFolderUrlString() + ids[0];
                 //String urlString = "https://quigleyserver.ddns.net:14500/api/v1/folder/" + ids[0];
@@ -225,20 +221,21 @@ public  class FolderDownloadTask {
                         sb.append(output);
                     String result = sb.toString();
                     Gson gson = new Gson();
-                    FolderModel folder = gson.fromJson(result, FolderModel.class);
-                    DownloaderResult<FolderModel> downloaderResult = new DownloaderResult<>(folder);
+                    OfflineFolderModel folder = gson.fromJson(result, OfflineFolderModel.class);
+                    folder.setSynced(true);
+                    DownloaderResult<OfflineFolderModel> downloaderResult = new DownloaderResult<>(folder);
                     return downloaderResult;
                 }
 
             } catch (Exception exc) {
                 String error = exc.getMessage();
-                DownloaderResult<FolderModel> downloaderResult = new DownloaderResult<>(exc);
+                DownloaderResult<OfflineFolderModel> downloaderResult = new DownloaderResult<>(exc);
                 return downloaderResult;
             }
         }
 
         @Override
-        protected void onPostExecute(DownloaderResult<FolderModel> downloaderResult) {
+        protected void onPostExecute(DownloaderResult<OfflineFolderModel> downloaderResult) {
             super.onPostExecute(downloaderResult);
             callback.downloadComplete(downloaderResult.getResult(),downloaderResult.getException());
         }

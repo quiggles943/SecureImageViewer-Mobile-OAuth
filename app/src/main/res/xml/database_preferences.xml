@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="Database Settings">
+        <Preference
+            app:title="@string/update_artist_title"
+            app:key="updateArtistButton"
+            app:summary="@string/update_artist_summary"/>
+        <Preference
+            app:title="@string/update_catagory_title"
+            app:key="updateCatagoryButton"
+            app:summary="@string/update_catagory_summary"/>
+        <Preference
+            app:title="@string/update_subject_title"
+            app:key="updateSubjectButton"
+            app:summary="@string/update_subject_summary"/>
+    </PreferenceCategory>
+</PreferenceScreen>

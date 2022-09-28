@@ -1,13 +1,7 @@
 package com.quigglesproductions.secureimageviewer.ui.offlinefolderlist;
 
 import android.content.Context;
-import android.content.res.ColorStateList;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.graphics.PorterDuff;
-import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
 import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,12 +11,10 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
-import androidx.core.view.ViewCompat;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
@@ -30,20 +22,18 @@ import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.signature.ObjectKey;
-import com.google.android.material.shape.MaterialShapeDrawable;
 import com.quigglesproductions.secureimageviewer.R;
-import com.quigglesproductions.secureimageviewer.models.FolderModel;
+import com.quigglesproductions.secureimageviewer.models.folder.FolderModel;
+import com.quigglesproductions.secureimageviewer.models.folder.OfflineFolderModel;
 import com.quigglesproductions.secureimageviewer.volley.VolleySingleton;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 
 public class FolderGridAdapter extends BaseAdapter
 {
     private Context mContext;
-    private ArrayList<FolderModel> folders;
+    private ArrayList<OfflineFolderModel> folders;
     private GridView gridView;
     private Glide glide;
     private AdapterView.OnItemClickListener onItemClickListener;
@@ -51,11 +41,13 @@ public class FolderGridAdapter extends BaseAdapter
     private ArrayList<Integer> selectedFolders = new ArrayList<>();
     private boolean multiSelect;
 
+    private boolean syncView;
+
     public void removeItem(FolderModel folder) {
         folders.remove(folder);
     }
 
-    public void setFolderAsDownloaded(FolderModel folder) {
+    public void setFolderAsDownloaded(OfflineFolderModel folder) {
         FolderModel searchedFolder = folders.stream().filter(x -> x.getId() == folder.getId()).findFirst().orElse(null);
         if(searchedFolder != null){
             int position = folders.indexOf(searchedFolder);
@@ -92,11 +84,43 @@ public class FolderGridAdapter extends BaseAdapter
         return multiSelect;
     }
 
+    public boolean isSyncView() {
+        return syncView;
+    }
+
+    public void setSyncView(boolean enabled){
+        syncView = enabled;
+        setMultiSelect(enabled);
+        notifyDataSetChanged();
+    }
+
+    public boolean isItemInSelection(int position) {
+        if(selectedFolders.contains(position)) {
+            return true;
+        }
+        else
+            return false;
+    }
+
+    public List<Integer> getSelectedFolders() {
+        return selectedFolders;
+    }
+
+    public void removeFromSelected(int index) {
+        selectedFolders.remove(index);
+        notifyDataSetChanged();
+    }
+
+    public void addToSelected(int index) {
+        selectedFolders.add(index);
+        notifyDataSetChanged();
+    }
+
     static class ViewHolder{
         public TextView text;
-        public ImageView image;
+        public ImageView image,syncIcon;
     }
-    public FolderGridAdapter(Context c, ArrayList<FolderModel> folders, GridView gridView)
+    public FolderGridAdapter(Context c, ArrayList<OfflineFolderModel> folders, GridView gridView)
     {
         mContext = c;
         this.gridView = gridView;
@@ -109,7 +133,7 @@ public class FolderGridAdapter extends BaseAdapter
         return folders.size();
     }
     @Override
-    public FolderModel getItem(int position)
+    public OfflineFolderModel getItem(int position)
     {
         return folders.get(position);
     }
@@ -126,14 +150,14 @@ public class FolderGridAdapter extends BaseAdapter
     public View getView(int position, View convertView, ViewGroup
             parent)
     {
-        FolderModel folder = folders.get(position);
+        OfflineFolderModel folder = folders.get(position);
 
         View itemView = convertView;
         if (itemView == null) {
             LayoutInflater inflater = (LayoutInflater)
                     mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             itemView = inflater.inflate(R.layout.foldergrid_layout_constrained, null);
-            itemView.setOnClickListener(new View.OnClickListener() {
+            /*itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if(v.isEnabled()) {
@@ -145,19 +169,24 @@ public class FolderGridAdapter extends BaseAdapter
                             }
                             else
                                 selectedFolders.add(pos);
-                            onItemSelectionChangedListener.OnChange(selectedFolders);
+                            if(onItemSelectionChangedListener != null) {
+                                onItemSelectionChangedListener.OnChange(selectedFolders);
+                            }
                             getView(pos,v,gridView);
                         }
                         else {
-                            onItemClickListener.onItemClick(gridView, v, pos, 0);
+                            if(onItemClickListener != null) {
+                                onItemClickListener.onItemClick(gridView, v, pos, 0);
+                            }
                         }
                     }
                 }
-            });
+            });*/
         }
             ViewHolder viewHolder = new ViewHolder();
             viewHolder.text = itemView.findViewById(R.id.grid_item_label);
             viewHolder.image = itemView.findViewById(R.id.grid_item_image);
+            viewHolder.syncIcon = itemView.findViewById(R.id.sync_icon);
             itemView.setTag(viewHolder);
             if(folder.getIsDownloading()){
                 itemView.setEnabled(false);
@@ -167,6 +196,15 @@ public class FolderGridAdapter extends BaseAdapter
                 itemView.setEnabled(true);
                 itemView.setAlpha(1f);
             }
+            if(syncView) {
+                viewHolder.syncIcon.setVisibility(View.VISIBLE);
+                if (folder.isSynced())
+                    viewHolder.syncIcon.setImageResource(R.drawable.ic_baseline_check);
+                else
+                viewHolder.syncIcon.setImageResource(R.drawable.ic_baseline_sync);
+            }
+            else
+                viewHolder.syncIcon.setVisibility(View.INVISIBLE);
             if(selectedFolders.contains(position)) {
                 viewHolder.image.setColorFilter(ContextCompat.getColor(mContext, R.color.selected), PorterDuff.Mode.SRC_ATOP);
             }
@@ -208,7 +246,7 @@ public class FolderGridAdapter extends BaseAdapter
         FolderModel folder = folders.get(position);
         return isItemSelected(folder);
     }*/
-    public void addItem(FolderModel folder) {
+    public void addItem(OfflineFolderModel folder) {
         folder.isDownloading = !VolleySingleton.getInstance(mContext).getIsFolderDownloadComplete(folder);
         folders.add(folder);
     }

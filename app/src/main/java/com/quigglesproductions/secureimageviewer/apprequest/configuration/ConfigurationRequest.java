@@ -4,7 +4,6 @@ import android.content.Context;
 import android.os.AsyncTask;
 
 import com.google.gson.Gson;
-import com.quigglesproductions.secureimageviewer.models.FolderModel;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -51,7 +50,7 @@ public class ConfigurationRequest extends AsyncTask<String,Void,ConfigurationRes
             String error = exc.getMessage();
             RequestConfigurationException exception = new RequestConfigurationException(exc);
             ConfigurationResponse response = new ConfigurationResponse(exception);
-            callback.onFetchConfigurationCompleted(null,exception);
+            //callback.onFetchConfigurationCompleted(null,exception);
             return response;
         }
     }
@@ -59,6 +58,10 @@ public class ConfigurationRequest extends AsyncTask<String,Void,ConfigurationRes
     @Override
     protected void onPostExecute(ConfigurationResponse configurationResponse) {
         super.onPostExecute(configurationResponse);
-        callback.onFetchConfigurationCompleted(new RequestServiceConfiguration(context,configurationResponse.getEndpoints()),configurationResponse.getException());
+        if(configurationResponse.getException() == null && configurationResponse.getEndpoints() != null) {
+            callback.onFetchConfigurationCompleted(new RequestServiceConfiguration(context, configurationResponse.getEndpoints()), configurationResponse.getException());
+        }
+        else
+            callback.onFetchConfigurationCompleted(null, configurationResponse.getException());
     }
 }

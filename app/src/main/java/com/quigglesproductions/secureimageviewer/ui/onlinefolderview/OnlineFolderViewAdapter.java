@@ -22,8 +22,9 @@ import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
 import com.quigglesproductions.secureimageviewer.R;
 import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
-import com.quigglesproductions.secureimageviewer.models.FileModel;
-import com.quigglesproductions.secureimageviewer.models.FolderModel;
+import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
+import com.quigglesproductions.secureimageviewer.models.file.FileModel;
+import com.quigglesproductions.secureimageviewer.models.folder.FolderModel;
 
 import net.openid.appauth.AuthState;
 import net.openid.appauth.AuthorizationException;
@@ -83,7 +84,8 @@ public class OnlineFolderViewAdapter  extends BaseAdapter
             @Override
             public void execute(@Nullable String accessToken, @Nullable String idToken, @Nullable AuthorizationException ex) {
                 RequestOptions requestOptions = new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL);
-                GlideUrl glideUrl = new GlideUrl("https://quigleyserver.ddns.net:14500/api/v1/file/" + item.getOnlineId() + "/thumbnail",new LazyHeaders.Builder()
+                String baseUrl = RequestManager.getInstance().getUrlManager().getFileUrlString();
+                GlideUrl glideUrl = new GlideUrl(baseUrl + item.getOnlineId() + "/thumbnail",new LazyHeaders.Builder()
                         .addHeader("Authorization","Bearer "+ accessToken).build());
                 /*Glide.with(mContext).asBitmap().load(glideUrl).into(new CustomTarget<Bitmap>() {
                     @Override

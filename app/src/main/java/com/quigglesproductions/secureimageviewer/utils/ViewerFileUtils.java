@@ -3,14 +3,11 @@ package com.quigglesproductions.secureimageviewer.utils;
 import android.content.Context;
 import android.util.Log;
 
-import com.quigglesproductions.secureimageviewer.managers.FolderManager;
-import com.quigglesproductions.secureimageviewer.models.FileModel;
-import com.quigglesproductions.secureimageviewer.models.FolderModel;
+import com.quigglesproductions.secureimageviewer.models.file.FileModel;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;

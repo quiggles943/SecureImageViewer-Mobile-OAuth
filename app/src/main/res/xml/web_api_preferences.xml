@@ -16,12 +16,13 @@
     <SwitchPreferenceCompat
         app:key="https_toggle"
         app:title="@string/https_toggle_title" />
-    <ListPreference
-        app:defaultValue="api_version"
-        app:entries="@array/api_version_entries"
-        app:entryValues="@array/api_version_values"
-        app:key="api_version"
-        app:title="@string/api_version_title"
-        app:useSimpleSummaryProvider="true" />
+    <Preference app:key="endpoint_update"
+        app:title="Update Endpoints"/>
+
 </PreferenceCategory>
+    <PreferenceCategory>
+        <Preference
+            android:title="View endpoints"
+            app:key="endpoints"/>
+    </PreferenceCategory>
 </PreferenceScreen>

@@ -3,23 +3,10 @@
     <PreferenceCategory app:title="Network">
         <Preference app:title="Network Settings" app:key="network_settings"/>
     </PreferenceCategory>
-
-    <PreferenceCategory android:title="Database Settings">
-        <Preference
-            app:title="@string/update_artist_title"
-            app:key="updateArtistButton"
-            app:summary="@string/update_artist_summary"/>
-        <Preference
-            app:title="@string/update_catagory_title"
-            app:key="updateCatagoryButton"
-            app:summary="@string/update_catagory_summary"/>
-        <Preference
-            app:title="@string/update_subject_title"
-            app:key="updateSubjectButton"
-            app:summary="@string/update_subject_summary"/>
-    </PreferenceCategory>
-    <PreferenceCategory android:title="@string/storage_header">
+    <PreferenceCategory app:title="Device Settings">
+        <Preference app:title="Database" app:key="database_settings"/>
         <Preference android:title="@string/storage_settings_button" app:key="storage_settings"/>
+        <Preference android:title="Security" app:key="security_settings"/>
     </PreferenceCategory>
 
 </PreferenceScreen>

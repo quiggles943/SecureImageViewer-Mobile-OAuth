@@ -1,14 +1,9 @@
 package com.quigglesproductions.secureimageviewer.registration;
 
-import android.bluetooth.BluetoothClass;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.os.AsyncTask;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import com.quigglesproductions.secureimageviewer.models.FolderModel;
-import com.quigglesproductions.secureimageviewer.ui.onlinefolderlist.OnlineFolderListAdapter;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -16,9 +11,7 @@ import java.io.BufferedWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.lang.reflect.Type;
 import java.net.URL;
-import java.util.ArrayList;
 
 import javax.net.ssl.HttpsURLConnection;
 

@@ -11,7 +11,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.DialogFragment;
 
 import com.quigglesproductions.secureimageviewer.R;
-import com.quigglesproductions.secureimageviewer.models.FileModel;
+import com.quigglesproductions.secureimageviewer.models.file.FileModel;
 
 
 public class ItemInfoDialog extends DialogFragment {

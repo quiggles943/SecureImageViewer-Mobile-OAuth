@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
-    public static final int DATABASE_VERSION = 20;
+    public static final int DATABASE_VERSION = 21;
     public static final String DATABASE_NAME = "imagedatabase.db";
 
     public DatabaseHelper(Context context) {
@@ -191,6 +191,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         public static final String COLUMN_THUMBNAIL_IMAGE = "FOLDER_THUMBNAIL_IMAGE";
         public static final String COLUMN_UPDATE_TIME = "FOLDER_UPDATE_TIME";
         public static final String COLUMN_STATUS = "FOLDER_STATUS";
+        public static final String COLUMN_IS_SYNCED = "FOLDER_IS_SYNCED";
 
         private static final String SQL_CREATE_ENTRIES =
                 "CREATE VIEW " + ViewFolder.VIEW_NAME + " AS SELECT " +
@@ -206,6 +207,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         //SysFolder.COLUMN_THUMBNAIL_IMAGE + ", " +
                         SysFolder.COLUMN_DEFAULT_SUBJECT +", " +
                         SysFolder.COLUMN_UPDATE_TIME +", " +
+                        "(SELECT COUNT(*) FROM "+SysFile.TABLE_NAME+" WHERE "+SysFile.COLUMN_FOLDER_ID+" = FOLDER."+SysFolder._ID+") AS "+ViewFolder.COLUMN_FILE_COUNT+","+
+                        "CASE\n" +
+                        "\t WHEN (SELECT COUNT(*) FROM "+ SysFile.TABLE_NAME +" WHERE "+SysFile.COLUMN_IS_UPLOADED+" = 0 AND "+SysFile.COLUMN_FOLDER_ID+" = FOLDER."+SysFolder._ID+") > 0 THEN \n" +
+                        "\t 0"+
+                        "\t ELSE \n" +
+                        "\t 1 \n" +
+                        "\t END AS "+ViewFolder.COLUMN_IS_SYNCED+","+
                         SysFolder.COLUMN_STATUS +", " +
                         SysFolder._ID +" , " +
                         SysFolder.COLUMN_ONLINE_ID + " FROM "+SysFolder.TABLE_NAME+" FOLDER";

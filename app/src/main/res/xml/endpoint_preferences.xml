@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceCategory>
+    <Preference
+        android:defaultValue="Default value"
+        android:key="base_endpoint"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="Base Url"
+        android:enabled="true" />
+    <Preference
+        android:defaultValue="Default value"
+        android:key="metadata_endpoint"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="Metadata Endpoint"
+        android:enabled="true" />
+</PreferenceCategory>
+    <PreferenceCategory>
+    <Preference
+        android:defaultValue="Default value"
+        android:key="folder_endpoint"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="Folder Endpoint"
+        android:enabled="true"/>
+    <Preference
+        android:defaultValue="Default value"
+        android:key="file_endpoint"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="File Endpoint"
+        android:enabled="true"/>
+    <Preference
+        android:defaultValue="Default value"
+        android:key="recents_endpoint"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="Recent File Endpoint"
+        android:enabled="true" />
+    <Preference
+        android:defaultValue="Default value"
+        android:key="catagory_endpoint"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="Catagory Endpoint"
+        android:enabled="true" />
+    <Preference
+        android:defaultValue="Default value"
+        android:key="subject_endpoint"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="Subject Endpoint"
+        android:enabled="true" />
+    <Preference
+        android:defaultValue="Default value"
+        android:key="artist_endpoint"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="Artist Endpoint"
+        android:enabled="true" />
+    </PreferenceCategory>
+</PreferenceScreen>

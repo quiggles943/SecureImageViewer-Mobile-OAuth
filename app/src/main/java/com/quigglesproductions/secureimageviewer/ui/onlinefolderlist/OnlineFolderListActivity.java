@@ -9,7 +9,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.app.SearchManager;
-import android.app.SearchableInfo;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
@@ -21,8 +20,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ProgressBar;
-import android.widget.SearchView;
 
 import com.android.volley.VolleyError;
 import com.google.android.material.snackbar.Snackbar;
@@ -32,8 +29,8 @@ import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
 import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
 import com.quigglesproductions.secureimageviewer.managers.FolderManager;
 import com.quigglesproductions.secureimageviewer.managers.NotificationManager;
-import com.quigglesproductions.secureimageviewer.models.FolderModel;
-import com.quigglesproductions.secureimageviewer.recycler.RecyclerItemClickListener;
+import com.quigglesproductions.secureimageviewer.models.folder.FolderModel;
+import com.quigglesproductions.secureimageviewer.models.folder.OfflineFolderModel;
 import com.quigglesproductions.secureimageviewer.recycler.RecyclerViewSelectionMode;
 import com.quigglesproductions.secureimageviewer.recycler.SpacesItemDecoration;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
@@ -126,7 +123,47 @@ public class OnlineFolderListActivity extends SecureActivity {
                 setTitle(rvAdapter.getSelectedCount()+" Selected");
             }
         });
-        recyclerView.addOnItemTouchListener(new RecyclerItemClickListener(context, recyclerView, new RecyclerItemClickListener.OnItemClickListener() {
+        rvAdapter.setOnClickListener(new FolderListRecyclerAdapter.FolderListRecyclerViewOnClickListener() {
+            @Override
+            public void onClick(int position) {
+                if(rvAdapter.getMultiSelect()){
+                    if(rvAdapter.getIsSelected(position))
+                        rvAdapter.removeFromSelected(position);
+                    else
+                        rvAdapter.addToSelected(position);
+                    if(rvAdapter.getSelectedCount() == 0)
+                        rvAdapter.setMultiSelect(false);
+                }
+                else {
+                    FolderModel value = rvAdapter.getItem(position);
+                    Intent intent = new Intent(context, OnlineFolderViewActivity.class);
+                    intent.putExtra("folderId", value.getOnlineId());
+                    intent.putExtra("folderName", value.getName());
+                    intent.putExtra("folder", gson.toJson(value));
+                    startActivity(intent);
+                }
+            }
+
+            @Override
+            public void onLongClick(int position) {
+                FolderModel value = rvAdapter.getItem(position);
+                if(rvAdapter.getSelectedCount() == 0){
+                    vibrator.vibrate(10);
+                    rvAdapter.setMultiSelect(true);
+                    rvAdapter.addToSelected(position);
+
+                }
+                else {
+                    if(rvAdapter.getIsSelected(position)){
+                        rvAdapter.removeFromSelected(position);
+                    }
+                    else{
+                        rvAdapter.addToSelected(position);
+                    }
+                }
+            }
+        });
+        /*recyclerView.addOnItemTouchListener(new RecyclerItemClickListener(context, recyclerView, new RecyclerItemClickListener.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
                 if(rvAdapter.getMultiSelect()){
@@ -167,7 +204,7 @@ public class OnlineFolderListActivity extends SecureActivity {
 
 
             }
-        }));
+        }));*/
         swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -221,7 +258,19 @@ public class OnlineFolderListActivity extends SecureActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_item_download_selection, menu);
+        MenuItem searchItem = menu.findItem(R.id.menu_download_selection_search);
 
+        SearchManager searchManager = (SearchManager) context.getSystemService(Context.SEARCH_SERVICE);
+
+        androidx.appcompat.widget.SearchView searchView = null;
+        if (searchItem != null) {
+            searchView = (androidx.appcompat.widget.SearchView) searchItem.getActionView();
+        }
+        if (searchView != null) {
+            searchView.setSearchableInfo(searchManager.getSearchableInfo(this.getComponentName()));
+            searchView.setQueryRefinementEnabled(true);
+            searchView.setSubmitButtonEnabled(true);
+        }
         myMenu = menu;
         return true;
     }
@@ -240,22 +289,24 @@ public class OnlineFolderListActivity extends SecureActivity {
                     AuthManager.getInstance().performActionWithFreshTokens(context, new AuthState.AuthStateAction() {
                         @Override
                         public void execute(@Nullable String accessToken, @Nullable String idToken, @Nullable AuthorizationException ex) {
-                            FolderManager.getInstance().downloadFolder(folder, accessToken, new FolderManager.DownloadResultCallback<FolderModel, ArrayList<VolleyError>>() {
+                            FolderManager.getInstance().downloadFolder(folder, accessToken, new FolderManager.DownloadResultCallback<OfflineFolderModel, ArrayList<VolleyError>>() {
                                 @Override
-                                public void ResultReceived(FolderModel result, ArrayList<VolleyError> exception) {
+                                public void ResultReceived(OfflineFolderModel result, ArrayList<VolleyError> exception) {
                                     NotificationManager.getInstance().showSnackbar(folder.getName() + " downloaded successfully", Snackbar.LENGTH_SHORT);
                                 }
                             });
                         }
                     });
-                    rvAdapter.setMultiSelect(false);
                 }
+                rvAdapter.setMultiSelect(false);
                 return true;
             case R.id.menu_download_selection_recent_files:
                 NotificationManager.getInstance().showSnackbar("Recent files selected",Snackbar.LENGTH_SHORT);
                 Intent intent = new Intent(this,OnlineRecentFilesViewActivity.class);
                 startActivity(intent);
                 return true;
+            case R.id.menu_download_selection_search:
+
             default:
                 return super.onOptionsItemSelected(item);
         }

@@ -6,7 +6,7 @@ import android.os.AsyncTask;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
-import com.quigglesproductions.secureimageviewer.models.FileModel;
+import com.quigglesproductions.secureimageviewer.models.file.FileModel;
 
 import java.io.BufferedReader;
 import java.io.InputStream;

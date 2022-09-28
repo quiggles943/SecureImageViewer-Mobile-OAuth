@@ -34,6 +34,6 @@ public class LoginActivity extends SecureActivity {
         infoTextView.setText("Re-authenticate to continue");
         Intent passthroughIntent = getIntent().getParcelableExtra(EXTRA_PASSTHROUGH_INTENT);
         //SecurityManager.getInstance().setupBiometrics(this,passthroughIntent);
-        SecurityManager.getInstance().setupBiometricsForResult(this,passthroughIntent);
+        SecurityManager.getInstance().setupBiometrics(this,passthroughIntent);
     }
 }

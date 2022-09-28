@@ -2,6 +2,7 @@ package com.quigglesproductions.secureimageviewer;
 
 import android.app.Application;
 import android.content.Context;
+import android.view.WindowManager;
 
 import androidx.annotation.Nullable;
 import androidx.lifecycle.Lifecycle;

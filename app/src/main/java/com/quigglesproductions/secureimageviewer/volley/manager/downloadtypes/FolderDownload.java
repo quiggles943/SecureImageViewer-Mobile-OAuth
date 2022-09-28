@@ -1,18 +1,15 @@
 package com.quigglesproductions.secureimageviewer.volley.manager.downloadtypes;
 
 import android.content.Context;
-import android.os.AsyncTask;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.quigglesproductions.secureimageviewer.models.FolderModel;
+import com.quigglesproductions.secureimageviewer.models.folder.FolderModel;
 import com.quigglesproductions.secureimageviewer.volley.VolleySingleton;
-import com.quigglesproductions.secureimageviewer.volley.manager.downloadtypes.BaseDownload;
 import com.quigglesproductions.secureimageviewer.volley.requests.FileDownloadRequest;
 
 import java.util.ArrayList;
-import java.util.concurrent.Executor;
 
 public class FolderDownload extends BaseDownload<FileDownloadRequest> {
     private FolderModel folder;
@@ -57,7 +54,7 @@ public class FolderDownload extends BaseDownload<FileDownloadRequest> {
                 public void onErrorResponse(VolleyError error) {
                     requestCompleteWithError(error);
                     if(errorListener != null)
-                    errorListener.onErrorResponse(error);
+                        errorListener.onErrorResponse(error);
                 }
             });
             //request.getFuture().setRequest(request);

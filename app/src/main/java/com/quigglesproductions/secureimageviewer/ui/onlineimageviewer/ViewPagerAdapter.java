@@ -22,7 +22,8 @@ import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
 import com.quigglesproductions.secureimageviewer.R;
 import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
-import com.quigglesproductions.secureimageviewer.models.FileModel;
+import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
+import com.quigglesproductions.secureimageviewer.models.file.FileModel;
 
 import net.openid.appauth.AuthState;
 import net.openid.appauth.AuthorizationException;
@@ -100,9 +101,10 @@ public class ViewPagerAdapter extends PagerAdapter {
                         public void execute(@Nullable String accessToken, @Nullable String idToken, @Nullable AuthorizationException ex) {
                             try {
                                 RequestOptions requestOptions = new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL);
-                                GlideUrl glideThumbnailUrl = new GlideUrl("https://quigleyserver.ddns.net:14500/api/v1/file/" + item.getOnlineId() + "/thumbnail", new LazyHeaders.Builder()
+                                String fileUrl = RequestManager.getInstance().getUrlManager().getFileUrlString();
+                                GlideUrl glideThumbnailUrl = new GlideUrl(fileUrl + item.getOnlineId() + "/thumbnail", new LazyHeaders.Builder()
                                         .addHeader("Authorization", "Bearer " + accessToken).build());
-                                GlideUrl glideUrl = new GlideUrl("https://quigleyserver.ddns.net:14500/api/v1/file/" + item.getOnlineId() + "/content", new LazyHeaders.Builder()
+                                GlideUrl glideUrl = new GlideUrl(fileUrl + item.getOnlineId() + "/content", new LazyHeaders.Builder()
                                         .addHeader("Authorization", "Bearer " + accessToken).build());
                                 Glide.with(context).addDefaultRequestListener(new RequestListener<Object>() {
                                     @Override

@@ -7,9 +7,10 @@ import androidx.annotation.Nullable;
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.RequestFuture;
-import com.quigglesproductions.secureimageviewer.models.FileModel;
+import com.quigglesproductions.secureimageviewer.models.file.FileModel;
 import com.quigglesproductions.secureimageviewer.utils.ViewerFileUtils;
 
 import java.util.HashMap;
@@ -71,10 +72,15 @@ public class FileDownloadRequest extends ViewerRequest<byte[]> {
 
         //Initialise local responseHeaders map with response headers received
         responseHeaders = response.headers;
-        ViewerFileUtils.createFileOnDisk(context,downloadFile,response.data);
-        //createFileOnDisk(response.data);
-        //Pass the response data here
-        return Response.success(response.data, HttpHeaderParser.parseCacheHeaders(response));
+        try {
+            ViewerFileUtils.createFileOnDisk(context, downloadFile, response.data);
+            return Response.success(response.data, HttpHeaderParser.parseCacheHeaders(response));
+        }
+        catch(Exception ex){
+            VolleyError error = new VolleyError();
+            error.initCause(ex);
+            return Response.error(error);
+        }
     }
 
     /*private void createFileOnDisk(byte[] data){

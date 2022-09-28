@@ -1,28 +1,30 @@
 package com.quigglesproductions.secureimageviewer.apprequest;
 
 import android.content.Context;
-import android.os.Parcelable;
 
 import com.android.volley.VolleyError;
+import com.google.android.material.snackbar.Snackbar;
 import com.quigglesproductions.secureimageviewer.apprequest.configuration.RequestConfigurationException;
 import com.quigglesproductions.secureimageviewer.apprequest.configuration.RequestServiceConfiguration;
 import com.quigglesproductions.secureimageviewer.apprequest.downloaders.ArtistDownloadTask;
 import com.quigglesproductions.secureimageviewer.apprequest.downloaders.CatagoryDownloadTask;
 import com.quigglesproductions.secureimageviewer.apprequest.downloaders.DownloadCompleteCallback;
-import com.quigglesproductions.secureimageviewer.apprequest.downloaders.FileUploadTask;
+import com.quigglesproductions.secureimageviewer.apprequest.downloaders.FileContentUploadTask;
+import com.quigglesproductions.secureimageviewer.apprequest.downloaders.FileModelUploadTask;
 import com.quigglesproductions.secureimageviewer.apprequest.downloaders.FolderDownloadTask;
 import com.quigglesproductions.secureimageviewer.apprequest.downloaders.FolderListDownloadTask;
 import com.quigglesproductions.secureimageviewer.apprequest.downloaders.OnlineFolderRetrievalTask;
 import com.quigglesproductions.secureimageviewer.apprequest.downloaders.RecentFileDownloader;
 import com.quigglesproductions.secureimageviewer.apprequest.downloaders.SubjectDownloadTask;
 import com.quigglesproductions.secureimageviewer.database.DatabaseHandler;
+import com.quigglesproductions.secureimageviewer.managers.NotificationManager;
 import com.quigglesproductions.secureimageviewer.models.ArtistModel;
 import com.quigglesproductions.secureimageviewer.models.CatagoryModel;
-import com.quigglesproductions.secureimageviewer.models.FileModel;
-import com.quigglesproductions.secureimageviewer.models.FolderModel;
+import com.quigglesproductions.secureimageviewer.models.file.FileModel;
+import com.quigglesproductions.secureimageviewer.models.folder.FolderModel;
 import com.quigglesproductions.secureimageviewer.models.SubjectModel;
+import com.quigglesproductions.secureimageviewer.models.folder.OfflineFolderModel;
 
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 
 public class RequestService {
@@ -91,13 +93,94 @@ public class RequestService {
     }
 
     public void uploadFile(String accessToken,FileModel item,RequestManager.RequestResultCallback<FileModel,Exception> requestCallback) {
-        FileUploadTask uploadTask = new FileUploadTask(context,accessToken, new RequestManager.RequestResultCallback<FileModel, Exception>() {
+        if(item.getOnlineId() == 0) {
+            FileModelUploadTask modelUploadTask = new FileModelUploadTask(context, accessToken, new RequestManager.RequestResultCallback<FileModel, Exception>() {
+                @Override
+                public void RequestResultRetrieved(FileModel result, Exception exception) {
+                    if (exception == null) {
+                        DatabaseHandler.getInstance().updateFileOnlineId(result);
+                        FileContentUploadTask contentUploadTask = new FileContentUploadTask(context, accessToken, new RequestManager.RequestResultCallback<FileModel, Exception>() {
+                            @Override
+                            public void RequestResultRetrieved(FileModel result, Exception exception) {
+                                if (exception == null) {
+                                    DatabaseHandler.getInstance().updateFileIsUploaded(result);
+                                    requestCallback.RequestResultRetrieved(result, exception);
+                                }
+                            }
+                        });
+                        contentUploadTask.execute(result);
+                    }
+
+                    //requestCallback.RequestResultRetrieved(result,exception);
+                }
+            });
+            modelUploadTask.execute(item);
+        }
+        else
+        {
+            FileContentUploadTask contentUploadTask = new FileContentUploadTask(context, accessToken, new RequestManager.RequestResultCallback<FileModel, Exception>() {
+                @Override
+                public void RequestResultRetrieved(FileModel result, Exception exception) {
+                    if (exception == null) {
+                        DatabaseHandler.getInstance().updateFileIsUploaded(result);
+                        requestCallback.RequestResultRetrieved(result, exception);
+                    }
+                }
+            });
+            contentUploadTask.execute(item);
+        }
+        /*FileUploadTask uploadTask = new FileUploadTask(context,accessToken, new RequestManager.RequestResultCallback<FileModel, Exception>() {
             @Override
             public void RequestResultRetrieved(FileModel result, Exception exception) {
                 requestCallback.RequestResultRetrieved(result,exception);
             }
         });
-        uploadTask.execute(item);
+        uploadTask.execute(item);*/
+    }
+
+    public void uploadFile(String accessToken,UploadRequest<FileModel> item,RequestManager.RequestResultCallback<FileModel,Exception> requestCallback) {
+        FileModel fileModel = item.object;
+        if(fileModel.getOnlineId() == 0) {
+            item.setStatus(UploadRequest.RequestStatus.INFO_SENDING);
+            FileModelUploadTask modelUploadTask = new FileModelUploadTask(context, accessToken, new RequestManager.RequestResultCallback<FileModel, Exception>() {
+                @Override
+                public void RequestResultRetrieved(FileModel result, Exception exception) {
+                    if (exception == null) {
+                        DatabaseHandler.getInstance().updateFileOnlineId(result);
+                        item.setStatus(UploadRequest.RequestStatus.CONTENT_SENDING);
+                        FileContentUploadTask contentUploadTask = new FileContentUploadTask(context, accessToken, new RequestManager.RequestResultCallback<FileModel, Exception>() {
+                            @Override
+                            public void RequestResultRetrieved(FileModel result, Exception exception) {
+                                if (exception == null) {
+                                    DatabaseHandler.getInstance().updateFileIsUploaded(result);
+                                    item.setStatus(UploadRequest.RequestStatus.COMPLETE);
+                                    requestCallback.RequestResultRetrieved(result, exception);
+                                }
+                            }
+                        });
+                        contentUploadTask.execute(result);
+                    }
+                    else{
+                        NotificationManager.getInstance().showSnackbar("Unable to upload Image: "+exception.getClass().getName(), Snackbar.LENGTH_SHORT);
+                    }
+
+                }
+            });
+            modelUploadTask.execute(fileModel);
+        }
+        else
+        {
+            FileContentUploadTask contentUploadTask = new FileContentUploadTask(context, accessToken, new RequestManager.RequestResultCallback<FileModel, Exception>() {
+                @Override
+                public void RequestResultRetrieved(FileModel result, Exception exception) {
+                    if (exception == null) {
+                        DatabaseHandler.getInstance().updateFileIsUploaded(result);
+                        requestCallback.RequestResultRetrieved(result, exception);
+                    }
+                }
+            });
+            contentUploadTask.execute(fileModel);
+        }
     }
 
     public void getArtists(String accessToken,RequestManager.RequestResultCallback<ArrayList<ArtistModel>,Exception> resultCallback){
@@ -128,6 +211,132 @@ public class RequestService {
             }
         });
         downloadTask.execute();
+    }
+    public static class FolderUploadRequest<T,V>{
+        private DownloadRequest.RequestStatus status;
+        private T folder;
+        private ArrayList<UploadRequest<V>> files;
+        private boolean inProgress;
+        private ArrayList<Exception> exceptions = new ArrayList<>();
+        private RequestManager.RequestResultCallback<T,Exception> folderUploadCompleteCallback;
+        public FolderUploadRequest(T object){
+            this.folder = object;
+            status = DownloadRequest.RequestStatus.READY;
+            files = new ArrayList<>();
+        }
+        public void setCallback(RequestManager.RequestResultCallback<T,Exception> callback){
+            folderUploadCompleteCallback = callback;
+        }
+
+        public void addException(Exception ex){
+            exceptions.add(ex);
+        }
+        public T getFolder() {
+            return folder;
+        }
+        public ArrayList<UploadRequest<V>> getFiles(){
+            return files;
+        }
+        public UploadRequest<V> addFile(V file){
+            UploadRequest<V> uploadRequest = new UploadRequest<>(file);
+            uploadRequest.setFileUpdateListener(new fileStatusUpdatedListener<V>(){
+
+                @Override
+                public void statusUpdated(V file, UploadRequest.RequestStatus status) {
+                    updateFileStatus(file,status);
+                }
+            });
+            files.add(uploadRequest);
+            return uploadRequest;
+        }
+        public void updateFileStatus(V file, UploadRequest.RequestStatus status){
+            //files.stream().filter(x-> x.object.equals(file)).findFirst().get().setStatus(status);
+            if(getFilesInProgress() == 0){
+                folderUploadCompleteCallback.RequestResultRetrieved(folder,null);
+            }
+        }
+        public long getFilesInProgress(){
+            long count = files.stream().filter(x-> x.getStatus() != UploadRequest.RequestStatus.COMPLETE).count();
+            return count;
+        }
+
+        public DownloadRequest.RequestStatus getStatus() {
+            return status;
+        }
+
+        public FolderUploadRequest setStatus(DownloadRequest.RequestStatus status) {
+            this.status = status;
+            return this;
+        }
+
+        public FolderUploadRequest updateObject(T object) {
+            this.folder = object;
+            return this;
+        }
+
+        public ArrayList<Exception> getExceptions(){
+            return exceptions;
+        }
+
+        public enum RequestStatus{
+            READY,
+            INFO_SENDING,
+            CONTENT_SENDING,
+            COMPLETE,
+            COMPLETE_WITH_ERROR
+        }
+        public static interface fileStatusUpdatedListener<T>{
+            public void statusUpdated(T file,UploadRequest.RequestStatus status);
+        }
+    }
+    public static class UploadRequest<T>{
+        private UploadRequest.RequestStatus status;
+        private T object;
+        private boolean inProgress;
+        private FolderUploadRequest.fileStatusUpdatedListener<T> fileStatusUpdatedListener;
+        private ArrayList<Exception> exceptions = new ArrayList<>();
+        public UploadRequest(T object){
+            this.object = object;
+            status = UploadRequest.RequestStatus.READY;
+        }
+
+        public void addException(Exception ex){
+            exceptions.add(ex);
+        }
+        public T getObject() {
+            return object;
+        }
+
+        public UploadRequest.RequestStatus getStatus() {
+            return status;
+        }
+
+        public UploadRequest setStatus(UploadRequest.RequestStatus status) {
+            this.status = status;
+            fileStatusUpdatedListener.statusUpdated(object,status);
+            return this;
+        }
+
+        public UploadRequest updateObject(T object) {
+            this.object = object;
+            return this;
+        }
+
+        public ArrayList<Exception> getExceptions(){
+            return exceptions;
+        }
+
+        public void setFileUpdateListener(FolderUploadRequest.fileStatusUpdatedListener<T> vfileStatusUpdatedListener) {
+            this.fileStatusUpdatedListener = vfileStatusUpdatedListener;
+        }
+
+        public enum RequestStatus{
+            READY,
+            INFO_SENDING,
+            CONTENT_SENDING,
+            COMPLETE,
+            COMPLETE_WITH_ERROR
+        }
     }
 
     public static class DownloadRequest<T>{

@@ -10,8 +10,8 @@ import android.text.TextUtils;
 import com.quigglesproductions.secureimageviewer.managers.FolderManager;
 import com.quigglesproductions.secureimageviewer.models.ArtistModel;
 import com.quigglesproductions.secureimageviewer.models.CatagoryModel;
-import com.quigglesproductions.secureimageviewer.models.FileModel;
-import com.quigglesproductions.secureimageviewer.models.FolderModel;
+import com.quigglesproductions.secureimageviewer.models.file.FileModel;
+import com.quigglesproductions.secureimageviewer.models.folder.FolderModel;
 import com.quigglesproductions.secureimageviewer.models.SubjectModel;
 
 import java.io.File;
@@ -267,7 +267,7 @@ public class DatabaseHandler {
                     item.Catagories = getCatagoriesForFile(item);
                 }
             });*/
-            item.artist = getArtistFromOnlineId(item.onlineArtistId);
+            item.Artist = getArtistFromOnlineId(item.onlineArtistId);
             item.Subjects = getSubjectsForFile(item);
             item.Catagories = getCatagoriesForFile(item);
             files.add(item);
@@ -720,6 +720,13 @@ public class DatabaseHandler {
         ContentValues values = new ContentValues();
         values.put(DatabaseHelper.SysFile.COLUMN_IS_UPLOADED, response.getIsUploaded());
         database.update(DatabaseHelper.SysFile.TABLE_NAME, values, "_id=?", new String[]{response.getId() + ""});
+    }
+
+    public void updateFileOnlineId(FileModel fileModel){
+        ContentValues values = new ContentValues();
+        values.put(DatabaseHelper.SysFile.COLUMN_ONLINE_ID, fileModel.getOnlineId());
+        values.put(DatabaseHelper.SysFile.COLUMN_ONLINE_FOLDER_ID, fileModel.getOnlineFolderId());
+        database.update(DatabaseHelper.SysFile.TABLE_NAME, values, "_id=?", new String[]{fileModel.getId() + ""});
     }
 
     public void clearSubjects() {

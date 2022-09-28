@@ -1,9 +1,11 @@
 package com.quigglesproductions.secureimageviewer.ui;
 
 import android.app.Activity;
+import android.app.UiModeManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -54,7 +56,34 @@ public class SecureActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         context = this;
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
+        UiModeManager uiModeManager = (UiModeManager) context.getSystemService(Context.UI_MODE_SERVICE);
+        float density = context.getResources().getDisplayMetrics().densityDpi;
+        int modeType = uiModeManager.getCurrentModeType();
+        Configuration config = getResources().getConfiguration();
+        try {
+            Class configClass = config.getClass();
+            if(configClass.getField("SEM_DESKTOP_MODE_ENABLED").getInt(configClass) == configClass.getField("semDesktopModeEnabled").getInt(config)) {
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+                boolean desktopAllowed = prefs.getBoolean("streaming_support",false);
+                if(desktopAllowed){
+
+                }
+                else
+                {
+                    getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
+                }
+            }
+            else
+            {
+                getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
+            }
+        } catch(NoSuchFieldException e) {
+            //Handle the NoSuchFieldException
+        } catch(IllegalAccessException e) {
+            //Handle the IllegalAccessException
+        } catch(IllegalArgumentException e) {
+            //Handle the IllegalArgumentException
+        }
         ViewerConnectivityManager.getInstance().setCallback(new ViewerConnectivityManager.ViewerConnectivityCallback() {
             @Override
             public void connectionEstablished() {
@@ -115,6 +144,15 @@ public class SecureActivity extends AppCompatActivity {
                 authenticateUser();
             }
         }
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        boolean desktopAllowed = prefs.getBoolean("streaming_support",false);
+        if(desktopAllowed){
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_SECURE);
+        }
+        else
+        {
+            //getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
+        }
         //SharedPreferences preferences= PreferenceManager.getDefaultSharedPreferences(this);
         //boolean isLoggedIn =preferences.getBoolean("loggedIn",false);
         /*if(!isLoggedIn) {
@@ -134,7 +172,7 @@ public class SecureActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
 
     }
 
@@ -207,7 +245,7 @@ public class SecureActivity extends AppCompatActivity {
                     }
                 }
                 else
-                    finish();
+                    //finish();
                 break;
         }
 

@@ -3,19 +3,10 @@ package com.quigglesproductions.secureimageviewer.apprequest.downloaders;
 import android.content.Context;
 import android.os.AsyncTask;
 
-import androidx.annotation.Nullable;
-
-import com.android.volley.VolleyError;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
 import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
-import com.quigglesproductions.secureimageviewer.models.FileModel;
-import com.quigglesproductions.secureimageviewer.models.FolderModel;
-import com.quigglesproductions.secureimageviewer.volley.requests.FileDownloadRequest;
-
-import net.openid.appauth.AuthState;
-import net.openid.appauth.AuthorizationException;
+import com.quigglesproductions.secureimageviewer.models.file.FileModel;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -38,7 +29,9 @@ public class RecentFileDownloader extends AsyncTask<Integer,Void,DownloaderResul
     @Override
     protected DownloaderResult<ArrayList<FileModel>> doInBackground(Integer... ints) {
         try {
-            String urlString = "https://quigleyserver.ddns.net:14500/api/v1/file/recents?count=" + ints[0] + "&offset="+ints[1];
+            String urlString = RequestManager.getInstance().getUrlManager().getRecentFileUrlString();
+            urlString = urlString+"?count=" + ints[0] + "&offset="+ints[1];
+            //String urlString = "https://quigleyserver.ddns.net:14500/api/v1/file/recents?count=" + ints[0] + "&offset="+ints[1];
             URL url = new URL(urlString);
             HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
             connection.setRequestProperty("Authorization", "Bearer " + accessToken);

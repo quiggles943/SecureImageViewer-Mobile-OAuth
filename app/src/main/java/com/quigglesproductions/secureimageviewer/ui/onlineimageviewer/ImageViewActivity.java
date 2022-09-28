@@ -9,24 +9,16 @@ import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager.widget.ViewPager;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.quigglesproductions.secureimageviewer.R;
-import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
-import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
-import com.quigglesproductions.secureimageviewer.database.DatabaseHandler;
-import com.quigglesproductions.secureimageviewer.database.DatabaseHelper;
-import com.quigglesproductions.secureimageviewer.models.FileModel;
-import com.quigglesproductions.secureimageviewer.models.FolderModel;
+import com.quigglesproductions.secureimageviewer.managers.FolderManager;
+import com.quigglesproductions.secureimageviewer.models.file.FileModel;
+import com.quigglesproductions.secureimageviewer.models.folder.FolderModel;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
 import com.quigglesproductions.secureimageviewer.utils.ImageUtils;
-
-import net.openid.appauth.AuthState;
-import net.openid.appauth.AuthorizationException;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -44,14 +36,15 @@ public class ImageViewActivity extends SecureActivity implements ViewPager.OnPag
         setContentView(R.layout.activity_image_pager);
         //FolderModel folder = gson.fromJson(getIntent().getStringExtra("folder"), FolderModel.class);
         Type listType = new TypeToken<ArrayList<FileModel>>(){}.getType();
-        ArrayList<FileModel> files = gson.fromJson(getIntent().getStringExtra("fileList"),listType);
-        FolderModel selectedFolder = getIntent().getParcelableExtra("folder");
+        //ArrayList<FileModel> files = gson.fromJson(getIntent().getStringExtra("fileList"),listType);
+        //FolderModel selectedFolder = getIntent().getParcelableExtra("folder");
+        FolderModel selectedFolder = FolderManager.getInstance().getCurrentFolder();
         int selectedPosition = (int) getIntent().getIntExtra("position",0);
         mPager = (ViewPager) findViewById(R.id.view_pager);
         fileName = findViewById(R.id.file_name);
         topLayout = findViewById(R.id.topLinearLayout);
         mViewPagerAdapter = new ViewPagerAdapter(ImageViewActivity.this);
-        mViewPagerAdapter.addFiles(files);
+        mViewPagerAdapter.addFiles(selectedFolder.getItems());
         mViewPagerAdapter.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

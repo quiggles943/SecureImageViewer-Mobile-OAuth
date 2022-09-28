@@ -3,7 +3,6 @@ package com.quigglesproductions.secureimageviewer.ui.offlinefolderview;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.BitmapFactory;
@@ -17,11 +16,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
-import android.widget.Toast;
+import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.gson.Gson;
 import com.quigglesproductions.secureimageviewer.R;
@@ -29,10 +29,9 @@ import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
 import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
 import com.quigglesproductions.secureimageviewer.database.DatabaseHandler;
 import com.quigglesproductions.secureimageviewer.database.DatabaseHelper;
-import com.quigglesproductions.secureimageviewer.dialogs.ItemInfoDialog;
 import com.quigglesproductions.secureimageviewer.managers.FolderManager;
-import com.quigglesproductions.secureimageviewer.models.FileModel;
-import com.quigglesproductions.secureimageviewer.models.FolderModel;
+import com.quigglesproductions.secureimageviewer.models.file.FileModel;
+import com.quigglesproductions.secureimageviewer.models.folder.FolderModel;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
 import com.quigglesproductions.secureimageviewer.ui.offlineimageviewer.ImageViewActivity;
 import com.quigglesproductions.secureimageviewer.utils.ViewerFileUtils;
@@ -75,6 +74,8 @@ public class FolderViewActivity extends SecureActivity  {
         itemList = databaseHandler.getFilesInFolder(selectedFolder);
         selectedFolder.setItems(itemList);
         GridView gridview = findViewById(R.id.file_gridview);
+        int columns = getResources().getInteger(R.integer.column_count_filelist);
+        gridview.setNumColumns(columns);
         adapter = new ImageGridAdapter(context,selectedFolder.getItems());
         gridview.setAdapter(adapter);
         registerForContextMenu(gridview);
@@ -110,7 +111,7 @@ public class FolderViewActivity extends SecureActivity  {
             case android.R.id.home:
                 onBackPressed();
                 break;
-            case R.id.offline_folder_sync:
+            case R.id.offline_folder_sync_activate:
                 Snackbar snackbar = Snackbar.make(findViewById(R.id.offline_folder_layout),"Folder sync in progress",Snackbar.LENGTH_SHORT);
                 snackbar.show();
                 break;
@@ -144,7 +145,21 @@ public class FolderViewActivity extends SecureActivity  {
         FileModel selectedFile = adapter.getItem(item.getItemId());
         switch (item.getGroupId()){
             case CONTEXTMENU_INFO:
-                new ItemInfoDialog(adapter.getItem(item.getItemId())).show(getSupportFragmentManager(),ItemInfoDialog.TAG);
+                //new ItemInfoDialog(adapter.getItem(item.getItemId())).show(getSupportFragmentManager(),ItemInfoDialog.TAG);
+                BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(context);
+                bottomSheetDialog.setContentView(R.layout.bottomdialog_fileinfo);
+                TextView itemNameText = bottomSheetDialog.findViewById(R.id.item_name);
+                TextView folderNameText = bottomSheetDialog.findViewById(R.id.folder_name);
+                TextView artistNameText = bottomSheetDialog.findViewById(R.id.artist_name);
+                TextView catagoriesText = bottomSheetDialog.findViewById(R.id.catagories);
+                TextView subjectsText = bottomSheetDialog.findViewById(R.id.subjects);
+                itemNameText.setText(selectedFile.getName());
+                folderNameText.setText(selectedFolder.getName());
+                artistNameText.setText(selectedFile.getArtistName());
+                catagoriesText.setText(selectedFile.getCatagoryListString());
+                subjectsText.setText(selectedFile.getSubjectListString());
+                bottomSheetDialog.create();
+                bottomSheetDialog.show();
                 break;
             case CONTEXTMENU_SET_THUMBNAIL:
                 FolderManager.getInstance().changeFolderThumbnailFile(selectedFolder,adapter.getItem(item.getItemId()));

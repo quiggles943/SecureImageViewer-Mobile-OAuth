@@ -8,8 +8,8 @@ import android.os.CancellationSignal;
 import android.os.FileUtils;
 import android.util.Size;
 
-import com.quigglesproductions.secureimageviewer.models.FileModel;
-import com.quigglesproductions.secureimageviewer.models.FolderModel;
+import com.quigglesproductions.secureimageviewer.models.file.FileModel;
+import com.quigglesproductions.secureimageviewer.models.folder.FolderModel;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;

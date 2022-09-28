@@ -2,15 +2,18 @@ package com.quigglesproductions.secureimageviewer.apprequest.configuration;
 
 import android.content.Context;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.quigglesproductions.secureimageviewer.apprequest.RequestService;
 import com.quigglesproductions.secureimageviewer.apprequest.configuration.url.UrlManager;
 
+import org.jetbrains.annotations.NotNull;
+
 public class RequestServiceConfiguration {
     private Context context;
     private UrlManager urlManager;
-    public RequestServiceConfiguration(Context context,RequestConfigurationEndpoints endpoints){
+    public RequestServiceConfiguration(@NonNull Context context,@NonNull RequestConfigurationEndpoints endpoints){
         this.context = context;
         urlManager = new UrlManager(endpoints);
     }

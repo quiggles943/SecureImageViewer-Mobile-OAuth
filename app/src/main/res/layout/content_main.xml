@@ -27,7 +27,7 @@
                 android:layout_height="wrap_content"
                 android:drawableTop="@drawable/ic_baseline_wifi_24"
                 android:drawablePadding="-15sp"
-                android:text="Online Image Viewer" />
+                android:text="@string/online_viewer_title" />
 
         </TableRow>
 
@@ -39,9 +39,9 @@
                 android:id="@+id/offline_image_viewer_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:drawableTop="@android:drawable/ic_menu_gallery"
+                android:drawableTop="@drawable/ic_image_24"
                 android:drawablePadding="-15sp"
-                android:text="Image Viewer" />
+                android:text="@string/offline_viewer_title" />
         </TableRow>
 
         <TableRow
@@ -54,7 +54,7 @@
                 android:layout_height="match_parent"
                 android:drawableTop="@drawable/ic_baseline_settings_24"
                 android:drawablePadding="-15sp"
-                android:text="Settings"></Button>
+                android:text="@string/settings_title" />
         </TableRow>
     </TableLayout>
 

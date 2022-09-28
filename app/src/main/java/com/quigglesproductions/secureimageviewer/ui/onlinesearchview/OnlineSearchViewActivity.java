@@ -1,5 +1,6 @@
 package com.quigglesproductions.secureimageviewer.ui.onlinesearchview;
 
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -11,11 +12,10 @@ import android.widget.GridView;
 import androidx.annotation.Nullable;
 
 import com.google.gson.Gson;
-import com.quigglesproductions.secureimageviewer.Downloaders.OnlineFolderDownloader;
 import com.quigglesproductions.secureimageviewer.R;
 import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
-import com.quigglesproductions.secureimageviewer.models.FileModel;
-import com.quigglesproductions.secureimageviewer.models.FolderModel;
+import com.quigglesproductions.secureimageviewer.models.file.FileModel;
+import com.quigglesproductions.secureimageviewer.models.folder.FolderModel;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
 import com.quigglesproductions.secureimageviewer.ui.onlineimageviewer.ImageViewActivity;
 
@@ -34,9 +34,14 @@ public class OnlineSearchViewActivity extends SecureActivity {
         super.onCreate(savedInstanceState);
         context = this;
         gson = new Gson();
+        Intent intent = getIntent();
+        String query;
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            query = intent.getStringExtra(SearchManager.QUERY);
+            //doMySearch(query);
+        }
         setContentView(R.layout.activity_online_folder_view);
         folderView = (GridView) findViewById(R.id.folderView);
-        Intent intent = getIntent();
         folderId = intent.getIntExtra("folderId",0);
         String folderName = intent.getStringExtra("folderName");
         selectedFolder = gson.fromJson(intent.getStringExtra("folder"),FolderModel.class);

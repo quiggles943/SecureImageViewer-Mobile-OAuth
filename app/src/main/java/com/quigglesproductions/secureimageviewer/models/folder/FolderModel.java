@@ -1,22 +1,19 @@
-package com.quigglesproductions.secureimageviewer.models;
+package com.quigglesproductions.secureimageviewer.models.folder;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
-import android.icu.text.CaseMap;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import androidx.annotation.Nullable;
 
 import com.google.gson.annotations.SerializedName;
-import com.quigglesproductions.secureimageviewer.database.DatabaseHelper;
 import com.quigglesproductions.secureimageviewer.managers.FolderManager;
+import com.quigglesproductions.secureimageviewer.models.file.FileModel;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 public class FolderModel implements Parcelable {
 
@@ -190,6 +187,7 @@ public class FolderModel implements Parcelable {
         else
             return false;
     }
+
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeStringArray(new String[] {String.valueOf(this.ID),

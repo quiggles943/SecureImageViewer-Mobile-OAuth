@@ -3,27 +3,19 @@ package com.quigglesproductions.secureimageviewer.ui.preferences;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.InputType;
 import android.view.MenuItem;
-import android.widget.EditText;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NavUtils;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
 import com.google.android.material.snackbar.Snackbar;
-import com.quigglesproductions.secureimageviewer.Downloaders.catagory.CatagoryDownloader;
-import com.quigglesproductions.secureimageviewer.Downloaders.subject.SubjectDownloader;
 import com.quigglesproductions.secureimageviewer.R;
 import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
 import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
-import com.quigglesproductions.secureimageviewer.barcodescanner.BarcodeCaptureActivity;
 import com.quigglesproductions.secureimageviewer.database.DatabaseHandler;
-import com.quigglesproductions.secureimageviewer.database.DatabaseHelper;
 import com.quigglesproductions.secureimageviewer.managers.NotificationManager;
 import com.quigglesproductions.secureimageviewer.models.ArtistModel;
 import com.quigglesproductions.secureimageviewer.models.CatagoryModel;
@@ -32,9 +24,6 @@ import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
 
 import net.openid.appauth.AuthState;
 import net.openid.appauth.AuthorizationException;
-import net.openid.appauth.AuthorizationResponse;
-import net.openid.appauth.AuthorizationService;
-import net.openid.appauth.TokenResponse;
 
 import java.util.ArrayList;
 
@@ -71,6 +60,15 @@ public class SettingsActivity extends SecureActivity {
                     return true;
                 }
             });
+            androidx.preference.Preference databasePreference  = getPreferenceManager().findPreference("database_settings");
+            databasePreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    Intent intent = new Intent(getContext(),DatabaseSettingsActivity.class);
+                    startActivity(intent);
+                    return true;
+                }
+            });
             androidx.preference.Preference storagePreference  = getPreferenceManager().findPreference("storage_settings");
             storagePreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
@@ -80,91 +78,12 @@ public class SettingsActivity extends SecureActivity {
                     return true;
                 }
             });
-            androidx.preference.Preference artistUpdatePreference = getPreferenceManager().findPreference("updateArtistButton");
-            artistUpdatePreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            androidx.preference.Preference securityPreference  = getPreferenceManager().findPreference("security_settings");
+            securityPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    NotificationManager.getInstance().showSnackbar("Downloading artists", Snackbar.LENGTH_SHORT);
-                    AuthManager.getInstance().performActionWithFreshTokens(getContext(), new AuthState.AuthStateAction() {
-                        @Override
-                        public void execute(@Nullable String accessToken, @Nullable String idToken, @Nullable AuthorizationException ex) {
-                            RequestManager.getInstance().getRequestService().getArtists(accessToken, new RequestManager.RequestResultCallback<ArrayList<ArtistModel>, Exception>() {
-                                @Override
-                                public void RequestResultRetrieved(ArrayList<ArtistModel> result, Exception exception) {
-                                    if(result != null){
-                                        DatabaseHandler.getInstance().clearArtists();
-                                        for(ArtistModel artist:result) {
-                                            DatabaseHandler.getInstance().addArtist(artist);
-                                        }
-                                        if(exception != null)
-                                            NotificationManager.getInstance().showSnackbar("Artists downloaded with errors", Snackbar.LENGTH_SHORT);
-                                        else
-                                            NotificationManager.getInstance().showSnackbar("Artists downloaded successfully", Snackbar.LENGTH_SHORT);
-                                    }
-                                }
-                            });
-                            //subjectDownloader.execute(accessToken);
-                        }
-                    });
-
-                    return true;
-                }
-            });
-            androidx.preference.Preference subjectUpdatePreference = getPreferenceManager().findPreference("updateSubjectButton");
-            subjectUpdatePreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                @Override
-                public boolean onPreferenceClick(Preference preference) {
-                    NotificationManager.getInstance().showSnackbar("Downloading subjects", Snackbar.LENGTH_SHORT);
-                    AuthManager.getInstance().performActionWithFreshTokens(getContext(), new AuthState.AuthStateAction() {
-                        @Override
-                        public void execute(@Nullable String accessToken, @Nullable String idToken, @Nullable AuthorizationException ex) {
-                            RequestManager.getInstance().getRequestService().getSubjects(accessToken, new RequestManager.RequestResultCallback<ArrayList<SubjectModel>, Exception>() {
-                                @Override
-                                public void RequestResultRetrieved(ArrayList<SubjectModel> result, Exception exception) {
-                                    if(result != null){
-                                        DatabaseHandler.getInstance().clearSubjects();
-                                        for(SubjectModel subject:result) {
-                                            DatabaseHandler.getInstance().addSubject(subject);
-                                        }
-                                        if(exception != null)
-                                            NotificationManager.getInstance().showSnackbar("Subjects downloaded with errors", Snackbar.LENGTH_SHORT);
-                                        else
-                                            NotificationManager.getInstance().showSnackbar("Subjects downloaded successfully", Snackbar.LENGTH_SHORT);
-                                    }
-                                }
-                            });
-                            //subjectDownloader.execute(accessToken);
-                        }
-                    });
-
-                    return true;
-                }
-            });
-            androidx.preference.Preference catagoryUpdatePreference = getPreferenceManager().findPreference("updateCatagoryButton");
-            catagoryUpdatePreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                @Override
-                public boolean onPreferenceClick(Preference preference) {
-                    NotificationManager.getInstance().showSnackbar("Downloading categories", Snackbar.LENGTH_SHORT);
-                    AuthManager.getInstance().performActionWithFreshTokens(getContext(), new AuthState.AuthStateAction() {
-                        @Override
-                        public void execute(@Nullable String accessToken, @Nullable String idToken, @Nullable AuthorizationException ex) {
-                            RequestManager.getInstance().getRequestService().getCatagories(accessToken,new RequestManager.RequestResultCallback<ArrayList<CatagoryModel>,Exception>(){
-                                @Override
-                                public void RequestResultRetrieved(ArrayList<CatagoryModel> result, Exception exception) {
-                                    if(result != null){
-                                        DatabaseHandler.getInstance().clearCatagories();
-                                        for(CatagoryModel catagory:result) {
-                                            DatabaseHandler.getInstance().addCatagory(catagory);
-                                        }
-                                        if(exception != null)
-                                            NotificationManager.getInstance().showSnackbar("Categories downloaded with errors", Snackbar.LENGTH_SHORT);
-                                        else
-                                            NotificationManager.getInstance().showSnackbar("Categories downloaded successfully", Snackbar.LENGTH_SHORT);
-                                    }
-                                }
-                            });
-                        }
-                    });
+                    Intent intent = new Intent(getContext(),SecuritySettingsActivity.class);
+                    startActivity(intent);
                     return true;
                 }
             });

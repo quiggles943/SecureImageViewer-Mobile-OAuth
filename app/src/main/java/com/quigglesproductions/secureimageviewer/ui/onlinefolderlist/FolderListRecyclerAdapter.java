@@ -21,7 +21,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.quigglesproductions.secureimageviewer.R;
 import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
 import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
-import com.quigglesproductions.secureimageviewer.models.FolderModel;
+import com.quigglesproductions.secureimageviewer.models.folder.FolderModel;
 import com.quigglesproductions.secureimageviewer.recycler.RecyclerViewSelectionMode;
 
 import net.openid.appauth.AuthState;
@@ -35,6 +35,11 @@ public class FolderListRecyclerAdapter extends RecyclerView.Adapter<FolderListRe
     private Context mContext;
     private boolean multiSelect = false;
     private SelectionChangedListener selectionModeChangeListener;
+    private FolderListRecyclerViewOnClickListener onClickListener;
+
+    public void setOnClickListener(FolderListRecyclerViewOnClickListener onClickListener) {
+        this.onClickListener = onClickListener;
+    }
 
     public FolderModel getItem(int position) {
         return folders.get(position);
@@ -137,6 +142,21 @@ public class FolderListRecyclerAdapter extends RecyclerView.Adapter<FolderListRe
         else
             viewHolder.getImageView().setColorFilter(null);
         viewHolder.getFolderNameView().setText(folder.getName());
+        viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(onClickListener != null)
+                    onClickListener.onClick(viewHolder.getAdapterPosition());
+            }
+        });
+        viewHolder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                if(onClickListener != null)
+                    onClickListener.onLongClick(viewHolder.getAdapterPosition());
+                return true;
+            }
+        });
     }
 
     // Return the size of your dataset (invoked by the layout manager)
@@ -158,6 +178,11 @@ public class FolderListRecyclerAdapter extends RecyclerView.Adapter<FolderListRe
         void selectionModeChanged(RecyclerViewSelectionMode selectionMode);
         void selectionAdded(int position);
         void selectionRemoved(int position);
+    }
+
+    public interface FolderListRecyclerViewOnClickListener{
+        void onClick(int position);
+        void onLongClick(int position);
     }
 
 }

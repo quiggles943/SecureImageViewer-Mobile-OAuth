@@ -4,9 +4,11 @@ import android.content.Context;
 
 import androidx.annotation.Nullable;
 
+import com.android.volley.VolleyError;
 import com.quigglesproductions.secureimageviewer.apprequest.configuration.RequestConfigurationException;
 import com.quigglesproductions.secureimageviewer.apprequest.configuration.RequestServiceConfiguration;
 import com.quigglesproductions.secureimageviewer.apprequest.configuration.url.UrlManager;
+import com.quigglesproductions.secureimageviewer.models.file.FileModel;
 
 public class RequestManager {
 

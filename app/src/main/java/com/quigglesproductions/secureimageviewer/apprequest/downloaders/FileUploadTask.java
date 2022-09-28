@@ -6,14 +6,16 @@ import android.os.AsyncTask;
 import com.google.gson.Gson;
 import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
 import com.quigglesproductions.secureimageviewer.database.DatabaseHandler;
-import com.quigglesproductions.secureimageviewer.models.FileModel;
+import com.quigglesproductions.secureimageviewer.models.file.FileModel;
 import com.quigglesproductions.secureimageviewer.utils.ViewerFileUtils;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.nio.file.Files;
@@ -52,36 +54,61 @@ public class FileUploadTask extends AsyncTask<FileModel,Void,DownloaderResult<Ar
     }
 
     private FileModel sendFileModel(FileModel fileModel) throws Exception {
-        String urlString = RequestManager.getInstance().getUrlManager().getFileUrlString();
-        //String urlString = "https://quigleyserver.ddns.net:14500/api/v1/device/register";
-        URL url = new URL(urlString);
-        HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
-        connection.setRequestProperty("Authorization", "Bearer " + accessToken);
-        connection.setRequestProperty("Content-Type", "application/json");
-        connection.setRequestProperty("Accept", "application/json");
-        connection.setRequestMethod("POST");
-        connection.setDoOutput(true);
-        BufferedOutputStream out = new BufferedOutputStream(connection.getOutputStream());
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out));
-        writer.write(gson.toJson(fileModel));
-        writer.flush();
-        writer.close();
-        out.close();
-        connection.connect();
-        int responseCode = connection.getResponseCode();
-        if (responseCode >= 400 && responseCode <= 499) {
-            throw new Exception("Bad authentication status: " + responseCode); //provide a more meaningful exception message
-        } else {
-            InputStream is = connection.getInputStream();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-            String output;
-            StringBuilder sb = new StringBuilder();
-            while ((output = reader.readLine()) != null)
-                sb.append(output);
-            String result = sb.toString();
-            FileModel response = gson.fromJson(result, FileModel.class);
-            fileModel.setOnlineId(response.onlineId);
-            //model.setRegistrationId(response.Id);
+        try {
+            String urlString = RequestManager.getInstance().getUrlManager().getFileUrlString();
+            //urlString = urlString.substring(0,urlString.length()-1);
+            //String urlString = "https://quigleyserver.ddns.net:14500/api/v1/device/register";
+            URL url = new URL(urlString);
+            HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setRequestProperty("Connection", "Keep-Alive");
+            connection.setRequestProperty("Cache-Control", "no-cache");
+            connection.setRequestProperty("Authorization", "Bearer " + accessToken);
+
+            //connection.setRequestProperty("Accept", "application/json");
+            connection.setConnectTimeout(5000);
+            connection.setReadTimeout(5000);
+            connection.setRequestMethod("POST");
+            connection.setChunkedStreamingMode(0);
+            //connection.setUseCaches(false);
+            connection.setDoOutput(true);
+            //connection.setDoInput(true);
+            connection.setInstanceFollowRedirects(false);
+            connection.connect();
+            String json = gson.toJson(fileModel);
+            String testJson = fileModel.getJson();
+            connection.getOutputStream().write(testJson.getBytes());
+            connection.getOutputStream().flush();
+            connection.getOutputStream().close();
+            try {
+                //connection.getContent();
+                int responseCode = connection.getResponseCode();
+                if (responseCode >= 400 && responseCode <= 499) {
+                    throw new Exception("Bad authentication status: " + responseCode); //provide a more meaningful exception message
+                } else {
+                    InputStream is = connection.getInputStream();
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+                    String output;
+                    StringBuilder sb = new StringBuilder();
+                    while ((output = reader.readLine()) != null)
+                        sb.append(output);
+                    String result = sb.toString();
+                    FileModel response = gson.fromJson(result, FileModel.class);
+                    fileModel.setOnlineId(response.onlineId);
+                    //model.setRegistrationId(response.Id);
+                    return fileModel;
+                }
+            }
+            catch(Exception ex){
+                String exceptionString = ex.toString();
+                return fileModel;
+            }
+
+
+        }
+        catch(Exception exc)
+        {
+            String error = exc.getMessage();
             return fileModel;
         }
     }

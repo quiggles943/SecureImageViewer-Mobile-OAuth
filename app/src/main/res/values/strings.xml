@@ -32,7 +32,7 @@
     <string name="web_server_header">Web Server Settings</string>
     <string name="storage_header">Storage Settings</string>
     <string name="web_server_settings_button">Server Settings</string>
-    <string name="storage_settings_button">Storage Settings</string>
+    <string name="storage_settings_button">Storage</string>
     <string name="url_title">Web server url</string>
     <string name="port_title">Web server port</string>
     <string name="api_version_title">API version</string>
@@ -68,4 +68,9 @@
     <string name="authservice_connecting">Connecting to Auth Service</string>
     <string name="requestservice_connecting">Connecting to Request Service</string>
     <string name="service_connected">Connected</string>
+    <string name="online_viewer_title">Online Image Viewer</string>
+    <string name="offline_viewer_title">Image Viewer</string>
+    <string name="settings_title">Settings</string>
+    <string name="auth_error_connection">Unable to connect to Auth Service</string>
+    <string name="request_error_connection">Unable to connect to Request Service</string>
 </resources>

@@ -1,10 +1,21 @@
-package com.quigglesproductions.secureimageviewer.models;
+package com.quigglesproductions.secureimageviewer.models.file;
 
 import android.graphics.Bitmap;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.annotations.SerializedName;
+import com.quigglesproductions.secureimageviewer.models.ArtistModel;
+import com.quigglesproductions.secureimageviewer.models.CatagoryModel;
+import com.quigglesproductions.secureimageviewer.models.ItemBaseModel;
+import com.quigglesproductions.secureimageviewer.models.SubjectModel;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.ArrayList;
 
@@ -32,13 +43,15 @@ public class FileModel implements ItemBaseModel {
     public boolean isEncrypted;
     @SerializedName("FILE_CONTENT_TYPE")
     public String contentType;
-    public ArtistModel artist;
+    public ArtistModel Artist;
     public ArrayList<SubjectModel> Subjects;
     public ArrayList<CatagoryModel> Catagories;
 
     public Date downloadTime;
     public int folderId;
+    String filePath;
     File imageFile;
+    String thumbnailPath;
     File thumbnailFile;
     Bitmap image;
     Bitmap thumbnailImage;
@@ -72,7 +85,9 @@ public class FileModel implements ItemBaseModel {
         fileWidth = width;
         fileHeight = height;
         this.folderId = folderId;
+        this.filePath = imageFile.getPath();
         this.imageFile = imageFile;
+        this.thumbnailPath = thumbnailFile.getPath();
         this.thumbnailFile = thumbnailFile;
         this.downloadTime = downloadTime;
         isUploaded = true;
@@ -97,15 +112,25 @@ public class FileModel implements ItemBaseModel {
         return onlineFolderId;
     }
 
-    public File getImageFile(){ return this.imageFile; }
+    public File getImageFile(){
+        //return this.imageFile;
+        return new File(filePath);
+    }
 
-    public File getThumbnailFile(){ return this.thumbnailFile; }
+    public File getThumbnailFile(){
+        //return this.thumbnailFile;
+        return new File(thumbnailPath);
+    }
 
     public void setImageFile(File imageFile){
         this.imageFile = imageFile;
+        this.filePath = imageFile.getPath();
     }
 
-    public void setThumbnailFile(File thumbnailFile){ this.thumbnailFile = thumbnailFile;}
+    public void setThumbnailFile(File thumbnailFile){
+        this.thumbnailFile = thumbnailFile;
+        this.thumbnailPath = thumbnailFile.getPath();
+    }
 
     public boolean hasThumbnail(){
         if(this.thumbnailFile == null)
@@ -152,10 +177,10 @@ public class FileModel implements ItemBaseModel {
     }
 
     public String getArtistName(){
-        if(artist == null)
+        if(Artist == null)
             return "";
         else
-            return artist.name;
+            return Artist.name;
     }
 
     public String getCatagoryListString(){
@@ -227,5 +252,48 @@ public class FileModel implements ItemBaseModel {
     }
     public ArrayList<CatagoryModel> getCatagories(){
         return this.Catagories;
+    }
+
+
+    public String getJson() throws JSONException {
+        Gson gson = new Gson();
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss");
+        String date = format.format(new Date());
+        JSONObject object = new JSONObject();
+        object.put("FILE_BASE64_NAME",encodedName);
+        object.put("FILE_REAL_NAME",normalName);
+        object.put("FILE_SIZE",fileSize);
+        object.put("FILE_FOLDER_ID",onlineFolderId);
+        object.put("FILE_WIDTH",fileWidth);
+        object.put("FILE_HEIGHT",fileHeight);
+        object.put("FILE_ARTIST_ID",onlineArtistId);
+        object.put("FILE_EXTENSION",fileExtension);
+        object.put("FILE_IS_ENCRYPTED",isEncrypted);
+        object.put("FILE_CONTENT_TYPE",contentType);
+        object.put("FILE_IMPORT_TIME",date);
+        object.put("Catagories",gson.toJsonTree(getCatagories()));
+        object.put("Subjects",gson.toJsonTree(getSubjects()));
+        return object.toString();
+    }
+
+    public JSONObject getJsonObject() throws JSONException {
+        Gson gson = new Gson();
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss");
+        String date = format.format(new Date());
+        JSONObject object = new JSONObject();
+        object.put("FILE_BASE64_NAME",encodedName);
+        object.put("FILE_REAL_NAME",normalName);
+        object.put("FILE_SIZE",fileSize);
+        object.put("FILE_FOLDER_ID",onlineFolderId);
+        object.put("FILE_WIDTH",fileWidth);
+        object.put("FILE_HEIGHT",fileHeight);
+        object.put("FILE_ARTIST_ID",onlineArtistId);
+        object.put("FILE_EXTENSION",fileExtension);
+        object.put("FILE_IS_ENCRYPTED",isEncrypted);
+        object.put("FILE_CONTENT_TYPE",contentType);
+        object.put("FILE_IMPORT_TIME",date);
+        object.put("Catagories",gson.toJsonTree(getCatagories()));
+        object.put("Subjects",gson.toJsonTree(getSubjects()));
+        return object;
     }
 }

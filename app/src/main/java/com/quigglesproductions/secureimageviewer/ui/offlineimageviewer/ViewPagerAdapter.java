@@ -17,8 +17,8 @@ import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.quigglesproductions.secureimageviewer.R;
-import com.quigglesproductions.secureimageviewer.models.FileModel;
-import com.quigglesproductions.secureimageviewer.models.FolderModel;
+import com.quigglesproductions.secureimageviewer.models.file.FileModel;
+import com.quigglesproductions.secureimageviewer.models.folder.FolderModel;
 import com.quigglesproductions.secureimageviewer.ui.onlineimageviewer.NewTouchImageView;
 
 import java.util.Objects;
@@ -59,51 +59,20 @@ public class ViewPagerAdapter extends PagerAdapter {
     public Object instantiateItem(@NonNull ViewGroup container, final int position) {
         // inflating the item.xml
         FileModel item = itemFolder.getItemAtPosition(position);
-        View itemView = mLayoutInflater.inflate(R.layout.activity_image_view, container, false);
-        // referencing the image view from the item.xml file
-        NewTouchImageView imageView = (NewTouchImageView) itemView.findViewById(R.id.imageViewer);
-        imageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(clickListener != null){
-                    clickListener.onClick(v);
-                }
-            }
-        });
-        imageView.setMaxZoom((float)3.2);
-        // setting the image in the imageView
-        /*if(item.getIsAnimated()) {
-            try {
-                ImageDecoder.Source source = ImageDecoder.createSource(item.getImageFile());
-                Drawable drawable = ImageDecoder.decodeDrawable(source);
-                imageView.setImageDrawable(drawable);
-                ((AnimatedImageDrawable) drawable).start();
-            }catch(Exception e){
-                Log.e("Error",e.getMessage());
-            }
+        View itemView;
+        switch (item.contentType){
+            case "IMAGE":
+                itemView = createImageView(container,item);
+                break;
+            case "VIDEO":
+                itemView = createVideoView(container,item);
+                break;
+            case "TEXT":
+                itemView = createTextView(container,item);
+                break;
+            default:
+                itemView = null;
         }
-            else*/
-        try {
-            Glide.with(context).addDefaultRequestListener(new RequestListener<Object>() {
-                @Override
-                public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Object> target, boolean isFirstResource) {
-                    Log.e("Image Load Fail",e.getMessage());
-                    e.logRootCauses("Image Load Fail");
-                    return false;
-                }
-
-                @Override
-                public boolean onResourceReady(Object resource, Object model, Target<Object> target, DataSource dataSource, boolean isFirstResource) {
-                    return false;
-                }
-            }).load(item.getImageFile()).dontTransform().into(imageView);
-        }catch(Exception ex){
-            Log.e("Error", ex.getMessage());
-        }
-        //imageView.setImageBitmap(BitmapFactory.decodeFile(item.getImageFile().getAbsolutePath()));
-        //imageView.setImageBitmap(BitmapFactory.decodeFile(itemFolder.getItemAtPosition(position).getImageFile().getAbsolutePath()));
-        //Glide.with(context).load(itemFolder.getItemAtPosition(position).getImageFile()).asBitmap().into(imageView);
-
         // Adding the View
         Objects.requireNonNull(container).addView(itemView);
 
@@ -122,5 +91,94 @@ public class ViewPagerAdapter extends PagerAdapter {
 
     public void setOnClickListener(View.OnClickListener l){
         clickListener = l;
+    }
+
+    public View createImageView(ViewGroup container, FileModel item){
+        View itemView = mLayoutInflater.inflate(R.layout.activity_image_view, container, false);
+        // referencing the image view from the item.xml file
+        NewTouchImageView imageView = (NewTouchImageView) itemView.findViewById(R.id.imageViewer);
+        imageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(clickListener != null){
+                    clickListener.onClick(v);
+                }
+            }
+        });
+        imageView.setMaxZoom((float)3.2);
+        try {
+            Glide.with(context).addDefaultRequestListener(new RequestListener<Object>() {
+                @Override
+                public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Object> target, boolean isFirstResource) {
+                    Log.e("Image Load Fail",e.getMessage());
+                    e.logRootCauses("Image Load Fail");
+                    return false;
+                }
+
+                @Override
+                public boolean onResourceReady(Object resource, Object model, Target<Object> target, DataSource dataSource, boolean isFirstResource) {
+                    return false;
+                }
+            }).load(item.getImageFile()).dontTransform().into(imageView);
+        }catch(Exception ex){
+            Log.e("Error", ex.getMessage());
+        }
+        return itemView;
+    }
+
+    public View createVideoView(ViewGroup container, FileModel item){
+        View itemView = mLayoutInflater.inflate(R.layout.activity_video_view, container, false);
+        // referencing the image view from the item.xml file
+        try {
+            /*Glide.with(context).addDefaultRequestListener(new RequestListener<Object>() {
+                @Override
+                public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Object> target, boolean isFirstResource) {
+                    Log.e("Image Load Fail",e.getMessage());
+                    e.logRootCauses("Image Load Fail");
+                    return false;
+                }
+
+                @Override
+                public boolean onResourceReady(Object resource, Object model, Target<Object> target, DataSource dataSource, boolean isFirstResource) {
+                    return false;
+                }
+            }).load(item.getImageFile()).dontTransform().into(imageView);*/
+        }catch(Exception ex){
+            Log.e("Error", ex.getMessage());
+        }
+        return itemView;
+    }
+
+    public View createTextView(ViewGroup container, FileModel item){
+        View itemView = mLayoutInflater.inflate(R.layout.activity_image_view, container, false);
+        // referencing the image view from the item.xml file
+        NewTouchImageView imageView = (NewTouchImageView) itemView.findViewById(R.id.imageViewer);
+        imageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(clickListener != null){
+                    clickListener.onClick(v);
+                }
+            }
+        });
+        imageView.setMaxZoom((float)3.2);
+        try {
+            Glide.with(context).addDefaultRequestListener(new RequestListener<Object>() {
+                @Override
+                public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Object> target, boolean isFirstResource) {
+                    Log.e("Image Load Fail",e.getMessage());
+                    e.logRootCauses("Image Load Fail");
+                    return false;
+                }
+
+                @Override
+                public boolean onResourceReady(Object resource, Object model, Target<Object> target, DataSource dataSource, boolean isFirstResource) {
+                    return false;
+                }
+            }).load(item.getImageFile()).dontTransform().into(imageView);
+        }catch(Exception ex){
+            Log.e("Error", ex.getMessage());
+        }
+        return itemView;
     }
 }
