@@ -13,4 +13,8 @@
     <color name="text_grey">@android:color/darker_gray</color>
     <color name="progressBar_overlay_background">#804E4E4E</color>
     <color name="reauthenticate">#B8800F</color>
+
+    <color name="blue_200">#90CAF9</color>
+    <color name="blue_500">#2196F3</color>
+    <color name="blue_700">#1976D2</color>
 </resources>

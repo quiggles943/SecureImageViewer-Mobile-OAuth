@@ -5,8 +5,11 @@
     </PreferenceCategory>
     <PreferenceCategory app:title="Device Settings">
         <Preference app:title="Database" app:key="database_settings"/>
+        <Preference app:title="Display" app:key="display_settings"/>
+        <Preference
+            android:title="Security"
+            app:key="security_settings" />
         <Preference android:title="@string/storage_settings_button" app:key="storage_settings"/>
-        <Preference android:title="Security" app:key="security_settings"/>
     </PreferenceCategory>
 
 </PreferenceScreen>

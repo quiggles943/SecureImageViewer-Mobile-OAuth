@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="darkmode_array">
+        <item>Dark</item>
+        <item>Light</item>
+        <item>Device Default</item>
+    </string-array>
+    <string-array name="darkmode_values">
+        <item>night</item>
+        <item>day</item>
+        <item>device</item>
+    </string-array>
+</resources>

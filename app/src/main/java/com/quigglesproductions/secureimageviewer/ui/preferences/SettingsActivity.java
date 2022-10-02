@@ -69,6 +69,15 @@ public class SettingsActivity extends SecureActivity {
                     return true;
                 }
             });
+            androidx.preference.Preference displayPreference  = getPreferenceManager().findPreference("display_settings");
+            displayPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    Intent intent = new Intent(getContext(),DisplaySettingsActivity.class);
+                    startActivity(intent);
+                    return true;
+                }
+            });
             androidx.preference.Preference storagePreference  = getPreferenceManager().findPreference("storage_settings");
             storagePreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override

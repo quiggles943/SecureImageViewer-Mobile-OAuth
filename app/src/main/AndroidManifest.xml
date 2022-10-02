@@ -110,6 +110,14 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.preferences.SettingsActivity" />
         </activity>
+        <activity
+            android:name=".ui.preferences.DisplaySettingsActivity"
+            android:label="Display Settings"
+            android:launchMode="singleTask">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.preferences.SettingsActivity" />
+        </activity>
         <activity android:name=".ui.preferences.SecuritySettingsActivity"
         android:label="Security Settings"
         android:launchMode="singleTask">
