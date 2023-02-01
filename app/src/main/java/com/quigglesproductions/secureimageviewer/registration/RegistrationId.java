@@ -1,12 +1,15 @@
 package com.quigglesproductions.secureimageviewer.registration;
 
 import com.google.gson.Gson;
+import com.quigglesproductions.secureimageviewer.gson.ViewerGson;
+
+import java.time.LocalDateTime;
 
 public class RegistrationId {
     private String registrationId;
     private String deviceId;
     private String deviceName;
-    private static Gson gson = new Gson();
+    private LocalDateTime nextCheckIn;
     public RegistrationId(){
 
     }
@@ -35,11 +38,19 @@ public class RegistrationId {
         this.registrationId = registrationId;
     }
 
+    public void setNextCheckIn(LocalDateTime nextCheckIn) {
+        this.nextCheckIn = nextCheckIn;
+    }
+
+    public LocalDateTime getNextCheckIn() {
+        return nextCheckIn;
+    }
+
     public String toJsonString(){
-        return gson.toJson(this);
+        return ViewerGson.getGson().toJson(this);
     }
 
     public static RegistrationId fromJsonString(String string){
-        return gson.fromJson(string,RegistrationId.class);
+        return ViewerGson.getGson().fromJson(string,RegistrationId.class);
     }
 }

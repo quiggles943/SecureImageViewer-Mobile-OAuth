@@ -1,4 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <attr name="splashIcon" format="reference"/>
+
+    <style name="ExoMediaButton">
+        <item name="android:background">?android:attr/selectableItemBackground</item>
+        <item name="android:layout_width">@dimen/exo_media_button_width</item>
+        <item name="android:layout_height">@dimen/exo_media_button_height</item>
+    </style>
+    <style name="ExoMediaButton.FastForward">
+        <item name="android:src">@drawable/exo_controls_fastforward</item>
+        <item name="android:contentDescription">@string/exo_controls_fastforward_description</item>
+    </style>
+    <style name="ExoMediaButton.Next">
+        <item name="android:src">@drawable/exo_controls_next</item>
+        <item name="android:contentDescription">@string/exo_controls_next_description</item>
+    </style>
+    <style name="ExoMediaButton.Pause">
+        <item name="android:src">@drawable/exo_controls_pause</item>
+        <item name="android:contentDescription">@string/exo_controls_pause_description</item>
+    </style>
+    <style name="ExoMediaButton.Play">
+        <item name="android:src">@drawable/exo_controls_play</item>
+        <item name="android:contentDescription">@string/exo_controls_play_description</item>
+    </style>
+    <style name="ExoStyledControls.Button.Center.PlayPause">
+        <item name="android:src">@drawable/exo_controls_play</item>
+        <item name="android:contentDescription">@string/exo_controls_play_description</item>
+        <item name="android:layout_marginHorizontal">20dp</item>
+    </style>
+    <style name="ExoMediaButton.Previous">
+        <item name="android:src">@drawable/exo_controls_previous</item>
+        <item name="android:contentDescription">@string/exo_controls_previous_description</item>
+    </style>
+    <style name="ExoMediaButton.Rewind">
+        <item name="android:src">@drawable/exo_controls_rewind</item>
+        <item name="android:contentDescription">@string/exo_controls_rewind_description</item>
+    </style>
+
+    <style name="ImagePagerButton">
+        <item name="android:background">?android:attr/selectableItemBackground</item>
+        <item name="android:layout_width">71dp</item>
+        <item name="android:layout_height">52dp</item>
+    </style>
+    <style name="ImagePagerButton.Previous">
+        <item name="android:src">@drawable/image_pager_navigate_before</item>
+        <item name="android:layout_marginHorizontal">40dp</item>
+    </style>
+    <style name="ImagePagerButton.Next">
+        <item name="android:src">@drawable/image_pager_navigate_next</item>
+        <item name="android:layout_marginHorizontal">40dp</item>
+    </style>
+    <style name="ImagePagerButton.Back">
+        <item name="android:src">@drawable/ic_baseline_back</item>
+        <item name="android:layout_width">40dp</item>
+        <item name="android:layout_height">50dp</item>
+        <item name="android:layout_marginHorizontal">5dp</item>
+    </style>
 </resources>

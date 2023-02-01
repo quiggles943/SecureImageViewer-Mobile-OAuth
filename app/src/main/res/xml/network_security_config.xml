@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
-    <domain-config usesCleartextTraffic="false">
+    <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="true">quigleyserver.ddns.net</domain>
+        <domain includeSubdomains="true">192.168.0.17</domain>
     </domain-config>
     <base-config>
         <trust-anchors>
             <certificates src="@raw/quigglesproductionsca"/>
+            <certificates src="@raw/quigleyidca"/>
             <certificates src="@raw/localhost"/>
             <certificates src="system"/>
+            <certificates src="user"/>
         </trust-anchors>
     </base-config>
     <debug-overrides>

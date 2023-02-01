@@ -18,6 +18,7 @@ import android.net.LinkProperties;
 import android.net.Network;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.transition.Fade;
 import android.util.Log;
 import android.view.Display;
@@ -30,29 +31,44 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
 import androidx.preference.PreferenceManager;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.snackbar.Snackbar;
+import com.quigglesproductions.secureimageviewer.BuildConfig;
 import com.quigglesproductions.secureimageviewer.R;
 import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
+import com.quigglesproductions.secureimageviewer.appauth.DeviceRegistration;
+import com.quigglesproductions.secureimageviewer.apprequest.AppRequestError;
 import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
+import com.quigglesproductions.secureimageviewer.apprequest.callbacks.ItemRetrievalCallback;
 import com.quigglesproductions.secureimageviewer.apprequest.configuration.RequestConfigurationException;
 import com.quigglesproductions.secureimageviewer.apprequest.configuration.RequestServiceConfiguration;
 import com.quigglesproductions.secureimageviewer.apprequest.configuration.url.UrlManager;
+import com.quigglesproductions.secureimageviewer.apprequest.requests.DeviceRegistrationRequest;
+import com.quigglesproductions.secureimageviewer.apprequest.requests.DeviceStatusRequest;
+import com.quigglesproductions.secureimageviewer.apprequest.services.AppAuthorizedService;
 import com.quigglesproductions.secureimageviewer.managers.NotificationManager;
 import com.quigglesproductions.secureimageviewer.managers.SecurityManager;
 import com.quigglesproductions.secureimageviewer.managers.ViewerConnectivityManager;
+import com.quigglesproductions.secureimageviewer.models.DeviceStatus;
+import com.quigglesproductions.secureimageviewer.models.error.RequestError;
 import com.quigglesproductions.secureimageviewer.notifications.NotificationHelper;
+import com.quigglesproductions.secureimageviewer.registration.RegistrationId;
 import com.quigglesproductions.secureimageviewer.ui.MainMenuActivity;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
 import com.quigglesproductions.secureimageviewer.ui.filesend.FileSendActivity;
 import com.quigglesproductions.secureimageviewer.ui.login.BiometricAuthenticationException;
 import com.quigglesproductions.secureimageviewer.ui.preferences.WebSettingsActivity;
 
+import net.openid.appauth.AuthState;
 import net.openid.appauth.AuthorizationException;
 import net.openid.appauth.AuthorizationServiceConfiguration;
 
+import org.acra.ACRA;
+
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -64,7 +80,7 @@ public class NewSplashScreenActivity extends SecureActivity {
     private ImageView fingerprintIcon;
     private ProgressBar progressBar;
     //String configUrl = "https://quigleyserver.ddns.net:14500/api/v1/info/metadata";
-    String configUrl = "https://quigleyserver.ddns.net:12450/api/v1/info/metadata";
+    String configUrl = BuildConfig.SERVER_URL;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         getWindow().requestFeature(Window.FEATURE_ACTIVITY_TRANSITIONS);
@@ -93,6 +109,7 @@ public class NewSplashScreenActivity extends SecureActivity {
                 normalStart();
                 break;
         }
+        //ACRA.getErrorReporter().handleException(new Exception("test"));
     }
     private void checkForDex(){
         Configuration config = getResources().getConfiguration();
@@ -113,6 +130,7 @@ public class NewSplashScreenActivity extends SecureActivity {
             //Handle the IllegalArgumentException
         }
     }
+
     private void showBottomSheetDialog(){
         DisplayManager dm = (DisplayManager)getSystemService(Context.DISPLAY_SERVICE);
         Display targetDisplay = dm.getDisplay(Display.DEFAULT_DISPLAY);
@@ -142,58 +160,229 @@ public class NewSplashScreenActivity extends SecureActivity {
 
     private void normalStart() {
         NotificationHelper.getInstance(this).createNotificationChannels();
-        infoTextView.setText(R.string.authservice_connecting);
+
         AuthManager.isOnline(context, new AuthManager.AuthAvailableCallback() {
             @Override
             public void requestComplete(boolean available, Exception ex) {
-                if(available){
-                    AuthManager.getInstance().checkForConfiguration("https://quigleyid.ddns.net/v1/oauth2/metadata", new AuthorizationServiceConfiguration.RetrieveConfigurationCallback() {
-
-                        @Override
-                        public void onFetchConfigurationCompleted(@Nullable AuthorizationServiceConfiguration serviceConfiguration, @Nullable AuthorizationException ex) {
-                            infoTextView.setText(R.string.requestservice_connecting);
-                            RequestManager.getInstance().checkForConfiguration(configUrl, new RequestServiceConfiguration.RetrieveConfigurationCallback() {
-                                @Override
-                                public void onFetchConfigurationCompleted(@Nullable RequestServiceConfiguration serviceConfiguration, @Nullable RequestConfigurationException ex) {
-                                    if(serviceConfiguration != null) {
-                                        RequestManager.getInstance().ConfigureRequestManager(serviceConfiguration, ex);
-                                        ViewerConnectivityManager.getInstance().networkConnected();
-                                        infoTextView.setText(R.string.service_connected);
-                                        progressBar.setIndeterminate(false);
-                                        progressBar.setMax(1);
-                                        progressBar.setProgress(1);
-                                        fingerprintIcon.setVisibility(View.VISIBLE);
-                                        setupNetworkCallback();
-                                        Intent intent = new Intent(context, MainMenuActivity.class);
-                                        SecurityManager.getInstance().setupBiometricsForResult((SecureActivity) context, intent);
-                                    }
-                                    else{
-                                        infoTextView.setText(R.string.request_error_connection);
-                                        progressBar.setIndeterminate(false);
-                                        progressBar.setMax(1);
-                                        progressBar.setProgress(1);
-                                        progressBar.setProgressTintList(ColorStateList.valueOf(Color.RED));
-                                        progressBar.setProgressTintMode(PorterDuff.Mode.MULTIPLY);
-                                        fingerprintIcon.setVisibility(View.VISIBLE);
-                                        Intent intent = new Intent(context,MainMenuActivity.class);
-                                        SecurityManager.getInstance().setupBiometricsForResult((SecureActivity)context,intent);
-                                    }
-                                    //setupBiometrics(intent);
-                                }
-                            });
+                setupNetworkCallback();
+                if(!available){
+                    if(AuthManager.getInstance().getDeviceRegistration().getDeviceAuthenticated()){
+                        RegistrationId registrationId = AuthManager.getInstance().getDeviceRegistration().getRegistrationID();
+                        if(registrationId.getNextCheckIn() != null){
+                            if(registrationId.getNextCheckIn().isAfter(LocalDateTime.now())){
+                                setupOfflineLogin();
+                            }
+                            else{
+                                updateProgressBar(true,R.string.online_authentication_required,ProgressBarState.ERROR);
+                            }
                         }
-                    });
+
+                    }
+                    else{
+                        updateProgressBar(true,R.string.online_authentication_required,ProgressBarState.ERROR);
+                    }
                 }
                 else{
-                    registerNetworkCallback();
+
                 }
             }
         });
     }
 
+    private void startAuthCheckinService(){
+        AppAuthorizedService authService = new AppAuthorizedService();
+        Intent intent = new Intent(context,AppAuthorizedService.class);
+        try {
+            startService(intent);
+            //startForegroundService(intent);
+            //context.startService(intent);
+        }
+        catch(Exception ex){
+            ex.printStackTrace();
+        }
+    }
+
+    private void fetchAuthServiceConfiguration(AuthorizationServiceConfiguration.RetrieveConfigurationCallback callback){
+        updateProgressBar(false,R.string.authservice_connecting,ProgressBarState.INPROGRESS);
+        AuthManager.getInstance().checkForConfiguration("https://quigleyid.ddns.net/v1/oauth2/metadata", new AuthorizationServiceConfiguration.RetrieveConfigurationCallback() {
+
+            @Override
+            public void onFetchConfigurationCompleted(@Nullable AuthorizationServiceConfiguration serviceConfiguration, @Nullable AuthorizationException ex) {
+                callback.onFetchConfigurationCompleted(serviceConfiguration,ex);
+
+                /*if(serviceConfiguration != null && ex == null) {
+                    if(!AuthManager.getInstance().getDeviceAuthenticated()) {
+                        AuthManager.getInstance().performActionWithFreshTokens(new AuthState.AuthStateAction() {
+                            @Override
+                            public void execute(@Nullable String accessToken, @Nullable String idToken, @Nullable AuthorizationException ex) {
+                                if(ex == null){
+                                    AuthManager.getInstance().setDeviceAuthenticated(true);
+                                }
+                                else
+                                    AuthManager.getInstance().setDeviceAuthenticated(true);
+                            }
+                        });
+                    }
+                }
+                else if(ex != null){
+                    ACRA.getErrorReporter().handleSilentException(ex);
+                }*/
+            }
+        });
+    }
+
+    private void fetchRequestServiceConfiguration(RequestServiceConfiguration.RetrieveConfigurationCallback callback){
+        infoTextView.setText(R.string.requestservice_connecting);
+        RequestManager.getInstance().checkForConfiguration(configUrl, new RequestServiceConfiguration.RetrieveConfigurationCallback() {
+            @Override
+            public void onFetchConfigurationCompleted(@Nullable RequestServiceConfiguration serviceConfiguration, @Nullable RequestConfigurationException ex) {
+                if(ex != null)
+                    ACRA.getErrorReporter().handleException(ex.getException());
+                if (serviceConfiguration != null) {
+                    RequestManager.getInstance().ConfigureRequestManager(serviceConfiguration, ex);
+                    //setupNetworkCallback();
+                    ViewerConnectivityManager.getInstance().networkConnected();
+                }
+                callback.onFetchConfigurationCompleted(serviceConfiguration,ex);
+            }
+        });
+    }
+
+    private void updateProgressBar(boolean isComplete,String status,ProgressBarState state){
+        infoTextView.setText(status);
+        setProgressBarUpdate(isComplete,state);
+    }
+
+    private void updateProgressBar(boolean isComplete, @StringRes int statusString, ProgressBarState state){
+        infoTextView.setText(statusString);
+        setProgressBarUpdate(isComplete,state);
+    }
+
+    private void setProgressBarUpdate(boolean isComplete,ProgressBarState state){
+        progressBar.setIndeterminate(!isComplete);
+        if(isComplete) {
+            progressBar.setMax(1);
+            progressBar.setProgress(1);
+        }
+        switch (state){
+            case INPROGRESS:
+                progressBar.setProgressTintList(ColorStateList.valueOf(Color.CYAN));
+                progressBar.setProgressTintMode(PorterDuff.Mode.MULTIPLY);
+                break;
+            case GOOD:
+                progressBar.setProgressTintList(ColorStateList.valueOf(Color.CYAN));
+                progressBar.setProgressTintMode(PorterDuff.Mode.MULTIPLY);
+                break;
+            case WAITING:
+                progressBar.setProgressTintList(ColorStateList.valueOf(getBaseContext().getResources().getColor(R.color.reauthenticate)));
+                progressBar.setProgressTintMode(PorterDuff.Mode.MULTIPLY);
+                break;
+            case ERROR:
+                progressBar.setProgressTintList(ColorStateList.valueOf(Color.RED));
+                progressBar.setProgressTintMode(PorterDuff.Mode.MULTIPLY);
+                break;
+        }
+    }
+
+    private void setupOfflineLogin(){
+        updateProgressBar(true,R.string.request_error_connection,ProgressBarState.ERROR);
+        fingerprintIcon.setVisibility(View.VISIBLE);
+        startAuthCheckinService();
+        showBiometrics();
+    }
+
+    private void checkDeviceAuthentication(Context context,ItemRetrievalCallback<Boolean> callback){
+        infoTextView.setText(R.string.requestservice_authenticating);
+        AuthManager.getInstance().getDeviceRegistration().retrieveRegistrationId(context,new DeviceRegistration.DeviceRegistrationRetrievalCallback() {
+            @Override
+            public void DeviceRegistrationRetrieved(RegistrationId registrationId, Exception ex) {
+                if(registrationId != null){
+                    DeviceStatusRequest request = new DeviceStatusRequest();
+                    final ItemRetrievalCallback<DeviceStatus> deviceStatusCallback = new ItemRetrievalCallback<DeviceStatus>() {
+                        @Override
+                        public void ItemRetrieved(DeviceStatus item, AppRequestError exception) {
+                            if(item != null){
+                                if(item.resetDevice){
+                                    //TODO should remove all files from device
+                                }
+                                if(!item.isActive){
+                                    //TODO should disable the application
+                                }
+                                registrationId.setNextCheckIn(item.nextRequiredCheckin);
+                                AuthManager.getInstance().getDeviceRegistration().UpdateRegistrationId(registrationId);
+                                AuthManager.getInstance().getDeviceRegistration().setDeviceAuthenticated(true);
+                                callback.ItemRetrieved(true,null);
+                            }
+                            else{
+                                switch (exception.getRequestError()){
+                                    case DeviceNotRegistered:
+                                        RegistrationId newRegistrationId = new RegistrationId();
+                                        newRegistrationId.setDeviceId(AuthManager.getInstance().getDeviceRegistration().getDeviceId());
+                                        String deviceName = Settings.Secure.getString(context.getContentResolver(), "bluetooth_name");
+                                        newRegistrationId.setDeviceName(deviceName);
+                                        AuthManager.getInstance().getDeviceRegistration().registerDevice(context,newRegistrationId, new DeviceRegistrationRequest.DeviceRegistrationCallback() {
+                                            @Override
+                                            public void deviceRegistered(RegistrationId registrationId, Exception ex) {
+                                                request.getDeviceStatus(new ItemRetrievalCallback<DeviceStatus>() {
+                                                    @Override
+                                                    public void ItemRetrieved(DeviceStatus item, AppRequestError exception) {
+                                                        if(item != null){
+                                                            if(item.resetDevice){
+                                                                //TODO should remove all files from device
+                                                            }
+                                                            if(!item.isActive){
+                                                                //TODO should disable the application
+                                                            }
+                                                            registrationId.setNextCheckIn(item.nextRequiredCheckin);
+                                                            AuthManager.getInstance().getDeviceRegistration().UpdateRegistrationId(registrationId);
+                                                            AuthManager.getInstance().getDeviceRegistration().setDeviceAuthenticated(true);
+                                                            callback.ItemRetrieved(true,null);
+                                                        }
+                                                        else {
+                                                            callback.ItemRetrieved(false,exception);
+                                                        }
+                                                    }
+                                                });
+                                            }
+                                        });
+                                        break;
+                                    default:
+                                        callback.ItemRetrieved(false,exception);
+                                }
+                            }
+
+                            startAuthCheckinService();
+                        }
+                    };
+                    request.getDeviceStatus(deviceStatusCallback);
+                }
+            }
+        });
+    }
+
+    private void showBiometrics(){
+        Intent intent = new Intent(context, MainMenuActivity.class);
+        SecurityManager.getInstance().setupBiometricsForResult((SecureActivity) context, intent);
+    }
+
     private void registerNetworkCallback(){
         setupNetworkCallback();
-        infoTextView.setText(R.string.auth_error_connection);
+        if(AuthManager.getInstance().getDeviceRegistration().getDeviceAuthenticated()){
+            RegistrationId registrationId = AuthManager.getInstance().getDeviceRegistration().getRegistrationID();
+            if(registrationId.getNextCheckIn() != null){
+                if(registrationId.getNextCheckIn().isAfter(LocalDateTime.now())){
+                    setupOfflineLogin();
+                }
+                else{
+                    updateProgressBar(true,R.string.online_authentication_required,ProgressBarState.ERROR);
+                }
+            }
+
+        }
+        else{
+            updateProgressBar(true,R.string.online_authentication_required,ProgressBarState.ERROR);
+        }
+        /*infoTextView.setText(R.string.auth_error_connection);
         progressBar.setIndeterminate(false);
         progressBar.setMax(1);
         progressBar.setProgress(1);
@@ -201,7 +390,7 @@ public class NewSplashScreenActivity extends SecureActivity {
         progressBar.setProgressTintMode(PorterDuff.Mode.MULTIPLY);
         fingerprintIcon.setVisibility(View.VISIBLE);
         Intent intent = new Intent(this,MainMenuActivity.class);
-        SecurityManager.getInstance().setupBiometricsForResult((SecureActivity)context,intent);
+        SecurityManager.getInstance().setupBiometricsForResult((SecureActivity)context,intent);*/
         //setupBiometrics(intent);
         //startActivity(new Intent(NewSplashScreenActivity.this, LoginActivity.class));
         //finish();
@@ -212,32 +401,117 @@ public class NewSplashScreenActivity extends SecureActivity {
             @Override
             public void onAvailable(Network network) {
                 // network available
-                //if(!AuthManager.getInstance().isConfigured()){
-                if(!AuthManager.getInstance().isConfigured()) {
-                    AuthManager.getInstance().checkForConfiguration("https://quigleyid.ddns.net/v1/oauth2/metadata", new AuthorizationServiceConfiguration.RetrieveConfigurationCallback() {
-                        @Override
-                        public void onFetchConfigurationCompleted(@Nullable AuthorizationServiceConfiguration serviceConfiguration, @Nullable AuthorizationException ex) {
-                            if (ex == null) {
-                                RequestManager.getInstance().checkForConfiguration(configUrl, new RequestServiceConfiguration.RetrieveConfigurationCallback() {
-                                    @Override
-                                    public void onFetchConfigurationCompleted(@Nullable RequestServiceConfiguration serviceConfiguration, @Nullable RequestConfigurationException ex) {
-                                        //if(ex != null)
-                                        //NotificationManager.getInstance().showToast("Unable to connect to file server", Toast.LENGTH_SHORT);
-                                        if (ex == null) {
-                                            RequestManager.getInstance().ConfigureRequestManager(serviceConfiguration, ex);
-                                            ViewerConnectivityManager.getInstance().networkConnected();
-                                            NotificationManager.getInstance().showSnackbar(getResources().getString(R.string.service_connected), Snackbar.LENGTH_SHORT);
+                /*AuthManager.getInstance().checkForConfiguration("https://quigleyid.ddns.net/v1/oauth2/metadata", new AuthorizationServiceConfiguration.RetrieveConfigurationCallback() {
+                    @Override
+                    public void onFetchConfigurationCompleted(@Nullable AuthorizationServiceConfiguration serviceConfiguration, @Nullable AuthorizationException ex) {
+                        if (ex == null) {
+                            RequestManager.getInstance().checkForConfiguration(configUrl, new RequestServiceConfiguration.RetrieveConfigurationCallback() {
+                                @Override
+                                public void onFetchConfigurationCompleted(@Nullable RequestServiceConfiguration serviceConfiguration, @Nullable RequestConfigurationException ex) {
+                                    //if(ex != null)
+                                    //NotificationManager.getInstance().showToast("Unable to connect to file server", Toast.LENGTH_SHORT);
+                                    if (ex == null) {
+                                        RequestManager.getInstance().ConfigureRequestManager(serviceConfiguration, ex);
+                                        ViewerConnectivityManager.getInstance().networkConnected();
+                                        AuthManager.getInstance().getDeviceRegistration().retrieveRegistrationId(new DeviceRegistration.DeviceRegistrationRetrievalCallback() {
+                                            @Override
+                                            public void DeviceRegistrationRetrieved(RegistrationId registrationId, Exception ex) {
+                                                //TODO setup what happens when device status is retrieved when device is running
+                                            }
+                                        });
+                                        NotificationManager.getInstance().showSnackbar(getResources().getString(R.string.service_connected), Snackbar.LENGTH_SHORT);
+                                    }
+                                }
+                            });
+                        } else {
+                            Log.e("AuthConfig", ex.errorDescription, ex);
+                        }
+
+                    }
+                });*/
+                AuthManager.isOnline(context, new AuthManager.AuthAvailableCallback() {
+                    @Override
+                    public void requestComplete(boolean available, Exception ex) {
+                        if(available){
+                            fetchAuthServiceConfiguration(new AuthorizationServiceConfiguration.RetrieveConfigurationCallback() {
+                                @Override
+                                public void onFetchConfigurationCompleted(@Nullable AuthorizationServiceConfiguration serviceConfiguration, @Nullable AuthorizationException ex) {
+                                    if(serviceConfiguration != null) {
+                                        fetchRequestServiceConfiguration(new RequestServiceConfiguration.RetrieveConfigurationCallback() {
+                                            @Override
+                                            public void onFetchConfigurationCompleted(@Nullable RequestServiceConfiguration serviceConfiguration, @Nullable RequestConfigurationException ex) {
+                                                if(serviceConfiguration != null) {
+                                                    checkDeviceAuthentication(context,new ItemRetrievalCallback<Boolean>() {
+                                                        @Override
+                                                        public void ItemRetrieved(Boolean authenticated, AppRequestError exception) {
+                                                            if (authenticated) {
+                                                                updateProgressBar(true,R.string.service_connected,ProgressBarState.GOOD);
+                                                                showBiometrics();
+                                                            }
+                                                            else{
+                                                                updateProgressBar(true,R.string.device_authenticate_error,ProgressBarState.ERROR);
+                                                                if(exception != null){
+                                                                    NotificationManager.getInstance().showSnackbar(exception.getLocalizedMessage(),Snackbar.LENGTH_SHORT);
+                                                                }
+                                                            }
+                                                        }
+                                                    });
+                                                }
+                                                else{
+                                                    if(AuthManager.getInstance().getDeviceRegistration().getDeviceAuthenticated()){
+                                                        RegistrationId registrationId = AuthManager.getInstance().getDeviceRegistration().getRegistrationID();
+                                                        if(registrationId.getNextCheckIn() != null){
+                                                            if(registrationId.getNextCheckIn().isAfter(LocalDateTime.now())){
+                                                                setupOfflineLogin();
+                                                            }
+                                                            else{
+                                                                updateProgressBar(true,R.string.online_authentication_required,ProgressBarState.ERROR);
+                                                            }
+                                                        }
+
+                                                    }
+                                                }
+                                            }
+                                        });
+                                    }
+                                    else{
+                                        if(AuthManager.getInstance().getDeviceRegistration().getDeviceAuthenticated()){
+                                            RegistrationId registrationId = AuthManager.getInstance().getDeviceRegistration().getRegistrationID();
+                                            if(registrationId.getNextCheckIn() != null){
+                                                if(registrationId.getNextCheckIn().isAfter(LocalDateTime.now())){
+                                                    setupOfflineLogin();
+                                                }
+                                                else{
+                                                    updateProgressBar(true,R.string.online_authentication_required,ProgressBarState.ERROR);
+                                                }
+                                            }
+
                                         }
                                     }
-                                });
-                            } else {
-                                Log.e("AuthConfig", ex.errorDescription, ex);
-                            }
-
+                                }
+                            });
                         }
-                    });
-                }
-                //}
+                        else{
+                            //registerNetworkCallback();
+                            if(AuthManager.getInstance().getDeviceRegistration().getDeviceAuthenticated()){
+                                RegistrationId registrationId = AuthManager.getInstance().getDeviceRegistration().getRegistrationID();
+                                if(registrationId.getNextCheckIn() != null){
+                                    if(registrationId.getNextCheckIn().isAfter(LocalDateTime.now())){
+                                        setupOfflineLogin();
+                                    }
+                                    else{
+                                        updateProgressBar(true,R.string.online_authentication_required,ProgressBarState.ERROR);
+                                    }
+                                }
+
+                            }
+                            else{
+                                updateProgressBar(true,R.string.online_authentication_required,ProgressBarState.ERROR);
+                            }
+                        }
+                    }
+                });
+
             }
 
             @Override
@@ -259,6 +533,7 @@ public class NewSplashScreenActivity extends SecureActivity {
                 ViewerConnectivityManager.getInstance().networkLost();
             }
 
+
             @Override
             public void onLinkPropertiesChanged(@NonNull Network network, @NonNull LinkProperties linkProperties) {
                 super.onLinkPropertiesChanged(network, linkProperties);
@@ -277,6 +552,7 @@ public class NewSplashScreenActivity extends SecureActivity {
                     case RESULT_OK:
                         if(data != null){
                             startActivity(data);
+                            finish();
                         }
                         break;
                     default:
@@ -297,6 +573,11 @@ public class NewSplashScreenActivity extends SecureActivity {
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
+
     private void getConfigUrl(){
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         String mainUrl = prefs.getString("url","");
@@ -304,13 +585,21 @@ public class NewSplashScreenActivity extends SecureActivity {
         boolean useHttps = prefs.getBoolean("https_toggle",true);
         String scheme = UrlManager.getScheme(useHttps);
 
-        if(mainUrl.length() == 0 || port.length() == 0){
+        /*if(mainUrl.length() == 0 || port.length() == 0){
             Intent intent = new Intent(context, WebSettingsActivity.class);
             startActivity(intent);
         }
         else {
             String baseUrl = scheme + mainUrl + ":" + port + UrlManager.getMetadataEndpoint();
             configUrl = baseUrl;
-        }
+        }*/
+    }
+
+    public enum ProgressBarState{
+        INPROGRESS,
+        GOOD,
+        WAITING,
+        ERROR,
+
     }
 }

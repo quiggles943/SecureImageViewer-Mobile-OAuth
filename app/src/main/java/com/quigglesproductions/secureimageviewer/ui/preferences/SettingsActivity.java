@@ -96,13 +96,24 @@ public class SettingsActivity extends SecureActivity {
                     return true;
                 }
             });
+            androidx.preference.Preference aboutPreference  = getPreferenceManager().findPreference("about_settings");
+            aboutPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    Intent intent = new Intent(getContext(),AboutSettingsActivity.class);
+                    startActivity(intent);
+                    return true;
+                }
+            });
         }
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                NavUtils.navigateUpFromSameTask(this);
+                Intent intent = NavUtils.getParentActivityIntent(this);
+                if(intent != null)
+                    NavUtils.navigateUpTo(this,intent);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

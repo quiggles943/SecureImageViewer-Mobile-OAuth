@@ -13,4 +13,7 @@ public class RequestConfigurationException {
     public String getExceptionName(){
         return exception.getClass().getName();
     }
+    public Exception getException(){
+        return exception;
+    }
 }

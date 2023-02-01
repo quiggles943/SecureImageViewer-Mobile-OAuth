@@ -29,11 +29,13 @@ import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
 import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
 import com.quigglesproductions.secureimageviewer.managers.FolderManager;
 import com.quigglesproductions.secureimageviewer.managers.NotificationManager;
-import com.quigglesproductions.secureimageviewer.models.folder.FolderModel;
-import com.quigglesproductions.secureimageviewer.models.folder.OfflineFolderModel;
+import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedDatabaseFolder;
+import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedFolder;
+import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedOnlineFolder;
 import com.quigglesproductions.secureimageviewer.recycler.RecyclerViewSelectionMode;
 import com.quigglesproductions.secureimageviewer.recycler.SpacesItemDecoration;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
+import com.quigglesproductions.secureimageviewer.ui.newfolderviewer.NewFolderViewerActivity;
 import com.quigglesproductions.secureimageviewer.ui.onlinefolderview.OnlineFolderViewActivity;
 import com.quigglesproductions.secureimageviewer.ui.onlinerecentfilelist.OnlineRecentFilesViewActivity;
 
@@ -72,9 +74,9 @@ public class OnlineFolderListActivity extends SecureActivity {
         recyclerView.addItemDecoration(new SpacesItemDecoration(4));
         vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
         if(savedInstanceState != null) {
-            ArrayList<FolderModel> items = savedInstanceState.getParcelableArrayList("myAdapter");
+            //ArrayList<EnhancedFolder> items = savedInstanceState.getParcelableArrayList("myAdapter");
             rvAdapter.clear();
-            rvAdapter.addList(items);
+            //rvAdapter.addList(items);
             //rvAdapter = new FolderListRecyclerAdapter(context,items);
             int columns = getResources().getInteger(R.integer.column_count_folderlist);
             recyclerView.setLayoutManager(new GridLayoutManager(context,columns));
@@ -135,18 +137,19 @@ public class OnlineFolderListActivity extends SecureActivity {
                         rvAdapter.setMultiSelect(false);
                 }
                 else {
-                    FolderModel value = rvAdapter.getItem(position);
-                    Intent intent = new Intent(context, OnlineFolderViewActivity.class);
+                    EnhancedFolder value = rvAdapter.getItem(position);
+                    FolderManager.getInstance().setCurrentFolder(value);
+                    Intent intent = new Intent(context, NewFolderViewerActivity.class);
                     intent.putExtra("folderId", value.getOnlineId());
                     intent.putExtra("folderName", value.getName());
-                    intent.putExtra("folder", gson.toJson(value));
+                    //intent.putExtra("folder", gson.toJson(value));
                     startActivity(intent);
                 }
             }
 
             @Override
             public void onLongClick(int position) {
-                FolderModel value = rvAdapter.getItem(position);
+                EnhancedFolder value = rvAdapter.getItem(position);
                 if(rvAdapter.getSelectedCount() == 0){
                     vibrator.vibrate(10);
                     rvAdapter.setMultiSelect(true);
@@ -227,12 +230,29 @@ public class OnlineFolderListActivity extends SecureActivity {
 
     private void refreshFolders(String accessToken){
         //onlineProgressBar.setVisibility(View.VISIBLE);
-        RequestManager.getInstance().getRequestService().getFolders(accessToken, new RequestManager.RequestResultCallback<ArrayList<FolderModel>, Exception>() {
+        /*RequestManager.getInstance().getRequestService().getFolders(accessToken, new RequestManager.RequestResultCallback<ArrayList<FolderModel>, Exception>() {
             @Override
             public void RequestResultRetrieved(ArrayList<FolderModel> result, Exception exception) {
                 if (result != null) {
                     rvAdapter.clear();
                     rvAdapter.addList(result);
+                }
+                swipeContainer.setRefreshing(false);
+                //onlineProgressBar.setVisibility(View.INVISIBLE);
+            }
+        });*/
+        RequestManager.getInstance().getRequestService().getFolders(context,new RequestManager.RequestResultCallback<ArrayList<EnhancedOnlineFolder>, Exception>() {
+            @Override
+            public void RequestResultRetrieved(ArrayList<EnhancedOnlineFolder> result, Exception exception) {
+                if(exception != null){
+                    NotificationManager.getInstance().showSnackbar(exception.getLocalizedMessage(),Snackbar.LENGTH_SHORT);
+                }
+                if (result != null) {
+                    rvAdapter.clear();
+                    for(EnhancedOnlineFolder folder : result){
+                        rvAdapter.add(folder);
+                    }
+                    //rvAdapter.addList(result);
                 }
                 swipeContainer.setRefreshing(false);
                 //onlineProgressBar.setVisibility(View.INVISIBLE);
@@ -285,13 +305,13 @@ public class OnlineFolderListActivity extends SecureActivity {
                 NotificationManager.getInstance().showSnackbar("Downloading selected folders",Snackbar.LENGTH_SHORT);
                 for(int i : rvAdapter.getSelectedPositions())
                 {
-                    FolderModel folder = rvAdapter.getItem(i);
+                    EnhancedFolder folder = rvAdapter.getItem(i);
                     AuthManager.getInstance().performActionWithFreshTokens(context, new AuthState.AuthStateAction() {
                         @Override
                         public void execute(@Nullable String accessToken, @Nullable String idToken, @Nullable AuthorizationException ex) {
-                            FolderManager.getInstance().downloadFolder(folder, accessToken, new FolderManager.DownloadResultCallback<OfflineFolderModel, ArrayList<VolleyError>>() {
+                            FolderManager.getInstance().downloadFolder(folder, accessToken, new FolderManager.DownloadResultCallback<EnhancedDatabaseFolder, ArrayList<VolleyError>>() {
                                 @Override
-                                public void ResultReceived(OfflineFolderModel result, ArrayList<VolleyError> exception) {
+                                public void ResultReceived(EnhancedDatabaseFolder result, ArrayList<VolleyError> exception) {
                                     NotificationManager.getInstance().showSnackbar(folder.getName() + " downloaded successfully", Snackbar.LENGTH_SHORT);
                                 }
                             });

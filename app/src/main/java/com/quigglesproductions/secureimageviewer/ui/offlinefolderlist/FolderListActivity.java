@@ -6,6 +6,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -25,13 +27,17 @@ import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
 import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
 import com.quigglesproductions.secureimageviewer.apprequest.RequestService;
 import com.quigglesproductions.secureimageviewer.database.DatabaseHelper;
+import com.quigglesproductions.secureimageviewer.database.enhanced.EnhancedDatabaseHandler;
 import com.quigglesproductions.secureimageviewer.managers.FolderManager;
 import com.quigglesproductions.secureimageviewer.managers.NotificationManager;
+import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedDatabaseFolder;
+import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedOnlineFolder;
 import com.quigglesproductions.secureimageviewer.models.file.FileModel;
 import com.quigglesproductions.secureimageviewer.models.file.OfflineFileModel;
 import com.quigglesproductions.secureimageviewer.models.folder.FolderModel;
 import com.quigglesproductions.secureimageviewer.models.folder.OfflineFolderModel;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
+import com.quigglesproductions.secureimageviewer.ui.newfolderviewer.NewFolderViewerActivity;
 import com.quigglesproductions.secureimageviewer.ui.offlinefolderview.FolderViewActivity;
 import com.quigglesproductions.secureimageviewer.utils.BooleanUtils;
 
@@ -43,6 +49,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class FolderListActivity extends SecureActivity {
     private static final int CONTEXTMENU_INFO = 0;
@@ -54,7 +62,7 @@ public class FolderListActivity extends SecureActivity {
     //protected ObservableArrayList<ItemFolder> folders;
     private DatabaseHelper dbHelper;
     protected FolderGridAdapter gridAdapter;
-    FolderLoader folderLoader;
+    //FolderLoader folderLoader;
     MenuItem syncItem;
 
     @Override
@@ -64,18 +72,19 @@ public class FolderListActivity extends SecureActivity {
         context = this;
         setContentView(R.layout.activity_folder_list);
         folderView = (GridView) findViewById(R.id.folderView);
-        FolderManager.getInstance().setDownloadCompleteCallback(new FolderManager.DownloadResultCallback<RequestService.DownloadRequest<OfflineFolderModel>, ArrayList<VolleyError>>() {
+        FolderManager.getInstance().setDownloadCompleteCallback(new FolderManager.DownloadResultCallback<RequestService.DownloadRequest<EnhancedDatabaseFolder>, ArrayList<VolleyError>>() {
             @Override
-            public void ResultReceived(RequestService.DownloadRequest<OfflineFolderModel> result, ArrayList<VolleyError> exception) {
+            public void ResultReceived(RequestService.DownloadRequest<EnhancedDatabaseFolder> result, ArrayList<VolleyError> exception) {
                 if(result.getStatus() == RequestService.DownloadRequest.RequestStatus.COMPLETE || result.getStatus() == RequestService.DownloadRequest.RequestStatus.COMPLETE_WITH_ERROR) {
-                    result.getObject().setFileInfo(context);
-                    gridAdapter.setFolderAsDownloaded(result.getObject());
+                    //result.getObject().setFileInfo(context);
+                    //gridAdapter.setFolderAsDownloaded(result.getObject());
                 }
             }
         });
-        gridAdapter = new FolderGridAdapter(context, new ArrayList<OfflineFolderModel>(),folderView);
-        folderLoader = new FolderLoader(context,gridAdapter);
-        folderLoader.execute();
+        gridAdapter = new FolderGridAdapter(context, new ArrayList<EnhancedDatabaseFolder>(),folderView);
+        //folderLoader = new FolderLoader(context,gridAdapter);
+        //folderLoader.execute();
+        getFolders();
         folderView.setAdapter(gridAdapter);
         /*gridAdapter.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -99,7 +108,7 @@ public class FolderListActivity extends SecureActivity {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
                 // TODO Auto-generated method stub
-                FolderModel value = gridAdapter.getItem(position);
+                EnhancedDatabaseFolder value = gridAdapter.getItem(position);
                 if(gridAdapter.isMultiSelect()) {
                     if (gridAdapter.isItemInSelection(position)) {
                         int index = gridAdapter.getSelectedFolders().indexOf(position);
@@ -110,8 +119,8 @@ public class FolderListActivity extends SecureActivity {
                     }
                 }
                 else {
-
-                    Intent intent = new Intent(context, FolderViewActivity.class);
+                    FolderManager.getInstance().setCurrentFolder(value);
+                    Intent intent = new Intent(context, NewFolderViewerActivity.class);
                     intent.putExtra("folderId", value.getId());
                     intent.putExtra("folderName", value.getName());
                     //intent.putExtra("folder", value);
@@ -157,7 +166,7 @@ public class FolderListActivity extends SecureActivity {
         switch(item.getItemId()) {
             case CONTEXTMENU_DELETE:
                 // add stuff here
-                FolderModel folder = (FolderModel)folderView.getItemAtPosition(info.position);
+                OfflineFolderModel folder = (OfflineFolderModel)folderView.getItemAtPosition(info.position);
                 NotificationManager.getInstance().showSnackbar("Folder '"+folder.getName()+"' selected for deletion", Snackbar.LENGTH_SHORT);
                 AsyncTask.execute(new Runnable() {
                     @Override
@@ -178,8 +187,9 @@ public class FolderListActivity extends SecureActivity {
     protected void onRestart() {
         super.onRestart();
         gridAdapter.clear();
-        folderLoader = new FolderLoader(context, gridAdapter);
-        folderLoader.execute();
+        //folderLoader = new FolderLoader(context, gridAdapter);
+        //folderLoader.execute();
+        getFolders();
         //gridAdapter.notifyDataSetChanged();
     }
 
@@ -207,7 +217,7 @@ public class FolderListActivity extends SecureActivity {
             AuthManager.getInstance().performActionWithFreshTokens(context,new AuthState.AuthStateAction() {
                 @Override
                 public void execute(@Nullable String accessToken, @Nullable String idToken, @Nullable AuthorizationException ex) {
-                    FolderManager.getInstance().syncFolder(accessToken, gridAdapter.getItem(index), new RequestManager.RequestResultCallback<FileModel, Exception>() {
+                    /*FolderManager.getInstance().syncFolder(accessToken, gridAdapter.getItem(index), new RequestManager.RequestResultCallback<FileModel, Exception>() {
                         @Override
                         public void RequestResultRetrieved(FileModel result, Exception exception) {
                             result.setIsUploaded(true);
@@ -218,7 +228,7 @@ public class FolderListActivity extends SecureActivity {
                             result.setSynced(true);
                             gridAdapter.notifyDataSetChanged();
                         }
-                    });
+                    });*/
                 }
             });
 
@@ -243,9 +253,30 @@ public class FolderListActivity extends SecureActivity {
         }
     }
 
+    private void getFolders(){
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        Handler handler = new Handler(Looper.getMainLooper());
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                EnhancedDatabaseHandler databaseHandler = new EnhancedDatabaseHandler(context);
+                ArrayList<EnhancedDatabaseFolder> folders = databaseHandler.getFolders();
+                for(EnhancedDatabaseFolder folder : folders) {
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            gridAdapter.addItem(folder);
+                        }
+                    });
+                }
+            }
+        });
+    }
+}
 
 
-    public class FolderLoader extends AsyncTask<Void,Integer, Void> {
+
+   /* public class FolderLoader extends AsyncTask<Void,Integer, Void> {
         Context context;
         BaseAdapter adapter;
 
@@ -338,4 +369,4 @@ public class FolderListActivity extends SecureActivity {
             adapter.notifyDataSetChanged();
         }
     }
-}
+}*/

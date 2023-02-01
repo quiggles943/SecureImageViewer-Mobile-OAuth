@@ -11,5 +11,8 @@
             app:key="security_settings" />
         <Preference android:title="@string/storage_settings_button" app:key="storage_settings"/>
     </PreferenceCategory>
+    <PreferenceCategory android:title="Extra">
+        <Preference app:title="About" app:key="about_settings"/>
+    </PreferenceCategory>
 
 </PreferenceScreen>

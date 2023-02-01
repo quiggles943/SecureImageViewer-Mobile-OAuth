@@ -10,11 +10,15 @@
     <color name="transparent">#00FFFFFF</color>
     <color name="selected">#7458DEFF</color>
     <color name="translucent">#F2000000</color>
-    <color name="text_grey">@android:color/darker_gray</color>
+    <color name="text_grey_200">@android:color/darker_gray</color>
+    <color name="text_color_button">#818181</color>
     <color name="progressBar_overlay_background">#804E4E4E</color>
     <color name="reauthenticate">#B8800F</color>
 
+    <color name="blue_100">#B6DEFF</color>
     <color name="blue_200">#90CAF9</color>
     <color name="blue_500">#2196F3</color>
     <color name="blue_700">#1976D2</color>
+
+    <color name="underline">#818181</color>
 </resources>

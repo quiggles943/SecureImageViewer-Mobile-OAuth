@@ -4,26 +4,39 @@ import android.content.Context;
 
 import com.android.volley.VolleyError;
 import com.google.android.material.snackbar.Snackbar;
+import com.quigglesproductions.secureimageviewer.SortType;
+import com.quigglesproductions.secureimageviewer.appauth.RequestServiceNotConfiguredException;
+import com.quigglesproductions.secureimageviewer.apprequest.callbacks.ItemListRetrievalCallback;
+import com.quigglesproductions.secureimageviewer.apprequest.callbacks.ItemRetrievalCallback;
 import com.quigglesproductions.secureimageviewer.apprequest.configuration.RequestConfigurationException;
 import com.quigglesproductions.secureimageviewer.apprequest.configuration.RequestServiceConfiguration;
-import com.quigglesproductions.secureimageviewer.apprequest.downloaders.ArtistDownloadTask;
-import com.quigglesproductions.secureimageviewer.apprequest.downloaders.CatagoryDownloadTask;
 import com.quigglesproductions.secureimageviewer.apprequest.downloaders.DownloadCompleteCallback;
 import com.quigglesproductions.secureimageviewer.apprequest.downloaders.FileContentUploadTask;
 import com.quigglesproductions.secureimageviewer.apprequest.downloaders.FileModelUploadTask;
 import com.quigglesproductions.secureimageviewer.apprequest.downloaders.FolderDownloadTask;
-import com.quigglesproductions.secureimageviewer.apprequest.downloaders.FolderListDownloadTask;
-import com.quigglesproductions.secureimageviewer.apprequest.downloaders.OnlineFolderRetrievalTask;
-import com.quigglesproductions.secureimageviewer.apprequest.downloaders.RecentFileDownloader;
-import com.quigglesproductions.secureimageviewer.apprequest.downloaders.SubjectDownloadTask;
+import com.quigglesproductions.secureimageviewer.apprequest.requests.ArtistListRequest;
+import com.quigglesproductions.secureimageviewer.apprequest.requests.CatagoryListRequest;
+import com.quigglesproductions.secureimageviewer.apprequest.requests.FileMetadataRequest;
+import com.quigglesproductions.secureimageviewer.apprequest.requests.FolderFilesRequest;
+import com.quigglesproductions.secureimageviewer.apprequest.requests.FolderListRequest;
+import com.quigglesproductions.secureimageviewer.apprequest.requests.RecentFilesRequest;
+import com.quigglesproductions.secureimageviewer.apprequest.requests.SubjectListRequest;
 import com.quigglesproductions.secureimageviewer.database.DatabaseHandler;
+import com.quigglesproductions.secureimageviewer.database.enhanced.EnhancedDatabaseHandler;
 import com.quigglesproductions.secureimageviewer.managers.NotificationManager;
 import com.quigglesproductions.secureimageviewer.models.ArtistModel;
 import com.quigglesproductions.secureimageviewer.models.CatagoryModel;
+import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
+import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedDatabaseFolder;
+import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedFolder;
+import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedOnlineFile;
+import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedOnlineFolder;
+import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.FileMetadata;
 import com.quigglesproductions.secureimageviewer.models.file.FileModel;
 import com.quigglesproductions.secureimageviewer.models.folder.FolderModel;
 import com.quigglesproductions.secureimageviewer.models.SubjectModel;
-import com.quigglesproductions.secureimageviewer.models.folder.OfflineFolderModel;
+import com.techyourchance.threadposter.BackgroundThreadPoster;
+import com.techyourchance.threadposter.UiThreadPoster;
 
 import java.util.ArrayList;
 
@@ -31,32 +44,43 @@ public class RequestService {
     private Context context;
     private RequestServiceConfiguration configuration;
     private  RequestConfigurationException exception;
+    private final BackgroundThreadPoster backgroundThreadPoster;
+    private final UiThreadPoster uiThreadPoster;
     public RequestService(RequestServiceConfiguration serviceConfiguration, RequestConfigurationException ex) {
         configuration = serviceConfiguration;
         context = serviceConfiguration.getContext();
         exception = ex;
+        backgroundThreadPoster = new BackgroundThreadPoster();
+        uiThreadPoster = new UiThreadPoster();
     }
 
-    public void getFolders(String accessToken,RequestManager.RequestResultCallback<ArrayList<FolderModel>,Exception> resultCallback)
+    public void getFolders(Context context,RequestManager.RequestResultCallback<ArrayList<EnhancedOnlineFolder>,Exception> resultCallback)
     {
-        new FolderListDownloadTask(resultCallback).execute(accessToken);
-    }
-    public void getFolderForDownload(FolderModel folder, String accessToken, RequestManager.RequestResultCallback<FolderModel,ArrayList<VolleyError>> resultCallback){
-        FolderDownloadTask.getFolderForDownload(context, folder, accessToken, new DownloadCompleteCallback<FolderModel, ArrayList<VolleyError>>() {
-            @Override
-            public void downloadComplete(FolderModel folder, ArrayList<VolleyError> volleyErrors) {
-                resultCallback.RequestResultRetrieved(folder,volleyErrors);
-            }
-        });
+        FolderListRequest request = new FolderListRequest(context);
+        try{
+            request.getFolderList(new ItemListRetrievalCallback<EnhancedOnlineFolder>() {
+                @Override
+                public void ItemsRetrieved(ArrayList<EnhancedOnlineFolder> items, Exception exception) {
+                    uiThreadPoster.post(()->
+                    {
+                        resultCallback.RequestResultRetrieved(items,exception);
+                    });
+                }
+            });
+        }catch (RequestServiceNotConfiguredException exception){
+            resultCallback.RequestResultRetrieved(null,exception);
+        }
     }
     public void getFolderForDownload(DownloadRequest request, String accessToken, RequestManager.RequestResultCallback<DownloadRequest,ArrayList<VolleyError>> resultCallback){
         request.setStatus(DownloadRequest.RequestStatus.IN_PROGRESS);
-        FolderDownloadTask.getFolderForDownload(context, (FolderModel) request.object, accessToken, new DownloadCompleteCallback<FolderModel, ArrayList<VolleyError>>() {
+        FolderDownloadTask.getFolderForDownload(context, (EnhancedFolder) request.object, accessToken, new DownloadCompleteCallback<EnhancedFolder, ArrayList<VolleyError>>() {
             @Override
-            public void downloadComplete(FolderModel folder, ArrayList<VolleyError> volleyErrors) {
+            public void downloadComplete(EnhancedFolder folder, ArrayList<VolleyError> volleyErrors) {
                 folder.isDownloading = false;
-                folder.setStatus(FolderModel.Status.DOWNLOADED);
-                DatabaseHandler.getInstance().insertOrUpdateFolder(folder);
+                folder.setStatus(EnhancedFolder.Status.DOWNLOADED);
+                EnhancedDatabaseHandler databaseHandler = new EnhancedDatabaseHandler(context);
+                databaseHandler.insertOrUpdateFolder(folder);
+                //DatabaseHandler.getInstance().insertOrUpdateFolder(folder);
                 request.updateObject(folder);
                 if(volleyErrors != null && volleyErrors.size()>0){
                     for(VolleyError error:volleyErrors)
@@ -67,14 +91,20 @@ public class RequestService {
         });
     }
 
-    public void getRecentFiles(String accessToken, int count, int offset, RequestManager.RequestResultCallback<ArrayList<FileModel>,Exception> resultCallback){
-        RecentFileDownloader downloader = new RecentFileDownloader(context, accessToken, new DownloadCompleteCallback<ArrayList<FileModel>, Exception>() {
-            @Override
-            public void downloadComplete(ArrayList<FileModel> files, Exception error) {
-                resultCallback.RequestResultRetrieved(files,error);
-            }
-        });
-        downloader.execute(count,offset);
+    public void getRecentFiles(Context context,int count, int offset, RequestManager.RequestResultCallback<ArrayList<EnhancedOnlineFile>,Exception> resultCallback){
+        RecentFilesRequest recentFilesRequest = new RecentFilesRequest(context);
+        recentFilesRequest.setFileCount(count);
+        recentFilesRequest.setOffset(offset);
+        try{
+            recentFilesRequest.getRecentFiles(new ItemListRetrievalCallback<EnhancedOnlineFile>() {
+                @Override
+                public void ItemsRetrieved(ArrayList<EnhancedOnlineFile> recentFiles, Exception exc) {
+                    resultCallback.RequestResultRetrieved(recentFiles,exc);
+                }
+            });
+        }catch (RequestServiceNotConfiguredException exception){
+            resultCallback.RequestResultRetrieved(null,exception);
+        }
 
     }
 
@@ -82,14 +112,19 @@ public class RequestService {
         return configuration;
     }
 
-    public void getFolderFiles(String accessToken, int folderId, RequestManager.RequestResultCallback<ArrayList<FileModel>,Exception> resultCallback) {
-        OnlineFolderRetrievalTask folderRetrieval = new OnlineFolderRetrievalTask(context, accessToken, new DownloadCompleteCallback<ArrayList<FileModel>, Exception>() {
-            @Override
-            public void downloadComplete(ArrayList<FileModel> result, Exception error) {
-                resultCallback.RequestResultRetrieved(result,error);
-            }
-        });
-        folderRetrieval.execute(folderId);
+    public void getFolderFiles(int folderId, RequestManager.RequestResultCallback<ArrayList<EnhancedOnlineFile>,Exception> resultCallback, SortType sortType) {
+        FolderFilesRequest request = new FolderFilesRequest(context);
+        request.setSortType(sortType);
+        try {
+            request.getFolderFiles(folderId, new FolderFilesRequest.FolderFilesRetrievalCallback() {
+                @Override
+                public void FilesRetrieved(ArrayList files, Exception exception) {
+                    resultCallback.RequestResultRetrieved(files, exception);
+                }
+            });
+        }catch (RequestServiceNotConfiguredException exception){
+            resultCallback.RequestResultRetrieved(null,exception);
+        }
     }
 
     public void uploadFile(String accessToken,FileModel item,RequestManager.RequestResultCallback<FileModel,Exception> requestCallback) {
@@ -183,35 +218,84 @@ public class RequestService {
         }
     }
 
-    public void getArtists(String accessToken,RequestManager.RequestResultCallback<ArrayList<ArtistModel>,Exception> resultCallback){
-        ArtistDownloadTask artistDownloadTask = new ArtistDownloadTask(accessToken, new DownloadCompleteCallback<ArrayList<ArtistModel>, Exception>() {
+    public void getArtists(Context context,String accessToken,RequestManager.RequestResultCallback<ArrayList<ArtistModel>,Exception> resultCallback){
+        /*ArtistDownloadTask artistDownloadTask = new ArtistDownloadTask(accessToken, new DownloadCompleteCallback<ArrayList<ArtistModel>, Exception>() {
             @Override
             public void downloadComplete(ArrayList<ArtistModel> result, Exception error) {
                 resultCallback.RequestResultRetrieved(result, error);
             }
         });
-        artistDownloadTask.execute();
+        artistDownloadTask.execute();*/
+
+        ArtistListRequest request = new ArtistListRequest();
+        try {
+            request.getArtists(context, new ItemListRetrievalCallback<ArtistModel>() {
+                @Override
+                public void ItemsRetrieved(ArrayList<ArtistModel> items, Exception exception) {
+                    resultCallback.RequestResultRetrieved(items, exception);
+                }
+            });
+        }catch (RequestServiceNotConfiguredException exception){
+            resultCallback.RequestResultRetrieved(null,exception);
+        }
     }
 
-    public void getSubjects(String accessToken,RequestManager.RequestResultCallback<ArrayList<SubjectModel>,Exception> resultCallback){
-        SubjectDownloadTask downloadTask = new SubjectDownloadTask(accessToken, new DownloadCompleteCallback<ArrayList<SubjectModel>, Exception>() {
+    public void getSubjects(Context context,String accessToken,RequestManager.RequestResultCallback<ArrayList<SubjectModel>,Exception> resultCallback){
+        /*SubjectDownloadTask downloadTask = new SubjectDownloadTask(accessToken, new DownloadCompleteCallback<ArrayList<SubjectModel>, Exception>() {
             @Override
             public void downloadComplete(ArrayList<SubjectModel> result, Exception error) {
                 resultCallback.RequestResultRetrieved(result,error);
             }
         });
-        downloadTask.execute();
+        downloadTask.execute();*/
+        SubjectListRequest request = new SubjectListRequest();
+        try {
+            request.getSubjects(context,new ItemListRetrievalCallback<SubjectModel>() {
+                @Override
+                public void ItemsRetrieved(ArrayList<SubjectModel> items, Exception exception) {
+                    resultCallback.RequestResultRetrieved(items,exception);
+                }
+            });
+        }catch (RequestServiceNotConfiguredException exception){
+            resultCallback.RequestResultRetrieved(null,exception);
+        }
     }
 
-    public void getCatagories(String accessToken, RequestManager.RequestResultCallback<ArrayList<CatagoryModel>, Exception> resultCallback) {
-        CatagoryDownloadTask downloadTask = new CatagoryDownloadTask(accessToken, new DownloadCompleteCallback<ArrayList<CatagoryModel>, Exception>() {
+    public void getCatagories(Context context,String accessToken, RequestManager.RequestResultCallback<ArrayList<CatagoryModel>, Exception> resultCallback) {
+        /*CatagoryDownloadTask downloadTask = new CatagoryDownloadTask(accessToken, new DownloadCompleteCallback<ArrayList<CatagoryModel>, Exception>() {
             @Override
             public void downloadComplete(ArrayList<CatagoryModel> result, Exception error) {
                 resultCallback.RequestResultRetrieved(result,error);
             }
         });
-        downloadTask.execute();
+        downloadTask.execute();*/
+        CatagoryListRequest request = new CatagoryListRequest();
+        try {
+            request.getCatagories(context, new ItemListRetrievalCallback<CatagoryModel>() {
+                @Override
+                public void ItemsRetrieved(ArrayList<CatagoryModel> items, Exception exception) {
+                    resultCallback.RequestResultRetrieved(items, exception);
+                }
+            });
+        }catch (RequestServiceNotConfiguredException exception){
+            resultCallback.RequestResultRetrieved(null,exception);
+        }
     }
+
+    public void getFileMetadata(int onlineId, RequestManager.RequestResultCallback<FileMetadata, Exception> fileMetadataExceptionRequestResultCallback) {
+        FileMetadataRequest fileMetadataRequest = new FileMetadataRequest(context);
+        try {
+        fileMetadataRequest.getFileMetadata(onlineId, new ItemRetrievalCallback<FileMetadata>() {
+            @Override
+            public void ItemRetrieved(FileMetadata item, AppRequestError exception) {
+                fileMetadataExceptionRequestResultCallback.RequestResultRetrieved(item,exception);
+            }
+        });
+        }catch (RequestServiceNotConfiguredException exception){
+            fileMetadataExceptionRequestResultCallback.RequestResultRetrieved(null,exception);
+        }
+    }
+
     public static class FolderUploadRequest<T,V>{
         private DownloadRequest.RequestStatus status;
         private T folder;

@@ -10,9 +10,12 @@ import android.text.TextUtils;
 import com.quigglesproductions.secureimageviewer.managers.FolderManager;
 import com.quigglesproductions.secureimageviewer.models.ArtistModel;
 import com.quigglesproductions.secureimageviewer.models.CatagoryModel;
+import com.quigglesproductions.secureimageviewer.models.ItemBaseModel;
 import com.quigglesproductions.secureimageviewer.models.file.FileModel;
+import com.quigglesproductions.secureimageviewer.models.file.OfflineFileModel;
 import com.quigglesproductions.secureimageviewer.models.folder.FolderModel;
 import com.quigglesproductions.secureimageviewer.models.SubjectModel;
+import com.quigglesproductions.secureimageviewer.models.folder.OfflineFolderModel;
 
 import java.io.File;
 import java.text.ParseException;
@@ -42,7 +45,7 @@ public class DatabaseHandler {
         this.database = new DatabaseHelper(context).getWritableDatabase();
     }
 
-    public FolderModel getFolderById(int folderId){
+    public OfflineFolderModel getFolderById(int folderId){
         String[] projection = {
                 DatabaseHelper.ViewFolder._ID,
                 DatabaseHelper.ViewFolder.COLUMN_ONLINE_ID,
@@ -80,7 +83,7 @@ public class DatabaseHandler {
             if(statusString != null && statusString.length()>0) {
                 status = FolderModel.Status.valueOf(statusString);
             }
-            FolderModel folder = new FolderModel(folderId,onlineId, folderName, fileCount,downloadDate,status);
+            OfflineFolderModel folder = new OfflineFolderModel(folderId,onlineId, folderName, fileCount,downloadDate,status);
             folder.setFolderFile(folderFile);
             if (folderThumbnailId >0)
                 folder.setThumbnailFile(new File(context.getFilesDir() + File.separator +".Pictures"+File.separator+folderId+File.separator+".thumbnails"+File.separator+ folderThumbnailId));
@@ -93,60 +96,7 @@ public class DatabaseHandler {
         return null;
     }
 
-    public FileModel getFileById(int id){
-        String[] projection = {
-                DatabaseHelper.SysFile._ID,
-                DatabaseHelper.SysFile.COLUMN_ONLINE_ID,
-                DatabaseHelper.SysFile.COLUMN_REAL_NAME,
-                DatabaseHelper.SysFile.COLUMN_BASE64_NAME,
-                DatabaseHelper.SysFile.COLUMN_FOLDER_ID,
-                DatabaseHelper.SysFile.COLUMN_ONLINE_FOLDER_ID,
-                DatabaseHelper.SysFile.COLUMN_ARTIST_ID,
-                DatabaseHelper.SysFile.COLUMN_HEIGHT,
-                DatabaseHelper.SysFile.COLUMN_WIDTH,
-                DatabaseHelper.SysFile.COLUMN_UPDATE_TIME,
-                DatabaseHelper.SysFile.COLUMN_IS_UPLOADED,
-        };
-// How you want the results sorted in the resulting Cursor
-        String sortOrder =
-                DatabaseHelper.SysFile.COLUMN_REAL_NAME + " ASC";
-        String selection = DatabaseHelper.SysFile._ID+" = ?";
-        String[] selectionArgs = { id+"" };
-        Cursor cursor = database.query(
-                DatabaseHelper.SysFile.TABLE_NAME,   // The table to query
-                projection,             // The array of columns to return (pass null to get all)
-                selection,              // The columns for the WHERE clause
-                selectionArgs,          // The values for the WHERE clause
-                null,                   // don't group the rows
-                null,                   // don't filter by row groups
-                sortOrder               // The sort order
-        );
-        while(cursor.moveToNext()) {
-            int itemId = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.SysFile._ID));
-            int onlineId = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.SysFile.COLUMN_ONLINE_ID));
-            String name = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.SysFile.COLUMN_REAL_NAME));
-            String base64Name = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.SysFile.COLUMN_BASE64_NAME));
-            int folderId = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.SysFile.COLUMN_FOLDER_ID));
-            int onlineFolderId = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.SysFile.COLUMN_ONLINE_FOLDER_ID));
-            int artistId = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.SysFile.COLUMN_ARTIST_ID));
-            int height = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.SysFile.COLUMN_HEIGHT));
-            int width = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.SysFile.COLUMN_WIDTH));
-            int isUploadedInt = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.SysFile.COLUMN_IS_UPLOADED));
-            boolean isUploaded;
-            if(isUploadedInt == 0)
-                isUploaded = false;
-            else
-                isUploaded = true;
-            String downloadTime = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.SysFile.COLUMN_UPDATE_TIME));
-            Date downloadDate = convertStringToDate(downloadTime);
-            File itemFile = new File(context.getFilesDir() + File.separator +".Pictures"+File.separator+folderId+File.separator+ itemId);
-            File thumbnailFile = new File(context.getFilesDir() + File.separator +".Pictures"+File.separator+folderId+File.separator+".thumbnails"+File.separator+ itemId);
-            FileModel item = new FileModel(itemId,onlineId,name,base64Name,artistId,folderId,onlineFolderId,width,height,itemFile,thumbnailFile,downloadDate);
-            item.setIsUploaded(isUploaded);
-            return item;
-        }
-        return null;
-    }
+
     public FileModel getFileByOnlineId(int id){
         String[] projection = {
                 DatabaseHelper.SysFile._ID,
@@ -160,6 +110,7 @@ public class DatabaseHandler {
                 DatabaseHelper.SysFile.COLUMN_WIDTH,
                 DatabaseHelper.SysFile.COLUMN_UPDATE_TIME,
                 DatabaseHelper.SysFile.COLUMN_IS_UPLOADED,
+                DatabaseHelper.SysFile.COLUMN_ONLINE_CREATED_TIME,
         };
 // How you want the results sorted in the resulting Cursor
         String sortOrder =
@@ -178,7 +129,7 @@ public class DatabaseHandler {
         int count = cursor.getCount();
         if(cursor.getCount() > 0) {
             while (cursor.moveToNext()) {
-                int itemId = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.SysFile._ID));
+                /*int itemId = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.SysFile._ID));
                 int onlineId = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.SysFile.COLUMN_ONLINE_ID));
                 String name = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.SysFile.COLUMN_REAL_NAME));
                 String base64Name = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.SysFile.COLUMN_BASE64_NAME));
@@ -198,14 +149,47 @@ public class DatabaseHandler {
                 File itemFile = new File(context.getFilesDir() + File.separator + ".Pictures" + File.separator + folderId + File.separator + itemId);
                 File thumbnailFile = new File(context.getFilesDir() + File.separator + ".Pictures" + File.separator + folderId + File.separator + ".thumbnails" + File.separator + itemId);
                 FileModel item = new FileModel(itemId, onlineId, name, base64Name, artistId, folderId,onlineFolderId, width, height, itemFile, thumbnailFile,downloadDate);
-                item.setIsUploaded(isUploaded);
+                item.setIsUploaded(isUploaded);*/
+                FileModel item = getFileFromCursor(cursor);
                 return item;
             }
         }
         return null;
     }
 
-    public ArrayList<FileModel> getFilesInFolder(int folderId){
+    public OfflineFileModel getFileFromCursor(Cursor cursor){
+        int itemId = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.SysFile._ID));
+        int onlineId = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.SysFile.COLUMN_ONLINE_ID));
+        String name = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.SysFile.COLUMN_REAL_NAME));
+        String base64Name = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.SysFile.COLUMN_BASE64_NAME));
+        int folderId = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.SysFile.COLUMN_FOLDER_ID));
+        int onlineFolderId = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.SysFile.COLUMN_ONLINE_FOLDER_ID));
+        int artistId = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.SysFile.COLUMN_ARTIST_ID));
+        int height = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.SysFile.COLUMN_HEIGHT));
+        int width = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.SysFile.COLUMN_WIDTH));
+        int isUploadedInt = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.SysFile.COLUMN_IS_UPLOADED));
+        boolean isUploaded;
+        if(isUploadedInt == 0)
+            isUploaded = false;
+        else
+            isUploaded = true;
+        String contentType = "";
+        if(cursor.getColumnIndex(DatabaseHelper.SysFile.COLUMN_CONTENT_TYPE) != -1)
+            contentType = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.SysFile.COLUMN_CONTENT_TYPE));
+        String downloadTime = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.SysFile.COLUMN_UPDATE_TIME));
+        String onlineCreateTime = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.SysFile.COLUMN_ONLINE_CREATED_TIME));
+        Date downloadDate = convertStringToDate(downloadTime);
+        Date createdDate = convertStringToDate(onlineCreateTime);
+        File itemFile = new File(context.getFilesDir() + File.separator + ".Pictures" + File.separator + folderId + File.separator + itemId);
+        File thumbnailFile = new File(context.getFilesDir() + File.separator + ".Pictures" + File.separator + folderId + File.separator + ".thumbnails" + File.separator + itemId);
+        OfflineFileModel item = new OfflineFileModel(itemId, onlineId, name, base64Name, artistId, folderId,onlineFolderId, width, height, itemFile, thumbnailFile,downloadDate);
+        item.setContentType(contentType);
+        item.setIsUploaded(isUploaded);
+        item.setOnlineCreatedTime(createdDate);
+        return item;
+    }
+
+    public ArrayList<OfflineFileModel> getFilesInFolder(int folderId){
         FolderModel folder = getFolderById(folderId);
         String[] projection = {
                 DatabaseHelper.SysFile._ID,
@@ -220,6 +204,7 @@ public class DatabaseHandler {
                 DatabaseHelper.SysFile.COLUMN_UPDATE_TIME,
                 DatabaseHelper.SysFile.COLUMN_IS_UPLOADED,
                 DatabaseHelper.SysFile.COLUMN_CONTENT_TYPE,
+                DatabaseHelper.SysFile.COLUMN_ONLINE_CREATED_TIME,
         };
 // How you want the results sorted in the resulting Cursor
         String sortOrder =
@@ -235,9 +220,9 @@ public class DatabaseHandler {
                 null,                   // don't filter by row groups
                 sortOrder               // The sort order
         );
-        ArrayList<FileModel> files = new ArrayList<>();
+        ArrayList<OfflineFileModel> files = new ArrayList<>();
         while(cursor.moveToNext()) {
-            int itemId = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.SysFile._ID));
+            /*int itemId = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.SysFile._ID));
             int onlineId = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.SysFile.COLUMN_ONLINE_ID));
             int onlineFolderId = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseHelper.SysFile.COLUMN_ONLINE_FOLDER_ID));
             String name = cursor.getString(cursor.getColumnIndexOrThrow(DatabaseHelper.SysFile.COLUMN_REAL_NAME));
@@ -256,9 +241,8 @@ public class DatabaseHandler {
             Date downloadDate = convertStringToDate(downloadTime);
             File itemFile = new File(context.getFilesDir() + File.separator +".Pictures"+File.separator+folderId+File.separator+ itemId);
             File thumbnailFile = new File(context.getFilesDir() + File.separator +".Pictures"+File.separator+folderId+File.separator+".thumbnails"+File.separator+ itemId);
-            FileModel item = new FileModel(itemId,onlineId,name,base64Name,artistId,folderId,onlineFolderId,width,height,itemFile,thumbnailFile,downloadDate);
-            item.setContentType(contentType);
-            item.setIsUploaded(isUploaded);
+            FileModel item = new FileModel(itemId,onlineId,name,base64Name,artistId,folderId,onlineFolderId,width,height,itemFile,thumbnailFile,downloadDate);*/
+            OfflineFileModel item = getFileFromCursor(cursor);
             item.setFolderName(folder.getName());
             /*AsyncTask.execute(new Runnable() {
                 @Override
@@ -278,7 +262,7 @@ public class DatabaseHandler {
 
 
 
-    public ArrayList<FileModel> getFilesInFolder(FolderModel folder){
+    public ArrayList<OfflineFileModel> getFilesInFolder(FolderModel folder){
         return getFilesInFolder(folder.getId());
     }
 
@@ -475,7 +459,7 @@ public class DatabaseHandler {
         return file;
     }
 
-    public FileModel insertFileForUpload(FileModel file, FolderModel folder){
+    public OfflineFileModel insertFileForUpload(FileModel file, FolderModel folder){
         ContentValues values = new ContentValues();
         values.put(DatabaseHelper.SysFile.COLUMN_BASE64_NAME, file.encodedName);
         values.put(DatabaseHelper.SysFile.COLUMN_REAL_NAME,file.normalName);
@@ -500,7 +484,7 @@ public class DatabaseHandler {
             file.setId(getFileByOnlineId(file.getOnlineId()).getId());
         }
         file.setFolderId(folder.getId());
-        return file;
+        return (OfflineFileModel) file;
     }
 
     public FolderModel getFolderByOnlineId(int folderId) {
@@ -553,8 +537,8 @@ public class DatabaseHandler {
         }
         return null;
     }
-    public ArrayList<FolderModel> getFolders(){
-        ArrayList<FolderModel> folders = new ArrayList<>();
+    public ArrayList<OfflineFolderModel> getFolders(){
+        ArrayList<OfflineFolderModel> folders = new ArrayList<>();
         String[] projection = {
                 DatabaseHelper.ViewFolder._ID,
                 DatabaseHelper.ViewFolder.COLUMN_ONLINE_ID,
@@ -599,7 +583,7 @@ public class DatabaseHandler {
             FolderModel.Status status = FolderModel.Status.UNKNOWN;
             if(statusString != null && statusString.length()>0)
                 status = FolderModel.Status.valueOf(statusString);
-            FolderModel folder = new FolderModel(folderId,onlineFolderId, folderName, fileCount,downloadDate,status);
+            OfflineFolderModel folder = new OfflineFolderModel(folderId,onlineFolderId, folderName, fileCount,downloadDate,status);
             folder.setFolderFile(folderFile);
 
             if(new File(folder.getFolderFile(), ".thumbnail").exists())

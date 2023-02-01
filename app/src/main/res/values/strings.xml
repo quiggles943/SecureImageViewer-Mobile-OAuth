@@ -73,4 +73,8 @@
     <string name="settings_title">Settings</string>
     <string name="auth_error_connection">Unable to connect to Auth Service</string>
     <string name="request_error_connection">Unable to connect to Request Service</string>
+    <string name="requestservice_authenticating">Authenticating</string>
+    <string name="device_authenticate_error">Unable to authenticate device</string>
+    <string name="online_authentication_required">Online authentication required</string>
+
 </resources>

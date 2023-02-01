@@ -17,24 +17,48 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.signature.ObjectKey;
 import com.quigglesproductions.secureimageviewer.R;
+import com.quigglesproductions.secureimageviewer.SortType;
+import com.quigglesproductions.secureimageviewer.models.ItemBaseModel;
+import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
+import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
 import com.quigglesproductions.secureimageviewer.models.file.FileModel;
+import com.quigglesproductions.secureimageviewer.models.file.OfflineFileModel;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class ImageGridAdapter extends BaseAdapter
 {
     private Context mContext;
-    private ArrayList<FileModel> items;
+    private ArrayList<EnhancedDatabaseFile> items;
     private int folderId;
     private boolean isEncrypted;
-    public ImageGridAdapter(Context c, List<FileModel> files)
+    public ImageGridAdapter(Context c, List<EnhancedDatabaseFile> files, SortType initialSort)
     {
         mContext = c;
-        this.items = (ArrayList<FileModel>) files;
+        this.items = sortFiles((ArrayList<EnhancedDatabaseFile>) files,initialSort);
     }
 
-    public void add(FileModel item){
+    public ArrayList<EnhancedDatabaseFile> sortFiles(ArrayList<EnhancedDatabaseFile> files,SortType sortType){
+        switch (sortType){
+            case NAME_ASC:
+                files.sort(Comparator.comparing(EnhancedDatabaseFile::getName));
+                break;
+            case NAME_DESC:
+                files.sort(Comparator.comparing(EnhancedDatabaseFile::getName).reversed());
+                break;
+            case NEWEST_FIRST:
+                files.sort(Comparator.comparing(EnhancedDatabaseFile::getDownloadTime));
+                break;
+            case OLDEST_FIRST:
+                files.sort(Comparator.comparing(EnhancedDatabaseFile::getDownloadTime).reversed());
+                break;
+        }
+        return files;
+    }
+
+    public void add(EnhancedDatabaseFile item){
         items.add(item);
     }
 
@@ -44,7 +68,7 @@ public class ImageGridAdapter extends BaseAdapter
         return items.size();
     }
     @Override
-    public FileModel getItem(int position)
+    public EnhancedDatabaseFile getItem(int position)
     {
         return items.get(position);
     }
@@ -56,7 +80,7 @@ public class ImageGridAdapter extends BaseAdapter
     @Override
     public View getView(int position, View convertView, ViewGroup parent)
     {
-        FileModel item = items.get(position);
+        EnhancedDatabaseFile item = items.get(position);
         View gridView = convertView;
         if (gridView == null)
         {
@@ -94,5 +118,10 @@ public class ImageGridAdapter extends BaseAdapter
     @Override
     public void notifyDataSetChanged() {
         super.notifyDataSetChanged();
+    }
+
+    public void sort(SortType sortType) {
+        sortFiles(items,sortType);
+        notifyDataSetChanged();
     }
 }

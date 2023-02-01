@@ -66,7 +66,8 @@ public class LoginActivity extends AppCompatActivity {
         if(AuthManager.getInstance() != null && AuthManager.getInstance().isConfigured()) {
             SharedPreferences preferences = context.getSharedPreferences(
                     "com.secureimageviewer.registration", Context.MODE_PRIVATE);
-            if (!AuthManager.getInstance().isRegistrationIdSet()) {
+            //AuthManager.getInstance().generateRegistrationId();
+            /*if (!AuthManager.getInstance().isRegistrationIdSet()) {
                 if (AuthManager.getInstance().getRegistrationID() == null) {
                     String deviceId = AuthManager.getInstance().getDeviceUuid();
                     RegistrationId registrationId = new RegistrationId();
@@ -80,8 +81,8 @@ public class LoginActivity extends AppCompatActivity {
                     registrationId.setDeviceName(deviceName);
                     AuthManager.getInstance().setRegistrationId(registrationId);
                 }
-            }
-            if (AuthManager.getInstance().getRegistrationID().getRegistrationId() == null) {
+            }*/
+            /*if (AuthManager.getInstance().getRegistrationID().getRegistrationId() == null) {
                 AuthManager.getInstance().performActionWithFreshTokens(context, new AuthState.AuthStateAction() {
                     @Override
                     public void execute(@Nullable String accessToken, @Nullable String idToken, @Nullable AuthorizationException ex) {
@@ -99,7 +100,7 @@ public class LoginActivity extends AppCompatActivity {
                         }
                     }
                 });
-            }
+            }*/
         }
 
 

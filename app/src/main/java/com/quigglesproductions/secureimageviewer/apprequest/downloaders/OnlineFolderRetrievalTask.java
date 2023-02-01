@@ -4,9 +4,14 @@ import android.content.Context;
 import android.os.AsyncTask;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import com.quigglesproductions.secureimageviewer.SortType;
 import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
+import com.quigglesproductions.secureimageviewer.gson.DateDeserializer;
+import com.quigglesproductions.secureimageviewer.gson.ViewerGson;
 import com.quigglesproductions.secureimageviewer.models.file.FileModel;
+import com.quigglesproductions.secureimageviewer.models.file.StreamingFileModel;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -14,24 +19,33 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 
 import javax.net.ssl.HttpsURLConnection;
 
-public class OnlineFolderRetrievalTask extends AsyncTask<Integer, FileModel, DownloaderResult<ArrayList<FileModel>>> {
+public class OnlineFolderRetrievalTask extends AsyncTask<Integer, StreamingFileModel, DownloaderResult<ArrayList<StreamingFileModel>>> {
     Context context;
     String accessToken;
-    DownloadCompleteCallback<ArrayList<FileModel>,Exception> downloadCompleteCallback;
-    public OnlineFolderRetrievalTask(Context context, String accessToken, DownloadCompleteCallback<ArrayList<FileModel>,Exception> downloadCompleteCallback)
+    DownloadCompleteCallback<ArrayList<StreamingFileModel>,Exception> downloadCompleteCallback;
+    SortType sortType;
+    public OnlineFolderRetrievalTask(Context context, String accessToken, DownloadCompleteCallback<ArrayList<StreamingFileModel>,Exception> downloadCompleteCallback)
     {
         this.context = context;
         this.accessToken = accessToken;
         this.downloadCompleteCallback = downloadCompleteCallback;
+        this.sortType = SortType.NAME_ASC;
+    }
+    public OnlineFolderRetrievalTask(Context context, String accessToken, DownloadCompleteCallback<ArrayList<StreamingFileModel>,Exception> downloadCompleteCallback, SortType sortType)
+    {
+        this.context = context;
+        this.accessToken = accessToken;
+        this.downloadCompleteCallback = downloadCompleteCallback;
+        this.sortType = sortType;
     }
     @Override
-    protected DownloaderResult<ArrayList<FileModel>> doInBackground(Integer... ids) {
+    protected DownloaderResult<ArrayList<StreamingFileModel>> doInBackground(Integer... ids) {
         try {
-            String urlString = RequestManager.getInstance().getUrlManager().getFolderUrlString()+ids[0]+"/files";
-            //String urlString = "https://quigleyserver.ddns.net:14500/api/v1/folder/"+ids[0]+"/files";
+            String urlString = RequestManager.getInstance().getUrlManager().getFolderUrlString()+ids[0]+"/files"+"?sort_type="+sortType;
             URL url = new URL(urlString);
             HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
             connection.setRequestProperty("Authorization","Bearer "+accessToken);
@@ -47,9 +61,8 @@ public class OnlineFolderRetrievalTask extends AsyncTask<Integer, FileModel, Dow
                 while ((output = reader.readLine()) != null)
                     sb.append(output);
                 String result = sb.toString();
-                Gson gson = new Gson();
-                Type listType = new TypeToken<ArrayList<FileModel>>(){}.getType();
-                ArrayList<FileModel> files = gson.fromJson(result,listType);
+                Type listType = new TypeToken<ArrayList<StreamingFileModel>>(){}.getType();
+                ArrayList<StreamingFileModel> files = ViewerGson.getGson().fromJson(result,listType);
                 return new DownloaderResult<>(files);
             }
 
@@ -62,7 +75,7 @@ public class OnlineFolderRetrievalTask extends AsyncTask<Integer, FileModel, Dow
     }
 
     @Override
-    protected void onPostExecute(DownloaderResult<ArrayList<FileModel>> arrayListDownloaderResult) {
+    protected void onPostExecute(DownloaderResult<ArrayList<StreamingFileModel>> arrayListDownloaderResult) {
         super.onPostExecute(arrayListDownloaderResult);
         downloadCompleteCallback.downloadComplete(arrayListDownloaderResult.getResult(),arrayListDownloaderResult.getException());
     }

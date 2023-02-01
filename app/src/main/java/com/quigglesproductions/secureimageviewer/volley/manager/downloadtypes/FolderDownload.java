@@ -5,15 +5,16 @@ import android.content.Context;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedFolder;
 import com.quigglesproductions.secureimageviewer.models.folder.FolderModel;
 import com.quigglesproductions.secureimageviewer.volley.VolleySingleton;
-import com.quigglesproductions.secureimageviewer.volley.requests.FileDownloadRequest;
+import com.quigglesproductions.secureimageviewer.volley.requests.VolleyFileDownloadRequest;
 
 import java.util.ArrayList;
 
-public class FolderDownload extends BaseDownload<FileDownloadRequest> {
-    private FolderModel folder;
-    private ArrayList<FileDownloadRequest> requests;
+public class FolderDownload extends BaseDownload<VolleyFileDownloadRequest> {
+    private EnhancedFolder folder;
+    private ArrayList<VolleyFileDownloadRequest> requests;
     private Context context;
     private int requestTotal;
     private int requestsRemaining;
@@ -38,7 +39,7 @@ public class FolderDownload extends BaseDownload<FileDownloadRequest> {
     private void runDownload(){
         requestsRemaining = requestTotal;
         RequestQueue queue = VolleySingleton.getInstance(context).getRequestQueue();
-        for (FileDownloadRequest request:requests) {
+        for (VolleyFileDownloadRequest request:requests) {
             Response.Listener<byte[]> currentRequest = request.getListener();
             request.setListener(new Response.Listener<byte[]>() {
                 @Override
@@ -92,21 +93,21 @@ public class FolderDownload extends BaseDownload<FileDownloadRequest> {
 
     public static class Builder{
         protected Context context;
-        protected FolderModel folder;
-        protected ArrayList<FileDownloadRequest> requests;
+        protected EnhancedFolder folder;
+        protected ArrayList<VolleyFileDownloadRequest> requests;
         public Builder(Context context){
             this.context = context.getApplicationContext();
         }
-        public void setFolder(FolderModel folderModel){
+        public void setFolder(EnhancedFolder folderModel){
             folder = folderModel;
         }
-        public void setDownloadRequests(ArrayList<FileDownloadRequest> requests){
+        public void setDownloadRequests(ArrayList<VolleyFileDownloadRequest> requests){
             this.requests = requests;
         }
     }
 
     public interface FolderDownloadCallback{
-        public void downloadComplete(FolderModel folder,ArrayList<VolleyError> errors);
+        public void downloadComplete(EnhancedFolder folder,ArrayList<VolleyError> errors);
     }
 
 

@@ -58,7 +58,7 @@ public class DatabaseSettingsActivity  extends SecureActivity {
                     AuthManager.getInstance().performActionWithFreshTokens(getContext(), new AuthState.AuthStateAction() {
                         @Override
                         public void execute(@Nullable String accessToken, @Nullable String idToken, @Nullable AuthorizationException ex) {
-                            RequestManager.getInstance().getRequestService().getArtists(accessToken, new RequestManager.RequestResultCallback<ArrayList<ArtistModel>, Exception>() {
+                            RequestManager.getInstance().getRequestService().getArtists(getContext(),accessToken, new RequestManager.RequestResultCallback<ArrayList<ArtistModel>, Exception>() {
                                 @Override
                                 public void RequestResultRetrieved(ArrayList<ArtistModel> result, Exception exception) {
                                     if(result != null){
@@ -88,7 +88,7 @@ public class DatabaseSettingsActivity  extends SecureActivity {
                     AuthManager.getInstance().performActionWithFreshTokens(getContext(), new AuthState.AuthStateAction() {
                         @Override
                         public void execute(@Nullable String accessToken, @Nullable String idToken, @Nullable AuthorizationException ex) {
-                            RequestManager.getInstance().getRequestService().getSubjects(accessToken, new RequestManager.RequestResultCallback<ArrayList<SubjectModel>, Exception>() {
+                            RequestManager.getInstance().getRequestService().getSubjects(getContext(),accessToken, new RequestManager.RequestResultCallback<ArrayList<SubjectModel>, Exception>() {
                                 @Override
                                 public void RequestResultRetrieved(ArrayList<SubjectModel> result, Exception exception) {
                                     if(result != null){
@@ -118,7 +118,7 @@ public class DatabaseSettingsActivity  extends SecureActivity {
                     AuthManager.getInstance().performActionWithFreshTokens(getContext(), new AuthState.AuthStateAction() {
                         @Override
                         public void execute(@Nullable String accessToken, @Nullable String idToken, @Nullable AuthorizationException ex) {
-                            RequestManager.getInstance().getRequestService().getCatagories(accessToken,new RequestManager.RequestResultCallback<ArrayList<CatagoryModel>,Exception>(){
+                            RequestManager.getInstance().getRequestService().getCatagories(getContext(),accessToken,new RequestManager.RequestResultCallback<ArrayList<CatagoryModel>,Exception>(){
                                 @Override
                                 public void RequestResultRetrieved(ArrayList<CatagoryModel> result, Exception exception) {
                                     if(result != null){

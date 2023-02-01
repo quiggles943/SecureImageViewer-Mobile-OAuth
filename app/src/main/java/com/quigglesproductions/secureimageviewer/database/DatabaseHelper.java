@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
-    public static final int DATABASE_VERSION = 21;
+    public static final int DATABASE_VERSION = 22;
     public static final String DATABASE_NAME = "imagedatabase.db";
 
     public DatabaseHelper(Context context) {
@@ -52,6 +52,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         public static final String COLUMN_CONTENT_TYPE = "FILE_CONTENT_TYPE";
         public static final String COLUMN_UPDATE_TIME = "FILE_UPDATE_TIME";
         public static final String COLUMN_DOWNLOAD_TIME = "FILE_DOWNLOAD_TIME";
+        public static final String COLUMN_ONLINE_CREATED_TIME = "FILE_ONLINE_CREATED_TIME";
         public static final String COLUMN_IS_UPLOADED = "FILE_IS_UPLOADED";
 
         private static final String SQL_CREATE_ENTRIES =
@@ -68,6 +69,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         SysFile.COLUMN_EXTENSION + " TEXT," +
                         SysFile.COLUMN_IS_ENCRYPTED + " INTEGER," +
                         SysFile.COLUMN_IS_UPLOADED + " INTEGER," +
+                        SysFile.COLUMN_ONLINE_CREATED_TIME + " TEXT," +
                         SysFile.COLUMN_UPDATE_TIME + " TEXT," +
                         SysFile.COLUMN_DOWNLOAD_TIME + " TEXT," +
                         SysFile.COLUMN_CONTENT_TYPE + " TEXT)";

@@ -3,6 +3,8 @@ package com.quigglesproductions.secureimageviewer.ui;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 
 import com.android.volley.RequestQueue;
@@ -65,6 +67,7 @@ public class MainMenuActivity extends SecureActivity {
         else {
             imageViewerBtn.setEnabled(true);
             imageViewerBtn.setAlpha(1f);
+            //AuthManager.getInstance().generateRegistrationId();
         }
         Button offlineImageViewerBtn = findViewById(R.id.offline_image_viewer_btn);
         imageViewerBtn.setOnClickListener(new View.OnClickListener() {

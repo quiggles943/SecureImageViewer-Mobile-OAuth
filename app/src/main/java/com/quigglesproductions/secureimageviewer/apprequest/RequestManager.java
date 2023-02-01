@@ -5,9 +5,11 @@ import android.content.Context;
 import androidx.annotation.Nullable;
 
 import com.android.volley.VolleyError;
+import com.quigglesproductions.secureimageviewer.appauth.RequestServiceNotConfiguredException;
 import com.quigglesproductions.secureimageviewer.apprequest.configuration.RequestConfigurationException;
 import com.quigglesproductions.secureimageviewer.apprequest.configuration.RequestServiceConfiguration;
 import com.quigglesproductions.secureimageviewer.apprequest.configuration.url.UrlManager;
+import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.FileMetadata;
 import com.quigglesproductions.secureimageviewer.models.file.FileModel;
 
 public class RequestManager {
@@ -53,8 +55,11 @@ public class RequestManager {
     public RequestService getRequestService() {
         return this.requestService;
     }
-    public UrlManager getUrlManager(){
-        return this.requestService.getRequestServiceConfiguration().getUrlManager();
+    public UrlManager getUrlManager() throws RequestServiceNotConfiguredException {
+        if(this.requestService != null)
+            return this.requestService.getRequestServiceConfiguration().getUrlManager();
+        else
+            throw new RequestServiceNotConfiguredException();
     }
 
     public interface RequestResultCallback<T,V>{

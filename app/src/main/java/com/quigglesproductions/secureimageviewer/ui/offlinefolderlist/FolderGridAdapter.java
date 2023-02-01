@@ -23,6 +23,7 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.signature.ObjectKey;
 import com.quigglesproductions.secureimageviewer.R;
+import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedDatabaseFolder;
 import com.quigglesproductions.secureimageviewer.models.folder.FolderModel;
 import com.quigglesproductions.secureimageviewer.models.folder.OfflineFolderModel;
 import com.quigglesproductions.secureimageviewer.volley.VolleySingleton;
@@ -33,7 +34,7 @@ import java.util.List;
 public class FolderGridAdapter extends BaseAdapter
 {
     private Context mContext;
-    private ArrayList<OfflineFolderModel> folders;
+    private ArrayList<EnhancedDatabaseFolder> folders;
     private GridView gridView;
     private Glide glide;
     private AdapterView.OnItemClickListener onItemClickListener;
@@ -47,8 +48,8 @@ public class FolderGridAdapter extends BaseAdapter
         folders.remove(folder);
     }
 
-    public void setFolderAsDownloaded(OfflineFolderModel folder) {
-        FolderModel searchedFolder = folders.stream().filter(x -> x.getId() == folder.getId()).findFirst().orElse(null);
+    public void setFolderAsDownloaded(EnhancedDatabaseFolder folder) {
+        EnhancedDatabaseFolder searchedFolder = folders.stream().filter(x -> x.getId() == folder.getId()).findFirst().orElse(null);
         if(searchedFolder != null){
             int position = folders.indexOf(searchedFolder);
             folders.remove(position);
@@ -120,7 +121,7 @@ public class FolderGridAdapter extends BaseAdapter
         public TextView text;
         public ImageView image,syncIcon;
     }
-    public FolderGridAdapter(Context c, ArrayList<OfflineFolderModel> folders, GridView gridView)
+    public FolderGridAdapter(Context c, ArrayList<EnhancedDatabaseFolder> folders, GridView gridView)
     {
         mContext = c;
         this.gridView = gridView;
@@ -133,7 +134,7 @@ public class FolderGridAdapter extends BaseAdapter
         return folders.size();
     }
     @Override
-    public OfflineFolderModel getItem(int position)
+    public EnhancedDatabaseFolder getItem(int position)
     {
         return folders.get(position);
     }
@@ -150,7 +151,7 @@ public class FolderGridAdapter extends BaseAdapter
     public View getView(int position, View convertView, ViewGroup
             parent)
     {
-        OfflineFolderModel folder = folders.get(position);
+        EnhancedDatabaseFolder folder = folders.get(position);
 
         View itemView = convertView;
         if (itemView == null) {
@@ -198,10 +199,10 @@ public class FolderGridAdapter extends BaseAdapter
             }
             if(syncView) {
                 viewHolder.syncIcon.setVisibility(View.VISIBLE);
-                if (folder.isSynced())
+                /*if (folder.isSynced())
                     viewHolder.syncIcon.setImageResource(R.drawable.ic_baseline_check);
                 else
-                viewHolder.syncIcon.setImageResource(R.drawable.ic_baseline_sync);
+                    viewHolder.syncIcon.setImageResource(R.drawable.ic_baseline_sync);*/
             }
             else
                 viewHolder.syncIcon.setVisibility(View.INVISIBLE);
@@ -213,7 +214,7 @@ public class FolderGridAdapter extends BaseAdapter
             //itemView.setBackgroundColor(isItemSelectedAtPosition(position)? mContext.getResources().getColor(R.color.selected)  : Color.TRANSPARENT);
         //}
         ViewHolder holder = (ViewHolder) itemView.getTag();
-        holder.text.setText(folder.getName()+" ("+folder.fileCount+")");
+        holder.text.setText(folder.getName()+" ");
         Glide.with(mContext).addDefaultRequestListener(new RequestListener<Object>() {
             @Override
             public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Object> target, boolean isFirstResource) {
@@ -246,9 +247,10 @@ public class FolderGridAdapter extends BaseAdapter
         FolderModel folder = folders.get(position);
         return isItemSelected(folder);
     }*/
-    public void addItem(OfflineFolderModel folder) {
+    public void addItem(EnhancedDatabaseFolder folder) {
         folder.isDownloading = !VolleySingleton.getInstance(mContext).getIsFolderDownloadComplete(folder);
         folders.add(folder);
+        notifyDataSetChanged();
     }
 
     public void clear() {

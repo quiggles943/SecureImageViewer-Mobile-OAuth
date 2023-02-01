@@ -7,16 +7,21 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.provider.Settings;
 import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.quigglesproductions.secureimageviewer.App;
 import com.quigglesproductions.secureimageviewer.Downloaders.UserInfoDownloader;
+import com.quigglesproductions.secureimageviewer.apprequest.requests.DeviceRegistrationRequest;
 import com.quigglesproductions.secureimageviewer.models.oauth.UserInfo;
 import com.quigglesproductions.secureimageviewer.registration.RegistrationId;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
+import com.techyourchance.threadposter.BackgroundThreadPoster;
+import com.techyourchance.threadposter.UiThreadPoster;
 
 import net.openid.appauth.AuthState;
 import net.openid.appauth.AuthorizationException;
@@ -28,8 +33,10 @@ import net.openid.appauth.ResponseTypeValues;
 import net.openid.appauth.TokenRequest;
 import net.openid.appauth.TokenResponse;
 
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 
+import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -40,7 +47,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
-public class AuthManager{
+import javax.net.ssl.HttpsURLConnection;
+
+public class AuthManager implements IAuthManager{
     private static final AuthManager instance = new AuthManager();
     private Context rootContext;
     public String MY_CLIENT_ID = "10887ebe-29e9-45db-b739-56ef6919ea34";
@@ -56,18 +65,17 @@ public class AuthManager{
     private UserInfo userInfo;
     private AuthorizationServiceConfiguration serviceConfig;
     private AuthState.AuthStateAction delayedAction;
-    private RegistrationId registrationId;
+    private DeviceRegistration deviceRegistration;
     private boolean isConfigured = false;
     SharedPreferences tokenPref;
     SharedPreferences registrationPref;
     private RegistrationCallback registrationCallback;
+
+    private final BackgroundThreadPoster backgroundThreadPoster = new BackgroundThreadPoster();
+    private final UiThreadPoster uiThreadPoster = new UiThreadPoster();
     private ArrayList<RegistrationCallback> registrationCallbacks = new ArrayList<>();
     public AuthManager(){
-        /*serviceConfig =
-                new AuthorizationServiceConfiguration(
-                        Uri.parse("https://quigleyid.ddns.net/v1/oauth2/authorize"), // authorization endpoint
-                        Uri.parse("https://quigleyid.ddns.net/v1/oauth2/token")); // token endpoint
-        */
+
     }
 
     public static AuthManager getInstance(){
@@ -83,17 +91,12 @@ public class AuthManager{
         }
         return tokenPref;
     }
-    private SharedPreferences getRegistrationPref(){
-        if(registrationPref == null) {
-            registrationPref = rootContext.getSharedPreferences("com.secureimageviewer.registration", Context.MODE_PRIVATE);
-        }
-        return registrationPref;
-    }
+
     public void ConfigureAuthManager(@NonNull Context context){
+        deviceRegistration = new DeviceRegistration(context);
         rootContext = context;
         tokenPref = getTokenPref();
         loadAuthState();
-        loadRegistrationId();
         authService = new AuthorizationService(context);
         if(authState != null)
             serviceConfig = authState.getAuthorizationServiceConfiguration();
@@ -105,6 +108,7 @@ public class AuthManager{
         boolean stateOverwritten = false;
         tokenPref = getTokenPref();
         authService = new AuthorizationService(rootContext);
+        deviceRegistration = new DeviceRegistration(rootContext);
         String authStateString = getTokenPref().getString(TOKEN_PREF,null);
         serviceConfig = configuration;
         String accessToken = null;
@@ -143,7 +147,6 @@ public class AuthManager{
         setAuthState(authState);
         setAuthService(authService);
         saveAuthState(rootContext);
-        loadRegistrationId();
         isConfigured = true;
         registrationComplete();
     }
@@ -162,12 +165,8 @@ public class AuthManager{
             authState = newAuthState;
     }
 
-    public void setRegistrationId(RegistrationId registrationId){
-        this.registrationId = registrationId;
-        SharedPreferences.Editor editor = getRegistrationPref().edit();
-        editor.putString("registrationId",registrationId.toJsonString());
-        editor.apply();
-    }
+
+
     public void runDelayedActionIfAvailable(@Nullable String accessToken, @Nullable String idToken, @Nullable AuthorizationException ex){
         if(delayedAction != null) {
             delayedAction.execute(accessToken, idToken, ex);
@@ -240,6 +239,15 @@ public class AuthManager{
             else
                 Toast.makeText(context,"Unable to connect to server",Toast.LENGTH_SHORT).show();
         }
+        else if(context instanceof App){
+            Intent intent = AuthManager.getInstance().getAuthorizationRequestIntent();
+
+            if(intent != null) {
+
+            }
+            else
+                Toast.makeText(context,"Unable to connect to server",Toast.LENGTH_SHORT).show();
+        }
         else {
             Toast.makeText(context, "This didnt work", Toast.LENGTH_SHORT).show();
         }
@@ -271,12 +279,31 @@ public class AuthManager{
             return null;
         }
     }
-    private RegistrationId loadRegistrationId(){
+    /*public RegistrationId generateRegistrationId(){
+        if (!AuthManager.getInstance().isRegistrationIdSet()) {
+            if (AuthManager.getInstance().getRegistrationID() == null) {
+                String deviceId = Settings.Secure.getString(rootContext.getContentResolver(), Settings.Secure.ANDROID_ID);
+                //String deviceId = AuthManager.getInstance().getDeviceUuid();
+                RegistrationId registrationId = new RegistrationId();
+                /*if (deviceId == null) {
+                    UUID deviceUuid = UUID.randomUUID();
+                    deviceId = deviceUuid.toString();
+                    AuthManager.getInstance().setDeviceUuid(deviceId);
+                }
+                registrationId.setDeviceId(deviceId);
+                String deviceName = Settings.Secure.getString(rootContext.getContentResolver(), "bluetooth_name");
+                registrationId.setDeviceName(deviceName);
+                AuthManager.getInstance().registerDevice(registrationId);
+            }
+        }
+        return loadRegistrationId();
+    }*/
+    /*private RegistrationId loadRegistrationId(){
         String regIDJson = getRegistrationPref().getString("registrationId",null);
         RegistrationId currentRegId = RegistrationId.fromJsonString(regIDJson);
         registrationId = currentRegId;
         return currentRegId;
-    }
+    }*/
     public void performTokenRequest(TokenRequest tokenRequest, AuthorizationService.TokenResponseCallback token) {
         authService.performTokenRequest(tokenRequest,token);
     }
@@ -398,15 +425,6 @@ public class AuthManager{
         return result;
     }
 
-    public boolean isRegistrationIdSet() {
-        if(registrationId == null)
-            return false;
-        if(registrationId.getRegistrationId() == null)
-            return false;
-
-        return true;
-    }
-
     public static void isOnline(Context context,AuthAvailableCallback callback) {
         ConnectivityManager cm =
                 (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -418,10 +436,6 @@ public class AuthManager{
         else {
             callback.requestComplete(false, null);
         }
-    }
-
-    public RegistrationId getRegistrationID() {
-        return this.registrationId;
     }
 
     public void setContext(Context context) {
@@ -459,14 +473,7 @@ public class AuthManager{
         return true;
     }
 
-    public String getDeviceUuid() {
-        return getRegistrationPref().getString("uuid", null);
-    }
 
-    public void setDeviceUuid(String deviceId) {
-        SharedPreferences.Editor editor = getRegistrationPref().edit();
-        editor.putString("uuid",deviceId);
-    }
 
     public void getTokenInfo(){
         TokenInfo tokenInfo = new TokenInfo();
@@ -500,6 +507,42 @@ public class AuthManager{
         return format.format(date);
     }
 
+    public void getHttpsUrlConnection(@NotNull Context context,@NotNull String urlString,@NotNull UrlConnectionRetrievalCallback callback) {
+        performActionWithFreshTokens(context,new AuthState.AuthStateAction() {
+            @Override
+            public void execute(@Nullable String accessToken, @Nullable String idToken, @Nullable AuthorizationException ex) {
+
+                    backgroundThreadPoster.post(() ->{
+                        try {
+                            URL url = new URL(urlString);
+                            HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
+                            urlConnection.setRequestProperty("Authorization", "Bearer " + accessToken);
+                            if(AuthManager.getInstance().getDeviceRegistration().getRegistrationID() != null)
+                                urlConnection.setRequestProperty("X-Device-Id", AuthManager.getInstance().getDeviceRegistration().getRegistrationID().getRegistrationId());
+                            urlConnection.setConnectTimeout(10000);
+                            Log.d("Get-Request",urlString);
+                            uiThreadPoster.post(() ->{
+                                callback.UrlConnectionRetrieved(urlConnection,null);
+                            });
+
+                        }
+                        catch(IOException exception){
+                            callback.UrlConnectionRetrieved(null,exception);
+                        }
+                    });
+
+
+            }
+        });
+    }
+
+    public DeviceRegistration getDeviceRegistration() {
+        return deviceRegistration;
+    }
+
+    public interface UrlConnectionRetrievalCallback{
+        void UrlConnectionRetrieved(HttpsURLConnection connection, IOException exception);
+    }
     public class TokenInfo{
         public Date accessTokenExpirationTime;
         public Date refreshTokenExpirationTime;

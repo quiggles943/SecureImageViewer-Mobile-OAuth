@@ -17,7 +17,7 @@ import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
 import com.quigglesproductions.secureimageviewer.models.file.FileModel;
 import com.quigglesproductions.secureimageviewer.models.folder.FolderModel;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
-import com.quigglesproductions.secureimageviewer.ui.onlineimageviewer.ImageViewActivity;
+import com.quigglesproductions.secureimageviewer.ui.newimageviewer.FileViewActivity;
 
 import net.openid.appauth.AuthState;
 import net.openid.appauth.AuthorizationException;
@@ -71,7 +71,7 @@ public class OnlineSearchViewActivity extends SecureActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 FileModel item = adapter.getItem(position);
-                Intent intent = new Intent(context, ImageViewActivity.class);
+                Intent intent = new Intent(context, FileViewActivity.class);
                 intent.putExtra("position",position);
                 intent.putExtra("folder",gson.toJson(selectedFolder));
                 intent.putExtra("folderId", id);

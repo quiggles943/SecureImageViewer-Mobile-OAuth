@@ -10,13 +10,15 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.RequestFuture;
+import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
+import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
 import com.quigglesproductions.secureimageviewer.models.file.FileModel;
 import com.quigglesproductions.secureimageviewer.utils.ViewerFileUtils;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class FileDownloadRequest extends ViewerRequest<byte[]> {
+public class VolleyFileDownloadRequest extends ViewerRequest<byte[]> {
     private Response.Listener<byte[]> mListener;
     private Map<String, String> mParams;
     //create a static map for directly accessing headers
@@ -24,9 +26,9 @@ public class FileDownloadRequest extends ViewerRequest<byte[]> {
     private String accessToken;
     private RequestFuture future;
     private Context context;
-    private FileModel downloadFile;
+    private EnhancedDatabaseFile downloadFile;
 
-    public FileDownloadRequest(Builder builder){
+    public VolleyFileDownloadRequest(Builder builder){
         super(builder.method,builder.url,builder.getErrorListener());
         this.mListener = builder.listener;
         mParams = builder.parameters;
@@ -36,7 +38,7 @@ public class FileDownloadRequest extends ViewerRequest<byte[]> {
         this.downloadFile = builder.file;
     }
 
-    public FileDownloadRequest(int method, String url, Response.Listener<byte[]> listener, @Nullable Response.ErrorListener errorListener, HashMap<String, String> params, FileModel file, String accessToken) {
+    public VolleyFileDownloadRequest(int method, String url, Response.Listener<byte[]> listener, @Nullable Response.ErrorListener errorListener, HashMap<String, String> params, EnhancedDatabaseFile file, String accessToken) {
         super(method, url, errorListener);
         // this request would never use cache.
         setShouldCache(false);
@@ -134,7 +136,7 @@ public class FileDownloadRequest extends ViewerRequest<byte[]> {
         protected HashMap<String,String>parameters;
         protected String accessToken;
         protected RequestFuture<byte[]> future;
-        protected FileModel file;
+        protected EnhancedDatabaseFile file;
         public Builder(Context context){
             this.context = context.getApplicationContext();
         }
@@ -149,7 +151,7 @@ public class FileDownloadRequest extends ViewerRequest<byte[]> {
         public void setErrorListener(Response.ErrorListener errorListener) {
             this.errorListener = errorListener;
         }
-        public void setFile(FileModel fileModel){
+        public void setFile(EnhancedDatabaseFile fileModel){
             this.file = fileModel;
         }
 

@@ -11,7 +11,14 @@ import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
 import com.quigglesproductions.secureimageviewer.apprequest.RequestService;
 import com.quigglesproductions.secureimageviewer.database.DatabaseHandler;
 import com.quigglesproductions.secureimageviewer.database.DatabaseHelper;
+import com.quigglesproductions.secureimageviewer.database.enhanced.EnhancedDatabaseHandler;
+import com.quigglesproductions.secureimageviewer.models.ItemBaseModel;
+import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
+import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedDatabaseFolder;
+import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedFolder;
+import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedOnlineFolder;
 import com.quigglesproductions.secureimageviewer.models.file.FileModel;
+import com.quigglesproductions.secureimageviewer.models.file.OfflineFileModel;
 import com.quigglesproductions.secureimageviewer.models.folder.FolderModel;
 import com.quigglesproductions.secureimageviewer.models.folder.OfflineFolderModel;
 
@@ -26,12 +33,12 @@ public class FolderManager {
     private Context rootContext;
     //private DatabaseHandler DatabaseHandler.getInstance();
     //private DatabaseHelper dbHelper;
-    private ArrayList<RequestService.DownloadRequest<OfflineFolderModel>> downloadRequests = new ArrayList<>();
-    private ArrayList<RequestService.FolderUploadRequest<OfflineFolderModel,FileModel>> uploadRequests = new ArrayList<>();
+    private ArrayList<RequestService.DownloadRequest<EnhancedDatabaseFolder>> downloadRequests = new ArrayList<>();
+    private ArrayList<RequestService.FolderUploadRequest<EnhancedDatabaseFolder,FileModel>> uploadRequests = new ArrayList<>();
 
-    private DownloadResultCallback<RequestService.DownloadRequest<OfflineFolderModel>,ArrayList<VolleyError>> downloadCompleteCallback;
+    private DownloadResultCallback<RequestService.DownloadRequest<EnhancedDatabaseFolder>,ArrayList<VolleyError>> downloadCompleteCallback;
 
-    private FolderModel currentFolder;
+    private EnhancedFolder currentFolder;
 
     public FolderManager(){
     }
@@ -43,16 +50,16 @@ public class FolderManager {
         rootContext = context.getApplicationContext();
     }
 
-    public void setCurrentFolder(FolderModel currentFolder){
+    public void setCurrentFolder(EnhancedFolder currentFolder){
         this.currentFolder = currentFolder;
     }
-    public FolderModel getCurrentFolder(){
+    public EnhancedFolder getCurrentFolder(){
         return this.currentFolder;
     }
-    public ArrayList<RequestService.DownloadRequest<OfflineFolderModel>> getDownloadRequests(){
+    public ArrayList<RequestService.DownloadRequest<EnhancedDatabaseFolder>> getDownloadRequests(){
         return this.downloadRequests;
     }
-    public void setDownloadCompleteCallback(DownloadResultCallback<RequestService.DownloadRequest<OfflineFolderModel>,ArrayList<VolleyError>> callback){
+    public void setDownloadCompleteCallback(DownloadResultCallback<RequestService.DownloadRequest<EnhancedDatabaseFolder>,ArrayList<VolleyError>> callback){
         this.downloadCompleteCallback = callback;
     }
 
@@ -73,8 +80,8 @@ public class FolderManager {
         folderLoader.execute();
     }
 
-    public void downloadFolder(FolderModel folder, String accessToken, FolderManager.DownloadResultCallback<OfflineFolderModel,ArrayList<VolleyError>> resultCallback){
-        RequestService.DownloadRequest<OfflineFolderModel> request = new RequestService.DownloadRequest(folder);
+    public void downloadFolder(EnhancedFolder folder, String accessToken, FolderManager.DownloadResultCallback<EnhancedDatabaseFolder,ArrayList<VolleyError>> resultCallback){
+        RequestService.DownloadRequest<EnhancedDatabaseFolder> request = new RequestService.DownloadRequest(folder);
         downloadRequests.add(request);
         RequestManager.getInstance().getRequestService().getFolderForDownload(request,accessToken, new RequestManager.RequestResultCallback<RequestService.DownloadRequest,ArrayList<VolleyError>>(){
             @Override
@@ -87,8 +94,10 @@ public class FolderManager {
                     }
                     else {
                         downloadRequests.get(downloadRequests.indexOf(result)).setStatus(RequestService.DownloadRequest.RequestStatus.FAILED);
-                        folder.setStatus(FolderModel.Status.ONLINE_ONLY);
-                        DatabaseHandler.getInstance().insertOrUpdateFolder(folder);
+                        folder.setStatus(EnhancedFolder.Status.ONLINE_ONLY);
+                        EnhancedDatabaseHandler databaseHandler = new EnhancedDatabaseHandler(rootContext);
+                        databaseHandler.insertOrUpdateFolder(folder);
+                        //DatabaseHandler.getInstance().insertOrUpdateFolder(folder);
                     }
                 }
                 else{
@@ -102,13 +111,13 @@ public class FolderManager {
         });
     }
 
-    public void removeLocalFolder(FolderModel folder) {
+    public void removeLocalFolder(OfflineFolderModel folder) {
         File folderFile = folder.getFolderFile();
-        ArrayList<FileModel> files = (ArrayList<FileModel>) folder.getItems();
+        ArrayList<ItemBaseModel> files =  folder.getItems();
         if(files.size() == 0 && folder.fileCount > 0){
-            folder.setItems(DatabaseHandler.getInstance().getFilesInFolder(folder));
+            folder.setOfflineItems(DatabaseHandler.getInstance().getFilesInFolder(folder));
         }
-        for(FileModel file: folder.getItems()){
+        for(OfflineFileModel file: folder.getOfflineItems()){
             DatabaseHandler.getInstance().deleteFile(file);
             file.getThumbnailFile().delete();
             file.getImageFile().delete();
@@ -126,13 +135,13 @@ public class FolderManager {
         fileOrDirectory.delete();
     }
 
-    public void changeFolderThumbnailFile(FolderModel selectedFolder, FileModel item) {
+    public void changeFolderThumbnailFile(EnhancedDatabaseFolder selectedFolder, EnhancedDatabaseFile item) {
         selectedFolder.getFolderFile();
     }
 
     public boolean removeAllFolders() {
-        ArrayList<FolderModel> folders = DatabaseHandler.getInstance().getFolders();
-        for(FolderModel folder: folders){
+        ArrayList<OfflineFolderModel> folders = DatabaseHandler.getInstance().getFolders();
+        for(OfflineFolderModel folder: folders){
             removeLocalFolder(folder);
         }
         clearPictureFolder();
@@ -144,13 +153,13 @@ public class FolderManager {
         deleteRecursive(picFolder);
     }
 
-    public void syncFolder(String accessToken,OfflineFolderModel item, RequestManager.RequestResultCallback<FileModel,Exception> fileUploadCallback,RequestManager.RequestResultCallback<OfflineFolderModel,Exception> folderUploadCompleteCallback) {
-        if(item.getItems() == null || item.getItems().size() == 0)
-            item.setItems(DatabaseHandler.getInstance().getFilesInFolder(item));
+    public void syncFolder(String accessToken,EnhancedDatabaseFolder item, RequestManager.RequestResultCallback<FileModel,Exception> fileUploadCallback,RequestManager.RequestResultCallback<OfflineFolderModel,Exception> folderUploadCompleteCallback) {
+        /*if(item.getItems() == null || item.getItems().size() == 0)
+            item.setOfflineItems(DatabaseHandler.getInstance().getFilesInFolder(item));
         RequestService.FolderUploadRequest<OfflineFolderModel,FileModel> folderUploadRequest = new RequestService.FolderUploadRequest<>(item);
         folderUploadRequest.setCallback(folderUploadCompleteCallback);
         uploadRequests.add(folderUploadRequest);
-        for(FileModel file: item.getItems()){
+        for(OfflineFileModel file: item.getOfflineItems()){
             if(!file.getIsUploaded()){
                 RequestService.UploadRequest<FileModel> uploadRequest = folderUploadRequest.addFile(file);
                 RequestManager.getInstance().getRequestService().uploadFile(accessToken,uploadRequest,new RequestManager.RequestResultCallback<FileModel,Exception>(){
@@ -161,7 +170,7 @@ public class FolderManager {
                     }
                 });
             }
-        }
+        }*/
         //folderUploadCompleteCallback.RequestResultRetrieved(item,null);
     }
 

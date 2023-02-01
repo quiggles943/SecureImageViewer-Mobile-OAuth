@@ -16,6 +16,7 @@ import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 
 import com.google.android.material.snackbar.Snackbar;
+import com.quigglesproductions.secureimageviewer.BuildConfig;
 import com.quigglesproductions.secureimageviewer.R;
 import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
 import com.quigglesproductions.secureimageviewer.apprequest.configuration.RequestConfigurationException;
@@ -25,6 +26,8 @@ import com.quigglesproductions.secureimageviewer.barcodescanner.BarcodeCaptureAc
 import com.quigglesproductions.secureimageviewer.managers.NotificationManager;
 import com.quigglesproductions.secureimageviewer.managers.ViewerConnectivityManager;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
+
+import org.acra.ACRA;
 
 public class WebSettingsActivity extends SecureActivity {
     private Context context;
@@ -82,7 +85,8 @@ public class WebSettingsActivity extends SecureActivity {
                     String port = prefs.getString("port","");
                     boolean useHttps = prefs.getBoolean("https_toggle",true);
                     String scheme = UrlManager.getScheme(useHttps);
-                    String baseUrl = scheme + mainUrl + ":" + port + UrlManager.getMetadataEndpoint();
+                    String testUrl = BuildConfig.SERVER_URL;
+                    String baseUrl = testUrl;
                     String configUrl = baseUrl;
                     RequestManager.getInstance().checkForConfiguration(configUrl, new RequestServiceConfiguration.RetrieveConfigurationCallback() {
                         @Override
@@ -92,8 +96,10 @@ public class WebSettingsActivity extends SecureActivity {
                                 ViewerConnectivityManager.getInstance().networkConnected();
                                 NotificationManager.getInstance().showSnackbar(getResources().getString(R.string.service_connected), Snackbar.LENGTH_SHORT);
                             }
-                            else
-                                NotificationManager.getInstance().showSnackbar("Unable to connect: "+ex.getExceptionName(), Snackbar.LENGTH_SHORT);
+                            else {
+                                NotificationManager.getInstance().showSnackbar("Unable to connect: " + ex.getExceptionName(), Snackbar.LENGTH_SHORT);
+                                ACRA.getErrorReporter().handleSilentException(ex.getException());
+                            }
                         }
                     });
                     return false;

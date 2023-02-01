@@ -10,7 +10,7 @@
  * Extends Android ImageView to include pinch zooming, panning, fling and double tap zoom.
  */
 
-package com.quigglesproductions.secureimageviewer.ui.onlineimageviewer;
+package com.quigglesproductions.secureimageviewer.ui.newimageviewer;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
@@ -65,7 +65,7 @@ public class NewTouchImageView extends ImageView {
     private Matrix matrix, prevMatrix;
 
     private static enum State { NONE, DRAG, ZOOM, FLING, ANIMATE_ZOOM };
-    private NewTouchImageView.State state;
+    private State state;
 
     private float minScale;
     private float maxScale;
@@ -74,14 +74,14 @@ public class NewTouchImageView extends ImageView {
     private float[] m;
 
     private Context context;
-    private  NewTouchImageView.Fling fling;
+    private  Fling fling;
 
     private ScaleType mScaleType;
 
     private boolean imageRenderedAtLeastOnce;
     private boolean onDrawReady;
 
-    private NewTouchImageView.ZoomVariables delayedZoomVariables;
+    private ZoomVariables delayedZoomVariables;
 
     //
     // Size of view and previous view size (ie before rotation)
@@ -98,7 +98,7 @@ public class NewTouchImageView extends ImageView {
     private GestureDetector.OnDoubleTapListener doubleTapListener = null;
     private OnTouchListener userTouchListener = null;
     private OnClickListener userOnClickListener = null;
-    private NewTouchImageView.OnTouchImageViewListener touchImageViewListener = null;
+    private OnTouchImageViewListener touchImageViewListener = null;
 
     public NewTouchImageView(Context context) {
         this(context, null);
@@ -118,8 +118,8 @@ public class NewTouchImageView extends ImageView {
 
         super.setClickable(true);
 
-        mScaleDetector   = new ScaleGestureDetector(context, new NewTouchImageView.ScaleListener());
-        mGestureDetector = new GestureDetector(context, new NewTouchImageView.GestureListener());
+        mScaleDetector   = new ScaleGestureDetector(context, new ScaleListener());
+        mGestureDetector = new GestureDetector(context, new GestureListener());
 
         matrix     = new Matrix();
         prevMatrix = new Matrix();
@@ -138,12 +138,12 @@ public class NewTouchImageView extends ImageView {
 
         setImageMatrix(matrix);
         setScaleType(ScaleType.MATRIX);
-        setState(NewTouchImageView.State.NONE);
+        setState(State.NONE);
 
         onDrawReady = false;
 
-        super.setOnTouchListener(new NewTouchImageView.PrivateOnTouchListener());
-        super.setOnClickListener(new NewTouchImageView.PrivateOnClickListener());
+        super.setOnTouchListener(new PrivateOnTouchListener());
+        super.setOnClickListener(new PrivateOnClickListener());
     }
 
     @Override
@@ -155,7 +155,7 @@ public class NewTouchImageView extends ImageView {
         userOnClickListener = l;
     }
 
-    public void setOnTouchImageViewListener(NewTouchImageView.OnTouchImageViewListener l) {
+    public void setOnTouchImageViewListener(OnTouchImageViewListener l) {
         touchImageViewListener = l;
     }
 
@@ -396,7 +396,7 @@ public class NewTouchImageView extends ImageView {
         // delay calling setZoom until the view has been measured.
         //
         if (!onDrawReady) {
-            delayedZoomVariables = new NewTouchImageView.ZoomVariables(scale, focusX, focusY, scaleType);
+            delayedZoomVariables = new ZoomVariables(scale, focusX, focusY, scaleType);
             return;
         }
 
@@ -741,7 +741,7 @@ public class NewTouchImageView extends ImageView {
         }
     }
 
-    private void setState(NewTouchImageView.State state) {
+    private void setState(State state) {
         this.state = state;
     }
 
@@ -818,7 +818,7 @@ public class NewTouchImageView extends ImageView {
                 //
                 fling.cancelFling();
             }
-            fling = new NewTouchImageView.Fling((int) velocityX, (int) velocityY);
+            fling = new Fling((int) velocityX, (int) velocityY);
             compatPostOnAnimation(fling);
             return super.onFling(e1, e2, velocityX, velocityY);
         }
@@ -829,9 +829,9 @@ public class NewTouchImageView extends ImageView {
             if(doubleTapListener != null) {
                 consumed = doubleTapListener.onDoubleTap(e);
             }
-            if (state == NewTouchImageView.State.NONE) {
+            if (state == State.NONE) {
                 float targetZoom = (normalizedScale == minScale) ? maxScale : minScale;
-                NewTouchImageView.DoubleTapZoom doubleTap = new NewTouchImageView.DoubleTapZoom(targetZoom, e.getX(), e.getY(), false);
+                DoubleTapZoom doubleTap = new DoubleTapZoom(targetZoom, e.getX(), e.getY(), false);
                 compatPostOnAnimation(doubleTap);
                 consumed = true;
             }
@@ -870,17 +870,17 @@ public class NewTouchImageView extends ImageView {
             mGestureDetector.onTouchEvent(event);
             PointF curr = new PointF(event.getX(), event.getY());
             int motionEvent = event.getAction();
-            if (state == NewTouchImageView.State.NONE || state == NewTouchImageView.State.DRAG || state == NewTouchImageView.State.FLING) {
+            if (state == State.NONE || state == State.DRAG || state == State.FLING) {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         last.set(curr);
                         if (fling != null)
                             fling.cancelFling();
-                        setState(NewTouchImageView.State.DRAG);
+                        setState(State.DRAG);
                         break;
 
                     case MotionEvent.ACTION_MOVE:
-                        if (state == NewTouchImageView.State.DRAG) {
+                        if (state == State.DRAG) {
                             float deltaX = curr.x - last.x;
                             float deltaY = curr.y - last.y;
                             /*if(((deltaX <(float)0.5)&&(deltaX >(float)-0.5))&&((deltaY <(float)0.5)&&(deltaY >(float)-0.5))  )
@@ -897,7 +897,7 @@ public class NewTouchImageView extends ImageView {
 
                     case MotionEvent.ACTION_UP:
                     case MotionEvent.ACTION_POINTER_UP:
-                        setState(NewTouchImageView.State.NONE);
+                        setState(State.NONE);
                         break;
                 }
             }
@@ -933,7 +933,7 @@ public class NewTouchImageView extends ImageView {
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
         @Override
         public boolean onScaleBegin(ScaleGestureDetector detector) {
-            setState(NewTouchImageView.State.ZOOM);
+            setState(State.ZOOM);
             return true;
         }
 
@@ -953,7 +953,7 @@ public class NewTouchImageView extends ImageView {
         @Override
         public void onScaleEnd(ScaleGestureDetector detector) {
             super.onScaleEnd(detector);
-            setState(NewTouchImageView.State.NONE);
+            setState(State.NONE);
             boolean animateToZoomBoundary = false;
             float targetZoom = normalizedScale;
             if (normalizedScale > maxScale) {
@@ -966,7 +966,7 @@ public class NewTouchImageView extends ImageView {
             }
 
             if (animateToZoomBoundary) {
-                NewTouchImageView.DoubleTapZoom doubleTap = new NewTouchImageView.DoubleTapZoom(targetZoom, viewWidth / 2, viewHeight / 2, true);
+                DoubleTapZoom doubleTap = new DoubleTapZoom(targetZoom, viewWidth / 2, viewHeight / 2, true);
                 compatPostOnAnimation(doubleTap);
             }
         }
@@ -1015,7 +1015,7 @@ public class NewTouchImageView extends ImageView {
         private PointF endTouch;
 
         DoubleTapZoom(float targetZoom, float focusX, float focusY, boolean stretchImageToSuper) {
-            setState(NewTouchImageView.State.ANIMATE_ZOOM);
+            setState(State.ANIMATE_ZOOM);
             startTime = System.currentTimeMillis();
             this.startZoom = normalizedScale;
             this.targetZoom = targetZoom;
@@ -1058,7 +1058,7 @@ public class NewTouchImageView extends ImageView {
                 //
                 // Finished zooming
                 //
-                setState(NewTouchImageView.State.NONE);
+                setState(State.NONE);
             }
         }
 
@@ -1151,12 +1151,12 @@ public class NewTouchImageView extends ImageView {
      */
     private class Fling implements Runnable {
 
-        NewTouchImageView.CompatScroller scroller;
+        CompatScroller scroller;
         int currX, currY;
 
         Fling(int velocityX, int velocityY) {
-            setState(NewTouchImageView.State.FLING);
-            scroller = new NewTouchImageView.CompatScroller(context);
+            setState(State.FLING);
+            scroller = new CompatScroller(context);
             matrix.getValues(m);
 
             int startX = (int) m[Matrix.MTRANS_X];
@@ -1187,7 +1187,7 @@ public class NewTouchImageView extends ImageView {
 
         public void cancelFling() {
             if (scroller != null) {
-                setState(NewTouchImageView.State.NONE);
+                setState(State.NONE);
                 scroller.forceFinished(true);
             }
         }

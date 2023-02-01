@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
+import com.quigglesproductions.secureimageviewer.gson.ViewerGson;
 import com.quigglesproductions.secureimageviewer.models.file.FileModel;
 
 import java.io.BufferedReader;
@@ -46,7 +47,7 @@ public class RecentFileDownloader extends AsyncTask<Integer,Void,DownloaderResul
                 while ((output = reader.readLine()) != null)
                     sb.append(output);
                 String result = sb.toString();
-                Gson gson = new Gson();
+                Gson gson = ViewerGson.getGson();
                 Type listType = new TypeToken<ArrayList<FileModel>>(){}.getType();
                 ArrayList<FileModel> files = gson.fromJson(result,listType);
 

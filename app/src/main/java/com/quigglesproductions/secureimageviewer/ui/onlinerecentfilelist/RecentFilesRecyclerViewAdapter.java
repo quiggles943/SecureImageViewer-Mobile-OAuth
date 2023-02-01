@@ -23,8 +23,10 @@ import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
 import com.quigglesproductions.secureimageviewer.R;
 import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
+import com.quigglesproductions.secureimageviewer.appauth.RequestServiceNotConfiguredException;
 import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
-import com.quigglesproductions.secureimageviewer.models.file.FileModel;
+import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
+import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedOnlineFile;
 
 import net.openid.appauth.AuthState;
 import net.openid.appauth.AuthorizationException;
@@ -32,7 +34,7 @@ import net.openid.appauth.AuthorizationException;
 import java.util.ArrayList;
 
 public class RecentFilesRecyclerViewAdapter extends RecyclerView.Adapter<RecentFilesRecyclerViewAdapter.ViewHolder> {
-    private ArrayList<FileModel> files;
+    private ArrayList<EnhancedOnlineFile> files;
     private Context mContext;
     private int position;
     private RecentFilesRecyclerViewOnClickListener onClickListener;
@@ -45,7 +47,7 @@ public class RecentFilesRecyclerViewAdapter extends RecyclerView.Adapter<RecentF
         this.position = position;
     }
 
-    public FileModel getItem(int position) {
+    public EnhancedOnlineFile getItem(int position) {
         return files.get(position);
     }
 
@@ -84,14 +86,14 @@ public class RecentFilesRecyclerViewAdapter extends RecyclerView.Adapter<RecentF
         this.files = new ArrayList<>();
     }
 
-    public void addItems(ArrayList<FileModel> files){
-        for(FileModel file: files){
+    public void addItems(ArrayList<EnhancedOnlineFile> files){
+        for(EnhancedOnlineFile file: files){
             this.files.add(file);
         }
         this.notifyDataSetChanged();
     }
 
-    public ArrayList<FileModel> getFiles(){
+    public ArrayList<EnhancedOnlineFile> getFiles(){
         return files;
     }
 
@@ -106,14 +108,20 @@ public class RecentFilesRecyclerViewAdapter extends RecyclerView.Adapter<RecentF
 
         // Get element from your dataset at this position and replace the
         // contents of the view with that element
-        FileModel item = files.get(position);
+        EnhancedFile item = files.get(position);
         AuthManager.getInstance().performActionWithFreshTokens(mContext, new AuthState.AuthStateAction() {
             @Override
             public void execute(@Nullable String accessToken, @Nullable String idToken, @Nullable AuthorizationException ex) {
                 RequestOptions requestOptions = new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL);
-                String fileUrl = RequestManager.getInstance().getUrlManager().getFileUrlString();
-                GlideUrl glideUrl = new GlideUrl(fileUrl + item.getOnlineId() + "/thumbnail",new LazyHeaders.Builder()
-                        .addHeader("Authorization","Bearer "+ accessToken).build());
+                GlideUrl glideUrl = null;
+                try {
+                    String fileUrl = RequestManager.getInstance().getUrlManager().getFileUrlString();
+                    glideUrl = new GlideUrl(fileUrl + item.getOnlineId() + "/thumbnail", new LazyHeaders.Builder()
+                            .addHeader("Authorization", "Bearer " + accessToken).build());
+                }
+                catch (RequestServiceNotConfiguredException exception){
+
+                }
 
                 Glide.with(mContext).addDefaultRequestListener(new RequestListener<Object>() {
                     @Override

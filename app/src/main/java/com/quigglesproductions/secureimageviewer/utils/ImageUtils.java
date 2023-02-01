@@ -8,6 +8,7 @@ import android.os.CancellationSignal;
 import android.os.FileUtils;
 import android.util.Size;
 
+import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
 import com.quigglesproductions.secureimageviewer.models.file.FileModel;
 import com.quigglesproductions.secureimageviewer.models.folder.FolderModel;
 
@@ -117,7 +118,7 @@ public class ImageUtils {
             return file; // it will return null
         }
     }
-    public static File createThumbnail(Context context, FileModel item) {
+    public static File createThumbnail(Context context, EnhancedDatabaseFile item) {
         //create a file to write bitmap data
         File file = null;
         File folder = new File(context.getFilesDir(),".Pictures");

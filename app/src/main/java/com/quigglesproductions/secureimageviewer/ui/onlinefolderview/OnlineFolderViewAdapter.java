@@ -22,9 +22,10 @@ import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
 import com.quigglesproductions.secureimageviewer.R;
 import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
+import com.quigglesproductions.secureimageviewer.appauth.RequestServiceNotConfiguredException;
 import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
-import com.quigglesproductions.secureimageviewer.models.file.FileModel;
-import com.quigglesproductions.secureimageviewer.models.folder.FolderModel;
+import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
+import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedFolder;
 
 import net.openid.appauth.AuthState;
 import net.openid.appauth.AuthorizationException;
@@ -34,20 +35,24 @@ import java.util.ArrayList;
 public class OnlineFolderViewAdapter  extends BaseAdapter
 {
     private Context mContext;
-    private ArrayList<FileModel> items;
+    private ArrayList<EnhancedFile> items;
     private int folderId;
     private boolean isEncrypted;
-    FolderModel folder;
-    public OnlineFolderViewAdapter(Context c, FolderModel folder)
+    EnhancedFolder folder;
+    public OnlineFolderViewAdapter(Context c, EnhancedFolder folder)
     {
         mContext = c;
-        this.items = new ArrayList<FileModel>();
+        this.items = new ArrayList<EnhancedFile>();
         this.folder = folder;
     }
+    public void clearItems(){
+        items.clear();
+    }
 
-    public void add(FileModel item){
+    public void add(EnhancedFile item){
         items.add(item);
-        folder.addItem(item);
+        //folder.addItem(item);
+        notifyDataSetChanged();
     }
 
     @Override
@@ -56,7 +61,7 @@ public class OnlineFolderViewAdapter  extends BaseAdapter
         return items.size();
     }
     @Override
-    public FileModel getItem(int position)
+    public EnhancedFile getItem(int position)
     {
         return items.get(position);
     }
@@ -68,7 +73,7 @@ public class OnlineFolderViewAdapter  extends BaseAdapter
     @Override
     public View getView(int position, View convertView, ViewGroup parent)
     {
-        FileModel item = items.get(position);
+        EnhancedFile item = items.get(position);
         View gridView = convertView;
         if (gridView == null)
         {
@@ -84,9 +89,14 @@ public class OnlineFolderViewAdapter  extends BaseAdapter
             @Override
             public void execute(@Nullable String accessToken, @Nullable String idToken, @Nullable AuthorizationException ex) {
                 RequestOptions requestOptions = new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL);
-                String baseUrl = RequestManager.getInstance().getUrlManager().getFileUrlString();
-                GlideUrl glideUrl = new GlideUrl(baseUrl + item.getOnlineId() + "/thumbnail",new LazyHeaders.Builder()
-                        .addHeader("Authorization","Bearer "+ accessToken).build());
+                GlideUrl glideUrl = null;
+                try {
+                    String baseUrl = RequestManager.getInstance().getUrlManager().getFileUrlString();
+                    glideUrl = new GlideUrl(baseUrl + item.getOnlineId() + "/thumbnail", new LazyHeaders.Builder()
+                            .addHeader("Authorization", "Bearer " + accessToken).build());
+                }catch (RequestServiceNotConfiguredException exception){
+
+                }
                 /*Glide.with(mContext).asBitmap().load(glideUrl).into(new CustomTarget<Bitmap>() {
                     @Override
                     public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
@@ -142,7 +152,7 @@ public class OnlineFolderViewAdapter  extends BaseAdapter
         super.notifyDataSetChanged();
     }
 
-    public void setFiles(ArrayList<FileModel> files) {
+    public void setFiles(ArrayList<EnhancedFile> files) {
         this.items = files;
         notifyDataSetChanged();
     }

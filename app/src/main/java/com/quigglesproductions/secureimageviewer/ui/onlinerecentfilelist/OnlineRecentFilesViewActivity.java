@@ -10,7 +10,6 @@ import android.widget.AdapterView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -18,16 +17,13 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.gson.Gson;
 import com.quigglesproductions.secureimageviewer.R;
-import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
 import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
 import com.quigglesproductions.secureimageviewer.managers.FolderManager;
-import com.quigglesproductions.secureimageviewer.models.file.FileModel;
-import com.quigglesproductions.secureimageviewer.models.folder.FolderModel;
+import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
+import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedOnlineFile;
+import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedFolder;
+import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedOnlineFolder;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
-import com.quigglesproductions.secureimageviewer.ui.onlineimageviewer.ImageViewActivity;
-
-import net.openid.appauth.AuthState;
-import net.openid.appauth.AuthorizationException;
 
 import java.util.ArrayList;
 
@@ -64,7 +60,8 @@ public class OnlineRecentFilesViewActivity extends SecureActivity {
         columnCount = getResources().getInteger(R.integer.column_count_filelist);
         layoutManager = new GridLayoutManager(context,columnCount);
         recyclerView.setLayoutManager(layoutManager);
-        AuthManager.getInstance().performActionWithFreshTokens(this, new AuthState.AuthStateAction() {
+        refreshFiles();
+        /*AuthManager.getInstance().performActionWithFreshTokens(this, new AuthState.AuthStateAction() {
             @Override
             public void execute(@Nullable String accessToken, @Nullable String idToken, @Nullable AuthorizationException ex) {
                 if(ex != null){
@@ -75,15 +72,16 @@ public class OnlineRecentFilesViewActivity extends SecureActivity {
 
                 }
             }
-        });
+        });*/
         setTitle("Recents");
         rvAdapter.setOnClickListener(new RecentFilesRecyclerViewAdapter.RecentFilesRecyclerViewOnClickListener(){
 
             @Override
             public void onClick(int position) {
-                FileModel selectedFile = rvAdapter.getItem(position);
-                Intent intent = new Intent(context, ImageViewActivity.class);
-                FolderModel recentFolder = new FolderModel();
+                EnhancedFile selectedFile = rvAdapter.getItem(position);
+
+                Intent intent = new Intent(context, com.quigglesproductions.secureimageviewer.ui.newimageviewer.FileViewActivity.class);
+                EnhancedOnlineFolder recentFolder = new EnhancedOnlineFolder(context);
                 recentFolder.setItems(rvAdapter.getFiles());
                 FolderManager.getInstance().setCurrentFolder(recentFolder);
                 intent.putExtra("position",position);
@@ -101,7 +99,17 @@ public class OnlineRecentFilesViewActivity extends SecureActivity {
                 if(layoutManager.findLastCompletelyVisibleItemPosition() >total-LIST_UPDATE_TRIGGER_THRESHOLD &&layoutManager.findLastCompletelyVisibleItemPosition() <=total-1){
                     if(scrollBottomReached == false) {
                         scrollBottomReached = true;
-                        AuthManager.getInstance().performActionWithFreshTokens(context, new AuthState.AuthStateAction() {
+                        RequestManager.getInstance().getRequestService().getRecentFiles(context,DOWNLOAD_FILE_COUNT, rvAdapter.getItemCount(), new RequestManager.RequestResultCallback<ArrayList<EnhancedOnlineFile>, Exception>() {
+                            @Override
+                            public void RequestResultRetrieved(ArrayList<EnhancedOnlineFile> result, Exception exception) {
+                                if(result != null) {
+                                    rvAdapter.addItems(result);
+                                }
+                                scrollBottomReached = false;
+                            }
+
+                        });
+                        /*AuthManager.getInstance().performActionWithFreshTokens(context, new AuthState.AuthStateAction() {
                             @Override
                             public void execute(@Nullable String accessToken, @Nullable String idToken, @Nullable AuthorizationException ex) {
                                 if(ex != null){
@@ -122,7 +130,7 @@ public class OnlineRecentFilesViewActivity extends SecureActivity {
                                 }
 
                             }
-                        });
+                        });*/
                     }
                 }
             }
@@ -138,7 +146,7 @@ public class OnlineRecentFilesViewActivity extends SecureActivity {
         swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                AuthManager.getInstance().performActionWithFreshTokens(context, new AuthState.AuthStateAction() {
+                /*AuthManager.getInstance().performActionWithFreshTokens(context, new AuthState.AuthStateAction() {
                     @Override
                     public void execute(@Nullable String accessToken, @Nullable String idToken, @Nullable AuthorizationException ex) {
                         if (ex != null) {
@@ -146,17 +154,33 @@ public class OnlineRecentFilesViewActivity extends SecureActivity {
                             refreshFiles(accessToken);
                         }
                     }
-                });
+                });*/
+                refreshFiles();
             }
         });
         registerForContextMenu(recyclerView);
     }
 
-    private void refreshFiles(String accessToken){
+    /*private void refreshFiles(String accessToken){
         swipeContainer.setRefreshing(true);
         RequestManager.getInstance().getRequestService().getRecentFiles(accessToken, DOWNLOAD_FILE_COUNT, 0, new RequestManager.RequestResultCallback<ArrayList<FileModel>, Exception>() {
             @Override
             public void RequestResultRetrieved(ArrayList<FileModel> result, Exception exception) {
+                if(result != null) {
+                    rvAdapter.clearItems();
+                    rvAdapter.addItems(result);
+                }
+                swipeContainer.setRefreshing(false);
+            }
+
+        });
+    }*/
+
+    private void refreshFiles(){
+        swipeContainer.setRefreshing(true);
+        RequestManager.getInstance().getRequestService().getRecentFiles(context,DOWNLOAD_FILE_COUNT,0, new RequestManager.RequestResultCallback<ArrayList<EnhancedOnlineFile>, Exception>() {
+            @Override
+            public void RequestResultRetrieved(ArrayList<EnhancedOnlineFile> result, Exception exception) {
                 if(result != null) {
                     rvAdapter.clearItems();
                     rvAdapter.addItems(result);
@@ -186,7 +210,7 @@ public class OnlineRecentFilesViewActivity extends SecureActivity {
         switch(item.getItemId()) {
             case CONTEXTMENU_INFO:
                 // add stuff here
-                FileModel file = (FileModel)rvAdapter.getItem(rvAdapter.getPosition());
+                EnhancedFile file = (EnhancedFile)rvAdapter.getItem(rvAdapter.getPosition());
                 BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(context);
                 bottomSheetDialog.setContentView(R.layout.bottomdialog_fileinfo);
                 TextView itemNameText = bottomSheetDialog.findViewById(R.id.item_name);

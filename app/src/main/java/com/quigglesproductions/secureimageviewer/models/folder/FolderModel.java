@@ -9,6 +9,7 @@ import androidx.annotation.Nullable;
 
 import com.google.gson.annotations.SerializedName;
 import com.quigglesproductions.secureimageviewer.managers.FolderManager;
+import com.quigglesproductions.secureimageviewer.models.ItemBaseModel;
 import com.quigglesproductions.secureimageviewer.models.file.FileModel;
 
 import java.io.File;
@@ -42,7 +43,7 @@ public class FolderModel implements Parcelable {
     private File thumbnailFile;
     private File folderFile;
     public int fileCount = 0;
-    private ArrayList<FileModel> itemList;
+    private ArrayList<ItemBaseModel> itemList;
     private Date downloadTime;
 
     private Status status;
@@ -133,21 +134,21 @@ public class FolderModel implements Parcelable {
         return folderFile;
     }
 
-    public FileModel getItemAtPosition(int position) {
+    public ItemBaseModel getItemAtPosition(int position) {
         return itemList.get(position);
     }
     public void addItem(FileModel file){
         itemList.add(file);
     }
-    public void removeItem(FileModel file){
+    public void removeItem(ItemBaseModel file){
         itemList.remove(file);
     }
 
-    public void setItems(ArrayList<FileModel> items) {
+    public void setItems(ArrayList<ItemBaseModel> items) {
         itemList = items;
     }
 
-    public ArrayList<FileModel> getItems() {
+    public ArrayList<ItemBaseModel> getItems() {
         return itemList;
     }
 
@@ -238,6 +239,10 @@ public class FolderModel implements Parcelable {
             return true;
         else
             return false;
+    }
+
+    public void clearItems(){
+        itemList.clear();
     }
 
     public enum Status{

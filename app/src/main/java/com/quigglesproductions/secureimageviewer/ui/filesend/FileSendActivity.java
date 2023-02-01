@@ -133,7 +133,7 @@ public class FileSendActivity extends SecureActivity {
                 DatabaseHandler handler = new DatabaseHandler(context,helper.getWritableDatabase());
                 uploadFile = handler.insertFileForUpload(uploadFile,folder);
                 InputStream in = getContentResolver().openInputStream(uri);
-                uploadFile = ViewerFileUtils.createFileOnDisk(context,uploadFile,in);
+                //uploadFile = (FileModel) ViewerFileUtils.createFileOnDisk(context,uploadFile,in);
                 return true;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -146,7 +146,7 @@ public class FileSendActivity extends SecureActivity {
         if (uri.getScheme().equals("content")) {
             try (Cursor cursor = getContentResolver().query(uri, null, null, null, null)) {
                 if (cursor != null && cursor.moveToFirst()) {
-                    result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+                    //result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
                 }
             }
         }

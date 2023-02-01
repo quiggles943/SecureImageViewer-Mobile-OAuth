@@ -19,10 +19,12 @@ public class DeviceRegistrationTask  extends AsyncTask<String, Integer, Registra
     Context context;
     RegistrationId model;
     DeviceRegistrationModel sendModel = new DeviceRegistrationModel();
-    public DeviceRegistrationTask(Context context,RegistrationId model)
+    DeviceRegistrationCallback callback;
+    public DeviceRegistrationTask(Context context,RegistrationId model, DeviceRegistrationCallback callback)
     {
         this.context = context;
         this.model = model;
+        this.callback = callback;
         sendModel.device_name = model.getDeviceName();
         sendModel.device_id = model.getDeviceId();
     }
@@ -73,5 +75,10 @@ public class DeviceRegistrationTask  extends AsyncTask<String, Integer, Registra
     @Override
     protected void onProgressUpdate(Integer... values) {
         super.onProgressUpdate(values);
+    }
+
+
+    public interface DeviceRegistrationCallback{
+        public void deviceRegistered(RegistrationId registrationId,Exception ex);
     }
 }

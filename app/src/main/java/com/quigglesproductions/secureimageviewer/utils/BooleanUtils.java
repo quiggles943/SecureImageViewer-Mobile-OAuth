@@ -17,10 +17,12 @@ public class BooleanUtils {
             case "Y":
             case "1":
             case "-1":
+            case "TRUE":
                 return true;
             case "NO":
             case "N":
             case "0":
+            case "FALSE":
                 return false;
             default:
                 return false;

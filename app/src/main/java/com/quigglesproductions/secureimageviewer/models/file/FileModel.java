@@ -1,11 +1,12 @@
 package com.quigglesproductions.secureimageviewer.models.file;
 
 import android.graphics.Bitmap;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.annotations.SerializedName;
+import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.IFileDataSource;
 import com.quigglesproductions.secureimageviewer.models.ArtistModel;
 import com.quigglesproductions.secureimageviewer.models.CatagoryModel;
 import com.quigglesproductions.secureimageviewer.models.ItemBaseModel;
@@ -19,7 +20,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.ArrayList;
 
-public class FileModel implements ItemBaseModel {
+public class FileModel implements ItemBaseModel, Parcelable {
     private int ID;
     @SerializedName("FILE_ID")
     public int onlineId;
@@ -43,6 +44,8 @@ public class FileModel implements ItemBaseModel {
     public boolean isEncrypted;
     @SerializedName("FILE_CONTENT_TYPE")
     public String contentType;
+    @SerializedName("FILE_IMPORT_TIME")
+    public Date onlineCreatedTime;
     public ArtistModel Artist;
     public ArrayList<SubjectModel> Subjects;
     public ArrayList<CatagoryModel> Catagories;
@@ -55,8 +58,10 @@ public class FileModel implements ItemBaseModel {
     File thumbnailFile;
     Bitmap image;
     Bitmap thumbnailImage;
-    String folderName;;
+    String folderName;
     boolean isUploaded;
+
+    IFileDataSource dataSource;
 
     public FileModel(String name, String base64Name){
         normalName = name;
@@ -93,8 +98,58 @@ public class FileModel implements ItemBaseModel {
         isUploaded = true;
     }
 
+    protected FileModel(Parcel in) {
+        ID = in.readInt();
+        onlineId = in.readInt();
+        encodedName = in.readString();
+        normalName = in.readString();
+        fileSize = in.readInt();
+        onlineFolderId = in.readInt();
+        fileWidth = in.readInt();
+        fileHeight = in.readInt();
+        onlineArtistId = in.readInt();
+        fileExtension = in.readString();
+        isEncrypted = in.readByte() != 0;
+        contentType = in.readString();
+        folderId = in.readInt();
+        filePath = in.readString();
+        thumbnailPath = in.readString();
+        image = in.readParcelable(Bitmap.class.getClassLoader());
+        thumbnailImage = in.readParcelable(Bitmap.class.getClassLoader());
+        folderName = in.readString();
+        isUploaded = in.readByte() != 0;
+
+        if(filePath != null){
+            imageFile = new File(filePath);
+        }
+        if(thumbnailPath != null){
+            thumbnailFile = new File(thumbnailPath);
+        }
+    }
+
+    public static final Creator<FileModel> CREATOR = new Creator<FileModel>() {
+        @Override
+        public FileModel createFromParcel(Parcel in) {
+            return new FileModel(in);
+        }
+
+        @Override
+        public FileModel[] newArray(int size) {
+            return new FileModel[size];
+        }
+    };
+
+    public FileModel() {
+
+    }
+
     public String getName(){
         return normalName;
+    }
+
+    @Override
+    public String getContentType() {
+        return contentType;
     }
 
     public String getFileType(){
@@ -120,6 +175,16 @@ public class FileModel implements ItemBaseModel {
     public File getThumbnailFile(){
         //return this.thumbnailFile;
         return new File(thumbnailPath);
+    }
+
+    @Override
+    public void setWidth(int imageWidth) {
+        this.fileWidth = imageWidth;
+    }
+
+    @Override
+    public void setHeight(int imageHeight) {
+        this.fileHeight = imageHeight;
     }
 
     public void setImageFile(File imageFile){
@@ -254,6 +319,14 @@ public class FileModel implements ItemBaseModel {
         return this.Catagories;
     }
 
+    public void setDataSource(IFileDataSource dataSource){
+        this.dataSource = dataSource;
+    }
+
+    public IFileDataSource getDataSource() {
+        return dataSource;
+    }
+
 
     public String getJson() throws JSONException {
         Gson gson = new Gson();
@@ -295,5 +368,38 @@ public class FileModel implements ItemBaseModel {
         object.put("Catagories",gson.toJsonTree(getCatagories()));
         object.put("Subjects",gson.toJsonTree(getSubjects()));
         return object;
+    }
+
+    public void setOnlineCreatedTime(Date createdDate) {
+        onlineCreatedTime = createdDate;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeStringArray(new String[] {String.valueOf(this.ID),
+                String.valueOf(this.onlineId),
+                this.encodedName,
+                this.normalName,
+                this.contentType,
+                this.filePath,
+                String.valueOf(this.fileSize),
+                String.valueOf(this.onlineFolderId),
+                String.valueOf(this.fileWidth),
+                String.valueOf(this.fileHeight),
+                String.valueOf(this.onlineArtistId),
+                this.fileExtension,
+                String.valueOf(this.isEncrypted?1:0),
+                String.valueOf(this.onlineCreatedTime),
+                String.valueOf(this.downloadTime),
+                String.valueOf(this.folderId),
+                this.thumbnailPath,
+                this.folderName,
+                String.valueOf(this.isUploaded?1:0)
+        });
     }
 }

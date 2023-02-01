@@ -2,12 +2,14 @@ package com.quigglesproductions.secureimageviewer.apprequest.configuration;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.google.gson.Gson;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.URL;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -24,7 +26,8 @@ public class ConfigurationRequest extends AsyncTask<String,Void,ConfigurationRes
         try {
             String urlString = strings[0];
             URL url = new URL(urlString);
-            HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            Log.d("Get-Request",urlString);
             int responseCode = connection.getResponseCode();
             if (responseCode >= 400 && responseCode <= 499) {
                 throw new Exception("Bad authentication status: " + responseCode); //provide a more meaningful exception message

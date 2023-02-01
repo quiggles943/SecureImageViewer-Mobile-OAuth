@@ -20,8 +20,10 @@ import com.bumptech.glide.load.model.LazyHeaders;
 import com.bumptech.glide.request.RequestOptions;
 import com.quigglesproductions.secureimageviewer.R;
 import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
+import com.quigglesproductions.secureimageviewer.appauth.RequestServiceNotConfiguredException;
 import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
-import com.quigglesproductions.secureimageviewer.models.folder.FolderModel;
+import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedFolder;
+import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedOnlineFolder;
 import com.quigglesproductions.secureimageviewer.recycler.RecyclerViewSelectionMode;
 
 import net.openid.appauth.AuthState;
@@ -30,7 +32,7 @@ import net.openid.appauth.AuthorizationException;
 import java.util.ArrayList;
 
 public class FolderListRecyclerAdapter extends RecyclerView.Adapter<FolderListRecyclerAdapter.ViewHolder> {
-    private ArrayList<FolderModel> folders = new ArrayList<>();
+    private ArrayList<EnhancedFolder> folders = new ArrayList<>();
     private ArrayList<Integer> selected = new ArrayList<>();
     private Context mContext;
     private boolean multiSelect = false;
@@ -41,12 +43,13 @@ public class FolderListRecyclerAdapter extends RecyclerView.Adapter<FolderListRe
         this.onClickListener = onClickListener;
     }
 
-    public FolderModel getItem(int position) {
+    public EnhancedFolder getItem(int position) {
         return folders.get(position);
     }
 
     public ArrayList<? extends Parcelable> getItems() {
-        return folders;
+        //return folders;
+        return null;
     }
 
     public int getSelectedCount(){
@@ -93,6 +96,11 @@ public class FolderListRecyclerAdapter extends RecyclerView.Adapter<FolderListRe
         this.selectionModeChangeListener = selectionModeChangeListener;
     }
 
+    public void add(EnhancedFolder folder) {
+        this.folders.add(folder);
+        notifyDataSetChanged();
+    }
+
     public static class ViewHolder extends RecyclerView.ViewHolder{
         private final ImageView imageView;
         private final TextView folderName;
@@ -110,7 +118,7 @@ public class FolderListRecyclerAdapter extends RecyclerView.Adapter<FolderListRe
         mContext = context;
     }
 
-    public FolderListRecyclerAdapter(Context context, ArrayList<FolderModel> files){
+    public FolderListRecyclerAdapter(Context context, ArrayList<EnhancedFolder> files){
         mContext = context;
         this.folders = files;
     }
@@ -126,15 +134,26 @@ public class FolderListRecyclerAdapter extends RecyclerView.Adapter<FolderListRe
 
         // Get element from your dataset at this position and replace the
         // contents of the view with that element
-        FolderModel folder = folders.get(position);
+        EnhancedFolder folder = folders.get(position);
         AuthManager.getInstance().performActionWithFreshTokens(mContext, new AuthState.AuthStateAction() {
             @Override
             public void execute(@Nullable String accessToken, @Nullable String idToken, @Nullable AuthorizationException ex) {
                 RequestOptions requestOptions = new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL);
-                GlideUrl glideUrl = new GlideUrl(RequestManager.getInstance().getUrlManager().getFileUrlString() + folder.onlineThumbnailId + "/thumbnail", new LazyHeaders.Builder().addHeader("Authorization", "Bearer " + accessToken).build());
-                //GlideUrl glideUrl = new GlideUrl("https://quigleyserver.ddns.net:14500/api/v1/file/" + folder.onlineThumbnailId + "/thumbnail", new LazyHeaders.Builder()
-                //        .addHeader("Authorization", "Bearer " + accessToken).build());
-                Glide.with(mContext).asBitmap().load(glideUrl).fallback(R.drawable.ic_baseline_broken_image_24).apply(requestOptions).into(viewHolder.getImageView());
+                GlideUrl glideUrl = null;
+                if(folder.onlineThumbnailId > 0) {
+                    try {
+                        glideUrl = new GlideUrl(RequestManager.getInstance().getUrlManager().getFileUrlString() + folder.onlineThumbnailId + "/thumbnail", new LazyHeaders.Builder().addHeader("Authorization", "Bearer " + accessToken).build());
+                        //GlideUrl glideUrl = new GlideUrl("https://quigleyserver.ddns.net:14500/api/v1/file/" + folder.onlineThumbnailId + "/thumbnail", new LazyHeaders.Builder()
+                        //        .addHeader("Authorization", "Bearer " + accessToken).build());
+
+                    }
+                    catch (RequestServiceNotConfiguredException exception){
+
+                    }
+                    finally {
+                        Glide.with(mContext).asBitmap().load(glideUrl).fallback(R.drawable.ic_baseline_broken_image_24).apply(requestOptions).into(viewHolder.getImageView());
+                    }
+                }
             }
         });
         if(getIsSelected(position))
@@ -169,7 +188,7 @@ public class FolderListRecyclerAdapter extends RecyclerView.Adapter<FolderListRe
         folders.clear();
         notifyDataSetChanged();
     }
-    public void addList(ArrayList<FolderModel> folders){
+    public void addList(ArrayList<EnhancedFolder> folders){
         this.folders.addAll(folders);
         notifyDataSetChanged();
     }
