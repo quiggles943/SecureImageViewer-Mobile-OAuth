@@ -83,9 +83,11 @@ public class NewFolderViewerActivity extends SecureActivity {
                 @Override
                 public void FolderFilesRetrieved(List<EnhancedFile> files, Exception exception) {
                     if(files != null){
-                        itemList = (ArrayList<EnhancedFile>) files;
+                        //itemList = (ArrayList<EnhancedFile>) files;
                         SortType initialSort = ApplicationPreferenceManager.getInstance().getOfflineFolderSortType();
-                        adapter = new FileGridAdapter(context,files,initialSort);
+                        selectedFolder.sortFiles(initialSort);
+                        itemList = (ArrayList<EnhancedFile>) selectedFolder.getFiles();
+                        adapter = new FileGridAdapter(context,itemList);
                         gridview.setAdapter(adapter);
                     }
                 }
@@ -173,6 +175,7 @@ public class NewFolderViewerActivity extends SecureActivity {
                         }
                         adapter.sort(newSortType);
                         ApplicationPreferenceManager.getInstance().setOfflineFolderSortType(newSortType);
+                        selectedFolder.sortFiles(newSortType);
                         dialog.dismiss();
                     }
                 });

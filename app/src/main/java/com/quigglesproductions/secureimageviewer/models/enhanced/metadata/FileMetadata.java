@@ -61,6 +61,9 @@ public class FileMetadata {
     }
 
     public LocalDateTime getCreationTime() {
-        return creationTime;
+        if(creationTime == null)
+            return LocalDateTime.MIN;
+        else
+            return creationTime;
     }
 }

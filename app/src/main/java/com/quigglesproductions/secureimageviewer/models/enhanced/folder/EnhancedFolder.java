@@ -6,6 +6,7 @@ import android.os.Parcelable;
 import androidx.annotation.NonNull;
 
 import com.google.gson.annotations.SerializedName;
+import com.quigglesproductions.secureimageviewer.SortType;
 import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.IFileDataSource;
 import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.IFolderDataSource;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
@@ -13,6 +14,8 @@ import com.quigglesproductions.secureimageviewer.models.folder.FolderModel;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 public class EnhancedFolder  implements Parcelable {
 
@@ -117,6 +120,14 @@ public class EnhancedFolder  implements Parcelable {
 
     public IFolderDataSource getDataSource() {
         return dataSource;
+    }
+
+    public void sortFiles(SortType newSortType) {
+
+    }
+
+    public List<EnhancedFile> getFiles(){
+        return null;
     }
 
 

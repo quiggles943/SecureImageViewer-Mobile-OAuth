@@ -1,10 +1,14 @@
 package com.quigglesproductions.secureimageviewer.managers;
 
 import android.content.Context;
+import android.net.Uri;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.OptIn;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.Player;
+import androidx.media3.common.util.UnstableApi;
+import androidx.media3.datasource.DataSource;
 import androidx.media3.datasource.DefaultHttpDataSource;
 import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory;
@@ -18,6 +22,8 @@ import net.openid.appauth.AuthState;
 import net.openid.appauth.AuthorizationException;
 
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -56,7 +62,7 @@ public class VideoPlaybackManager {
 
     }
 
-
+    @OptIn(markerClass = UnstableApi.class)
     public void releasePlayer(){
         if (player != null) {
             playbackPosition = player.getCurrentPosition();
@@ -86,7 +92,7 @@ public class VideoPlaybackManager {
     public boolean getPlayWhenReady() {
         return playWhenReady;
     }
-
+    @OptIn(markerClass = UnstableApi.class)
     public Player getVideoFromNetwork(String fileUri, IAuthManager authManager, boolean playWhenReady) {
         authManager.performActionWithFreshTokens(new AuthState.AuthStateAction() {
             @Override
@@ -106,20 +112,20 @@ public class VideoPlaybackManager {
         });
         return player;
     }
-
-    public void getVideoFromDataSource(IFileDataSource dataSource, boolean playWhenReady, VideoPlayerCallback callback) {
+    @OptIn(markerClass = UnstableApi.class)
+    public void  getVideoFromDataSource(IFileDataSource dataSource, boolean playWhenReady, VideoPlayerCallback callback) {
         try {
             URL fileUrl = dataSource.getFileURL();
-            androidx.media3.common.MediaItem mediaItem = MediaItem.fromUri(fileUrl.getPath());
+            androidx.media3.common.MediaItem mediaItem = MediaItem.fromUri(fileUrl.toString());
             if(ISecureDataSource.class.isAssignableFrom(dataSource.getClass())){
                 ((ISecureDataSource)dataSource).getAuthorization().performActionWithFreshTokens(new AuthState.AuthStateAction() {
                     @Override
-                    public void execute(@Nullable String accessToken, @Nullable String idToken, @Nullable AuthorizationException ex) {
+                    public void  execute(@Nullable String accessToken, @Nullable String idToken, @Nullable AuthorizationException ex) {
                         Map<String, String> headersMap = new HashMap<>();
                         headersMap.put("Authorization", "Bearer " + accessToken);
-                        androidx.media3.datasource.DataSource.Factory factory = new DefaultHttpDataSource.Factory().setDefaultRequestProperties(headersMap);
+                        DataSource.Factory factory = new DefaultHttpDataSource.Factory().setDefaultRequestProperties(headersMap);
                         setExoPlayer(new ExoPlayer.Builder(rootContext).setMediaSourceFactory(new
-                                DefaultMediaSourceFactory((androidx.media3.datasource.DataSource.Factory) factory)).setSeekBackIncrementMs(seekBackIntervalMs).setSeekForwardIncrementMs(seekForwardIntervalMs).build());
+                                DefaultMediaSourceFactory((DataSource.Factory) factory)).setSeekBackIncrementMs(seekBackIntervalMs).setSeekForwardIncrementMs(seekForwardIntervalMs).build());
                         player.setMediaItem(mediaItem);
                         player.prepare();
                         if(playWhenReady) {

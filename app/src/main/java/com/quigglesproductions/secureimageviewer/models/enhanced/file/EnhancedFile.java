@@ -166,7 +166,7 @@ public class EnhancedFile implements ItemBaseModel {
 
     public LocalDateTime getImportTime(){
         if(metadata == null)
-            return null;
+            return LocalDateTime.MIN;
         return metadata.getCreationTime();
     }
 

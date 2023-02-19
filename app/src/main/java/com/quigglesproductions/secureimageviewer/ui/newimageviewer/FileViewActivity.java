@@ -5,19 +5,14 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.ui.PlayerView;
 import androidx.viewpager.widget.ViewPager;
@@ -33,6 +28,7 @@ import com.quigglesproductions.secureimageviewer.models.enhanced.folder.Enhanced
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedOnlineFolder;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
+import com.quigglesproductions.secureimageviewer.ui.compoundcontrols.FileViewerNavigator;
 
 public class FileViewActivity extends SecureActivity implements ViewPager.OnPageChangeListener {
     private static final String KEY_FILE_POSITION = "viewerPager.position";
@@ -42,14 +38,17 @@ public class FileViewActivity extends SecureActivity implements ViewPager.OnPage
     Gson gson;
     TextView fileName;
     LinearLayout topLayout;
-    RelativeLayout bottomLayout;
+    //LinearLayout bottomLayout;
+    FileViewerNavigator fileViewerNavigatorImage;
+    FileViewerNavigator fileViewerNavigatorVideo;
     LinearLayout imagePagerControls;
     ViewPagerAdapter mViewPagerAdapter;
     Context context;
     //ExoPlayer exoPlayer;
     Bundle currentState;
     int currentIndex;
-    TextView imageCountText,imageTotalText;
+    //TextView imageCountText,imageTotalText;
+    View.OnClickListener prevFileClick,nextFileClick;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,17 +68,24 @@ public class FileViewActivity extends SecureActivity implements ViewPager.OnPage
         else if (EnhancedOnlineFolder.class.isAssignableFrom(selectedFolder.getClass())) {
             mViewPagerAdapter.addFiles(((EnhancedOnlineFolder)selectedFolder).getBaseItems());
         }
-        imageTotalText.setText(mViewPagerAdapter.getCount()+"");
+        fileViewerNavigatorImage.setTotal(mViewPagerAdapter.getCount());
+        //imageTotalText.setText(mViewPagerAdapter.getCount()+"");
         mViewPagerAdapter.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(topLayout.getVisibility() == View.VISIBLE){
                     topLayout.setVisibility(View.INVISIBLE);
-                    bottomLayout.setVisibility(View.INVISIBLE);
+                    if(fileViewerNavigatorImage != null)
+                        fileViewerNavigatorImage.setVisibility(View.INVISIBLE);
+                    if(fileViewerNavigatorVideo != null)
+                        fileViewerNavigatorVideo.setVisibility(View.INVISIBLE);
                 }
                 else {
                     topLayout.setVisibility(View.VISIBLE);
-                    bottomLayout.setVisibility(View.VISIBLE);
+                    if(fileViewerNavigatorImage != null)
+                        fileViewerNavigatorImage.setVisibility(View.VISIBLE);
+                    if(fileViewerNavigatorVideo != null)
+                        fileViewerNavigatorVideo.setVisibility(View.VISIBLE);
                 }
             }
         });
@@ -117,24 +123,28 @@ public class FileViewActivity extends SecureActivity implements ViewPager.OnPage
     }
 
     private void setupControls(){
-        fileName = findViewById(R.id.file_name);
-        topLayout = findViewById(R.id.topLinearLayout);
-        bottomLayout = findViewById(R.id.bottomLinearLayout);
-        imagePagerControls = findViewById(R.id.image_pager_controls);
-        ImageButton prevButton = imagePagerControls.findViewById(R.id.imagepager_prev);
-        prevButton.setOnClickListener(new View.OnClickListener() {
+        prevFileClick = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mPager.setCurrentItem(mPager.getCurrentItem()-1);
             }
-        });
-        ImageButton nextButton = imagePagerControls.findViewById(R.id.imagepager_next);
-        nextButton.setOnClickListener(new View.OnClickListener() {
+        };
+        nextFileClick = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mPager.setCurrentItem(mPager.getCurrentItem()+1);
             }
-        });
+        };
+        fileName = findViewById(R.id.file_name);
+        topLayout = findViewById(R.id.topLinearLayout);
+        //bottomLayout = findViewById(R.id.imageviewer_pager_layout);
+        fileViewerNavigatorImage = findViewById(R.id.fileviewer_navigator);
+        fileViewerNavigatorVideo = findViewById(R.id.fileviewer_navigator_video);
+        imagePagerControls = findViewById(R.id.image_pager_controls);
+        setupImageNavigatorControls();
+        setupVideoNavigatorControls();
+
+
         ImageButton backButton = topLayout.findViewById(R.id.backButton);
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -142,14 +152,38 @@ public class FileViewActivity extends SecureActivity implements ViewPager.OnPage
                 onBackPressed();
             }
         });
-        imageCountText = findViewById(R.id.imagecount);
-        imageTotalText = findViewById(R.id.imagetotal);
+        //imageCountText = findViewById(R.id.imagecount);
+        //imageTotalText = findViewById(R.id.imagetotal);
 
+    }
+
+    private void setupImageNavigatorControls(){
+        if(fileViewerNavigatorImage != null) {
+            ImageButton prevButtonImage = fileViewerNavigatorImage.findViewById(R.id.imagepager_prev);
+            prevButtonImage.setOnClickListener(prevFileClick);
+            ImageButton nextButtonImage = fileViewerNavigatorImage.findViewById(R.id.imagepager_next);
+            nextButtonImage.setOnClickListener(nextFileClick);
+        }
+    }
+    private void setupVideoNavigatorControls(){
+        if(fileViewerNavigatorVideo != null) {
+            ImageButton prevButtonImage = fileViewerNavigatorVideo.findViewById(R.id.imagepager_prev);
+            prevButtonImage.setOnClickListener(prevFileClick);
+            ImageButton nextButtonImage = fileViewerNavigatorVideo.findViewById(R.id.imagepager_next);
+            nextButtonImage.setOnClickListener(nextFileClick);
+        }
     }
 
     @Override
     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 
+    }
+
+    private void setNavigatorPosition(int position){
+        if(fileViewerNavigatorImage != null)
+            fileViewerNavigatorImage.setPosition(position+1);
+        if(fileViewerNavigatorVideo != null)
+            fileViewerNavigatorVideo.setPosition(position+1);
     }
 
     @Override
@@ -158,20 +192,30 @@ public class FileViewActivity extends SecureActivity implements ViewPager.OnPage
         if (VideoPlaybackManager.getInstance().getExoPlayer() != null)
             VideoPlaybackManager.getInstance().getExoPlayer().stop();
         EnhancedFile item = mViewPagerAdapter.getItem(position);
-        imageCountText.setText((position+1)+"");
+        setNavigatorPosition(position+1);
+        //fileViewerNavigatorImage.setPosition(position+1);
+        //fileViewerNavigatorVideo.setPosition(position+1);
+        //imageCountText.setText((position+1)+"");
         if (item.metadata.fileType.equalsIgnoreCase("VIDEO")) {
             topLayout.setVisibility(View.INVISIBLE);
-            bottomLayout.setVisibility(View.INVISIBLE);
+            fileViewerNavigatorImage.setVisibility(View.INVISIBLE);
             try {
                 View view = mPager.findViewWithTag(position);
                 if (view != null) {
                     PlayerView videoView = view.findViewById(R.id.videoView);
-                    ImageButton playpause = videoView.findViewById(R.id.button_play_pause_toggle);
+                    fileViewerNavigatorVideo = videoView.findViewById(R.id.fileviewer_navigator_video);
+                    setupVideoNavigatorControls();
+                    setNavigatorPosition(position+1);
+                    fileViewerNavigatorVideo.setTotal(mViewPagerAdapter.getCount());
+                    ImageButton backButton = videoView.findViewById(R.id.backButton);
+                    backButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            onBackPressed();
+                        }
+                    });
                     TextView titleView = videoView.findViewById(R.id.exo_title);
                     titleView.setText(item.getName());
-                    //videoView.setPlayer(VideoPlaybackManager.getInstance().getExoPlayer());
-                    String fileUrl = RequestManager.getInstance().getUrlManager().getFileUrlString();
-                    String fullUri = fileUrl + item.getOnlineId() + "/content";
                     VideoPlaybackManager.getInstance().getVideoFromDataSource(item.getDataSource(), true, new VideoPlaybackManager.VideoPlayerCallback() {
                         @Override
                         public void VideoPlayerRecieved(ExoPlayer player, Exception exception) {
@@ -183,6 +227,13 @@ public class FileViewActivity extends SecureActivity implements ViewPager.OnPage
                 }
             } catch (Exception exc) {
                 Log.e("Error", exc.getMessage());
+            }
+        }
+        else{
+            if(fileViewerNavigatorImage == null) {
+                fileViewerNavigatorImage = findViewById(R.id.fileviewer_navigator);
+                setupImageNavigatorControls();
+                setNavigatorPosition(position+1);
             }
         }
     }

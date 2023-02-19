@@ -24,7 +24,7 @@ public class OnlineFileDataSource implements IFileDataSource,ISecureDataSource {
     @Override
     public URL getFileURL() throws MalformedURLException, RequestServiceNotConfiguredException {
         String baseUrl = RequestManager.getInstance().getUrlManager().getFileUrlString();
-        String fileUri = baseUrl+file.getOnlineId();
+        String fileUri = baseUrl+file.getOnlineId()+"/content";
         return new URL(fileUri);
     }
     private URL getFileURL(int id) throws MalformedURLException, RequestServiceNotConfiguredException {

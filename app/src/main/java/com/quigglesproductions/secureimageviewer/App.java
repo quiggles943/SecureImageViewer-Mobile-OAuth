@@ -65,7 +65,7 @@ public class App extends Application implements LifecycleObserver {
         HttpSenderConfiguration httpSenderConfiguration = new HttpSenderConfigurationBuilder()
                 //required. Https recommended
                 //.withUri("http://192.168.0.17:10500/api/report")
-                .withUri("http://quigleyserver.ddns.net:14501/api/report")
+                .withUri("https://quigleyserver.ddns.net:14500/api/report/ ")
                 //optional. Enables http basic auth
                 //.withBasicAuthLogin("acra")
                 //required if above set
@@ -78,12 +78,12 @@ public class App extends Application implements LifecycleObserver {
                 .withSocketTimeout(20000)
                 // defaults to false
                 .withDropReportsOnTimeout(false)
-                .withResCertificate(R.raw.localhost)
+                .withResCertificate(R.raw.quigleyidca)
                 //defaults to false. Recommended if your backend supports it
                 .withCompress(false)
                 //defaults to all
                 .build();
-        String[] additionalSharedPreferences = new String[]{AuthManager.AUTHMANAGER_PREF_NAME,AuthManager.TOKEN_PREF,AuthManager.USERINFO_PREF};
+        //String[] additionalSharedPreferences = new String[]{AuthManager.AUTHMANAGER_PREF_NAME,AuthManager.TOKEN_PREF,AuthManager.USERINFO_PREF};
         ACRA.init(this, new CoreConfigurationBuilder()
                 //core configuration:
                 .withBuildConfigClass(BuildConfig.class)
@@ -95,7 +95,7 @@ public class App extends Application implements LifecycleObserver {
                                 .build(),httpSenderConfiguration
                 )
                 .withSendReportsInDevMode(true)
-                .withAdditionalSharedPreferences(additionalSharedPreferences)
+                //.withAdditionalSharedPreferences(additionalSharedPreferences)
         );
     }
 

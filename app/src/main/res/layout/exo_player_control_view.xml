@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android">
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<merge xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+<LinearLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_gravity="bottom"
     android:layoutDirection="ltr"
     android:background="#25000000"
@@ -31,7 +31,7 @@
             android:id="@id/exo_progress"
             android:layout_width="0dp"
             android:layout_weight="1"
-            android:layout_height="16dp"
+            android:layout_height="30dp"
             app:played_color="@color/blue_500"
             app:buffered_color="@color/blue_200"/>
 
@@ -46,6 +46,13 @@
             android:textColor="#FFFFFFFF"/>
 
     </LinearLayout>
+
+    <!--<include layout="@layout/fileviewer_navigation_bar"/>-->
+    <com.quigglesproductions.secureimageviewer.ui.compoundcontrols.FileViewerNavigator
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:id="@+id/fileviewer_navigator_video"/>
 </LinearLayout>
 
 <LinearLayout
@@ -66,24 +73,35 @@ android:clipToPadding="false">
 
 </LinearLayout>
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <LinearLayout
+        android:id="@+id/topLinearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_gravity="top"
-        android:layoutDirection="ltr"
         android:background="#25000000"
-        android:paddingHorizontal="10dp"
-        android:paddingVertical="10dp"
-        android:orientation="vertical"
-        android:fitsSystemWindows="true"
-        >
+        android:fitsSystemWindows="false"
+        android:layoutDirection="ltr"
+
+        android:paddingVertical="5dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageButton
+            android:id="@+id/backButton"
+            style="@style/ImagePagerButton.Back"
+            android:layout_width="50dp"
+            app:cornerRadius="5dp"
+            android:background="?android:attr/actionBarItemBackground"/>
+
         <TextView
             android:id="@+id/exo_title"
-            android:layout_marginHorizontal="13dp"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:ellipsize="end"
+            android:gravity="center_vertical"
             android:maxLines="1"
-            android:ellipsize="end"/>
+            android:paddingHorizontal="10dp"
+            />
     </LinearLayout>
 </merge>

@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.VIBRATE" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
     <application
         android:name=".App"
         android:allowBackup="true"
@@ -15,23 +16,24 @@
         android:networkSecurityConfig="@xml/network_security_config"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.SecureImageViewer">
-        <service android:name=".apprequest.services.AppAuthorizedService"/>
+        android:theme="@style/Theme.SecureImageViewer" >
+
+        <service android:name=".apprequest.services.AppAuthorizedService" />
+
         <activity
             android:name=".ui.splash.NewSplashScreenActivity"
+            android:exported="true"
             android:launchMode="singleTask"
-            android:theme="@style/SplashScreenTheme"
-            android:exported="true">
+            android:theme="@style/SplashScreenTheme" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
         <activity
             android:name=".ui.onlinefolderlist.OnlineFolderListActivity"
-            android:label="@string/app_name">
+            android:label="@string/app_name" >
             <meta-data
                 android:name="android.app.default_searchable"
                 android:value=".ui.onlinesearchview.OnlineSearchViewActivity" />
@@ -40,21 +42,23 @@
             android:name=".login.LoginActivity"
             android:noHistory="true"
             android:theme="@style/Theme.SecureImageViewer.NoActionBar" />
-        <activity android:name=".ui.onlinefolderview.OnlineFolderViewActivity"
-            android:launchMode="singleTask"/>
+        <activity
+            android:name=".ui.onlinefolderview.OnlineFolderViewActivity"
+            android:launchMode="singleTask" />
         <activity
             android:name=".ui.MainMenuActivity"
             android:label="@string/app_name"
-            android:launchMode="singleTask"/>
+            android:launchMode="singleTask" />
+
         <meta-data
             android:name="android.app.default_searchable"
             android:value=".ui.onlinesearchview.OnlineSearchViewActivity" />
 
         <activity
             android:name=".ui.onlinesearchview.OnlineSearchViewActivity"
+            android:exported="true"
             android:label="@string/app_name"
-            android:launchMode="singleTop"
-            android:exported="true">
+            android:launchMode="singleTop" >
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
@@ -68,15 +72,15 @@
         </activity>
         <activity
             android:name=".ui.preferences.SettingsActivity"
-            android:label="@string/title_activity_settings">
+            android:label="@string/title_activity_settings" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.MainMenuActivity"/>
+                android:value=".ui.MainMenuActivity" />
         </activity>
         <activity
             android:name=".ui.preferences.SsoSettingsActivity"
             android:label="SSO Settings"
-            android:launchMode="singleTask">
+            android:launchMode="singleTask" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.preferences.NetworkSettingsActivity" />
@@ -84,7 +88,7 @@
         <activity
             android:name=".ui.preferences.NetworkSettingsActivity"
             android:label="Network Settings"
-            android:launchMode="singleTask">
+            android:launchMode="singleTask" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.preferences.SettingsActivity" />
@@ -92,7 +96,7 @@
         <activity
             android:name=".ui.preferences.AboutSettingsActivity"
             android:label="Network Settings"
-            android:launchMode="singleTask">
+            android:launchMode="singleTask" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.preferences.SettingsActivity" />
@@ -100,7 +104,7 @@
         <activity
             android:name=".ui.preferences.WebSettingsActivity"
             android:label="Web Api Settings"
-            android:launchMode="singleTask">
+            android:launchMode="singleTask" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.preferences.NetworkSettingsActivity" />
@@ -108,7 +112,7 @@
         <activity
             android:name=".ui.preferences.StorageSettingsActivity"
             android:label="Web Api Settings"
-            android:launchMode="singleTask">
+            android:launchMode="singleTask" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.preferences.SettingsActivity" />
@@ -116,22 +120,23 @@
         <activity
             android:name=".ui.preferences.DisplaySettingsActivity"
             android:label="Display Settings"
-            android:launchMode="singleTask">
+            android:launchMode="singleTask" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.preferences.SettingsActivity" />
         </activity>
-        <activity android:name=".ui.preferences.SecuritySettingsActivity"
-        android:label="Security Settings"
-        android:launchMode="singleTask">
-        <meta-data
-            android:name="android.support.PARENT_ACTIVITY"
-            android:value=".ui.preferences.SettingsActivity" />
-        </activity>>
+        <activity
+            android:name=".ui.preferences.SecuritySettingsActivity"
+            android:label="Security Settings"
+            android:launchMode="singleTask" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.preferences.SettingsActivity" />
+        </activity>
         <activity
             android:name=".ui.preferences.DatabaseSettingsActivity"
             android:label="Web Api Settings"
-            android:launchMode="singleTask">
+            android:launchMode="singleTask" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.preferences.SettingsActivity" />
@@ -141,34 +146,42 @@
             android:name=".ui.offlinefolderlist.FolderListActivity"
             android:label="@string/app_name"
             android:launchMode="singleTask" />
-        <activity android:name=".ui.offlinefolderview.FolderViewActivity"
+        <activity
+            android:name=".ui.offlinefolderview.FolderViewActivity"
             android:launchMode="singleTask" />
-        <activity android:name=".ui.newfolderviewer.NewFolderViewerActivity"
-            android:launchMode="singleTask"/>
+        <activity
+            android:name=".ui.newfolderviewer.NewFolderViewerActivity"
+            android:launchMode="singleTask" />
         <activity
             android:name=".ui.newimageviewer.FileViewActivity"
-            android:theme="@style/Theme.SecureImageViewer.NoActionBar"
             android:configChanges="keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
-            android:launchMode="singleTask" />
-        <activity android:name=".ui.onlinerecentfilelist.OnlineRecentFilesViewActivity"/>
-        <activity android:name=".ui.filesend.FileSendActivity"
-                android:excludeFromRecents="true"
-            android:launchMode="singleInstance"
-            android:exported="true">
-            <intent-filter ><!--intent filter for single file sharing-->
+            android:launchMode="singleTask"
+            android:theme="@style/Theme.SecureImageViewer.NoActionBar" />
+        <activity android:name=".ui.onlinerecentfilelist.OnlineRecentFilesViewActivity" />
+        <activity
+            android:name=".ui.filesend.FileSendActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:launchMode="singleInstance" >
+            <intent-filter> <!-- intent filter for single file sharing -->
                 <action android:name="android.intent.action.SEND" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:mimeType="*/*" />
             </intent-filter>
-            <intent-filter ><!--intent filter for sharing multiple files-->
+            <intent-filter> <!-- intent filter for sharing multiple files -->
                 <action android:name="android.intent.action.SEND_MULTIPLE" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <data android:mimeType="*/*" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.login.LoginActivity"
-            android:theme="@style/SplashScreenTheme"
-            android:launchMode="singleTask"/>
+        <activity
+            android:name=".ui.login.LoginActivity"
+            android:launchMode="singleTask"
+            android:theme="@style/SplashScreenTheme" />
     </application>
 
 </manifest>

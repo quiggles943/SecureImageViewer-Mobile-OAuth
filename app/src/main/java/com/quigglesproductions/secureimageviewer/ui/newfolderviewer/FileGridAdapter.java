@@ -35,6 +35,11 @@ public class FileGridAdapter extends BaseAdapter {
     private ArrayList<EnhancedFile> items;
     private int folderId;
     private boolean isEncrypted;
+    public FileGridAdapter(Context c, List<EnhancedFile> files)
+    {
+        mContext = c;
+        this.items = (ArrayList<EnhancedFile>) files;
+    }
     public FileGridAdapter(Context c, List<EnhancedFile> files, SortType initialSort)
     {
         mContext = c;

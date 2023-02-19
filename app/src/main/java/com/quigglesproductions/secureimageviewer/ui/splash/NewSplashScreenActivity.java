@@ -574,6 +574,12 @@ public class NewSplashScreenActivity extends SecureActivity {
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+        finish();
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
     }

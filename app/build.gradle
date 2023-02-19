@@ -15,7 +15,7 @@ android {
         minSdkVersion 31
         targetSdkVersion 33
         versionCode 4
-        versionName "1.7.2"
+        versionName "1.7.3"
         android.defaultConfig.manifestPlaceholders = [
                 'appAuthRedirectScheme': 'siv'
         ]
@@ -42,6 +42,9 @@ android {
         targetCompatibility JavaVersion.VERSION_11
     }
     namespace 'com.quigglesproductions.secureimageviewer'
+    buildFeatures {
+        viewBinding true
+    }
 }
 def mediaVersion = "1.0.0-beta02"
 def acraVersion = '5.9.7'

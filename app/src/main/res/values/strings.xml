@@ -76,5 +76,6 @@
     <string name="requestservice_authenticating">Authenticating</string>
     <string name="device_authenticate_error">Unable to authenticate device</string>
     <string name="online_authentication_required">Online authentication required</string>
+    <string name="title_activity_device_login">DeviceLoginActivity</string>
 
 </resources>
