@@ -192,7 +192,7 @@ public class FileViewActivity extends SecureActivity implements ViewPager.OnPage
         if (VideoPlaybackManager.getInstance().getExoPlayer() != null)
             VideoPlaybackManager.getInstance().getExoPlayer().stop();
         EnhancedFile item = mViewPagerAdapter.getItem(position);
-        setNavigatorPosition(position+1);
+        //setNavigatorPosition(position);
         //fileViewerNavigatorImage.setPosition(position+1);
         //fileViewerNavigatorVideo.setPosition(position+1);
         //imageCountText.setText((position+1)+"");
@@ -205,7 +205,7 @@ public class FileViewActivity extends SecureActivity implements ViewPager.OnPage
                     PlayerView videoView = view.findViewById(R.id.videoView);
                     fileViewerNavigatorVideo = videoView.findViewById(R.id.fileviewer_navigator_video);
                     setupVideoNavigatorControls();
-                    setNavigatorPosition(position+1);
+                    setNavigatorPosition(position);
                     fileViewerNavigatorVideo.setTotal(mViewPagerAdapter.getCount());
                     ImageButton backButton = videoView.findViewById(R.id.backButton);
                     backButton.setOnClickListener(new View.OnClickListener() {
@@ -230,10 +230,11 @@ public class FileViewActivity extends SecureActivity implements ViewPager.OnPage
             }
         }
         else{
+            setNavigatorPosition(position);
             if(fileViewerNavigatorImage == null) {
                 fileViewerNavigatorImage = findViewById(R.id.fileviewer_navigator);
                 setupImageNavigatorControls();
-                setNavigatorPosition(position+1);
+
             }
         }
     }

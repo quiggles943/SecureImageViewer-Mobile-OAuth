@@ -60,6 +60,7 @@ import com.quigglesproductions.secureimageviewer.ui.MainMenuActivity;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
 import com.quigglesproductions.secureimageviewer.ui.filesend.FileSendActivity;
 import com.quigglesproductions.secureimageviewer.ui.login.BiometricAuthenticationException;
+import com.quigglesproductions.secureimageviewer.ui.login.EnhancedLoginActivity;
 import com.quigglesproductions.secureimageviewer.ui.preferences.WebSettingsActivity;
 
 import net.openid.appauth.AuthState;
@@ -361,8 +362,17 @@ public class NewSplashScreenActivity extends SecureActivity {
     }
 
     private void showBiometrics(){
-        Intent intent = new Intent(context, MainMenuActivity.class);
-        SecurityManager.getInstance().setupBiometricsForResult((SecureActivity) context, intent);
+        Intent intent;
+        if(NEW_LOGIN_METHOD) {
+            intent = new Intent(context, EnhancedLoginActivity.class);
+            startActivity(intent);
+            finish();
+        }
+        else {
+            intent = new Intent(context,MainMenuActivity.class);
+            SecurityManager.getInstance().setupBiometricsForResult((SecureActivity) context, intent);
+        }
+            //finish();
     }
 
     private void registerNetworkCallback(){
@@ -573,11 +583,11 @@ public class NewSplashScreenActivity extends SecureActivity {
         }
     }
 
-    @Override
+    /*@Override
     protected void onStop() {
         super.onStop();
         finish();
-    }
+    }*/
 
     @Override
     protected void onDestroy() {

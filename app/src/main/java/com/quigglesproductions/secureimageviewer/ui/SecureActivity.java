@@ -31,6 +31,7 @@ import com.quigglesproductions.secureimageviewer.managers.SecurityManager;
 import com.quigglesproductions.secureimageviewer.managers.ViewerConnectivityManager;
 import com.quigglesproductions.secureimageviewer.models.LoginModel;
 import com.quigglesproductions.secureimageviewer.models.WebServerConfig;
+import com.quigglesproductions.secureimageviewer.ui.login.EnhancedLoginActivity;
 import com.quigglesproductions.secureimageviewer.ui.login.LoginActivity;
 import com.quigglesproductions.secureimageviewer.ui.preferences.SsoSettingsActivity;
 import com.quigglesproductions.secureimageviewer.ui.splash.NewSplashScreenActivity;
@@ -52,6 +53,8 @@ public class SecureActivity extends AppCompatActivity {
     public static final int PICKFILE_RESULT_CODE = 546;
     public static final int BIOMETRIC_ENROLLMENT = 7844;
     public static final int INTENT_AUTHENTICATE = 5;
+
+    public static final boolean NEW_LOGIN_METHOD= false;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -107,7 +110,7 @@ public class SecureActivity extends AppCompatActivity {
             }
         });
         if(!SecurityManager.getInstance().isUserAuthenticated()){
-            if(!LoginActivity.class.isInstance(this) && !NewSplashScreenActivity.class.isInstance(this)){
+            if(!LoginActivity.class.isInstance(this) && !NewSplashScreenActivity.class.isInstance(this) && !EnhancedLoginActivity.class.isInstance(this)){
                 authenticateUser();
             }
         }
@@ -140,7 +143,7 @@ public class SecureActivity extends AppCompatActivity {
             }
         });
         if(!SecurityManager.getInstance().isUserAuthenticated()){
-            if(!LoginActivity.class.isInstance(this) && !NewSplashScreenActivity.class.isInstance(this)){
+            if(!LoginActivity.class.isInstance(this) && !NewSplashScreenActivity.class.isInstance(this) && !EnhancedLoginActivity.class.isInstance(this)){
                 authenticateUser();
             }
         }
