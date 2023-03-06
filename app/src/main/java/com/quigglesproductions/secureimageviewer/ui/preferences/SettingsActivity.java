@@ -9,9 +9,11 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.core.app.NavUtils;
 import androidx.preference.Preference;
+import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceFragmentCompat;
 
 import com.google.android.material.snackbar.Snackbar;
+import com.quigglesproductions.secureimageviewer.BuildConfig;
 import com.quigglesproductions.secureimageviewer.R;
 import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
 import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
@@ -101,6 +103,20 @@ public class SettingsActivity extends SecureActivity {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
                     Intent intent = new Intent(getContext(),AboutSettingsActivity.class);
+                    startActivity(intent);
+                    return true;
+                }
+            });
+            PreferenceCategory devCategory = getPreferenceManager().findPreference("dev_category");
+            if(BuildConfig.BUILD_TYPE.contentEquals("debug"))
+                devCategory.setVisible(true);
+            else
+                devCategory.setVisible(false);
+            Preference devSettingsPreference = getPreferenceManager().findPreference("dev_settings");
+            devSettingsPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    Intent intent = new Intent(getContext(),DevPreferencesActivity.class);
                     startActivity(intent);
                     return true;
                 }

@@ -14,5 +14,9 @@
     <PreferenceCategory android:title="Extra">
         <Preference app:title="About" app:key="about_settings"/>
     </PreferenceCategory>
+    <PreferenceCategory android:title="Development Options"
+        app:key="dev_category">
+        <Preference app:title="Dev Settings"  app:key="dev_settings"/>
+    </PreferenceCategory>
 
 </PreferenceScreen>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="Data">
+
+        <Preference
+            android:key="data_inject"
+            android:title="Dummy Data Injection"
+            android:persistent="false"
+            android:summary="Add dummy data into the system for testing"/>
+    </PreferenceCategory>
+</PreferenceScreen>

@@ -180,7 +180,11 @@ public class NewSplashScreenActivity extends SecureActivity {
 
                     }
                     else{
-                        updateProgressBar(true,R.string.online_authentication_required,ProgressBarState.ERROR);
+                        if(BuildConfig.BUILD_TYPE.contentEquals("debug")){
+                            setupOfflineLogin();
+                        }
+                        else
+                            updateProgressBar(true,R.string.online_authentication_required,ProgressBarState.ERROR);
                     }
                 }
                 else{

@@ -137,6 +137,14 @@
                 android:value=".ui.preferences.SettingsActivity" />
         </activity>
         <activity
+            android:name=".ui.preferences.DevPreferencesActivity"
+            android:label="Dev Settings"
+            android:launchMode="singleTask" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.preferences.SettingsActivity" />
+        </activity>
+        <activity
             android:name=".ui.preferences.DatabaseSettingsActivity"
             android:label="Web Api Settings"
             android:launchMode="singleTask" >
@@ -159,7 +167,11 @@
             android:name=".ui.newimageviewer.FileViewActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
             android:launchMode="singleTask"
-            android:theme="@style/Theme.SecureImageViewer.NoActionBar" />
+            android:theme="@style/FileViewerTheme" />
+        <activity android:name=".ui.newimageviewer.NewFileViewActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
+            android:launchMode="singleTask"
+            android:theme="@style/FileViewerTheme" />
         <activity android:name=".ui.onlinerecentfilelist.OnlineRecentFilesViewActivity" />
         <activity
             android:name=".ui.filesend.FileSendActivity"

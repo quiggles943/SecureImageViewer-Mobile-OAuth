@@ -10,6 +10,7 @@ import com.quigglesproductions.secureimageviewer.SortType;
 import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.IFileDataSource;
 import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.IFolderDataSource;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
+import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedOnlineFile;
 import com.quigglesproductions.secureimageviewer.models.folder.FolderModel;
 
 import java.time.LocalDateTime;
@@ -127,6 +128,10 @@ public class EnhancedFolder  implements Parcelable {
     }
 
     public List<EnhancedFile> getFiles(){
+        return null;
+    }
+
+    public ArrayList<EnhancedFile> getBaseItems() {
         return null;
     }
 
