@@ -54,10 +54,14 @@ public class EnhancedDatabaseFile extends EnhancedFile{
     }
 
     public File getImageFile() {
+        if(filePath != null && !filePath.isEmpty())
+            imageFile = new File(filePath);
         return imageFile;
     }
 
     public File getThumbnailFile() {
+        if(thumbnailPath != null && !thumbnailPath.isEmpty())
+            thumbnailFile = new File(thumbnailPath);
         return thumbnailFile;
     }
 

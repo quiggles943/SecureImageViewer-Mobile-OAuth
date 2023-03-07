@@ -42,7 +42,7 @@ public class EnhancedFile implements ItemBaseModel {
     @SerializedName("Metadata")
     public FileMetadata metadata;
 
-    IFileDataSource dataSource;
+    transient IFileDataSource dataSource;
 
     public EnhancedFile(){
 

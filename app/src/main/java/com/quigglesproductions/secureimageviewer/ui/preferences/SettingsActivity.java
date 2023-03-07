@@ -130,6 +130,8 @@ public class SettingsActivity extends SecureActivity {
                 Intent intent = NavUtils.getParentActivityIntent(this);
                 if(intent != null)
                     NavUtils.navigateUpTo(this,intent);
+                else
+                    onBackPressed();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

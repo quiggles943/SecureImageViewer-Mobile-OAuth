@@ -3,6 +3,10 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/drawable-night/ic_baseline_back.xml" value="0.1735" />
+        <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/drawable-night/ic_baseline_short_text.xml" value="0.1535" />
+        <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/drawable-night/ic_baseline_sort.xml" value="0.105" />
+        <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/layout/activity_folder_list.xml" value="0.1" />
         <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/layout/activity_image_pager.xml" value="0.11820652173913043" />
         <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/layout/activity_image_view.xml" value="0.11548913043478261" />
         <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/layout/activity_imageviewer.xml" value="0.11820652173913043" />
@@ -11,7 +15,10 @@
         <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/layout/content_image_view.xml" value="0.11548913043478261" />
         <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/layout/content_imageviewer.xml" value="0.11548913043478261" />
         <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/layout/fileviewer_navigation_bar.xml" value="0.536" />
+        <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/layout/foldergrid_layout_constrained.xml" value="0.1" />
         <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/layout/fragment_file_pager.xml" value="0.11548913043478261" />
+        <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/menu/menu_offline_folder_context.xml" value="0.14375" />
+        <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/menu/menu_online_folder_context.xml" value="0.14375" />
         <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/xml/dev_preferences.xml" value="0.264" />
         <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/xml/root_preferences.xml" value="0.2" />
       </map>

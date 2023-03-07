@@ -30,9 +30,11 @@ import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFi
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedDatabaseFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedOnlineFolder;
+import com.quigglesproductions.secureimageviewer.models.enhanced.folder.ILocalFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.FileMetadata;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
 import com.quigglesproductions.secureimageviewer.ui.newimageviewer.FileViewActivity;
+import com.quigglesproductions.secureimageviewer.ui.newimageviewer.NewFileViewActivity;
 import com.quigglesproductions.secureimageviewer.ui.offlinefolderview.ImageGridAdapter;
 
 import java.net.MalformedURLException;
@@ -67,7 +69,7 @@ public class NewFolderViewerActivity extends SecureActivity {
         gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                Intent intent = new Intent(context, FileViewActivity.class);
+                Intent intent = new Intent(context, NewFileViewActivity.class);
                 intent.putExtra("position",position);
                 intent.putExtra("folderId", folderId);
                 startActivity(intent);
@@ -193,7 +195,8 @@ public class NewFolderViewerActivity extends SecureActivity {
         AdapterView.AdapterContextMenuInfo cmi = (AdapterView.AdapterContextMenuInfo) menuInfo;
         EnhancedFile selectedFile = itemList.get(((AdapterView.AdapterContextMenuInfo) menuInfo).position);
         menu.add(CONTEXTMENU_INFO, cmi.position, 0, "Info");
-        //menu.add(CONTEXTMENU_SET_THUMBNAIL, cmi.position, 0, "Set as Thumbnail");
+        if(selectedFolder instanceof ILocalFolder)
+            menu.add(CONTEXTMENU_SET_THUMBNAIL, cmi.position, 0, "Set as Thumbnail");
         /*if(!selectedFile.getIsUploaded())
             menu.add(CONTEXTMENU_UPLOAD, cmi.position, 0, "Upload");*/
     }
@@ -227,10 +230,10 @@ public class NewFolderViewerActivity extends SecureActivity {
                 });
 
                 break;
-            /*case CONTEXTMENU_SET_THUMBNAIL:
-                FolderManager.getInstance().changeFolderThumbnailFile(selectedFolder,adapter.getItem(item.getItemId()));
-                databaseHandler.setFolderThumbnail(selectedFolder,adapter.getItem(item.getItemId()));
-                break;*/
+            case CONTEXTMENU_SET_THUMBNAIL:
+                FolderManager.getInstance().changeFolderThumbnailFile((EnhancedDatabaseFolder) selectedFolder,(EnhancedDatabaseFile) adapter.getItem(item.getItemId()));
+                databaseHandler.setFolderThumbnail((EnhancedDatabaseFolder) selectedFolder,(EnhancedDatabaseFile) adapter.getItem(item.getItemId()));
+                break;
             case CONTEXTMENU_UPLOAD:
                 /*AuthManager.getInstance().performActionWithFreshTokens(context, new AuthState.AuthStateAction() {
                     @Override

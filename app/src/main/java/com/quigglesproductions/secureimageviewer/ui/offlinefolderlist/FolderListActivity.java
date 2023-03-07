@@ -16,6 +16,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
+import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
@@ -40,6 +41,8 @@ import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
 import com.quigglesproductions.secureimageviewer.ui.newfolderviewer.NewFolderViewerActivity;
 import com.quigglesproductions.secureimageviewer.ui.offlinefolderview.FolderViewActivity;
 import com.quigglesproductions.secureimageviewer.utils.BooleanUtils;
+import com.techyourchance.threadposter.BackgroundThreadPoster;
+import com.techyourchance.threadposter.UiThreadPoster;
 
 import net.openid.appauth.AuthState;
 import net.openid.appauth.AuthorizationException;
@@ -59,11 +62,15 @@ public class FolderListActivity extends SecureActivity {
 
     private ArrayList<FolderModel> folderList;
     private GridView folderView;
+    private TextView folderListText;
     //protected ObservableArrayList<ItemFolder> folders;
     private DatabaseHelper dbHelper;
     protected FolderGridAdapter gridAdapter;
     //FolderLoader folderLoader;
     MenuItem syncItem;
+
+    private final BackgroundThreadPoster backgroundThreadPoster = new BackgroundThreadPoster();
+    private final UiThreadPoster uiThreadPoster = new UiThreadPoster();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +79,7 @@ public class FolderListActivity extends SecureActivity {
         context = this;
         setContentView(R.layout.activity_folder_list);
         folderView = (GridView) findViewById(R.id.folderView);
+        folderListText = findViewById(R.id.folder_list_text);
         FolderManager.getInstance().setDownloadCompleteCallback(new FolderManager.DownloadResultCallback<RequestService.DownloadRequest<EnhancedDatabaseFolder>, ArrayList<VolleyError>>() {
             @Override
             public void ResultReceived(RequestService.DownloadRequest<EnhancedDatabaseFolder> result, ArrayList<VolleyError> exception) {
@@ -82,28 +90,8 @@ public class FolderListActivity extends SecureActivity {
             }
         });
         gridAdapter = new FolderGridAdapter(context, new ArrayList<EnhancedDatabaseFolder>(),folderView);
-        //folderLoader = new FolderLoader(context,gridAdapter);
-        //folderLoader.execute();
         getFolders();
         folderView.setAdapter(gridAdapter);
-        /*gridAdapter.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                // TODO Auto-generated method stub
-                FolderModel value = gridAdapter.getItem(position);
-                Intent intent = new Intent(context, FolderViewActivity.class);
-                intent.putExtra("folderId",value.getId());
-                intent.putExtra("folderName",value.getName());
-                //intent.putExtra("folder", value);
-                startActivity(intent);
-            }
-        });*/
-        /*gridAdapter.setOnItemSelectionChangedlistenr(new FolderGridAdapter.OnItemSelectionChangedListener() {
-            @Override
-            public void OnChange(List<Integer> selectedItems) {
-
-            }
-        });*/
         folderView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
@@ -133,7 +121,19 @@ public class FolderListActivity extends SecureActivity {
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
-
+        gridAdapter.setOnItemsUpdatedListener(new FolderGridAdapter.OnItemsUpdatedListener() {
+            @Override
+            public void itemsUpdated() {
+                if(gridAdapter.getCount() == 0){
+                    folderView.setVisibility(View.INVISIBLE);
+                    folderListText.setVisibility(View.VISIBLE);
+                }
+                else{
+                    folderView.setVisibility(View.VISIBLE);
+                    folderListText.setVisibility(View.INVISIBLE);
+                }
+            }
+        });
     }
 
     @Override
@@ -166,16 +166,15 @@ public class FolderListActivity extends SecureActivity {
         switch(item.getItemId()) {
             case CONTEXTMENU_DELETE:
                 // add stuff here
-                OfflineFolderModel folder = (OfflineFolderModel)folderView.getItemAtPosition(info.position);
+                EnhancedDatabaseFolder folder = (EnhancedDatabaseFolder)folderView.getItemAtPosition(info.position);
                 NotificationManager.getInstance().showSnackbar("Folder '"+folder.getName()+"' selected for deletion", Snackbar.LENGTH_SHORT);
-                AsyncTask.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        FolderManager.getInstance().removeLocalFolder(folder);
-                    }
+                backgroundThreadPoster.post(() -> {
+                    FolderManager.getInstance().removeLocalFolder(folder);
+                    uiThreadPoster.post(() -> {
+                        NotificationManager.getInstance().showSnackbar("Folder '"+folder.getName()+"' deleted", Snackbar.LENGTH_SHORT);
+                        gridAdapter.removeItem(folder);
+                    });
                 });
-                //FolderManager.getInstance().removeLocalFolder(folder);
-                gridAdapter.removeItem(folder);
                 gridAdapter.notifyDataSetChanged();
                 return true;
             default:
@@ -261,6 +260,14 @@ public class FolderListActivity extends SecureActivity {
             public void run() {
                 EnhancedDatabaseHandler databaseHandler = new EnhancedDatabaseHandler(context);
                 ArrayList<EnhancedDatabaseFolder> folders = databaseHandler.getFolders();
+                if(folders.size() == 0){
+                    folderView.setVisibility(View.INVISIBLE);
+                    folderListText.setVisibility(View.VISIBLE);
+                }
+                else{
+                    folderView.setVisibility(View.VISIBLE);
+                    folderListText.setVisibility(View.INVISIBLE);
+                }
                 for(EnhancedDatabaseFolder folder : folders) {
                     handler.post(new Runnable() {
                         @Override

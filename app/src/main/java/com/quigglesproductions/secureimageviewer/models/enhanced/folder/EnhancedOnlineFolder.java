@@ -13,7 +13,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class EnhancedOnlineFolder extends EnhancedFolder{
+public class EnhancedOnlineFolder extends EnhancedFolder implements IRemoteFolder{
 
     private ArrayList<EnhancedOnlineFile> files = new ArrayList<>();
     public EnhancedOnlineFolder(Context context){

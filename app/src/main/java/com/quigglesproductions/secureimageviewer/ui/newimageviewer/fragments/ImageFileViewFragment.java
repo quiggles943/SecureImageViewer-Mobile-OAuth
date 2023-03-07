@@ -3,6 +3,7 @@ package com.quigglesproductions.secureimageviewer.ui.newimageviewer.fragments;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
@@ -21,12 +22,20 @@ import com.bumptech.glide.request.target.Target;
 import com.quigglesproductions.secureimageviewer.R;
 import com.quigglesproductions.secureimageviewer.gson.ViewerGson;
 import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.IFileDataSource;
+import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
+import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedOnlineFile;
+import com.quigglesproductions.secureimageviewer.ui.newimageviewer.NewFileCollectionAdapter;
 import com.quigglesproductions.secureimageviewer.ui.newimageviewer.NewTouchImageView;
 
 public class ImageFileViewFragment extends BaseFileViewFragment {
     TextView fileName;
     LinearLayout topLayout,imagePagerControls;
+    NewFileCollectionAdapter.ZoomLevelChangeCallback zoomLevelChangeCallback;
+
+    public ImageFileViewFragment(NewFileCollectionAdapter.ZoomLevelChangeCallback zoomCallback){
+        zoomLevelChangeCallback = zoomCallback;
+    }
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -36,7 +45,19 @@ public class ImageFileViewFragment extends BaseFileViewFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         Bundle args = getArguments();
-        EnhancedFile file = ViewerGson.getGson().fromJson(args.getString(ARG_FILE),EnhancedFile.class);
+        FileSourceType sourceType = FileSourceType.getFromKey(args.getString(ARG_FILE_SOURCE_TYPE));
+        EnhancedFile file;
+        switch (sourceType){
+            case ONLINE:
+                file = ViewerGson.getGson().fromJson(args.getString(ARG_FILE), EnhancedOnlineFile.class);
+                break;
+            case DATABASE:
+                file = ViewerGson.getGson().fromJson(args.getString(ARG_FILE), EnhancedDatabaseFile.class);
+                break;
+            default:
+                file = null;
+                break;
+        }
         loadImage(view,file);
         super.onViewCreated(view, savedInstanceState);
     }
@@ -52,7 +73,16 @@ public class ImageFileViewFragment extends BaseFileViewFragment {
             }
         });*/
         imageView.setMaxZoom((float)3.2);
-
+        imageView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if(imageView.getCurrentZoom() == imageView.getMinZoom())
+                    zoomLevelChangeCallback.zoomLevelChanged(false);
+                else
+                    zoomLevelChangeCallback.zoomLevelChanged(true);
+                return false;
+            }
+        });
         try {
             IFileDataSource dataSource = item.getDataSource();
             if(dataSource == null)

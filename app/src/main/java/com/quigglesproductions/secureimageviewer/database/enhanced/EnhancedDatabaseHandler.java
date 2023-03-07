@@ -3,6 +3,7 @@ package com.quigglesproductions.secureimageviewer.database.enhanced;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.quigglesproductions.secureimageviewer.database.DatabaseHelper;
@@ -16,6 +17,7 @@ import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFi
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedDatabaseFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.ImageMetadata;
 import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.VideoMetadata;
+import com.quigglesproductions.secureimageviewer.models.file.FileModel;
 import com.quigglesproductions.secureimageviewer.utils.ListUtils;
 
 import java.io.File;
@@ -596,9 +598,9 @@ public class EnhancedDatabaseHandler {
     public void setFolderThumbnail(EnhancedDatabaseFolder folder, EnhancedDatabaseFile file) {
         ContentValues values;
         values = new ContentValues();
-        values.put(DatabaseHelper.SysFolder._ID,folder.getId());
-        values.put(DatabaseHelper.SysFolder.COLUMN_THUMBNAIL_IMAGE,file.getOnlineId());
-        database.update(DatabaseHelper.SysFolder.TABLE_NAME, values, "_id=?", new String[]{folder.getId() + ""});  // number 1 is the _id here, update to variable for your code
+        values.put(EnhancedDatabaseBuilder.Folders._ID,folder.getId());
+        values.put(EnhancedDatabaseBuilder.Folders.THUMBNAIL_ID,file.getOnlineId());
+        database.update(EnhancedDatabaseBuilder.Folders.TABLE_NAME, values, "_id=?", new String[]{folder.getId() + ""});  // number 1 is the _id here, update to variable for your code
     }
 
     public int addSubjectToFile(EnhancedSubject subject, EnhancedDatabaseFile file) {
@@ -674,5 +676,25 @@ public class EnhancedDatabaseHandler {
         ContentValues values = new ContentValues();
         values.put(EnhancedDatabaseBuilder.FileMetadata.ARTIST_ID,artist.id);
         database.update(EnhancedDatabaseBuilder.FileMetadata.TABLE_NAME, values, "FileId=?", new String[]{file.getId() + ""});
+    }
+
+    public long getFolderCount() {
+        return DatabaseUtils.queryNumEntries(database,EnhancedDatabaseBuilder.Folders.TABLE_NAME);
+    }
+    public long getFileCount() {
+        return DatabaseUtils.queryNumEntries(database,EnhancedDatabaseBuilder.Files.TABLE_NAME);
+    }
+
+    public void deleteFile(EnhancedDatabaseFile file) {
+        database.delete(EnhancedDatabaseBuilder.Files.TABLE_NAME, EnhancedDatabaseBuilder.Files._ID+" = ?",new String[]{String.valueOf(file.getId())});
+        database.delete(EnhancedDatabaseBuilder.FileSubjects.TABLE_NAME,EnhancedDatabaseBuilder.FileSubjects.FILE_ID+" =?",new String[]{String.valueOf(file.getOnlineId())});
+        database.delete(EnhancedDatabaseBuilder.FileCategories.TABLE_NAME,EnhancedDatabaseBuilder.FileCategories.FILE_ID+" =?",new String[]{String.valueOf(file.getOnlineId())});
+        database.delete(EnhancedDatabaseBuilder.FileMetadata.TABLE_NAME,EnhancedDatabaseBuilder.FileMetadata.FILE_ID+" =?",new String[]{String.valueOf(file.getId())});
+
+    }
+
+    public void deleteFolder(EnhancedDatabaseFolder folder) {
+        database.delete(EnhancedDatabaseBuilder.Folders.TABLE_NAME,EnhancedDatabaseBuilder.Folders._ID+" = ?",new String[]{String.valueOf(folder.getId())});
+
     }
 }

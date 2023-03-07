@@ -9,7 +9,7 @@ import java.net.URI;
 import java.net.URL;
 
 public class LocalFileDataSource implements IFileDataSource {
-    private EnhancedDatabaseFile file;
+    private transient EnhancedDatabaseFile file;
     public LocalFileDataSource(EnhancedDatabaseFile file){
         this.file = file;
     }

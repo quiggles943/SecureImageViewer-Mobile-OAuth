@@ -1,5 +1,6 @@
 package com.quigglesproductions.secureimageviewer.managers;
 
+import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.quigglesproductions.secureimageviewer.notifications.NotificationHelper;
 import com.quigglesproductions.secureimageviewer.volley.manager.DownloadManager;
 
@@ -21,7 +22,7 @@ public class NotificationManager {
 
     }
 
-    public void showSnackbar(String text, int duration) {
+    public void showSnackbar(String text, @BaseTransientBottomBar.Duration int duration) {
         if(notificationCallback != null)
             notificationCallback.triggerSnackbar(text,duration);
     }

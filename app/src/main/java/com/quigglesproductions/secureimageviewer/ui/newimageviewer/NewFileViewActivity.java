@@ -16,10 +16,11 @@ public class NewFileViewActivity extends SecureActivity {
         super.onCreate(savedInstanceState);
         context = this;
         setContentView(R.layout.activity_newfileview);
+        int startPosition = getIntent().getIntExtra("position",0);
         if (savedInstanceState == null) {
             getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.newfileview_main, new FileViewFragment())
+                    .replace(R.id.newfileview_main, new FileViewFragment(startPosition))
                     .commit();
         }
     }

@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-public class EnhancedDatabaseFolder extends EnhancedFolder{
+public class EnhancedDatabaseFolder extends EnhancedFolder implements ILocalFolder{
     private int id;
     private LocalDateTime accessTime;
 
@@ -63,6 +63,9 @@ public class EnhancedDatabaseFolder extends EnhancedFolder{
 
     public File getFolderFile() {
         return folderFile;
+    }
+    public void setFolderFile(File file){
+        this.folderFile = file;
     }
 
     public LocalDateTime getDownloadTime() {

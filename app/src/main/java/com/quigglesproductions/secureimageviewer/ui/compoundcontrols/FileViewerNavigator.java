@@ -59,4 +59,11 @@ public class FileViewerNavigator extends LinearLayout {
         positionView.setText(mPosition);
         invalidate();
     }
+
+    public void setPreviousButtonOnClickListener(OnClickListener clickListener){
+        prevBtn.setOnClickListener(clickListener);
+    }
+    public void setNextButtonOnClickListener(OnClickListener clickListener){
+        nextBtn.setOnClickListener(clickListener);
+    }
 }

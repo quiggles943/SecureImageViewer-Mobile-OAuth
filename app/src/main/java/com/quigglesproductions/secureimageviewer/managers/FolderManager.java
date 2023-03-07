@@ -111,23 +111,24 @@ public class FolderManager {
         });
     }
 
-    public void removeLocalFolder(OfflineFolderModel folder) {
+    public void removeLocalFolder(EnhancedDatabaseFolder folder) {
+        EnhancedDatabaseHandler handler = new EnhancedDatabaseHandler(rootContext);
+
         File folderFile = folder.getFolderFile();
-        ArrayList<ItemBaseModel> files =  folder.getItems();
-        if(files.size() == 0 && folder.fileCount > 0){
-            folder.setOfflineItems(DatabaseHandler.getInstance().getFilesInFolder(folder));
-        }
-        for(OfflineFileModel file: folder.getOfflineItems()){
-            DatabaseHandler.getInstance().deleteFile(file);
+        ArrayList<EnhancedDatabaseFile> files = handler.getFilesInFolder(folder);
+        for(EnhancedDatabaseFile file: files){
+            handler.deleteFile(file);
             file.getThumbnailFile().delete();
             file.getImageFile().delete();
         }
-        DatabaseHandler.getInstance().deleteFolder(folder);
+        handler.deleteFolder(folder);
         deleteRecursive(folderFile);
 
     }
 
     private void deleteRecursive(File fileOrDirectory) {
+        if(fileOrDirectory == null)
+            return;
         if (fileOrDirectory.isDirectory())
             for (File child : fileOrDirectory.listFiles())
                 deleteRecursive(child);
@@ -140,8 +141,10 @@ public class FolderManager {
     }
 
     public boolean removeAllFolders() {
-        ArrayList<OfflineFolderModel> folders = DatabaseHandler.getInstance().getFolders();
-        for(OfflineFolderModel folder: folders){
+        EnhancedDatabaseHandler handler = new EnhancedDatabaseHandler(rootContext);
+        ArrayList<EnhancedDatabaseFolder> folders = handler.getFolders();
+        for(EnhancedDatabaseFolder folder: folders){
+            folder.setItems(handler.getFilesInFolder(folder));
             removeLocalFolder(folder);
         }
         clearPictureFolder();
@@ -172,6 +175,17 @@ public class FolderManager {
             }
         }*/
         //folderUploadCompleteCallback.RequestResultRetrieved(item,null);
+    }
+
+    public EnhancedDatabaseFolder insertFolder(EnhancedDatabaseFolder dummyFolder) {
+        EnhancedDatabaseHandler handler = new EnhancedDatabaseHandler(rootContext);
+        handler.insertOrUpdateFolder(dummyFolder);
+        EnhancedDatabaseFolder folder = handler.getFolderByOnlineId(dummyFolder.getOnlineId());
+        for (EnhancedDatabaseFile file : dummyFolder.getItems()){
+            EnhancedDatabaseFile insertedFile = handler.insertFile(file,folder.getId());
+            folder.addItem(insertedFile);
+        }
+        return folder;
     }
 
     public interface DownloadResultCallback<T,V>{

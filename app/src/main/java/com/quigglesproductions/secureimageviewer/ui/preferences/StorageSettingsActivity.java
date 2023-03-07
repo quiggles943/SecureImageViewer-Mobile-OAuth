@@ -9,10 +9,13 @@ import androidx.appcompat.app.ActionBar;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.quigglesproductions.secureimageviewer.R;
 import com.quigglesproductions.secureimageviewer.database.DatabaseHandler;
 import com.quigglesproductions.secureimageviewer.database.DatabaseHelper;
+import com.quigglesproductions.secureimageviewer.database.enhanced.EnhancedDatabaseHandler;
 import com.quigglesproductions.secureimageviewer.managers.FolderManager;
+import com.quigglesproductions.secureimageviewer.managers.NotificationManager;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
 
 import java.io.File;
@@ -32,7 +35,12 @@ public class StorageSettingsActivity  extends SecureActivity {
         if (savedInstanceState == null) {
             getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.settings_storage, new StorageSettingsActivity.SettingsFragment())
+                    .replace(R.id.settings_storage, new StorageSettingsActivity.SettingsFragment(new SettingsFragment.StorageInformationUpdatedCallback() {
+                        @Override
+                        public void informationUpdated() {
+                            getStorageInfo();
+                        }
+                    }))
                     .commit();
         }
         ActionBar actionBar = getSupportActionBar();
@@ -44,7 +52,8 @@ public class StorageSettingsActivity  extends SecureActivity {
 
     public void getStorageInfo(){
         DatabaseHelper databaseHelper = new DatabaseHelper(context);
-        DatabaseHandler databaseHandler = new DatabaseHandler(context,databaseHelper.getWritableDatabase());
+        //DatabaseHandler databaseHandler = new DatabaseHandler(context,databaseHelper.getWritableDatabase());
+        EnhancedDatabaseHandler databaseHandler = new EnhancedDatabaseHandler(context);
         long storageUsedByte = getFolderSize(context.getFilesDir());
         long storageUsedMb = storageUsedByte/1024/1024;
         long folderCount = databaseHandler.getFolderCount();
@@ -56,6 +65,10 @@ public class StorageSettingsActivity  extends SecureActivity {
     }
 
     public static class SettingsFragment extends PreferenceFragmentCompat {
+        StorageInformationUpdatedCallback callback;
+        public SettingsFragment(StorageInformationUpdatedCallback callback){
+            this.callback = callback;
+        }
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             setPreferencesFromResource(R.xml.storage_preferences, rootKey);
@@ -65,9 +78,16 @@ public class StorageSettingsActivity  extends SecureActivity {
                 public boolean onPreferenceClick(Preference preference) {
                     FolderManager.getInstance().removeAllFolders();
                     DatabaseHandler.getInstance().clearFiles();
+                    NotificationManager.getInstance().showSnackbar("All folders removed", Snackbar.LENGTH_SHORT);
+                    if(callback != null)
+                        callback.informationUpdated();
                     return true;
                 }
             });
+        }
+
+        public interface StorageInformationUpdatedCallback{
+            void informationUpdated();
         }
     }
 

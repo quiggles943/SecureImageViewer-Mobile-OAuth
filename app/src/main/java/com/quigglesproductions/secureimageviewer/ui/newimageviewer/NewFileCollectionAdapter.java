@@ -8,7 +8,9 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 
 import com.quigglesproductions.secureimageviewer.R;
 import com.quigglesproductions.secureimageviewer.gson.ViewerGson;
+import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
+import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedOnlineFile;
 import com.quigglesproductions.secureimageviewer.ui.newimageviewer.fragments.BaseFileViewFragment;
 import com.quigglesproductions.secureimageviewer.ui.newimageviewer.fragments.ImageFileViewFragment;
 import com.quigglesproductions.secureimageviewer.ui.newimageviewer.fragments.VideoFileViewFragment;
@@ -16,7 +18,8 @@ import com.quigglesproductions.secureimageviewer.ui.newimageviewer.fragments.Vid
 import java.util.ArrayList;
 
 public class NewFileCollectionAdapter extends FragmentStateAdapter {
-    ArrayList<EnhancedFile> files = new ArrayList<>();
+    private ArrayList<EnhancedFile> files = new ArrayList<>();
+    private ZoomLevelChangeCallback zoomCallback;
     public NewFileCollectionAdapter(@NonNull Fragment fragment) {
         super(fragment);
     }
@@ -30,16 +33,30 @@ public class NewFileCollectionAdapter extends FragmentStateAdapter {
         switch (file.metadata.fileType)
         {
             case "IMAGE":
-                fragment = new ImageFileViewFragment();
+                fragment = new ImageFileViewFragment(new ZoomLevelChangeCallback() {
+                    @Override
+                    public void zoomLevelChanged(boolean isZoomed) {
+                        zoomCallback.zoomLevelChanged(isZoomed);
+                    }
+                });
                 break;
             case "VIDEO":
                 fragment = new VideoFileViewFragment();
                 break;
             default:
-                fragment = new ImageFileViewFragment();
+                fragment = new ImageFileViewFragment(new ZoomLevelChangeCallback() {
+                    @Override
+                    public void zoomLevelChanged(boolean isZoomed) {
+                        zoomCallback.zoomLevelChanged(isZoomed);
+                    }
+                });
         }
         Bundle args = new Bundle();
         String json = ViewerGson.getGson().toJson(file);
+        if(file instanceof EnhancedDatabaseFile)
+            args.putString(BaseFileViewFragment.ARG_FILE_SOURCE_TYPE, BaseFileViewFragment.FileSourceType.DATABASE.toString());
+        else if(file instanceof EnhancedOnlineFile)
+            args.putString(BaseFileViewFragment.ARG_FILE_SOURCE_TYPE, BaseFileViewFragment.FileSourceType.ONLINE.toString());
         args.putInt(BaseFileViewFragment.ARG_FILE_ID,file.getOnlineId());
         args.putString(BaseFileViewFragment.ARG_FILE,json);
         fragment.setArguments(args);
@@ -55,5 +72,17 @@ public class NewFileCollectionAdapter extends FragmentStateAdapter {
         files.clear();
         files.addAll(fileModels);
         notifyDataSetChanged();
+    }
+
+    public EnhancedFile getItem(int position) {
+        return files.get(position);
+    }
+
+    public void setFileZoomLevelCallback(ZoomLevelChangeCallback callback){
+        this.zoomCallback = callback;
+    }
+
+    public interface ZoomLevelChangeCallback{
+        void zoomLevelChanged(boolean isZoomed);
     }
 }
