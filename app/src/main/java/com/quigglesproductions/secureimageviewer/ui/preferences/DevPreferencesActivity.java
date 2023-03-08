@@ -22,10 +22,14 @@ import com.quigglesproductions.secureimageviewer.database.DatabaseHandler;
 import com.quigglesproductions.secureimageviewer.managers.FolderManager;
 import com.quigglesproductions.secureimageviewer.managers.NotificationManager;
 import com.quigglesproductions.secureimageviewer.managers.ViewerConnectivityManager;
+import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedArtist;
+import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedCategory;
+import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedSubject;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedDatabaseFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.ImageMetadata;
+import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.VideoMetadata;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
 import com.quigglesproductions.secureimageviewer.utils.Base64Utils;
 import com.quigglesproductions.secureimageviewer.utils.ViewerFileUtils;
@@ -35,6 +39,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Base64;
 
 public class DevPreferencesActivity extends SecureActivity {
@@ -129,11 +134,11 @@ public class DevPreferencesActivity extends SecureActivity {
             dummyFolder2.onlineAccessTime = LocalDateTime.now();
             dummyFolder2.setStatus(EnhancedFolder.Status.DOWNLOADED);
             EnhancedDatabaseFile dummyFile3 = new EnhancedDatabaseFile();
-            dummyFile3.normalName = "Test Image 2";
+            dummyFile3.normalName = "Test Video 1";
             dummyFile3.encodedName = Base64Utils.base64EncodeString(dummyFile3.normalName);
             dummyFile3.contentType = "VIDEO";
             dummyFile3.onlineId = 999997;
-            dummyFile3.metadata = new ImageMetadata();
+            dummyFile3.metadata = new VideoMetadata();
             dummyFile3.metadata.downloadTime = LocalDateTime.now();
             dummyFile3.metadata.creationTime = LocalDateTime.now().minusHours(1);
             dummyFile3.metadata.contentType = "VIDEO";
@@ -143,13 +148,35 @@ public class DevPreferencesActivity extends SecureActivity {
             dummyFile3.metadata.height = 300;
             dummyFile3.metadata.onlineFileId = 999997;
             dummyFolder2.addItem(dummyFile3);
+            EnhancedDatabaseFile dummyFile4 = new EnhancedDatabaseFile();
+            dummyFile4.normalName = "Test Video 2";
+            dummyFile4.encodedName = Base64Utils.base64EncodeString(dummyFile4.normalName);
+            dummyFile4.contentType = "VIDEO";
+            dummyFile4.onlineId = 999996;
+            dummyFile4.metadata = new VideoMetadata();
+            dummyFile4.metadata.downloadTime = LocalDateTime.now();
+            dummyFile4.metadata.creationTime = LocalDateTime.now().minusHours(1);
+            dummyFile4.metadata.contentType = "VIDEO";
+            dummyFile4.metadata.fileType = "VIDEO";
+            dummyFile4.metadata.hasAnimatedThumbnail = false;
+            dummyFile4.metadata.width = 1146;
+            dummyFile4.metadata.height = 300;
+            dummyFile4.metadata.onlineFileId = 999996;
+            dummyFile4.metadata.subjects = new ArrayList<>();
+            dummyFile4.metadata.subjects.add(new EnhancedSubject(999999,"Dummy Subject"));
+            dummyFile4.metadata.categories = new ArrayList<>();
+            dummyFile4.metadata.categories.add(new EnhancedCategory(999999,"Dummy Category 1"));
+            dummyFile4.metadata.artist = new EnhancedArtist(999999,"Dummy Artist 1");
+            dummyFolder2.addItem(dummyFile4);
+
+            dummyFolder.onlineThumbnailId = 999999;
 
             EnhancedDatabaseFolder insertedFolder = FolderManager.getInstance().insertFolder(dummyFolder);
             EnhancedDatabaseFolder insertedFolder2 = FolderManager.getInstance().insertFolder(dummyFolder2);
             ViewerFileUtils.createFileOnDisk(getContext(), (EnhancedDatabaseFile) insertedFolder.getFiles().get(0),generateInputStream(R.drawable.dummy_image_1));
             ViewerFileUtils.createFileOnDisk(getContext(), (EnhancedDatabaseFile) insertedFolder.getFiles().get(1),generateInputStream(R.drawable.dummy_image_2));
-            //ViewerFileUtils.createFileOnDisk(getContext(), (EnhancedDatabaseFile) insertedFolder2.getFiles().get(0),);
-            generateInputStreamFromRawResource(R.raw.recording_20230307_172120);
+            ViewerFileUtils.createFileOnDisk(getContext(), (EnhancedDatabaseFile) insertedFolder2.getFiles().get(0),generateInputStreamFromRawResource(R.raw.recording_20230307_172120));
+            ViewerFileUtils.createFileOnDisk(getContext(), (EnhancedDatabaseFile) insertedFolder2.getFiles().get(1),generateInputStreamFromRawResource(R.raw.recording_20230308_143931));
 
             NotificationManager.getInstance().showSnackbar("Dummy data inserted",Snackbar.LENGTH_SHORT);
         }

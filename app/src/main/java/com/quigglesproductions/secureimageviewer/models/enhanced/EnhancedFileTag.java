@@ -8,4 +8,12 @@ public abstract class EnhancedFileTag {
     public int onlineId;
     @SerializedName("NormalName")
     public String name;
+
+    public EnhancedFileTag(){
+
+    }
+    public EnhancedFileTag(int onlineId,String name){
+        this.onlineId = onlineId;
+        this.name = name;
+    }
 }

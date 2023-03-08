@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 public class ViewerFileUtils {
 
@@ -26,23 +27,23 @@ public class ViewerFileUtils {
             folder.mkdirs();
         }
         File file = new File(context.getFilesDir() + File.separator + ".Pictures" + File.separator + fileToCreate.getFolderId() + File.separator + fileToCreate.getId());
-        file.createNewFile();
+        boolean created = file.createNewFile();
         return file;
     }
     private static void writeStreamToFile(InputStream input, File file) throws IOException {
         int count;
-        BufferedOutputStream output = new BufferedOutputStream(new FileOutputStream(file));
+        //BufferedOutputStream output = new BufferedOutputStream(new FileOutputStream(file));
+        OutputStream out = new FileOutputStream(file);
         byte dataParse[] = new byte[1024];
 
         long total = 0;
 
-        while ((count = input.read(dataParse)) != -1) {
+        while ((count = input.read(dataParse)) >0) {
             total += count;
-            output.write(dataParse, 0, count);
+            out.write(dataParse, 0, count);
         }
-        output.flush();
-        output.close();
         input.close();
+        out.close();
         //fileToInsert.setImageFile(file);
         //ImageUtils.createThumbnail(context, fileToInsert);
     }

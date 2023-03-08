@@ -35,8 +35,7 @@ import com.quigglesproductions.secureimageviewer.models.enhanced.folder.Enhanced
 import com.quigglesproductions.secureimageviewer.recycler.RecyclerViewSelectionMode;
 import com.quigglesproductions.secureimageviewer.recycler.SpacesItemDecoration;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
-import com.quigglesproductions.secureimageviewer.ui.newfolderviewer.NewFolderViewerActivity;
-import com.quigglesproductions.secureimageviewer.ui.onlinefolderview.OnlineFolderViewActivity;
+import com.quigglesproductions.secureimageviewer.ui.enhancedfolderviewer.EnhancedFolderViewerActivity;
 import com.quigglesproductions.secureimageviewer.ui.onlinerecentfilelist.OnlineRecentFilesViewActivity;
 
 import net.openid.appauth.AuthState;
@@ -139,7 +138,7 @@ public class OnlineFolderListActivity extends SecureActivity {
                 else {
                     EnhancedFolder value = rvAdapter.getItem(position);
                     FolderManager.getInstance().setCurrentFolder(value);
-                    Intent intent = new Intent(context, NewFolderViewerActivity.class);
+                    Intent intent = new Intent(context, EnhancedFolderViewerActivity.class);
                     intent.putExtra("folderId", value.getOnlineId());
                     intent.putExtra("folderName", value.getName());
                     //intent.putExtra("folder", gson.toJson(value));

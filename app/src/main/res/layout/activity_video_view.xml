@@ -15,5 +15,5 @@
         app:surface_type="surface_view"
         app:auto_show="true"
         app:show_buffering="always"
-        app:controller_layout_id="@layout/exo_player_control_view"/>
+        app:controller_layout_id="@layout/exo_player_simple_controls"/>
 </LinearLayout>

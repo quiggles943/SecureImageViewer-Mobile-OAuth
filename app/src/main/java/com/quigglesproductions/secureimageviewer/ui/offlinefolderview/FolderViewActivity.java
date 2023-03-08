@@ -1,12 +1,10 @@
 package com.quigglesproductions.secureimageviewer.ui.offlinefolderview;
 
 import android.annotation.SuppressLint;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
@@ -20,7 +18,6 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.TextView;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 
@@ -28,28 +25,16 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.snackbar.Snackbar;
 import com.quigglesproductions.secureimageviewer.R;
 import com.quigglesproductions.secureimageviewer.SortType;
-import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
-import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
-import com.quigglesproductions.secureimageviewer.database.DatabaseHandler;
-import com.quigglesproductions.secureimageviewer.database.DatabaseHelper;
 import com.quigglesproductions.secureimageviewer.database.enhanced.EnhancedDatabaseHandler;
 import com.quigglesproductions.secureimageviewer.managers.ApplicationPreferenceManager;
 import com.quigglesproductions.secureimageviewer.managers.FolderManager;
 import com.quigglesproductions.secureimageviewer.models.ItemBaseModel;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedDatabaseFolder;
-import com.quigglesproductions.secureimageviewer.models.file.FileModel;
-import com.quigglesproductions.secureimageviewer.models.file.OfflineFileModel;
-import com.quigglesproductions.secureimageviewer.models.folder.OfflineFolderModel;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
-import com.quigglesproductions.secureimageviewer.ui.newimageviewer.FileViewActivity;
-import com.quigglesproductions.secureimageviewer.utils.ViewerFileUtils;
-
-import net.openid.appauth.AuthState;
-import net.openid.appauth.AuthorizationException;
+import com.quigglesproductions.secureimageviewer.ui.enhancedimageviewer.FileViewActivity;
 
 import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.util.ArrayList;
 
 public class FolderViewActivity extends SecureActivity  {

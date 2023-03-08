@@ -161,14 +161,14 @@
             android:name=".ui.offlinefolderview.FolderViewActivity"
             android:launchMode="singleTask" />
         <activity
-            android:name=".ui.newfolderviewer.NewFolderViewerActivity"
+            android:name=".ui.enhancedfolderviewer.EnhancedFolderViewerActivity"
             android:launchMode="singleTask" />
         <activity
-            android:name=".ui.newimageviewer.FileViewActivity"
+            android:name=".ui.enhancedimageviewer.FileViewActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
             android:launchMode="singleTask"
             android:theme="@style/FileViewerTheme" />
-        <activity android:name=".ui.newimageviewer.NewFileViewActivity"
+        <activity android:name=".ui.enhancedimageviewer.EnhancedFileViewActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
             android:launchMode="singleTask"
             android:theme="@style/FileViewerTheme" />

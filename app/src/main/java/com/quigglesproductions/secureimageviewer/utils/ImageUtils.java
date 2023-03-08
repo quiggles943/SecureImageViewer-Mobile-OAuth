@@ -139,7 +139,11 @@ public class ImageUtils {
             file.createNewFile();
             int size = dpToPx(150,context);
             Size size1 = new Size(size,size);
-            Bitmap thumbnail = ThumbnailUtils.createImageThumbnail(item.getImageFile(),size1, new CancellationSignal());
+            Bitmap thumbnail;
+            if(item.getContentType().contentEquals("VIDEO"))
+                thumbnail = ThumbnailUtils.createVideoThumbnail(item.getImageFile(),size1, new CancellationSignal());
+            else
+                thumbnail = ThumbnailUtils.createImageThumbnail(item.getImageFile(),size1, new CancellationSignal());
             //Bitmap thumbnail = ThumbnailUtils.extractThumbnail(image,size,size);
             //image = Utils.decodeSampledBitmapFromFile(item.getImageFile(),size,size);
 //Convert bitmap to byte array

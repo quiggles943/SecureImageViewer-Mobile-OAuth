@@ -17,10 +17,13 @@ import com.quigglesproductions.secureimageviewer.appauth.IAuthManager;
 import com.quigglesproductions.secureimageviewer.appauth.RequestServiceNotConfiguredException;
 import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.IFileDataSource;
 import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.ISecureDataSource;
+import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.LocalFileDataSource;
 
 import net.openid.appauth.AuthState;
 import net.openid.appauth.AuthorizationException;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -116,6 +119,9 @@ public class VideoPlaybackManager {
     public void  getVideoFromDataSource(IFileDataSource dataSource, boolean playWhenReady, VideoPlayerCallback callback) {
         try {
             URL fileUrl = dataSource.getFileURL();
+            File file = new File(String.valueOf(fileUrl));
+            //if(dataSource instanceof LocalFileDataSource && !file.exists())
+            //    throw new FileNotFoundException("File not found");
             androidx.media3.common.MediaItem mediaItem = MediaItem.fromUri(fileUrl.toString());
             if(ISecureDataSource.class.isAssignableFrom(dataSource.getClass())){
                 ((ISecureDataSource)dataSource).getAuthorization().performActionWithFreshTokens(new AuthState.AuthStateAction() {
@@ -136,6 +142,7 @@ public class VideoPlaybackManager {
                 });
             }
             else{
+                setExoPlayer(new ExoPlayer.Builder(rootContext).build());
                 player.setMediaItem(mediaItem);
                 player.prepare();
                 if(playWhenReady) {

@@ -21,7 +21,6 @@ import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
 import com.quigglesproductions.secureimageviewer.managers.FolderManager;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedOnlineFile;
-import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedOnlineFolder;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
 
@@ -80,7 +79,7 @@ public class OnlineRecentFilesViewActivity extends SecureActivity {
             public void onClick(int position) {
                 EnhancedFile selectedFile = rvAdapter.getItem(position);
 
-                Intent intent = new Intent(context, com.quigglesproductions.secureimageviewer.ui.newimageviewer.FileViewActivity.class);
+                Intent intent = new Intent(context, com.quigglesproductions.secureimageviewer.ui.enhancedimageviewer.FileViewActivity.class);
                 EnhancedOnlineFolder recentFolder = new EnhancedOnlineFolder(context);
                 recentFolder.setItems(rvAdapter.getFiles());
                 FolderManager.getInstance().setCurrentFolder(recentFolder);

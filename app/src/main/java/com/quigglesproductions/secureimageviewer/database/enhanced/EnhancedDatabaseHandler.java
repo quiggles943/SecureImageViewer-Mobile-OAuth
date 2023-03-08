@@ -6,6 +6,8 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 
+import androidx.annotation.NonNull;
+
 import com.quigglesproductions.secureimageviewer.database.DatabaseHelper;
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedArtist;
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedCategory;
@@ -24,6 +26,7 @@ import java.io.File;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class EnhancedDatabaseHandler {
     Context context;
@@ -64,8 +67,10 @@ public class EnhancedDatabaseHandler {
             folder.setThumbnailFile(thumbnailFile);
         } else if (thumbnailId > 0) {
             EnhancedDatabaseFile thumbnail = getFileByOnlineId(thumbnailId);
-            File thumbnailFile = thumbnail.getThumbnailFile();
-            folder.setThumbnailFile(thumbnailFile);
+            if(thumbnail != null) {
+                File thumbnailFile = thumbnail.getThumbnailFile();
+                folder.setThumbnailFile(thumbnailFile);
+            }
         } else {
             folder.setThumbnailFile(null);
         }
@@ -212,6 +217,13 @@ public class EnhancedDatabaseHandler {
             database.update(EnhancedDatabaseBuilder.FileMetadata.TABLE_NAME, values, "OnlineFileId=?", new String[]{metadata.onlineFileId + ""});  // number 1 is the _id here, update to variable for your code
             databaseMetadata = getFileMetadataByOnlineId(metadata.onlineFileId);
         }
+        if(metadata.subjects != null && metadata.subjects.size()>0){
+            addSubjectsToFile(metadata.subjects,fileId);
+        }
+        if(metadata.categories != null && metadata.categories.size()>0)
+            addCategoriesToFile(metadata.categories,fileId);
+        if(metadata.artist != null)
+            addArtistToFile(metadata.artist,fileId);
         return databaseMetadata;
     }
 
@@ -252,9 +264,9 @@ public class EnhancedDatabaseHandler {
             contentType = cursor.getString(cursor.getColumnIndexOrThrow(EnhancedDatabaseBuilder.Files.CONTENT_TYPE));
         File itemFile = new File(context.getFilesDir() + File.separator + ".Pictures" + File.separator + folderId + File.separator + itemId);
         File thumbnailFile = new File(context.getFilesDir() + File.separator + ".Pictures" + File.separator + folderId + File.separator + ".thumbnails" + File.separator + itemId);
-
         EnhancedDatabaseFile item = new EnhancedDatabaseFile(itemId, onlineId, name, base64Name, folderId,onlineFolderId, itemFile, thumbnailFile);
         item.metadata = getFileMetadataByOnlineId(item.getOnlineId());
+        item.contentType = contentType;
         return item;
     }
 
@@ -617,9 +629,56 @@ public class EnhancedDatabaseHandler {
         else
             return -1;
     }
+    public boolean addSubjectsToFile(List<EnhancedSubject> subjects, EnhancedDatabaseFile file) {
+        for(EnhancedSubject subject : subjects) {
+            EnhancedSubject databaseSubject = getSubjectByOnlineId(subject.onlineId);
+            if (databaseSubject == null)
+                subject = addSubject(subject);
+            else
+                subject = databaseSubject;
+            ContentValues values = new ContentValues();
+            values.put(EnhancedDatabaseBuilder.FileSubjects.SUBJECT_ID, subject.id);
+            values.put(EnhancedDatabaseBuilder.FileSubjects.FILE_ID, file.getId());
+            if (!checkFileSubjectExists(subject, file))
+                database.insertWithOnConflict(EnhancedDatabaseBuilder.FileSubjects.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_IGNORE);
+        }
+        return true;
+    }
+
+    public boolean addSubjectsToFile(List<EnhancedSubject> subjects, int fileId) {
+        for(EnhancedSubject subject : subjects) {
+            EnhancedSubject databaseSubject = getSubjectByOnlineId(subject.onlineId);
+            if (databaseSubject == null)
+                subject = addSubject(subject);
+            else
+                subject = databaseSubject;
+            ContentValues values = new ContentValues();
+            values.put(EnhancedDatabaseBuilder.FileSubjects.SUBJECT_ID, subject.id);
+            values.put(EnhancedDatabaseBuilder.FileSubjects.FILE_ID, fileId);
+            if (!checkFileSubjectExists(subject, fileId))
+                database.insertWithOnConflict(EnhancedDatabaseBuilder.FileSubjects.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_IGNORE);
+        }
+        return true;
+    }
 
     private boolean checkFileSubjectExists(EnhancedSubject subject, EnhancedDatabaseFile file) {
         String where = EnhancedDatabaseBuilder.FileSubjects.SUBJECT_ID+" = "+subject.id+" AND "+EnhancedDatabaseBuilder.FileCategories.FILE_ID+" = "+file.getId();
+        Cursor cursor = database.query(
+                EnhancedDatabaseBuilder.FileSubjects.TABLE_NAME,   // The table to query
+                null,             // The array of columns to return (pass null to get all)
+                where,              // The columns for the WHERE clause
+                null,          // The values for the WHERE clause
+                null,                   // don't group the rows
+                null,                   // don't filter by row groups
+                null               // The sort order
+        );
+        if(cursor.getCount()>0)
+            return true;
+        else
+            return false;
+    }
+    private boolean checkFileSubjectExists(EnhancedSubject subject, int fileId) {
+        String where = EnhancedDatabaseBuilder.FileSubjects.SUBJECT_ID+" = "+subject.id+" AND "+EnhancedDatabaseBuilder.FileCategories.FILE_ID+" = "+fileId;
         Cursor cursor = database.query(
                 EnhancedDatabaseBuilder.FileSubjects.TABLE_NAME,   // The table to query
                 null,             // The array of columns to return (pass null to get all)
@@ -650,8 +709,29 @@ public class EnhancedDatabaseHandler {
             return -1;
     }
 
+    public boolean addCategoriesToFile(@NonNull List<EnhancedCategory> category, @NonNull EnhancedDatabaseFile file) {
+        return addCategoriesToFile(category,file.getId());
+    }
+    public boolean addCategoriesToFile(@NonNull List<EnhancedCategory> categories, @NonNull int fileId) {
+        for(EnhancedCategory category : categories) {
+            EnhancedCategory databaseCategory = getCategoryByOnlineId(category.onlineId);
+            if (databaseCategory == null)
+                category = addCategory(category);
+            else
+                category = databaseCategory;
+            ContentValues values = new ContentValues();
+            values.put(EnhancedDatabaseBuilder.FileCategories.CATEGORY_ID, category.id);
+            values.put(EnhancedDatabaseBuilder.FileCategories.FILE_ID, fileId);
+            if (!checkFileCategoryExists(category, fileId))
+                database.insertWithOnConflict(EnhancedDatabaseBuilder.FileCategories.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_IGNORE);
+        }
+        return true;
+    }
     private boolean checkFileCategoryExists(EnhancedCategory category, EnhancedDatabaseFile file) {
-        String where = EnhancedDatabaseBuilder.FileCategories.CATEGORY_ID+" = "+category.id+" AND "+EnhancedDatabaseBuilder.FileCategories.FILE_ID+" = "+file.getId();
+        return checkFileCategoryExists(category,file.getId());
+    }
+    private boolean checkFileCategoryExists(EnhancedCategory category, int fileId) {
+        String where = EnhancedDatabaseBuilder.FileCategories.CATEGORY_ID+" = "+category.id+" AND "+EnhancedDatabaseBuilder.FileCategories.FILE_ID+" = "+fileId;
         Cursor cursor = database.query(
                 EnhancedDatabaseBuilder.FileCategories.TABLE_NAME,   // The table to query
                 null,             // The array of columns to return (pass null to get all)
@@ -668,6 +748,10 @@ public class EnhancedDatabaseHandler {
     }
 
     public void addArtistToFile(EnhancedArtist artist, EnhancedDatabaseFile file) {
+        addArtistToFile(artist,file.getId());
+    }
+
+    public void addArtistToFile(EnhancedArtist artist, int fileId) {
         EnhancedArtist databaseArtist = getArtistByOnlineId(artist.onlineId);
         if(databaseArtist == null)
             artist = addArtist(artist);
@@ -675,7 +759,7 @@ public class EnhancedDatabaseHandler {
             artist = databaseArtist;
         ContentValues values = new ContentValues();
         values.put(EnhancedDatabaseBuilder.FileMetadata.ARTIST_ID,artist.id);
-        database.update(EnhancedDatabaseBuilder.FileMetadata.TABLE_NAME, values, "FileId=?", new String[]{file.getId() + ""});
+        database.update(EnhancedDatabaseBuilder.FileMetadata.TABLE_NAME, values, "FileId=?", new String[]{fileId + ""});
     }
 
     public long getFolderCount() {

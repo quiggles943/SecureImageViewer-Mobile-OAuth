@@ -2,9 +2,6 @@ package com.quigglesproductions.secureimageviewer.ui.offlinefolderlist;
 
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -14,7 +11,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.TextView;
 
@@ -25,33 +21,22 @@ import com.android.volley.VolleyError;
 import com.google.android.material.snackbar.Snackbar;
 import com.quigglesproductions.secureimageviewer.R;
 import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
-import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
 import com.quigglesproductions.secureimageviewer.apprequest.RequestService;
 import com.quigglesproductions.secureimageviewer.database.DatabaseHelper;
 import com.quigglesproductions.secureimageviewer.database.enhanced.EnhancedDatabaseHandler;
 import com.quigglesproductions.secureimageviewer.managers.FolderManager;
 import com.quigglesproductions.secureimageviewer.managers.NotificationManager;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedDatabaseFolder;
-import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedOnlineFolder;
-import com.quigglesproductions.secureimageviewer.models.file.FileModel;
-import com.quigglesproductions.secureimageviewer.models.file.OfflineFileModel;
 import com.quigglesproductions.secureimageviewer.models.folder.FolderModel;
-import com.quigglesproductions.secureimageviewer.models.folder.OfflineFolderModel;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
-import com.quigglesproductions.secureimageviewer.ui.newfolderviewer.NewFolderViewerActivity;
-import com.quigglesproductions.secureimageviewer.ui.offlinefolderview.FolderViewActivity;
-import com.quigglesproductions.secureimageviewer.utils.BooleanUtils;
+import com.quigglesproductions.secureimageviewer.ui.enhancedfolderviewer.EnhancedFolderViewerActivity;
 import com.techyourchance.threadposter.BackgroundThreadPoster;
 import com.techyourchance.threadposter.UiThreadPoster;
 
 import net.openid.appauth.AuthState;
 import net.openid.appauth.AuthorizationException;
 
-import java.io.File;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -108,7 +93,7 @@ public class FolderListActivity extends SecureActivity {
                 }
                 else {
                     FolderManager.getInstance().setCurrentFolder(value);
-                    Intent intent = new Intent(context, NewFolderViewerActivity.class);
+                    Intent intent = new Intent(context, EnhancedFolderViewerActivity.class);
                     intent.putExtra("folderId", value.getId());
                     intent.putExtra("folderName", value.getName());
                     //intent.putExtra("folder", value);
