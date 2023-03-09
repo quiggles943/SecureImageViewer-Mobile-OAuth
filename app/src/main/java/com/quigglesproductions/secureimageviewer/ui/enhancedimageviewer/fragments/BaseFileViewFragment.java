@@ -36,13 +36,6 @@ public class BaseFileViewFragment extends Fragment {
         return file;
     }
 
-    public FileViewerNavigator getNavigator(){
-        if(getActivity() instanceof IFileViewer)
-            return ((IFileViewer)getActivity()).getNavigator();
-        else
-            return null;
-    }
-
     public enum FileSourceType{
         UNKNOWN,
         DATABASE,

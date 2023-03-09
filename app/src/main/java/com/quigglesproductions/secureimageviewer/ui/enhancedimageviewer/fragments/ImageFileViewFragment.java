@@ -23,6 +23,7 @@ import com.bumptech.glide.request.target.Target;
 import com.quigglesproductions.secureimageviewer.R;
 import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.IFileDataSource;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
+import com.quigglesproductions.secureimageviewer.ui.compoundcontrols.FileViewerNavigator;
 import com.quigglesproductions.secureimageviewer.ui.enhancedimageviewer.EnhancedFileCollectionAdapter;
 import com.quigglesproductions.secureimageviewer.ui.enhancedimageviewer.NewTouchImageView;
 
@@ -30,8 +31,10 @@ public class ImageFileViewFragment extends BaseFileViewFragment {
     TextView fileName;
     LinearLayout topLayout,imagePagerControls;
     EnhancedFileCollectionAdapter.ZoomLevelChangeCallback zoomLevelChangeCallback;
+    private FileViewerNavigator navigatorControls;
 
-    public ImageFileViewFragment(EnhancedFileCollectionAdapter.ZoomLevelChangeCallback zoomCallback){
+    public ImageFileViewFragment(FileViewerNavigator viewerNavigator,EnhancedFileCollectionAdapter.ZoomLevelChangeCallback zoomCallback){
+        navigatorControls = viewerNavigator;
         zoomLevelChangeCallback = zoomCallback;
     }
     @Nullable
@@ -58,10 +61,10 @@ public class ImageFileViewFragment extends BaseFileViewFragment {
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(getNavigator().isFullyVisible())
-                    getNavigator().hide();
+                if(navigatorControls.isFullyVisible())
+                    navigatorControls.hide();
                 else
-                    getNavigator().show();
+                    navigatorControls.show();
             }
         });
         imageView.setMaxZoom((float)3.2);

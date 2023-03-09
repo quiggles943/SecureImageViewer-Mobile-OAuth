@@ -39,7 +39,7 @@ public class EnhancedFolder  implements Parcelable {
 
     private Status status;
 
-    private IFolderDataSource dataSource;
+    private transient IFolderDataSource dataSource;
 
     public boolean isDownloading = false;
 

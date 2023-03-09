@@ -56,7 +56,7 @@ public class EnhancedFolderViewerActivity extends SecureActivity {
         setContentView(R.layout.activity_folder_view);
         databaseHandler = new EnhancedDatabaseHandler(context);
         Intent intent = getIntent();
-        int folderId = intent.getIntExtra("folderId",0);
+        //int folderId = intent.getIntExtra("folderId",0);
         selectedFolder = FolderManager.getInstance().getCurrentFolder();
 
 
@@ -69,7 +69,6 @@ public class EnhancedFolderViewerActivity extends SecureActivity {
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
                 Intent intent = new Intent(context, EnhancedFileViewActivity.class);
                 intent.putExtra("position",position);
-                intent.putExtra("folderId", folderId);
                 startActivity(intent);
             }
         });

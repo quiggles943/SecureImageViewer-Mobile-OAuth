@@ -13,7 +13,15 @@ public interface IFolderDataSource {
 
     void getFilesFromDataSource(FolderDataSourceCallback callback, SortType sortType) throws MalformedURLException;
 
+    void getThumbnailFromDataSource(FolderDataSourceCallback callback) throws MalformedURLException;
+
     interface FolderDataSourceCallback{
-        void FolderFilesRetrieved(List<EnhancedFile> files,Exception exception);
+        default void FolderFilesRetrieved(List<EnhancedFile> files,Exception exception){
+
+        }
+
+        default void FolderThumbnailRetrieved(Object thumbnailDataSource, Exception exception){
+
+        }
     }
 }

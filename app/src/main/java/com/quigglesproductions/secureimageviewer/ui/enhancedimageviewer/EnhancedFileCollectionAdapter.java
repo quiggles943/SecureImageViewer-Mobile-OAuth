@@ -10,6 +10,7 @@ import com.quigglesproductions.secureimageviewer.gson.ViewerGson;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedOnlineFile;
+import com.quigglesproductions.secureimageviewer.ui.compoundcontrols.FileViewerNavigator;
 import com.quigglesproductions.secureimageviewer.ui.enhancedimageviewer.fragments.BaseFileViewFragment;
 import com.quigglesproductions.secureimageviewer.ui.enhancedimageviewer.fragments.ImageFileViewFragment;
 import com.quigglesproductions.secureimageviewer.ui.enhancedimageviewer.fragments.VideoFileViewFragment;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 public class EnhancedFileCollectionAdapter extends FragmentStateAdapter {
     private ArrayList<EnhancedFile> files = new ArrayList<>();
     private ZoomLevelChangeCallback zoomCallback;
+    private FileViewerNavigator navigatorControls;
     public EnhancedFileCollectionAdapter(@NonNull Fragment fragment) {
         super(fragment);
     }
@@ -32,7 +34,7 @@ public class EnhancedFileCollectionAdapter extends FragmentStateAdapter {
         switch (file.metadata.fileType)
         {
             case "IMAGE":
-                fragment = new ImageFileViewFragment(new ZoomLevelChangeCallback() {
+                fragment = new ImageFileViewFragment(navigatorControls,new ZoomLevelChangeCallback() {
                     @Override
                     public void zoomLevelChanged(boolean isZoomed) {
                         zoomCallback.zoomLevelChanged(isZoomed);
@@ -40,10 +42,10 @@ public class EnhancedFileCollectionAdapter extends FragmentStateAdapter {
                 });
                 break;
             case "VIDEO":
-                fragment = new VideoFileViewFragment();
+                fragment = new VideoFileViewFragment(navigatorControls);
                 break;
             default:
-                fragment = new ImageFileViewFragment(new ZoomLevelChangeCallback() {
+                fragment = new ImageFileViewFragment(navigatorControls,new ZoomLevelChangeCallback() {
                     @Override
                     public void zoomLevelChanged(boolean isZoomed) {
                         zoomCallback.zoomLevelChanged(isZoomed);
@@ -79,6 +81,10 @@ public class EnhancedFileCollectionAdapter extends FragmentStateAdapter {
 
     public void setFileZoomLevelCallback(ZoomLevelChangeCallback callback){
         this.zoomCallback = callback;
+    }
+
+    public void setFileNavigator(FileViewerNavigator fileNavigator) {
+        navigatorControls = fileNavigator;
     }
 
     public interface ZoomLevelChangeCallback{

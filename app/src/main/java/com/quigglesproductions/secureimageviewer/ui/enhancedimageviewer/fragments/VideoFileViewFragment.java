@@ -16,10 +16,15 @@ import androidx.media3.ui.PlayerView;
 import com.quigglesproductions.secureimageviewer.R;
 import com.quigglesproductions.secureimageviewer.managers.VideoPlaybackManager;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
+import com.quigglesproductions.secureimageviewer.ui.compoundcontrols.FileViewerNavigator;
 
 public class VideoFileViewFragment extends BaseFileViewFragment {
     PlayerView videoView;
     private static final boolean PLAY_ON_LOAD = false;
+    private FileViewerNavigator navigatorControls;
+    public VideoFileViewFragment(FileViewerNavigator viewerNavigator){
+        navigatorControls = viewerNavigator;
+    }
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -49,7 +54,7 @@ public class VideoFileViewFragment extends BaseFileViewFragment {
     @OptIn(markerClass = UnstableApi.class)
     public void onResume() {
         super.onResume();
-        if(getNavigator().isFullyVisible()){
+        if(navigatorControls.isFullyVisible()){
             videoView.showController();
         }
         else
@@ -72,7 +77,7 @@ public class VideoFileViewFragment extends BaseFileViewFragment {
                     @Override
                     public void VideoPlayerRecieved(ExoPlayer player, Exception exception) {
                         videoView.setPlayer(player);
-                        if(getNavigator().isFullyVisible())
+                        if(navigatorControls.isFullyVisible())
                             videoView.showController();
                         else
                             videoView.hideController();
@@ -83,10 +88,10 @@ public class VideoFileViewFragment extends BaseFileViewFragment {
                     public void onVisibilityChanged(int visibility) {
                         switch(visibility){
                             case 0:
-                                getNavigator().show();
+                                navigatorControls.show();
                                 break;
                             case 8:
-                                getNavigator().hide();
+                                navigatorControls.hide();
                                 break;
                         }
                     }

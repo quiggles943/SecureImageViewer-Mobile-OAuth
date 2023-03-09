@@ -2,6 +2,7 @@ package com.quigglesproductions.secureimageviewer.apprequest;
 
 import android.content.Context;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.volley.VolleyError;
@@ -51,9 +52,12 @@ public class RequestManager {
             return false;
         return true;
     }
-
+    @NonNull
     public RequestService getRequestService() {
-        return this.requestService;
+        if(this.requestService == null)
+            throw new IllegalStateException("Request service is not attached");
+        else
+            return this.requestService;
     }
     public UrlManager getUrlManager() throws RequestServiceNotConfiguredException {
         if(this.requestService != null)

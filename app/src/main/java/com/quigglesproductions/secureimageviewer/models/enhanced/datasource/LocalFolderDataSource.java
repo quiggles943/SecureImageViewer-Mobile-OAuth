@@ -10,6 +10,7 @@ import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDa
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedDatabaseFolder;
 
+import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -47,5 +48,11 @@ public class LocalFolderDataSource implements IFolderDataSource{
                 files.add(file);
             callback.FolderFilesRetrieved(files,null);
         }
+    }
+
+    @Override
+    public void getThumbnailFromDataSource(FolderDataSourceCallback callback) throws MalformedURLException {
+        File file = folder.getThumbnailFile();
+        callback.FolderThumbnailRetrieved(file,null);
     }
 }

@@ -11,6 +11,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.OptIn;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.ActionProvider;
 import androidx.fragment.app.Fragment;
 import androidx.media3.common.util.UnstableApi;
@@ -22,6 +23,7 @@ import com.quigglesproductions.secureimageviewer.managers.FolderManager;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedFolder;
 import com.quigglesproductions.secureimageviewer.ui.IFileViewer;
+import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
 import com.quigglesproductions.secureimageviewer.ui.compoundcontrols.FileViewerNavigator;
 
 import java.lang.reflect.Field;
@@ -35,9 +37,15 @@ public class EnhancedFileViewFragment extends Fragment implements IFileViewer {
     FileViewerNavigator fileNavigator;
     EnhancedFile selectedFile;
     int currentPagerSlopMultiplier;
+    boolean hasStartPosition;
+    public EnhancedFileViewFragment(){
+        hasStartPosition = false;
+    }
     public EnhancedFileViewFragment(int startPosition){
         startPos = startPosition;
+        hasStartPosition = true;
     }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -45,14 +53,30 @@ public class EnhancedFileViewFragment extends Fragment implements IFileViewer {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        ((SecureActivity)getActivity()).getSupportActionBar().hide();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        ((SecureActivity)getActivity()).getSupportActionBar().show();
+    }
+
+    @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         viewPager = view.findViewById(R.id.fragment_view_pager);
+        if(!hasStartPosition)
+            startPos = EnhancedFileViewFragmentArgs.fromBundle(getArguments()).getStartPosition();
+        setupNavigationControls(view);
         EnhancedFileCollectionAdapter collectionAdapter = new EnhancedFileCollectionAdapter(this);
+        collectionAdapter.setFileNavigator(fileNavigator);
         EnhancedFolder selectedFolder = FolderManager.getInstance().getCurrentFolder();
         collectionAdapter.addFiles(selectedFolder.getBaseItems());
         viewPager.setAdapter(collectionAdapter);
         super.onViewCreated(view, savedInstanceState);
-        setupNavigationControls(view);
+
         fileNavigator.setFileTotal(collectionAdapter.getItemCount());
         viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override

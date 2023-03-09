@@ -3,24 +3,40 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/drawable-night-anydpi/ic_baseline_wifi_24.xml" value="0.22" />
         <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/drawable-night/ic_baseline_back.xml" value="0.1735" />
         <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/drawable-night/ic_baseline_short_text.xml" value="0.1535" />
         <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/drawable-night/ic_baseline_sort.xml" value="0.105" />
+        <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/drawable-notnight-anydpi/ic_baseline_wifi_24.xml" value="0.22" />
+        <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/drawable/ic_baseline_home_24.xml" value="0.22" />
+        <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/drawable/side_nav_bar.xml" value="0.22" />
+        <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/layout/activity_enhanced_main.xml" value="0.2989583333333333" />
         <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/layout/activity_folder_list.xml" value="0.1" />
+        <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/layout/activity_folder_view.xml" value="0.3" />
         <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/layout/activity_image_pager.xml" value="0.11820652173913043" />
         <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/layout/activity_image_view.xml" value="0.11548913043478261" />
         <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/layout/activity_imageviewer.xml" value="0.11820652173913043" />
+        <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/layout/activity_main.xml" value="0.3" />
+        <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/layout/activity_main_navigation.xml" value="0.2989583333333333" />
         <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/layout/activity_newfileview.xml" value="0.11548913043478261" />
+        <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/layout/activity_online_recent_file_view.xml" value="0.125" />
         <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/layout/activity_video_view.xml" value="0.11548913043478261" />
+        <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/layout/app_bar_navigation.xml" value="0.22421875" />
+        <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/layout/content_folder_view.xml" value="0.3" />
         <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/layout/content_image_view.xml" value="0.11548913043478261" />
         <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/layout/content_imageviewer.xml" value="0.11548913043478261" />
+        <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/layout/content_main.xml" value="0.3" />
+        <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/layout/content_navigation.xml" value="0.2989583333333333" />
         <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/layout/exo_player_control_view.xml" value="0.1" />
         <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/layout/exo_player_simple_controls.xml" value="0.264" />
         <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/layout/fileviewer_navigation_bar.xml" value="0.264" />
         <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/layout/foldergrid_layout_constrained.xml" value="0.1" />
         <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/layout/fragment_file_pager.xml" value="0.11548913043478261" />
         <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/layout/fragment_folder_list.xml" value="0.1816123188405797" />
+        <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/layout/fragment_folder_view.xml" value="0.2452991452991453" />
         <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/layout/fragment_gallery.xml" value="0.22864583333333333" />
+        <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/layout/nav_header_navigation.xml" value="0.2989583333333333" />
+        <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/menu/activity_main_drawer.xml" value="0.3" />
         <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/menu/menu_offline_folder_context.xml" value="0.14375" />
         <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/menu/menu_online_folder_context.xml" value="0.14375" />
         <entry key="..\:/Users/paulq/Documents/Personal/Github Projects/SecureImageViewer-Mobile-OAuth/app/src/main/res/xml/dev_preferences.xml" value="0.264" />

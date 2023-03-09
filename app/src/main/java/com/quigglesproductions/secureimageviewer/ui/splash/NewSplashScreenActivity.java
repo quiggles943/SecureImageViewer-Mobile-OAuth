@@ -56,6 +56,7 @@ import com.quigglesproductions.secureimageviewer.models.DeviceStatus;
 import com.quigglesproductions.secureimageviewer.models.error.RequestError;
 import com.quigglesproductions.secureimageviewer.notifications.NotificationHelper;
 import com.quigglesproductions.secureimageviewer.registration.RegistrationId;
+import com.quigglesproductions.secureimageviewer.ui.EnhancedMainMenuActivity;
 import com.quigglesproductions.secureimageviewer.ui.MainMenuActivity;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
 import com.quigglesproductions.secureimageviewer.ui.filesend.FileSendActivity;
@@ -373,7 +374,7 @@ public class NewSplashScreenActivity extends SecureActivity {
             finish();
         }
         else {
-            intent = new Intent(context,MainMenuActivity.class);
+            intent = new Intent(context, EnhancedMainMenuActivity.class);
             SecurityManager.getInstance().setupBiometricsForResult((SecureActivity) context, intent);
         }
             //finish();
@@ -396,18 +397,6 @@ public class NewSplashScreenActivity extends SecureActivity {
         else{
             updateProgressBar(true,R.string.online_authentication_required,ProgressBarState.ERROR);
         }
-        /*infoTextView.setText(R.string.auth_error_connection);
-        progressBar.setIndeterminate(false);
-        progressBar.setMax(1);
-        progressBar.setProgress(1);
-        progressBar.setProgressTintList(ColorStateList.valueOf(Color.RED));
-        progressBar.setProgressTintMode(PorterDuff.Mode.MULTIPLY);
-        fingerprintIcon.setVisibility(View.VISIBLE);
-        Intent intent = new Intent(this,MainMenuActivity.class);
-        SecurityManager.getInstance().setupBiometricsForResult((SecureActivity)context,intent);*/
-        //setupBiometrics(intent);
-        //startActivity(new Intent(NewSplashScreenActivity.this, LoginActivity.class));
-        //finish();
     }
 
     private void setupNetworkCallback(){

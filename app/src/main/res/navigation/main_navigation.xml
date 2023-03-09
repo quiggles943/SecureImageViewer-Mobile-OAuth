@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_navigation"
+    app:startDestination="@id/nav_enhancedMainMenuFragment">
+
+    <fragment
+        android:id="@+id/nav_enhancedMainMenuFragment"
+        android:name="com.quigglesproductions.secureimageviewer.ui.EnhancedMainMenuFragment"
+        android:label="Main Menu"
+        tools:layout="@layout/activity_main">
+        <action
+            android:id="@+id/action_enhancedMainMenuFragment_to_enhancedFolderListFragment"
+            app:destination="@id/nav_enhancedFolderListFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+        <action
+            android:id="@+id/action_enhancedMainMenuFragment_to_settingsFragment"
+            app:destination="@id/nav_settingsFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+        <action
+            android:id="@+id/action_nav_enhancedMainMenuFragment_to_nav_enhancedOfflineFolderListFragment"
+            app:destination="@id/nav_enhancedOfflineFolderListFragment"
+            app:enterAnim="@anim/nav_default_enter_anim"
+            app:exitAnim="@anim/nav_default_exit_anim"
+            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_enhancedFolderListFragment"
+        android:name="com.quigglesproductions.secureimageviewer.ui.enhancedfolderlist.EnhancedFolderListFragment"
+        android:label="Folders"
+        tools:layout="@layout/fragment_folder_list" >
+        <action
+            android:id="@+id/action_enhancedFolderListFragment_to_enhancedFolderViewerFragment"
+            app:destination="@id/nav_enhancedFolderViewerFragment"
+            app:enterAnim="@anim/slide_in_horizontal"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/slide_out_horizontal" />
+    </fragment>
+    <fragment
+        android:id="@+id/nav_enhancedFolderViewerFragment"
+        android:name="com.quigglesproductions.secureimageviewer.ui.enhancedfolderviewer.EnhancedFolderViewerFragment"
+        android:label="EnhancedFolderViewerFragment"
+        tools:layout="@layout/fragment_folder_view">
+        <action
+            android:id="@+id/action_enhancedFolderViewerFragment_to_enhancedFileViewFragment"
+            app:destination="@id/nav_enhancedFileViewFragment"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+    <fragment
+        android:id="@+id/nav_enhancedFileViewFragment"
+        android:name="com.quigglesproductions.secureimageviewer.ui.enhancedimageviewer.EnhancedFileViewFragment"
+        android:label="EnhancedFileViewFragment"
+        tools:layout="@layout/fragment_file_pager">
+        <argument
+            android:name="startPosition"
+            app:argType="integer"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_enhancedOfflineFolderListFragment"
+        android:name="com.quigglesproductions.secureimageviewer.ui.enhancedfolderlist.EnhancedFolderListFragment"
+        android:label="Local Folders"
+        tools:layout="@layout/fragment_folder_list" >
+        <argument
+            android:name="state"
+            app:argType="string"/>
+        <action
+            android:id="@+id/action_enhancedFolderListFragment_to_enhancedFolderViewerFragment"
+            app:destination="@id/nav_enhancedFolderViewerFragment"
+            app:enterAnim="@anim/slide_in_horizontal"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/slide_out_horizontal" />
+    </fragment>
+
+
+    <fragment
+        android:id="@+id/nav_settingsFragment"
+        android:name="com.quigglesproductions.secureimageviewer.ui.preferences.EnhancedSettingsFragment"
+        android:label="@string/settings_title"
+        tools:layout="@layout/settings_activity"/>
+</navigation>

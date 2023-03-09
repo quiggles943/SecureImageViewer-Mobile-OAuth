@@ -33,6 +33,7 @@ public class FileGridAdapter extends BaseAdapter {
     private ArrayList<EnhancedFile> items;
     private int folderId;
     private boolean isEncrypted;
+    private SortType sortType = SortType.NAME_ASC;
     public FileGridAdapter(Context c, List<EnhancedFile> files)
     {
         mContext = c;
@@ -146,6 +147,11 @@ public class FileGridAdapter extends BaseAdapter {
 
     public void sort(SortType sortType) {
         sortFiles(items,sortType);
+        notifyDataSetChanged();
+    }
+
+    public void setFiles(ArrayList<EnhancedFile> enhancedFiles) {
+        this.items = sortFiles(enhancedFiles,sortType);
         notifyDataSetChanged();
     }
 }
