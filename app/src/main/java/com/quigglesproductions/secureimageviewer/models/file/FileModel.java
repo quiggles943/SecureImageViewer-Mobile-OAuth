@@ -11,6 +11,7 @@ import com.quigglesproductions.secureimageviewer.models.ArtistModel;
 import com.quigglesproductions.secureimageviewer.models.CatagoryModel;
 import com.quigglesproductions.secureimageviewer.models.ItemBaseModel;
 import com.quigglesproductions.secureimageviewer.models.SubjectModel;
+import com.quigglesproductions.secureimageviewer.models.enhanced.file.FileType;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -152,8 +153,8 @@ public class FileModel implements ItemBaseModel, Parcelable {
         return contentType;
     }
 
-    public String getFileType(){
-        return contentType;
+    public FileType getFileType(){
+        return FileType.UNKNOWN;
     }
 
     public int getId() {

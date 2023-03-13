@@ -10,7 +10,7 @@
  * Extends Android ImageView to include pinch zooming, panning, fling and double tap zoom.
  */
 
-package com.quigglesproductions.secureimageviewer.ui.enhancedimageviewer;
+package com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;

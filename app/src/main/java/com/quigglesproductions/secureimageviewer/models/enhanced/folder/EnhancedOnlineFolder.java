@@ -16,9 +16,9 @@ import java.util.stream.Collectors;
 public class EnhancedOnlineFolder extends EnhancedFolder implements IRemoteFolder{
 
     private ArrayList<EnhancedOnlineFile> files = new ArrayList<>();
-    public EnhancedOnlineFolder(Context context){
+    public EnhancedOnlineFolder(){
         super();
-        setDataSource(new OnlineFolderDataSource(context,this));
+        setDataSource(new OnlineFolderDataSource(this));
     }
 
     public void setItems(ArrayList<EnhancedOnlineFile> files) {
@@ -38,6 +38,8 @@ public class EnhancedOnlineFolder extends EnhancedFolder implements IRemoteFolde
 
     public ArrayList<EnhancedFile> getBaseItems() {
         ArrayList<EnhancedFile> baseFiles = new ArrayList<>();
+        if(files == null)
+            return baseFiles;
         for(EnhancedOnlineFile file:files){
             baseFiles.add(file);
         }

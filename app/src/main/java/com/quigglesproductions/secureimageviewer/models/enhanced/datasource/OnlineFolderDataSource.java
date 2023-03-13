@@ -26,9 +26,7 @@ import java.util.ArrayList;
 
 public class OnlineFolderDataSource implements IFolderDataSource{
     private EnhancedOnlineFolder folder;
-    private Context context;
-    public OnlineFolderDataSource(Context context,EnhancedOnlineFolder folder){
-        this.context = context;
+    public OnlineFolderDataSource(EnhancedOnlineFolder folder){
         this.folder = folder;
     }
     @Override

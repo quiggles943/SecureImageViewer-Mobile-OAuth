@@ -1,4 +1,4 @@
-package com.quigglesproductions.secureimageviewer.ui.enhancedimageviewer.fragments;
+package com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.fragments;
 
 import android.os.Bundle;
 
@@ -8,8 +8,6 @@ import com.quigglesproductions.secureimageviewer.gson.ViewerGson;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedOnlineFile;
-import com.quigglesproductions.secureimageviewer.ui.IFileViewer;
-import com.quigglesproductions.secureimageviewer.ui.compoundcontrols.FileViewerNavigator;
 
 import java.util.Locale;
 

@@ -79,8 +79,8 @@ public class OnlineRecentFilesViewActivity extends SecureActivity {
             public void onClick(int position) {
                 EnhancedFile selectedFile = rvAdapter.getItem(position);
 
-                Intent intent = new Intent(context, com.quigglesproductions.secureimageviewer.ui.enhancedimageviewer.FileViewActivity.class);
-                EnhancedOnlineFolder recentFolder = new EnhancedOnlineFolder(context);
+                Intent intent = new Intent(context, com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.FileViewActivity.class);
+                EnhancedOnlineFolder recentFolder = new EnhancedOnlineFolder();
                 recentFolder.setItems(rvAdapter.getFiles());
                 FolderManager.getInstance().setCurrentFolder(recentFolder);
                 intent.putExtra("position",position);

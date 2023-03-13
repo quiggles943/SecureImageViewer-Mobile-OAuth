@@ -1,4 +1,4 @@
-package com.quigglesproductions.secureimageviewer.ui.enhancedimageviewer.fragments;
+package com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.fragments;
 
 import android.os.Bundle;
 import android.util.Log;

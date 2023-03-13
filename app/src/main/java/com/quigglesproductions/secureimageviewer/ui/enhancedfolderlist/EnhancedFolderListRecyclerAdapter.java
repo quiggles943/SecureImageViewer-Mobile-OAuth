@@ -1,38 +1,47 @@
-package com.quigglesproductions.secureimageviewer.ui.onlinefolderlist;
+package com.quigglesproductions.secureimageviewer.ui.enhancedfolderlist;
 
 import android.content.Context;
 import android.graphics.PorterDuff;
 import android.os.Parcelable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.LazyHeaders;
+import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.Target;
 import com.quigglesproductions.secureimageviewer.R;
 import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
 import com.quigglesproductions.secureimageviewer.appauth.RequestServiceNotConfiguredException;
 import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
+import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.IFolderDataSource;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedFolder;
-import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedOnlineFolder;
 import com.quigglesproductions.secureimageviewer.recycler.RecyclerViewSelectionMode;
 
 import net.openid.appauth.AuthState;
 import net.openid.appauth.AuthorizationException;
 
+import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.List;
 
-public class FolderListRecyclerAdapter extends RecyclerView.Adapter<FolderListRecyclerAdapter.ViewHolder> {
-    private ArrayList<EnhancedFolder> folders = new ArrayList<>();
+public class EnhancedFolderListRecyclerAdapter extends RecyclerView.Adapter<EnhancedFolderListRecyclerAdapter.ViewHolder> {
+    private RecyclerView recyclerView;
+    private List<EnhancedFolder> folders = new ArrayList<>();
     private ArrayList<Integer> selected = new ArrayList<>();
     private Context mContext;
     private boolean multiSelect = false;
@@ -61,12 +70,14 @@ public class FolderListRecyclerAdapter extends RecyclerView.Adapter<FolderListRe
     public void addToSelected(int position) {
         selected.add(position);
         notifyItemChanged(position);
-        selectionModeChangeListener.selectionAdded(position);
+        if(selectionModeChangeListener != null)
+            selectionModeChangeListener.selectionAdded(position);
     }
     public void removeFromSelected(int position){
         selected.remove(selected.indexOf(position));
         notifyItemChanged(position);
-        selectionModeChangeListener.selectionRemoved(position);
+        if(selectionModeChangeListener != null)
+            selectionModeChangeListener.selectionRemoved(position);
     }
 
     public boolean getIsSelected(int position) {
@@ -101,6 +112,11 @@ public class FolderListRecyclerAdapter extends RecyclerView.Adapter<FolderListRe
         notifyDataSetChanged();
     }
 
+    public void setFolders(List<EnhancedFolder> enhancedFolders) {
+        this.folders = enhancedFolders;
+        notifyDataSetChanged();
+    }
+
     public static class ViewHolder extends RecyclerView.ViewHolder{
         private final ImageView imageView;
         private final TextView folderName;
@@ -114,11 +130,11 @@ public class FolderListRecyclerAdapter extends RecyclerView.Adapter<FolderListRe
         }
         public TextView getFolderNameView(){ return folderName; }
     }
-    public FolderListRecyclerAdapter(Context context){
+    public EnhancedFolderListRecyclerAdapter(Context context){
         mContext = context;
     }
 
-    public FolderListRecyclerAdapter(Context context, ArrayList<EnhancedFolder> files){
+    public EnhancedFolderListRecyclerAdapter(Context context, ArrayList<EnhancedFolder> files){
         mContext = context;
         this.folders = files;
     }
@@ -130,32 +146,40 @@ public class FolderListRecyclerAdapter extends RecyclerView.Adapter<FolderListRe
                 .inflate(R.layout.foldergrid_layout_constrained, viewGroup, false);
         return new ViewHolder(view);
     }
+
+    @Override
+    public void onViewRecycled(@NonNull ViewHolder holder) {
+        Glide.with(mContext).clear(holder.getImageView());
+        super.onViewRecycled(holder);
+    }
+
     public void onBindViewHolder(ViewHolder viewHolder, final int position) {
 
         // Get element from your dataset at this position and replace the
         // contents of the view with that element
         EnhancedFolder folder = folders.get(position);
-        AuthManager.getInstance().performActionWithFreshTokens(mContext, new AuthState.AuthStateAction() {
-            @Override
-            public void execute(@Nullable String accessToken, @Nullable String idToken, @Nullable AuthorizationException ex) {
-                RequestOptions requestOptions = new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL);
-                GlideUrl glideUrl = null;
-                if(folder.onlineThumbnailId > 0) {
-                    try {
-                        glideUrl = new GlideUrl(RequestManager.getInstance().getUrlManager().getFileUrlString() + folder.onlineThumbnailId + "/thumbnail", new LazyHeaders.Builder().addHeader("Authorization", "Bearer " + accessToken).build());
-                        //GlideUrl glideUrl = new GlideUrl("https://quigleyserver.ddns.net:14500/api/v1/file/" + folder.onlineThumbnailId + "/thumbnail", new LazyHeaders.Builder()
-                        //        .addHeader("Authorization", "Bearer " + accessToken).build());
+        try {
+            folder.getDataSource().getThumbnailFromDataSource(new IFolderDataSource.FolderDataSourceCallback() {
+                @Override
+                public void FolderThumbnailRetrieved(Object thumbnailDataSource, Exception exception) {
+                    Glide.with(mContext).addDefaultRequestListener(new RequestListener<Object>() {
+                        @Override
+                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Object> target, boolean isFirstResource) {
+                            Log.e("Image Load Fail", e.getMessage());
+                            e.logRootCauses("Image Load Fail");
+                            return false;
+                        }
 
-                    }
-                    catch (RequestServiceNotConfiguredException exception){
-
-                    }
-                    finally {
-                        Glide.with(mContext).asBitmap().load(glideUrl).fallback(R.drawable.ic_baseline_broken_image_24).apply(requestOptions).into(viewHolder.getImageView());
-                    }
+                        @Override
+                        public boolean onResourceReady(Object resource, Object model, Target<Object> target, DataSource dataSource, boolean isFirstResource) {
+                            return false;
+                        }
+                    }).load(thumbnailDataSource).into(viewHolder.getImageView());
                 }
-            }
-        });
+            });
+        }catch (MalformedURLException ex){
+            ex.printStackTrace();
+        }
         if(getIsSelected(position))
             viewHolder.getImageView().setColorFilter(ContextCompat.getColor(mContext, R.color.selected), PorterDuff.Mode.SRC_ATOP);
         else

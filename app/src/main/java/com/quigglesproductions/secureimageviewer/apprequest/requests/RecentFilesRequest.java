@@ -27,6 +27,7 @@ public class RecentFilesRequest {
     private final UiThreadPoster uiThreadPoster = new UiThreadPoster();
     private int count = 200;
     private int offset = 0;
+    private int totalFiles = 0;
     private Context context;
     public RecentFilesRequest(Context context){
         this.context = context;
@@ -50,6 +51,7 @@ public class RecentFilesRequest {
                                 if (responseCode >= 400 && responseCode <= 499) {
                                     throw new Exception("Bad authentication status: " + responseCode); //provide a more meaningful exception message
                                 } else {
+                                    totalFiles = connection.getHeaderFieldInt("X-File-Count",0);
                                     InputStream is = connection.getInputStream();
                                     String result = StreamUtils.readInputStream(connection.getInputStream());
                                     Gson gson = ViewerGson.getGson();
@@ -79,6 +81,10 @@ public class RecentFilesRequest {
                 }
             });
         });
+    }
+
+    public int getTotalFilesCount() {
+        return totalFiles;
     }
 
     public interface RecentFilesRetrievalCallback<T>{

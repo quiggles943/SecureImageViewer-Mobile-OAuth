@@ -8,11 +8,8 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.ParcelFileDescriptor;
 import android.util.Log;
-import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Toast;
@@ -33,19 +30,12 @@ import com.quigglesproductions.secureimageviewer.models.LoginModel;
 import com.quigglesproductions.secureimageviewer.models.WebServerConfig;
 import com.quigglesproductions.secureimageviewer.ui.login.EnhancedLoginActivity;
 import com.quigglesproductions.secureimageviewer.ui.login.LoginActivity;
-import com.quigglesproductions.secureimageviewer.ui.preferences.SsoSettingsActivity;
 import com.quigglesproductions.secureimageviewer.ui.splash.NewSplashScreenActivity;
 
 import net.openid.appauth.AuthorizationException;
 import net.openid.appauth.AuthorizationResponse;
 import net.openid.appauth.AuthorizationService;
 import net.openid.appauth.TokenResponse;
-
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
 
 public class SecureActivity extends AppCompatActivity {
     Context context;

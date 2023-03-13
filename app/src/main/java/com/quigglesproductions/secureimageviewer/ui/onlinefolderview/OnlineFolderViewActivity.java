@@ -33,7 +33,7 @@ import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedOn
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedOnlineFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.FileMetadata;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
-import com.quigglesproductions.secureimageviewer.ui.enhancedimageviewer.FileViewActivity;
+import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.FileViewActivity;
 
 import java.util.ArrayList;
 

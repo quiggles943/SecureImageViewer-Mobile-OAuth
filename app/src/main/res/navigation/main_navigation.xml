@@ -3,13 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main_navigation"
-    app:startDestination="@id/nav_enhancedMainMenuFragment">
+    app:startDestination="@id/nav_overviewFragment">
 
     <fragment
-        android:id="@+id/nav_enhancedMainMenuFragment"
-        android:name="com.quigglesproductions.secureimageviewer.ui.EnhancedMainMenuFragment"
-        android:label="Main Menu"
-        tools:layout="@layout/activity_main">
+        android:id="@+id/nav_overviewFragment"
+        android:name="com.quigglesproductions.secureimageviewer.ui.overview.OverviewFragment"
+        android:label="Overview"
+        tools:layout="@layout/activity_overview">
         <action
             android:id="@+id/action_enhancedMainMenuFragment_to_enhancedFolderListFragment"
             app:destination="@id/nav_enhancedFolderListFragment"
@@ -49,7 +49,6 @@
     <fragment
         android:id="@+id/nav_enhancedFolderViewerFragment"
         android:name="com.quigglesproductions.secureimageviewer.ui.enhancedfolderviewer.EnhancedFolderViewerFragment"
-        android:label="EnhancedFolderViewerFragment"
         tools:layout="@layout/fragment_folder_view">
         <action
             android:id="@+id/action_enhancedFolderViewerFragment_to_enhancedFileViewFragment"
@@ -61,7 +60,7 @@
     </fragment>
     <fragment
         android:id="@+id/nav_enhancedFileViewFragment"
-        android:name="com.quigglesproductions.secureimageviewer.ui.enhancedimageviewer.EnhancedFileViewFragment"
+        android:name="com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.EnhancedFileViewFragment"
         android:label="EnhancedFileViewFragment"
         tools:layout="@layout/fragment_file_pager">
         <argument
@@ -91,5 +90,78 @@
         android:id="@+id/nav_settingsFragment"
         android:name="com.quigglesproductions.secureimageviewer.ui.preferences.EnhancedSettingsFragment"
         android:label="@string/settings_title"
-        tools:layout="@layout/settings_activity"/>
+        tools:layout="@layout/settings_activity">
+        <action
+            android:id="@+id/action_nav_settingsFragment_to_aboutSettingsFragment"
+            app:destination="@id/aboutSettingsFragment" />
+        <action
+            android:id="@+id/action_nav_settingsFragment_to_databaseSettingsFragment"
+            app:destination="@id/databaseSettingsFragment" />
+        <action
+            android:id="@+id/action_nav_settingsFragment_to_devSettingsFragment"
+            app:destination="@id/devSettingsFragment" />
+        <action
+            android:id="@+id/action_nav_settingsFragment_to_displaySettingsFragment"
+            app:destination="@id/displaySettingsFragment" />
+        <action
+            android:id="@+id/action_nav_settingsFragment_to_networkSettingsFragment"
+            app:destination="@id/networkSettingsFragment" />
+        <action
+            android:id="@+id/action_nav_settingsFragment_to_securitySettingsFragment"
+            app:destination="@id/securitySettingsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/aboutSettingsFragment"
+        android:name="com.quigglesproductions.secureimageviewer.ui.preferences.AboutSettingsFragment"
+        android:label="About" />
+    <fragment
+        android:id="@+id/databaseSettingsFragment"
+        android:name="com.quigglesproductions.secureimageviewer.ui.preferences.DatabaseSettingsFragment"
+        android:label="Database" />
+    <fragment
+        android:id="@+id/devSettingsFragment"
+        android:name="com.quigglesproductions.secureimageviewer.ui.preferences.DevSettingsFragment"
+        android:label="Dev" />
+    <fragment
+        android:id="@+id/displaySettingsFragment"
+        android:name="com.quigglesproductions.secureimageviewer.ui.preferences.DisplaySettingsFragment"
+        android:label="Display" />
+    <fragment
+        android:id="@+id/networkSettingsFragment"
+        android:name="com.quigglesproductions.secureimageviewer.ui.preferences.NetworkSettingsFragment"
+        android:label="Network">
+        <action
+            android:id="@+id/action_networkSettingsFragment_to_ssoSettingsFragment"
+            app:destination="@id/ssoSettingsFragment" />
+        <action
+            android:id="@+id/action_networkSettingsFragment_to_webSettingsFragment"
+            app:destination="@id/webSettingsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/securitySettingsFragment"
+        android:name="com.quigglesproductions.secureimageviewer.ui.preferences.SecuritySettingsFragment"
+        android:label="Security" />
+    <fragment
+        android:id="@+id/ssoSettingsFragment"
+        android:name="com.quigglesproductions.secureimageviewer.ui.preferences.SsoSettingsFragment"
+        android:label="Single Sign-on" >
+        <action
+            android:id="@+id/action_ssoSettingsFragment_to_ssoInfoFragment"
+            app:destination="@id/ssoInfoFragment" />
+        <action
+            android:id="@+id/action_ssoSettingsFragment_to_ssoTokenFragment"
+            app:destination="@id/ssoTokenFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/webSettingsFragment"
+        android:name="com.quigglesproductions.secureimageviewer.ui.preferences.WebSettingsFragment"
+        android:label="WebSettingsFragment" />
+    <fragment
+        android:id="@+id/ssoInfoFragment"
+        android:name="com.quigglesproductions.secureimageviewer.ui.preferences.SsoInfoFragment"
+        android:label="SsoInfoFragment" />
+    <fragment
+        android:id="@+id/ssoTokenFragment"
+        android:name="com.quigglesproductions.secureimageviewer.ui.preferences.SsoTokenFragment"
+        android:label="SsoTokenFragment" />
 </navigation>

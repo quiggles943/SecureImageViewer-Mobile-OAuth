@@ -3,38 +3,22 @@ package com.quigglesproductions.secureimageviewer.ui;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.Volley;
 import com.quigglesproductions.secureimageviewer.R;
-import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
 import com.quigglesproductions.secureimageviewer.login.LoginActivity;
 import com.quigglesproductions.secureimageviewer.managers.ViewerConnectivityManager;
-import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
 import com.quigglesproductions.secureimageviewer.ui.offlinefolderlist.FolderListActivity;
-import com.quigglesproductions.secureimageviewer.ui.onlinefolderlist.OnlineFolderListActivity;
-import com.quigglesproductions.secureimageviewer.ui.preferences.SettingsActivity;
-
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 
 import android.view.View;
 
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
-import android.widget.TextView;
 
 import net.openid.appauth.AuthState;
-import net.openid.appauth.AuthorizationException;
-import net.openid.appauth.AuthorizationResponse;
 import net.openid.appauth.AuthorizationService;
 import net.openid.appauth.AuthorizationServiceConfiguration;
-import net.openid.appauth.TokenResponse;
 
 public class MainMenuActivity extends SecureActivity {
 
@@ -70,18 +54,11 @@ public class MainMenuActivity extends SecureActivity {
             //AuthManager.getInstance().generateRegistrationId();
         }
         Button offlineImageViewerBtn = findViewById(R.id.offline_image_viewer_btn);
-        imageViewerBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent imageViewerIntent = new Intent(context, OnlineFolderListActivity.class);
-                startActivity(imageViewerIntent);
-            }
-        });
         settingsBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent settingsIntent = new Intent(context, SettingsActivity.class);
-                startActivity(settingsIntent);
+                //Intent settingsIntent = new Intent(context, SettingsActivity.class);
+                //startActivity(settingsIntent);
             }
         });
         offlineImageViewerBtn.setOnClickListener(new View.OnClickListener() {

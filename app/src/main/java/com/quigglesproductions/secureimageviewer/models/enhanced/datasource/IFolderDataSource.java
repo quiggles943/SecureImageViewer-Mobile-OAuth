@@ -4,8 +4,10 @@ import com.quigglesproductions.secureimageviewer.SortType;
 import com.quigglesproductions.secureimageviewer.appauth.RequestServiceNotConfiguredException;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
 
+import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 public interface IFolderDataSource {
@@ -14,6 +16,10 @@ public interface IFolderDataSource {
     void getFilesFromDataSource(FolderDataSourceCallback callback, SortType sortType) throws MalformedURLException;
 
     void getThumbnailFromDataSource(FolderDataSourceCallback callback) throws MalformedURLException;
+
+    default boolean moreItemsAvailable(){
+        return false;
+    }
 
     interface FolderDataSourceCallback{
         default void FolderFilesRetrieved(List<EnhancedFile> files,Exception exception){

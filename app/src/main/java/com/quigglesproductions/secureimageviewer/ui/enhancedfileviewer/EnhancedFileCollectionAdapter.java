@@ -1,4 +1,4 @@
-package com.quigglesproductions.secureimageviewer.ui.enhancedimageviewer;
+package com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer;
 
 import android.os.Bundle;
 
@@ -11,9 +11,9 @@ import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDa
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedOnlineFile;
 import com.quigglesproductions.secureimageviewer.ui.compoundcontrols.FileViewerNavigator;
-import com.quigglesproductions.secureimageviewer.ui.enhancedimageviewer.fragments.BaseFileViewFragment;
-import com.quigglesproductions.secureimageviewer.ui.enhancedimageviewer.fragments.ImageFileViewFragment;
-import com.quigglesproductions.secureimageviewer.ui.enhancedimageviewer.fragments.VideoFileViewFragment;
+import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.fragments.BaseFileViewFragment;
+import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.fragments.ImageFileViewFragment;
+import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.fragments.VideoFileViewFragment;
 
 import java.util.ArrayList;
 

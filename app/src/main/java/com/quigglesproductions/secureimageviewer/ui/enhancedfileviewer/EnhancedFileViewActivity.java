@@ -1,4 +1,4 @@
-package com.quigglesproductions.secureimageviewer.ui.enhancedimageviewer;
+package com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer;
 
 import android.content.Context;
 import android.os.Bundle;

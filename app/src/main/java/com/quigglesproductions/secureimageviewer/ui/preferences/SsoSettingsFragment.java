@@ -1,11 +1,14 @@
 package com.quigglesproductions.secureimageviewer.ui.preferences;
 
+import static androidx.navigation.Navigation.findNavController;
+
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.navigation.NavDirections;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
@@ -41,7 +44,8 @@ public class SsoSettingsFragment extends PreferenceFragmentCompat {
         ssoConfigPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.settings_sso,new SsoInfoFragment(),"SsoInfoFrag").addToBackStack(null).commit();
+                NavDirections action = SsoSettingsFragmentDirections.actionSsoSettingsFragmentToSsoInfoFragment();
+                findNavController(getView()).navigate(action);
                 return true;
             }
         });
@@ -50,7 +54,8 @@ public class SsoSettingsFragment extends PreferenceFragmentCompat {
         ssoTokenPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.settings_sso,new SsoTokenFragment(),"SsoTokenFrag").addToBackStack(null).commit();
+                NavDirections action = SsoSettingsFragmentDirections.actionSsoSettingsFragmentToSsoTokenFragment();
+                findNavController(getView()).navigate(action);
                 return true;
             }
         });

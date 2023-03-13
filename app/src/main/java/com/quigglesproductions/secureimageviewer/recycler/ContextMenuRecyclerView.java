@@ -44,4 +44,11 @@ public class ContextMenuRecyclerView extends RecyclerView {
         final public int position;
         final public long id;
     }
+
+    @Override
+    public void setAdapter(@Nullable Adapter adapter) {
+        super.setAdapter(adapter);
+    }
+
+
 }

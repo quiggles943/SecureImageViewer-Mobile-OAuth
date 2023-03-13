@@ -1,4 +1,4 @@
-package com.quigglesproductions.secureimageviewer.ui.enhancedimageviewer;
+package com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -11,7 +11,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.OptIn;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.ActionProvider;
 import androidx.fragment.app.Fragment;
 import androidx.media3.common.util.UnstableApi;
@@ -106,7 +105,7 @@ public class EnhancedFileViewFragment extends Fragment implements IFileViewer {
             @Override
             public void zoomLevelChanged(boolean isZoomed) {
                 if(isZoomed)
-                    setViewPagerSlop(9);
+                    setViewPagerSlop(11);
                 else
                     setViewPagerSlop(1);
                 return;

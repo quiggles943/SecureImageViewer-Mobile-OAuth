@@ -47,7 +47,7 @@ public class FolderListRequest {
                                 }.getType();
                                 ArrayList<EnhancedOnlineFolder> folders = gson.fromJson(result, listType);
                                 for(EnhancedOnlineFolder folder : folders)
-                                    folder.setDataSource(new OnlineFolderDataSource(context,folder));
+                                    folder.setDataSource(new OnlineFolderDataSource(folder));
                                 uiThreadPoster.post(() -> {
                                     callback.ItemsRetrieved(folders, null);
                                 });

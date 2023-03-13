@@ -32,7 +32,7 @@ import com.quigglesproductions.secureimageviewer.models.ItemBaseModel;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedDatabaseFolder;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
-import com.quigglesproductions.secureimageviewer.ui.enhancedimageviewer.FileViewActivity;
+import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.FileViewActivity;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;

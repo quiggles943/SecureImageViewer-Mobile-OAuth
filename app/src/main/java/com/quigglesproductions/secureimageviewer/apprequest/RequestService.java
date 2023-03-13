@@ -26,14 +26,11 @@ import com.quigglesproductions.secureimageviewer.database.enhanced.EnhancedDatab
 import com.quigglesproductions.secureimageviewer.managers.NotificationManager;
 import com.quigglesproductions.secureimageviewer.models.ArtistModel;
 import com.quigglesproductions.secureimageviewer.models.CatagoryModel;
-import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
-import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedDatabaseFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedOnlineFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedOnlineFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.FileMetadata;
 import com.quigglesproductions.secureimageviewer.models.file.FileModel;
-import com.quigglesproductions.secureimageviewer.models.folder.FolderModel;
 import com.quigglesproductions.secureimageviewer.models.SubjectModel;
 import com.techyourchance.threadposter.BackgroundThreadPoster;
 import com.techyourchance.threadposter.UiThreadPoster;
@@ -89,6 +86,24 @@ public class RequestService {
                 resultCallback.RequestResultRetrieved(request,volleyErrors);
             }
         });
+    }
+    public void getRecentFiles(int count, int offset, RequestManager.RequestResultCallback<RecentFileResult<EnhancedOnlineFile>,Exception> resultCallback){
+        RecentFilesRequest recentFilesRequest = new RecentFilesRequest(context);
+        recentFilesRequest.setFileCount(count);
+        recentFilesRequest.setOffset(offset);
+        try{
+            recentFilesRequest.getRecentFiles(new ItemListRetrievalCallback<EnhancedOnlineFile>() {
+                @Override
+                public void ItemsRetrieved(ArrayList<EnhancedOnlineFile> recentFiles, Exception exc) {
+                    RecentFileResult<EnhancedOnlineFile> result = new RecentFileResult<>(recentFiles,recentFilesRequest.getTotalFilesCount());
+                    resultCallback.RequestResultRetrieved(result,exc);
+
+                }
+            });
+        }catch (RequestServiceNotConfiguredException exception){
+            resultCallback.RequestResultRetrieved(null,exception);
+        }
+
     }
 
     public void getRecentFiles(Context context,int count, int offset, RequestManager.RequestResultCallback<ArrayList<EnhancedOnlineFile>,Exception> resultCallback){
@@ -420,6 +435,24 @@ public class RequestService {
             CONTENT_SENDING,
             COMPLETE,
             COMPLETE_WITH_ERROR
+        }
+    }
+
+    public static class RecentFileResult<T>{
+        private ArrayList<T> recentFiles;
+        private int totalFiles;
+
+        public RecentFileResult(ArrayList<T> recentFiles,int totalFiles){
+            this.recentFiles = recentFiles;
+            this.totalFiles = totalFiles;
+        }
+
+        public ArrayList<T> getRecentFiles() {
+            return recentFiles;
+        }
+
+        public int getTotalFiles() {
+            return totalFiles;
         }
     }
 

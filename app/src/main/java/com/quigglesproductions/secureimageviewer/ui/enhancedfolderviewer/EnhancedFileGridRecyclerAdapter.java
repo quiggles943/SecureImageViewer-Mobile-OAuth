@@ -2,12 +2,15 @@ package com.quigglesproductions.secureimageviewer.ui.enhancedfolderviewer;
 
 import android.content.Context;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -25,9 +28,12 @@ import org.acra.ACRA;
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.List;
+
+import kotlinx.coroutines.ObsoleteCoroutinesApi;
 
 public class EnhancedFileGridRecyclerAdapter extends RecyclerView.Adapter<EnhancedFileGridRecyclerAdapter.ViewHolder> {
-    private ArrayList<EnhancedFile> files;
+    private ArrayList<EnhancedFile> files = new ArrayList<>();
     private Context mContext;
     private EnhancedRecyclerViewOnClickListener onClickListener;
 
@@ -36,7 +42,18 @@ public class EnhancedFileGridRecyclerAdapter extends RecyclerView.Adapter<Enhanc
         notifyDataSetChanged();
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    public EnhancedFile get(int position) {
+        return files.get(position);
+    }
+
+    public void addFiles(List<EnhancedFile> files) {
+        for (EnhancedFile file: files) {
+            this.files.add(file);
+        }
+        notifyDataSetChanged();
+    }
+
+    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnCreateContextMenuListener {
         private final ImageView imageView;
 
         public ViewHolder(View view) {
@@ -44,10 +61,16 @@ public class EnhancedFileGridRecyclerAdapter extends RecyclerView.Adapter<Enhanc
             // Define click listener for the ViewHolder's View
 
             imageView = (ImageView) view.findViewById(R.id.grid_item_image);
+            view.setOnCreateContextMenuListener(this);
         }
 
         public ImageView getImageView() {
             return imageView;
+        }
+
+        @Override
+        public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+
         }
     }
 
@@ -73,6 +96,19 @@ public class EnhancedFileGridRecyclerAdapter extends RecyclerView.Adapter<Enhanc
             @Override
             public void onClick(View v) {
                 onClickListener.onClick(viewHolder.getAdapterPosition());
+            }
+        });
+        viewHolder.getImageView().setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                return false;
+            }
+        });
+        viewHolder.getImageView().setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
+            @Override
+            public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+                menuInfo = new AdapterView.AdapterContextMenuInfo(viewHolder.itemView,viewHolder.getPosition(),0);
+                onClickListener.onCreateContextMenu(menu,v,menuInfo);
             }
         });
         // Get element from your dataset at this position and replace the
@@ -111,6 +147,12 @@ public class EnhancedFileGridRecyclerAdapter extends RecyclerView.Adapter<Enhanc
         }
     }
 
+    @Override
+    public void onViewRecycled(@NonNull ViewHolder holder) {
+        holder.itemView.setOnLongClickListener(null);
+        super.onViewRecycled(holder);
+    }
+
     // Return the size of your dataset (invoked by the layout manager)
     @Override
     public int getItemCount() {
@@ -123,5 +165,7 @@ public class EnhancedFileGridRecyclerAdapter extends RecyclerView.Adapter<Enhanc
 
     public interface EnhancedRecyclerViewOnClickListener{
         void onClick(int position);
+
+        void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo);
     }
 }

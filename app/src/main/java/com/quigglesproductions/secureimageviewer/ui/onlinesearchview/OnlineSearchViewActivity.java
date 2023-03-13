@@ -17,7 +17,7 @@ import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
 import com.quigglesproductions.secureimageviewer.models.file.FileModel;
 import com.quigglesproductions.secureimageviewer.models.folder.FolderModel;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
-import com.quigglesproductions.secureimageviewer.ui.enhancedimageviewer.FileViewActivity;
+import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.FileViewActivity;
 
 import net.openid.appauth.AuthState;
 import net.openid.appauth.AuthorizationException;

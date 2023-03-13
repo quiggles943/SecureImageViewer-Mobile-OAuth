@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-    <com.quigglesproductions.secureimageviewer.ui.enhancedimageviewer.NewTouchImageView
+    <com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.NewTouchImageView
         android:id="@+id/imageViewer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

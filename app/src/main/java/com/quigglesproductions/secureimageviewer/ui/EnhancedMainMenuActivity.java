@@ -1,11 +1,17 @@
 package com.quigglesproductions.secureimageviewer.ui;
 
 import android.content.Context;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.MenuItem;
 
+import androidx.annotation.ColorInt;
+import androidx.annotation.ColorRes;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavArgument;
 import androidx.navigation.NavController;
@@ -41,7 +47,7 @@ public class EnhancedMainMenuActivity extends SecureActivity{
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_enhancedMainMenuFragment, R.id.nav_enhancedFolderListFragment, R.id.nav_enhancedOfflineFolderListFragment,R.id.nav_settingsFragment)
+                R.id.nav_overviewFragment, R.id.nav_enhancedFolderListFragment, R.id.nav_enhancedOfflineFolderListFragment,R.id.nav_settingsFragment)
                 .setOpenableLayout(drawer)
                 .build();
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_navigation);
@@ -66,6 +72,10 @@ public class EnhancedMainMenuActivity extends SecureActivity{
         viewModel.getIsOnline().setValue(true);
     }
 
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        return super.onOptionsItemSelected(item);
+    }
 
     @Override
     public boolean onSupportNavigateUp() {
@@ -77,5 +87,17 @@ public class EnhancedMainMenuActivity extends SecureActivity{
     public void setOnlineEnabled(boolean enabled){
         MenuItem onlineMenuItem = binding.navView.getMenu().getItem(1);
         onlineMenuItem.setEnabled(enabled);
+    }
+
+    public void overrideActionBarTitle(String title){
+        getSupportActionBar().setTitle(title);
+        //setTitle(title);
+    }
+
+    public void overrideActionBarColorFromInt(@ColorInt int color){
+        getSupportActionBar().setBackgroundDrawable(new ColorDrawable(color));
+    }
+    public void overrideActionBarColor(@ColorRes int color) {
+        getSupportActionBar().setBackgroundDrawable(new ColorDrawable(ContextCompat.getColor(context,color)));
     }
 }

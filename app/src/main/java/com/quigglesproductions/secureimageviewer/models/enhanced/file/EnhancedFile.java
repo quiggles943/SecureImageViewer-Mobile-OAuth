@@ -148,8 +148,14 @@ public class EnhancedFile implements ItemBaseModel {
         }
     }
 
-    public String getFileType() {
-        return contentType;
+    public FileType getFileType() {
+        if(metadata == null)
+            return FileType.UNKNOWN;
+        if(metadata.fileExtension == null)
+            return FileType.UNKNOWN;
+        if(metadata.fileExtension.isEmpty())
+            return FileType.UNKNOWN;
+        return FileType.getFileTypeFromExtension(metadata.fileExtension);
     }
 
     public void setDataSource(IFileDataSource dataSource){

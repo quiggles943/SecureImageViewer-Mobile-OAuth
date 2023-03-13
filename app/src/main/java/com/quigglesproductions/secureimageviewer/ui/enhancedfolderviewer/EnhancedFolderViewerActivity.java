@@ -30,10 +30,12 @@ import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFi
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedDatabaseFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedOnlineFolder;
+import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedRecentsFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.ILocalFolder;
+import com.quigglesproductions.secureimageviewer.models.enhanced.folder.IRemoteFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.FileMetadata;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
-import com.quigglesproductions.secureimageviewer.ui.enhancedimageviewer.EnhancedFileViewActivity;
+import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.EnhancedFileViewActivity;
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
@@ -55,28 +57,24 @@ public class EnhancedFolderViewerActivity extends SecureActivity {
         this.context = this;
         setContentView(R.layout.activity_folder_view);
         databaseHandler = new EnhancedDatabaseHandler(context);
-        Intent intent = getIntent();
-        //int folderId = intent.getIntExtra("folderId",0);
+
+        setupView();
+
         selectedFolder = FolderManager.getInstance().getCurrentFolder();
-
-
         setTitle(selectedFolder.getName());
-        gridview = findViewById(R.id.file_gridview);
-        int columns = getResources().getInteger(R.integer.column_count_filelist);
-        gridview.setNumColumns(columns);
-        gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                Intent intent = new Intent(context, EnhancedFileViewActivity.class);
-                intent.putExtra("position",position);
-                startActivity(intent);
-            }
-        });
-        registerForContextMenu(gridview);
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
+
+        if(selectedFolder instanceof EnhancedRecentsFolder){
+
+        }else if (selectedFolder instanceof IRemoteFolder){
+
+        }else if(selectedFolder instanceof ILocalFolder){
+
+        }else{
+
         }
+
+
+
         try {
             selectedFolder.getDataSource().getFilesFromDataSource(new IFolderDataSource.FolderDataSourceCallback() {
                 @Override
@@ -95,6 +93,25 @@ public class EnhancedFolderViewerActivity extends SecureActivity {
             throw new RuntimeException(e);
         }
 
+    }
+
+    private void setupView(){
+        gridview = findViewById(R.id.file_gridview);
+        int columns = getResources().getInteger(R.integer.column_count_filelist);
+        gridview.setNumColumns(columns);
+        gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                Intent intent = new Intent(context, EnhancedFileViewActivity.class);
+                intent.putExtra("position",position);
+                startActivity(intent);
+            }
+        });
+        registerForContextMenu(gridview);
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
     }
 
     @Override

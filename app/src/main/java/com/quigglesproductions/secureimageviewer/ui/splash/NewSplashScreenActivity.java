@@ -20,7 +20,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.transition.Fade;
-import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.view.Window;
@@ -53,18 +52,14 @@ import com.quigglesproductions.secureimageviewer.managers.NotificationManager;
 import com.quigglesproductions.secureimageviewer.managers.SecurityManager;
 import com.quigglesproductions.secureimageviewer.managers.ViewerConnectivityManager;
 import com.quigglesproductions.secureimageviewer.models.DeviceStatus;
-import com.quigglesproductions.secureimageviewer.models.error.RequestError;
 import com.quigglesproductions.secureimageviewer.notifications.NotificationHelper;
 import com.quigglesproductions.secureimageviewer.registration.RegistrationId;
 import com.quigglesproductions.secureimageviewer.ui.EnhancedMainMenuActivity;
-import com.quigglesproductions.secureimageviewer.ui.MainMenuActivity;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
 import com.quigglesproductions.secureimageviewer.ui.filesend.FileSendActivity;
 import com.quigglesproductions.secureimageviewer.ui.login.BiometricAuthenticationException;
 import com.quigglesproductions.secureimageviewer.ui.login.EnhancedLoginActivity;
-import com.quigglesproductions.secureimageviewer.ui.preferences.WebSettingsActivity;
 
-import net.openid.appauth.AuthState;
 import net.openid.appauth.AuthorizationException;
 import net.openid.appauth.AuthorizationServiceConfiguration;
 
@@ -72,7 +67,6 @@ import org.acra.ACRA;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Locale;
 
 public class NewSplashScreenActivity extends SecureActivity {
     public static final String MAIN_CHANNEL_ID = "MainChannel";

@@ -37,13 +37,6 @@
         <activity android:name=".ui.EnhancedMainMenuActivity"
             android:theme="@style/Theme.SecureImageViewer.NoActionBar"/>
         <activity
-            android:name=".ui.onlinefolderlist.OnlineFolderListActivity"
-            android:label="@string/app_name" >
-            <meta-data
-                android:name="android.app.default_searchable"
-                android:value=".ui.onlinesearchview.OnlineSearchViewActivity" />
-        </activity>
-        <activity
             android:name=".login.LoginActivity"
             android:noHistory="true"
             android:theme="@style/Theme.SecureImageViewer.NoActionBar" />
@@ -76,83 +69,9 @@
                 android:resource="@xml/searchable" />
         </activity>
         <activity
-            android:name=".ui.preferences.SettingsActivity"
-            android:label="@string/title_activity_settings" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.MainMenuActivity" />
-        </activity>
-        <activity
-            android:name=".ui.preferences.SsoSettingsActivity"
-            android:label="SSO Settings"
-            android:launchMode="singleTask" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.preferences.NetworkSettingsActivity" />
-        </activity>
-        <activity
-            android:name=".ui.preferences.NetworkSettingsActivity"
-            android:label="Network Settings"
-            android:launchMode="singleTask" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.preferences.SettingsActivity" />
-        </activity>
-        <activity
-            android:name=".ui.preferences.AboutSettingsActivity"
-            android:label="Network Settings"
-            android:launchMode="singleTask" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.preferences.SettingsActivity" />
-        </activity>
-        <activity
-            android:name=".ui.preferences.WebSettingsActivity"
-            android:label="Web Api Settings"
-            android:launchMode="singleTask" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.preferences.NetworkSettingsActivity" />
-        </activity>
-        <activity
             android:name=".ui.preferences.StorageSettingsActivity"
             android:label="Web Api Settings"
             android:launchMode="singleTask" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.preferences.SettingsActivity" />
-        </activity>
-        <activity
-            android:name=".ui.preferences.DisplaySettingsActivity"
-            android:label="Display Settings"
-            android:launchMode="singleTask" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.preferences.SettingsActivity" />
-        </activity>
-        <activity
-            android:name=".ui.preferences.SecuritySettingsActivity"
-            android:label="Security Settings"
-            android:launchMode="singleTask" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.preferences.SettingsActivity" />
-        </activity>
-        <activity
-            android:name=".ui.preferences.DevPreferencesActivity"
-            android:label="Dev Settings"
-            android:launchMode="singleTask" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.preferences.SettingsActivity" />
-        </activity>
-        <activity
-            android:name=".ui.preferences.DatabaseSettingsActivity"
-            android:label="Web Api Settings"
-            android:launchMode="singleTask" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.preferences.SettingsActivity" />
         </activity>
         <activity android:name=".barcodescanner.BarcodeCaptureActivity" />
         <activity
@@ -166,11 +85,11 @@
             android:name=".ui.enhancedfolderviewer.EnhancedFolderViewerActivity"
             android:launchMode="singleTask" />
         <activity
-            android:name=".ui.enhancedimageviewer.FileViewActivity"
+            android:name=".ui.enhancedfileviewer.FileViewActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
             android:launchMode="singleTask"
             android:theme="@style/FileViewerTheme" />
-        <activity android:name=".ui.enhancedimageviewer.EnhancedFileViewActivity"
+        <activity android:name=".ui.enhancedfileviewer.EnhancedFileViewActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
             android:launchMode="singleTask"
             android:theme="@style/FileViewerTheme" />

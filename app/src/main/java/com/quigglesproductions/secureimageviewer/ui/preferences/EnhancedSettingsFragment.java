@@ -1,8 +1,12 @@
 package com.quigglesproductions.secureimageviewer.ui.preferences;
 
+import static androidx.navigation.Navigation.findNavController;
+
 import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.navigation.NavDirections;
+import androidx.navigation.Navigation;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceFragment;
@@ -10,6 +14,7 @@ import androidx.preference.PreferenceFragmentCompat;
 
 import com.quigglesproductions.secureimageviewer.BuildConfig;
 import com.quigglesproductions.secureimageviewer.R;
+import com.quigglesproductions.secureimageviewer.ui.enhancedfolderviewer.EnhancedFolderViewerFragmentDirections;
 
 public class EnhancedSettingsFragment extends PreferenceFragmentCompat {
     @Override
@@ -19,8 +24,8 @@ public class EnhancedSettingsFragment extends PreferenceFragmentCompat {
         networkPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                Intent intent = new Intent(getContext(),NetworkSettingsActivity.class);
-                startActivity(intent);
+                NavDirections action = EnhancedSettingsFragmentDirections.actionNavSettingsFragmentToNetworkSettingsFragment();
+                findNavController(getView()).navigate(action);
                 return true;
             }
         });
@@ -28,8 +33,8 @@ public class EnhancedSettingsFragment extends PreferenceFragmentCompat {
         databasePreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                Intent intent = new Intent(getContext(),DatabaseSettingsActivity.class);
-                startActivity(intent);
+                NavDirections action = EnhancedSettingsFragmentDirections.actionNavSettingsFragmentToDatabaseSettingsFragment();
+                findNavController(getView()).navigate(action);
                 return true;
             }
         });
@@ -37,8 +42,8 @@ public class EnhancedSettingsFragment extends PreferenceFragmentCompat {
         displayPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                Intent intent = new Intent(getContext(),DisplaySettingsActivity.class);
-                startActivity(intent);
+                NavDirections action = EnhancedSettingsFragmentDirections.actionNavSettingsFragmentToDisplaySettingsFragment();
+                findNavController(getView()).navigate(action);
                 return true;
             }
         });
@@ -55,8 +60,8 @@ public class EnhancedSettingsFragment extends PreferenceFragmentCompat {
         securityPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                Intent intent = new Intent(getContext(),SecuritySettingsActivity.class);
-                startActivity(intent);
+                NavDirections action = EnhancedSettingsFragmentDirections.actionNavSettingsFragmentToSecuritySettingsFragment();
+                findNavController(getView()).navigate(action);
                 return true;
             }
         });
@@ -64,8 +69,8 @@ public class EnhancedSettingsFragment extends PreferenceFragmentCompat {
         aboutPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                Intent intent = new Intent(getContext(),AboutSettingsActivity.class);
-                startActivity(intent);
+                NavDirections action = EnhancedSettingsFragmentDirections.actionNavSettingsFragmentToAboutSettingsFragment();
+                findNavController(getView()).navigate(action);
                 return true;
             }
         });
@@ -78,8 +83,8 @@ public class EnhancedSettingsFragment extends PreferenceFragmentCompat {
         devSettingsPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                Intent intent = new Intent(getContext(),DevPreferencesActivity.class);
-                startActivity(intent);
+                NavDirections action = EnhancedSettingsFragmentDirections.actionNavSettingsFragmentToDevSettingsFragment();
+                findNavController(getView()).navigate(action);
                 return true;
             }
         });
