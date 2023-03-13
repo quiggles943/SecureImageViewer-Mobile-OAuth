@@ -1,5 +1,7 @@
 package com.quigglesproductions.secureimageviewer.ui.preferences;
 
+import static androidx.navigation.Navigation.findNavController;
+
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -8,6 +10,7 @@ import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.navigation.NavDirections;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
@@ -51,7 +54,8 @@ public class WebSettingsFragment extends PreferenceFragmentCompat {
         endpointPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.settings,new WebEndpointsFragment(),"webEndpointFrag").addToBackStack(null).commit();
+                NavDirections action = WebSettingsFragmentDirections.actionWebSettingsFragmentToWebEndpointsFragment();
+                findNavController(getView()).navigate(action);
                 return false;
             }
         });

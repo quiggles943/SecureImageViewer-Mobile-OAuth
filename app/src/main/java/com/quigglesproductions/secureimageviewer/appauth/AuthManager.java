@@ -482,12 +482,16 @@ public class AuthManager implements IAuthManager{
     }
 
     public Date getAccessTokenExpirationDate() {
+        if(authState == null)
+            return null;
         if(authState.getAccessTokenExpirationTime() == null)
             return null;
         return new Date(authState.getAccessTokenExpirationTime());
     }
 
     public Date getRefreshExpirationDate() {
+        if(authState == null)
+            return null;
         return authState.getRefreshTokenExpirationDate();
     }
 

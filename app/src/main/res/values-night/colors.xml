@@ -3,4 +3,11 @@
     <color name="text_color_button">#FFFFFF</color>
 
     <color name="underline">#F9FAFF</color>
+
+    <color name="imagebutton_greyout_filter">#CC272727</color>
+    <color name="progressBar_default_tint">@color/purple_100</color>
+
+    <color name="navigationHeader_gradient_start">@color/purple_100</color>
+    <color name="navigationHeader_gradient_middle">@color/purple_200</color>
+    <color name="navigationHeader_gradient_end">@color/purple_500</color>
 </resources>

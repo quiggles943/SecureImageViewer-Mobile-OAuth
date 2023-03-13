@@ -77,5 +77,8 @@
     <string name="device_authenticate_error">Unable to authenticate device</string>
     <string name="online_authentication_required">Online authentication required</string>
     <string name="title_activity_device_login">DeviceLoginActivity</string>
+    <string name="connectivity_status_header">Connectivity Status: </string>
+    <string name="connectivity_status_offline">Offline</string>
+    <string name="connectivity_status_online">Online</string>
 
 </resources>

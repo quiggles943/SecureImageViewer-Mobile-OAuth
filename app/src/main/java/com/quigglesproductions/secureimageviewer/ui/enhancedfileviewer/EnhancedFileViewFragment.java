@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowInsets;
+import android.view.WindowInsetsController;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -12,7 +14,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.OptIn;
 import androidx.core.view.ActionProvider;
+import androidx.core.view.WindowCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.media3.common.util.UnstableApi;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
@@ -37,6 +41,7 @@ public class EnhancedFileViewFragment extends Fragment implements IFileViewer {
     EnhancedFile selectedFile;
     int currentPagerSlopMultiplier;
     boolean hasStartPosition;
+    EnhancedFileViewerViewModel viewModel;
     public EnhancedFileViewFragment(){
         hasStartPosition = false;
     }
@@ -48,6 +53,7 @@ public class EnhancedFileViewFragment extends Fragment implements IFileViewer {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        viewModel = new ViewModelProvider(this).get(EnhancedFileViewerViewModel.class);
         return inflater.inflate(R.layout.fragment_file_pager, container, false);
     }
 
@@ -164,6 +170,39 @@ public class EnhancedFileViewFragment extends Fragment implements IFileViewer {
                     topLayout.setVisibility(View.INVISIBLE);
             }
         });
+    }
+
+    private void hideSystemBars(){
+        View decorView =  requireActivity().getWindow().getDecorView();
+        WindowInsetsController windowInsetsController = decorView.getWindowInsetsController();
+        if (windowInsetsController == null) {
+            return;
+        }
+        // Configure the behavior of the hidden system bars
+        windowInsetsController.setSystemBarsBehavior(
+                WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        );
+        // Hide both the status bar and the navigation bar
+        windowInsetsController.hide(WindowInsets.Type.systemBars());
+        WindowCompat.setDecorFitsSystemWindows(requireActivity().getWindow(),false);
+        viewModel.getSystemBarsHidden().setValue(true);
+    }
+
+    private void showSystemBars(){
+        View decorView =  requireActivity().getWindow().getDecorView();
+        WindowInsetsController windowInsetsController = decorView.getWindowInsetsController();
+        if (windowInsetsController == null) {
+            return;
+        }
+        // Configure the behavior of the hidden system bars
+        //windowInsetsController.setSystemBarsBehavior(
+        //        WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        //);
+        // Hide both the status bar and the navigation bar
+        windowInsetsController.show(WindowInsets.Type.systemBars());
+        WindowCompat.setDecorFitsSystemWindows(requireActivity().getWindow(),true);
+        viewModel.getSystemBarsHidden().setValue(false);
+
     }
 
     @Override

@@ -88,6 +88,7 @@ public class NewSplashScreenActivity extends SecureActivity {
         progressBar.setProgressTintList(ColorStateList.valueOf(Color.CYAN));
         progressBar.setProgressTintMode(PorterDuff.Mode.MULTIPLY);
         progressBar.setIndeterminate(true);
+        setProgressBarUpdate(false,ProgressBarState.INPROGRESS);
         fingerprintIcon = findViewById(R.id.splash_fingerprint_icon);
         infoTextView.setText("Starting up");
         context = this;
@@ -266,11 +267,11 @@ public class NewSplashScreenActivity extends SecureActivity {
         }
         switch (state){
             case INPROGRESS:
-                progressBar.setProgressTintList(ColorStateList.valueOf(Color.CYAN));
+                progressBar.setProgressTintList(ColorStateList.valueOf(getBaseContext().getResources().getColor(R.color.progressBar_default_tint)));
                 progressBar.setProgressTintMode(PorterDuff.Mode.MULTIPLY);
                 break;
             case GOOD:
-                progressBar.setProgressTintList(ColorStateList.valueOf(Color.CYAN));
+                progressBar.setProgressTintList(ColorStateList.valueOf(getBaseContext().getResources().getColor(R.color.progressBar_default_tint)));
                 progressBar.setProgressTintMode(PorterDuff.Mode.MULTIPLY);
                 break;
             case WAITING:

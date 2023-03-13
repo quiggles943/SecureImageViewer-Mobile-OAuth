@@ -64,6 +64,7 @@ public class EnhancedFolderListFragment extends Fragment {
     public static final String STATE_ONLINE = "online";
     public static final String STATE_OFFLINE = "offline";
     private Menu myMenu;
+    private String state;
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -76,7 +77,7 @@ public class EnhancedFolderListFragment extends Fragment {
         EnhancedFolderListViewModel enhancedFolderListViewModel = new ViewModelProvider(this).get(EnhancedFolderListViewModel.class);
         binding = FragmentFolderListBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
-        String state = EnhancedFolderListFragmentArgs.fromBundle(getArguments()).getState();
+        state = EnhancedFolderListFragmentArgs.fromBundle(getArguments()).getState();
         final RecyclerView recyclerView = binding.fragmentFolderRecyclerView;
         int columnCount = getResources().getInteger(R.integer.column_count_folderlist);
         final GridLayoutManager layoutManager = new GridLayoutManager(getContext(),columnCount);
@@ -175,7 +176,15 @@ public class EnhancedFolderListFragment extends Fragment {
 
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
-        inflater.inflate(R.menu.menu_item_download_selection, menu);
+        switch (state){
+            case STATE_OFFLINE:
+                inflater.inflate(R.menu.menu_offline_folder, menu);
+                break;
+            case STATE_ONLINE:
+                inflater.inflate(R.menu.menu_item_download_selection, menu);
+                break;
+        }
+
         myMenu = menu;
     }
 
@@ -189,6 +198,13 @@ public class EnhancedFolderListFragment extends Fragment {
                 NavDirections action = EnhancedFolderListFragmentDirections.actionEnhancedFolderListFragmentToEnhancedFolderViewerFragment();
                 Navigation.findNavController(binding.getRoot()).navigate(action);
                 break;
+            case R.id.menu_download_selection_btn:
+                NotificationManager.getInstance().showSnackbar("Downloading "+recyclerAdapter.getSelectedCount()+" folders",Snackbar.LENGTH_SHORT);
+                recyclerAdapter.setMultiSelect(false);
+                break;
+            case R.id.offline_folder_sync_activate:
+                //TODO add sync functionality
+                return true;
             default:
                 return false;
         }

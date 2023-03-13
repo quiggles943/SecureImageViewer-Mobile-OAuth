@@ -155,7 +155,11 @@
     <fragment
         android:id="@+id/webSettingsFragment"
         android:name="com.quigglesproductions.secureimageviewer.ui.preferences.WebSettingsFragment"
-        android:label="WebSettingsFragment" />
+        android:label="WebSettingsFragment" >
+        <action
+            android:id="@+id/action_webSettingsFragment_to_webEndpointsFragment"
+            app:destination="@id/webEndpointsFragment" />
+    </fragment>
     <fragment
         android:id="@+id/ssoInfoFragment"
         android:name="com.quigglesproductions.secureimageviewer.ui.preferences.SsoInfoFragment"
@@ -164,4 +168,8 @@
         android:id="@+id/ssoTokenFragment"
         android:name="com.quigglesproductions.secureimageviewer.ui.preferences.SsoTokenFragment"
         android:label="SsoTokenFragment" />
+    <fragment
+        android:id="@+id/webEndpointsFragment"
+        android:name="com.quigglesproductions.secureimageviewer.ui.preferences.WebEndpointsFragment"
+        android:label="WebEndpointsFragment" />
 </navigation>

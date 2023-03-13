@@ -9,6 +9,7 @@ import android.database.sqlite.SQLiteDatabase;
 import androidx.annotation.NonNull;
 
 import com.quigglesproductions.secureimageviewer.database.DatabaseHelper;
+import com.quigglesproductions.secureimageviewer.enums.DeviceInfoKey;
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedArtist;
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedCategory;
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedSubject;
@@ -23,7 +24,9 @@ import com.quigglesproductions.secureimageviewer.models.file.FileModel;
 import com.quigglesproductions.secureimageviewer.utils.ListUtils;
 
 import java.io.File;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
@@ -156,12 +159,16 @@ public class EnhancedDatabaseHandler {
             values.put(EnhancedDatabaseBuilder.Folders.STATUS, ((EnhancedDatabaseFolder)folder).getStatus().toString());
         }
         if(getFolderByOnlineId(folder.getOnlineId()) == null) {
+            setLastUpdateTime(LocalDateTime.now());
             return (int) database.insertWithOnConflict(EnhancedDatabaseBuilder.Folders.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_IGNORE);
         }
         else{
             database.update(EnhancedDatabaseBuilder.Folders.TABLE_NAME, values, "OnlineId=?", new String[]{folder.getOnlineId() + ""});  // number 1 is the _id here, update to variable for your code
+            setLastUpdateTime(LocalDateTime.now());
             return -1;
         }
+
+
     }
 
     public EnhancedDatabaseFile insertFile(EnhancedFile file, int folderId){
@@ -183,6 +190,7 @@ public class EnhancedDatabaseHandler {
         }
         if(file.metadata != null)
             insertFileMetadata(file.metadata,databaseFile.getId());
+        setLastUpdateTime(LocalDateTime.now());
         return databaseFile;
     }
 
@@ -780,5 +788,58 @@ public class EnhancedDatabaseHandler {
     public void deleteFolder(EnhancedDatabaseFolder folder) {
         database.delete(EnhancedDatabaseBuilder.Folders.TABLE_NAME,EnhancedDatabaseBuilder.Folders._ID+" = ?",new String[]{String.valueOf(folder.getId())});
 
+    }
+
+    public void setDeviceInfoValue(DeviceInfoKey key, String value){
+        ContentValues values = new ContentValues();
+        values.put(EnhancedDatabaseBuilder.DeviceInfo.INFO_KEY,key.name());
+        values.put(EnhancedDatabaseBuilder.DeviceInfo.INFO_VALUE,value);
+        database.insertWithOnConflict(EnhancedDatabaseBuilder.DeviceInfo.TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_IGNORE);
+    }
+
+    public String getDeviceInfoByKey(DeviceInfoKey key){
+        // How you want the results sorted in the resulting Cursor
+        String selection = EnhancedDatabaseBuilder.DeviceInfo.INFO_KEY+" = ?";
+        String[] selectionArgs = { key.name()+"" };
+        Cursor cursor = database.query(
+                EnhancedDatabaseBuilder.DeviceInfo.TABLE_NAME,   // The table to query
+                null,             // The array of columns to return (pass null to get all)
+                selection,              // The columns for the WHERE clause
+                selectionArgs,          // The values for the WHERE clause
+                null,                   // don't group the rows
+                null,                   // don't filter by row groups
+                null               // The sort order
+        );
+        int count = cursor.getCount();
+        if(cursor.getCount() > 0) {
+            while (cursor.moveToNext()) {
+                return cursor.getString(cursor.getColumnIndexOrThrow(EnhancedDatabaseBuilder.DeviceInfo.INFO_VALUE));
+            }
+        }
+        return null;
+    }
+
+    public LocalDateTime getLastUpdateTime() {
+        String dateString = getDeviceInfoByKey(DeviceInfoKey.DEVICE_LAST_UPDATE);
+        if(dateString != null) {
+            DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
+            return LocalDateTime.parse(dateString, formatter);
+        }
+        else
+            return null;
+    }
+    public void setLastUpdateTime(LocalDateTime localDateTime){
+        String dateString = localDateTime.format(DateTimeFormatter.ISO_DATE_TIME);
+        setDeviceInfoValue(DeviceInfoKey.DEVICE_LAST_UPDATE,dateString);
+    }
+
+    public LocalDateTime getLastOnlineSyncTime() {
+        String dateString = getDeviceInfoByKey(DeviceInfoKey.DEVICE_LAST_ONLINE_SYNC);
+        if(dateString != null) {
+            DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
+            return LocalDateTime.parse(dateString, formatter);
+        }
+        else
+            return null;
     }
 }

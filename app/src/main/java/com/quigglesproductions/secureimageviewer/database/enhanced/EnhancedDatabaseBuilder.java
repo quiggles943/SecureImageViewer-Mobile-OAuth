@@ -7,7 +7,7 @@ import android.provider.BaseColumns;
 
 public class EnhancedDatabaseBuilder extends SQLiteOpenHelper {
 
-    public static final int DATABASE_VERSION = 1;
+    public static final int DATABASE_VERSION = 3;
     public static final String DATABASE_NAME = "siv.db";
 
     public EnhancedDatabaseBuilder(Context context) {
@@ -25,6 +25,7 @@ public class EnhancedDatabaseBuilder extends SQLiteOpenHelper {
         db.execSQL(FileCategories.SQL_CREATE_ENTRIES);
         db.execSQL(FileSubjects.SQL_CREATE_ENTRIES);
         db.execSQL(FileVarients.SQL_CREATE_ENTRIES);
+        db.execSQL(DeviceInfo.SQL_CREATE_ENTRIES);
     }
 
     @Override
@@ -38,6 +39,7 @@ public class EnhancedDatabaseBuilder extends SQLiteOpenHelper {
         db.execSQL(FileCategories.SQL_DELETE_ENTRIES);
         db.execSQL(FileSubjects.SQL_DELETE_ENTRIES);
         db.execSQL(FileVarients.SQL_DELETE_ENTRIES);
+        db.execSQL(DeviceInfo.SQL_DELETE_ENTRIES);
         onCreate(db);
     }
 
@@ -218,5 +220,21 @@ public class EnhancedDatabaseBuilder extends SQLiteOpenHelper {
 
         private static final String SQL_DELETE_ENTRIES =
                 "DROP TABLE IF EXISTS " + FileVarients.TABLE_NAME;
+    }
+
+    public static class DeviceInfo implements BaseColumns {
+        public static final String TABLE_NAME = "DeviceInfo";
+        public static final String INFO_KEY = "Key";
+        public static final String INFO_VALUE = "Value";
+
+        private static final String SQL_CREATE_ENTRIES =
+                "CREATE TABLE " + DeviceInfo.TABLE_NAME + " (" +
+                        DeviceInfo._ID + " INTEGER PRIMARY KEY," +
+                        DeviceInfo.INFO_KEY + " TEXT," +
+                        DeviceInfo.INFO_VALUE + " TEXT,"+
+                        "UNIQUE("+INFO_KEY+") ON CONFLICT REPLACE)";
+
+        private static final String SQL_DELETE_ENTRIES =
+                "DROP TABLE IF EXISTS " + DeviceInfo.TABLE_NAME;
     }
 }
