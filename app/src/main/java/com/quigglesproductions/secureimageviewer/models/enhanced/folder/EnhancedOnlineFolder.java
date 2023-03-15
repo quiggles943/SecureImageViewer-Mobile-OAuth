@@ -7,6 +7,7 @@ import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.Onli
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedOnlineFile;
+import com.quigglesproductions.secureimageviewer.ui.enhancedfolderviewer.FolderOrigin;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -83,6 +84,11 @@ public class EnhancedOnlineFolder extends EnhancedFolder implements IRemoteFolde
                 files.sort(Comparator.comparing(EnhancedFile::getName));
                 break;
         }
+    }
+
+    @Override
+    public FolderOrigin getFolderOrigin() {
+        return FolderOrigin.ONLINE;
     }
 
     @Override

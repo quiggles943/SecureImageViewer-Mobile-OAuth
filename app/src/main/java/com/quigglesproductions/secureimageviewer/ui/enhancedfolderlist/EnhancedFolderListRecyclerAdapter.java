@@ -117,6 +117,20 @@ public class EnhancedFolderListRecyclerAdapter extends RecyclerView.Adapter<Enha
         notifyDataSetChanged();
     }
 
+    public List<EnhancedFolder> getSelectedFolders() {
+        List<EnhancedFolder> result = new ArrayList<>();
+        for (Integer pos : getSelectedPositions())
+            result.add(getItem(pos));
+
+        return result;
+    }
+
+    public void removeFolder(EnhancedFolder folder) {
+        int position = folders.indexOf(folder);
+        folders.remove(position);
+        notifyItemRemoved(position);
+    }
+
     public static class ViewHolder extends RecyclerView.ViewHolder{
         private final ImageView imageView;
         private final TextView folderName;

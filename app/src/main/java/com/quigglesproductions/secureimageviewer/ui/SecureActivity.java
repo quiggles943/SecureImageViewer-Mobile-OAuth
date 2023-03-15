@@ -29,7 +29,7 @@ import com.quigglesproductions.secureimageviewer.managers.ViewerConnectivityMana
 import com.quigglesproductions.secureimageviewer.models.LoginModel;
 import com.quigglesproductions.secureimageviewer.models.WebServerConfig;
 import com.quigglesproductions.secureimageviewer.ui.login.EnhancedLoginActivity;
-import com.quigglesproductions.secureimageviewer.ui.login.LoginActivity;
+import com.quigglesproductions.secureimageviewer.ui.login.ReauthenticateActivity;
 import com.quigglesproductions.secureimageviewer.ui.splash.NewSplashScreenActivity;
 
 import net.openid.appauth.AuthorizationException;
@@ -100,7 +100,7 @@ public class SecureActivity extends AppCompatActivity {
             }
         });
         if(!SecurityManager.getInstance().isUserAuthenticated()){
-            if(!LoginActivity.class.isInstance(this) && !NewSplashScreenActivity.class.isInstance(this) && !EnhancedLoginActivity.class.isInstance(this)){
+            if(!ReauthenticateActivity.class.isInstance(this) && !NewSplashScreenActivity.class.isInstance(this) && !EnhancedLoginActivity.class.isInstance(this)){
                 authenticateUser();
             }
         }
@@ -133,7 +133,7 @@ public class SecureActivity extends AppCompatActivity {
             }
         });
         if(!SecurityManager.getInstance().isUserAuthenticated()){
-            if(!LoginActivity.class.isInstance(this) && !NewSplashScreenActivity.class.isInstance(this) && !EnhancedLoginActivity.class.isInstance(this)){
+            if(!ReauthenticateActivity.class.isInstance(this) && !NewSplashScreenActivity.class.isInstance(this) && !EnhancedLoginActivity.class.isInstance(this)){
                 authenticateUser();
             }
         }
@@ -171,8 +171,8 @@ public class SecureActivity extends AppCompatActivity {
 
     private void authenticateUser(){
         Intent passthroughIntent = getIntent();
-        Intent loginIntent = new Intent(this, LoginActivity.class);
-        loginIntent.putExtra(LoginActivity.EXTRA_PASSTHROUGH_INTENT, passthroughIntent);
+        Intent loginIntent = new Intent(this, ReauthenticateActivity.class);
+        loginIntent.putExtra(ReauthenticateActivity.EXTRA_PASSTHROUGH_INTENT, passthroughIntent);
         startActivityForResult(loginIntent,SecurityManager.LOGIN);
     }
 
@@ -230,7 +230,7 @@ public class SecureActivity extends AppCompatActivity {
             case SecurityManager.LOGIN:
                 if(data != null){
                     LoginModel model = data.getParcelableExtra(SecurityManager.LoginObject);
-                    Intent passthrough = data.getParcelableExtra(LoginActivity.EXTRA_PASSTHROUGH_INTENT);
+                    Intent passthrough = data.getParcelableExtra(ReauthenticateActivity.EXTRA_PASSTHROUGH_INTENT);
                     if(model != null){
                         SecurityManager.getInstance().setLogin(model);
                         //startActivity(passthrough);

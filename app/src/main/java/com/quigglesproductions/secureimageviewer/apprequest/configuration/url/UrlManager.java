@@ -13,6 +13,7 @@ public class UrlManager {
     private String subjectEndpoint;
     private String catagoryEndpoint;
     private String artistEndpoint;
+    private String serverStatusEndpoint;
 
     public static final String metadataEndpointDefault = "/api/v1/info/metadata";
 
@@ -27,6 +28,7 @@ public class UrlManager {
             subjectEndpoint = endpoints.subject_endpoint;
             catagoryEndpoint = endpoints.catagory_endpoint;
             artistEndpoint = endpoints.artist_endpoint;
+            serverStatusEndpoint = endpoints.serverInfoEndpoint;
         }
     }
 

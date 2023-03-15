@@ -15,7 +15,7 @@ import com.quigglesproductions.secureimageviewer.apprequest.downloaders.FileCont
 import com.quigglesproductions.secureimageviewer.apprequest.downloaders.FileModelUploadTask;
 import com.quigglesproductions.secureimageviewer.apprequest.downloaders.FolderDownloadTask;
 import com.quigglesproductions.secureimageviewer.apprequest.requests.ArtistListRequest;
-import com.quigglesproductions.secureimageviewer.apprequest.requests.CatagoryListRequest;
+import com.quigglesproductions.secureimageviewer.apprequest.requests.CategoryListRequest;
 import com.quigglesproductions.secureimageviewer.apprequest.requests.FileMetadataRequest;
 import com.quigglesproductions.secureimageviewer.apprequest.requests.FolderFilesRequest;
 import com.quigglesproductions.secureimageviewer.apprequest.requests.FolderListRequest;
@@ -26,6 +26,9 @@ import com.quigglesproductions.secureimageviewer.database.enhanced.EnhancedDatab
 import com.quigglesproductions.secureimageviewer.managers.NotificationManager;
 import com.quigglesproductions.secureimageviewer.models.ArtistModel;
 import com.quigglesproductions.secureimageviewer.models.CatagoryModel;
+import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedArtist;
+import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedCategory;
+import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedSubject;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedOnlineFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedOnlineFolder;
@@ -51,9 +54,17 @@ public class RequestService {
         uiThreadPoster = new UiThreadPoster();
     }
 
-    public void getFolders(Context context,RequestManager.RequestResultCallback<ArrayList<EnhancedOnlineFolder>,Exception> resultCallback)
+    private Context getRootContext(){
+        return context;
+    }
+
+    /**
+     * Retrieves all the folders from the server
+     * @param resultCallback The callback used to return the folders from the background thread
+     */
+    public void getFolders(RequestManager.RequestResultCallback<ArrayList<EnhancedOnlineFolder>,Exception> resultCallback)
     {
-        FolderListRequest request = new FolderListRequest(context);
+        FolderListRequest request = new FolderListRequest(getRootContext());
         try{
             request.getFolderList(new ItemListRetrievalCallback<EnhancedOnlineFolder>() {
                 @Override
@@ -68,6 +79,13 @@ public class RequestService {
             resultCallback.RequestResultRetrieved(null,exception);
         }
     }
+
+    /**
+     * Begins the process of downloading the folder specified by the provided {@link DownloadRequest}
+     * @param request The request containing the folder to download
+     * @param accessToken The access token used to request the folder from the server
+     * @param resultCallback The callback used to retrieve the completed download from the background thread
+     */
     public void getFolderForDownload(DownloadRequest request, String accessToken, RequestManager.RequestResultCallback<DownloadRequest,ArrayList<VolleyError>> resultCallback){
         request.setStatus(DownloadRequest.RequestStatus.IN_PROGRESS);
         FolderDownloadTask.getFolderForDownload(context, (EnhancedFolder) request.object, accessToken, new DownloadCompleteCallback<EnhancedFolder, ArrayList<VolleyError>>() {
@@ -87,6 +105,12 @@ public class RequestService {
             }
         });
     }
+    /**
+     * Retrieves recent files from the server
+     * @param count The number of files to retrieve
+     * @param offset The number of files to skip before starting
+     * @param resultCallback The callback to return the files from the background thread
+     */
     public void getRecentFiles(int count, int offset, RequestManager.RequestResultCallback<RecentFileResult<EnhancedOnlineFile>,Exception> resultCallback){
         RecentFilesRequest recentFilesRequest = new RecentFilesRequest(context);
         recentFilesRequest.setFileCount(count);
@@ -106,27 +130,32 @@ public class RequestService {
 
     }
 
-    public void getRecentFiles(Context context,int count, int offset, RequestManager.RequestResultCallback<ArrayList<EnhancedOnlineFile>,Exception> resultCallback){
-        RecentFilesRequest recentFilesRequest = new RecentFilesRequest(context);
-        recentFilesRequest.setFileCount(count);
-        recentFilesRequest.setOffset(offset);
-        try{
-            recentFilesRequest.getRecentFiles(new ItemListRetrievalCallback<EnhancedOnlineFile>() {
-                @Override
-                public void ItemsRetrieved(ArrayList<EnhancedOnlineFile> recentFiles, Exception exc) {
-                    resultCallback.RequestResultRetrieved(recentFiles,exc);
-                }
-            });
-        }catch (RequestServiceNotConfiguredException exception){
-            resultCallback.RequestResultRetrieved(null,exception);
-        }
-
-    }
-
+    /**
+     * Retrieve the {@link RequestServiceConfiguration} for the request service or null if not available
+     * @return
+     */
     public RequestServiceConfiguration getRequestServiceConfiguration() {
         return configuration;
     }
 
+    /**
+     * Retrieves the {@link RequestServiceConfiguration} for the request service. Throws a {@link RequestServiceNotConfiguredException if not available}
+     * @return
+     * @throws RequestServiceNotConfiguredException
+     */
+    public RequestServiceConfiguration requireRequestServiceConfiguration() throws RequestServiceNotConfiguredException {
+        if(configuration == null)
+            throw new RequestServiceNotConfiguredException();
+        else
+            return configuration;
+    }
+
+    /**
+     * Retrieve the files for a specified folder on the server asynchronously and return them sorted by the {@link SortType} specified
+     * @param folderId The id of the folder whose files to retrieve
+     * @param resultCallback Callback to return the files from the background thread
+     * @param sortType The order to sort the returned files by
+     */
     public void getFolderFiles(int folderId, RequestManager.RequestResultCallback<ArrayList<EnhancedOnlineFile>,Exception> resultCallback, SortType sortType) {
         FolderFilesRequest request = new FolderFilesRequest(context);
         request.setSortType(sortType);
@@ -142,12 +171,14 @@ public class RequestService {
         }
     }
 
-    public void uploadFile(String accessToken,FileModel item,RequestManager.RequestResultCallback<FileModel,Exception> requestCallback) {
+    /*public void uploadFile(String accessToken,FileModel item,RequestManager.RequestResultCallback<FileModel,Exception> requestCallback) {
         if(item.getOnlineId() == 0) {
             FileModelUploadTask modelUploadTask = new FileModelUploadTask(context, accessToken, new RequestManager.RequestResultCallback<FileModel, Exception>() {
                 @Override
                 public void RequestResultRetrieved(FileModel result, Exception exception) {
                     if (exception == null) {
+                        EnhancedDatabaseHandler handler = new EnhancedDatabaseHandler(getRootContext());
+                        handler.updateFileOnlineId(result);
                         DatabaseHandler.getInstance().updateFileOnlineId(result);
                         FileContentUploadTask contentUploadTask = new FileContentUploadTask(context, accessToken, new RequestManager.RequestResultCallback<FileModel, Exception>() {
                             @Override
@@ -185,10 +216,10 @@ public class RequestService {
                 requestCallback.RequestResultRetrieved(result,exception);
             }
         });
-        uploadTask.execute(item);*/
-    }
+        uploadTask.execute(item);
+    }*/
 
-    public void uploadFile(String accessToken,UploadRequest<FileModel> item,RequestManager.RequestResultCallback<FileModel,Exception> requestCallback) {
+    /*public void uploadFile(String accessToken,UploadRequest<FileModel> item,RequestManager.RequestResultCallback<FileModel,Exception> requestCallback) {
         FileModel fileModel = item.object;
         if(fileModel.getOnlineId() == 0) {
             item.setStatus(UploadRequest.RequestStatus.INFO_SENDING);
@@ -231,22 +262,18 @@ public class RequestService {
             });
             contentUploadTask.execute(fileModel);
         }
-    }
+    }*/
 
-    public void getArtists(Context context,String accessToken,RequestManager.RequestResultCallback<ArrayList<ArtistModel>,Exception> resultCallback){
-        /*ArtistDownloadTask artistDownloadTask = new ArtistDownloadTask(accessToken, new DownloadCompleteCallback<ArrayList<ArtistModel>, Exception>() {
-            @Override
-            public void downloadComplete(ArrayList<ArtistModel> result, Exception error) {
-                resultCallback.RequestResultRetrieved(result, error);
-            }
-        });
-        artistDownloadTask.execute();*/
-
+    /**
+     * Retrieve the list of artists from the server
+     * @param resultCallback Callback to return the artist list from the background thread
+     */
+    public void getArtists(RequestManager.RequestResultCallback<ArrayList<EnhancedArtist>,Exception> resultCallback){
         ArtistListRequest request = new ArtistListRequest();
         try {
-            request.getArtists(context, new ItemListRetrievalCallback<ArtistModel>() {
+            request.getArtists(getRootContext(), new ItemListRetrievalCallback<EnhancedArtist>() {
                 @Override
-                public void ItemsRetrieved(ArrayList<ArtistModel> items, Exception exception) {
+                public void ItemsRetrieved(ArrayList<EnhancedArtist> items, Exception exception) {
                     resultCallback.RequestResultRetrieved(items, exception);
                 }
             });
@@ -254,20 +281,16 @@ public class RequestService {
             resultCallback.RequestResultRetrieved(null,exception);
         }
     }
-
-    public void getSubjects(Context context,String accessToken,RequestManager.RequestResultCallback<ArrayList<SubjectModel>,Exception> resultCallback){
-        /*SubjectDownloadTask downloadTask = new SubjectDownloadTask(accessToken, new DownloadCompleteCallback<ArrayList<SubjectModel>, Exception>() {
-            @Override
-            public void downloadComplete(ArrayList<SubjectModel> result, Exception error) {
-                resultCallback.RequestResultRetrieved(result,error);
-            }
-        });
-        downloadTask.execute();*/
+    /**
+     * Retrieve the list of subjects from the server
+     * @param resultCallback Callback to return the subject list from the background thread
+     */
+    public void getSubjects(RequestManager.RequestResultCallback<ArrayList<EnhancedSubject>,Exception> resultCallback){
         SubjectListRequest request = new SubjectListRequest();
         try {
-            request.getSubjects(context,new ItemListRetrievalCallback<SubjectModel>() {
+            request.getSubjects(getRootContext(),new ItemListRetrievalCallback<EnhancedSubject>() {
                 @Override
-                public void ItemsRetrieved(ArrayList<SubjectModel> items, Exception exception) {
+                public void ItemsRetrieved(ArrayList<EnhancedSubject> items, Exception exception) {
                     resultCallback.RequestResultRetrieved(items,exception);
                 }
             });
@@ -275,20 +298,16 @@ public class RequestService {
             resultCallback.RequestResultRetrieved(null,exception);
         }
     }
-
-    public void getCatagories(Context context,String accessToken, RequestManager.RequestResultCallback<ArrayList<CatagoryModel>, Exception> resultCallback) {
-        /*CatagoryDownloadTask downloadTask = new CatagoryDownloadTask(accessToken, new DownloadCompleteCallback<ArrayList<CatagoryModel>, Exception>() {
-            @Override
-            public void downloadComplete(ArrayList<CatagoryModel> result, Exception error) {
-                resultCallback.RequestResultRetrieved(result,error);
-            }
-        });
-        downloadTask.execute();*/
-        CatagoryListRequest request = new CatagoryListRequest();
+    /**
+     * Retrieve the list of categories from the server
+     * @param resultCallback Callback to return the category list from the background thread
+     */
+    public void getCategories(RequestManager.RequestResultCallback<ArrayList<EnhancedCategory>, Exception> resultCallback) {
+        CategoryListRequest request = new CategoryListRequest();
         try {
-            request.getCatagories(context, new ItemListRetrievalCallback<CatagoryModel>() {
+            request.getCategories(getRootContext(), new ItemListRetrievalCallback<EnhancedCategory>() {
                 @Override
-                public void ItemsRetrieved(ArrayList<CatagoryModel> items, Exception exception) {
+                public void ItemsRetrieved(ArrayList<EnhancedCategory> items, Exception exception) {
                     resultCallback.RequestResultRetrieved(items, exception);
                 }
             });
@@ -297,17 +316,22 @@ public class RequestService {
         }
     }
 
-    public void getFileMetadata(int onlineId, RequestManager.RequestResultCallback<FileMetadata, Exception> fileMetadataExceptionRequestResultCallback) {
+    /**
+     * Retrieves the metadata for a specified file from the server
+     * @param onlineId The id of the file to retrieve
+     * @param fileMetadataRequestResultCallback The callback to return the file metadata from the background thread
+     */
+    public void getFileMetadata(int onlineId, RequestManager.RequestResultCallback<FileMetadata, Exception> fileMetadataRequestResultCallback) {
         FileMetadataRequest fileMetadataRequest = new FileMetadataRequest(context);
         try {
         fileMetadataRequest.getFileMetadata(onlineId, new ItemRetrievalCallback<FileMetadata>() {
             @Override
             public void ItemRetrieved(FileMetadata item, AppRequestError exception) {
-                fileMetadataExceptionRequestResultCallback.RequestResultRetrieved(item,exception);
+                fileMetadataRequestResultCallback.RequestResultRetrieved(item,exception);
             }
         });
         }catch (RequestServiceNotConfiguredException exception){
-            fileMetadataExceptionRequestResultCallback.RequestResultRetrieved(null,exception);
+            fileMetadataRequestResultCallback.RequestResultRetrieved(null,exception);
         }
     }
 

@@ -1,11 +1,14 @@
 package com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
+import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -25,8 +28,10 @@ import com.quigglesproductions.secureimageviewer.R;
 import com.quigglesproductions.secureimageviewer.managers.FolderManager;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedFolder;
+import com.quigglesproductions.secureimageviewer.ui.EnhancedMainMenuActivity;
 import com.quigglesproductions.secureimageviewer.ui.IFileViewer;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
+import com.quigglesproductions.secureimageviewer.ui.SupportActionBarSetListener;
 import com.quigglesproductions.secureimageviewer.ui.compoundcontrols.FileViewerNavigator;
 
 import java.lang.reflect.Field;
@@ -50,23 +55,43 @@ public class EnhancedFileViewFragment extends Fragment implements IFileViewer {
         hasStartPosition = true;
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         viewModel = new ViewModelProvider(this).get(EnhancedFileViewerViewModel.class);
-        return inflater.inflate(R.layout.fragment_file_pager, container, false);
+        if(((EnhancedMainMenuActivity)requireActivity()).getSupportActionBar() != null) {
+            ((EnhancedMainMenuActivity) requireActivity()).getSupportActionBar().hide();
+        }
+        else{
+            ((EnhancedMainMenuActivity) requireActivity()).registerActionBarSetListener(new SupportActionBarSetListener() {
+                @Override
+                public void SupportActionBarSet() {
+                    ((EnhancedMainMenuActivity) requireActivity()).getSupportActionBar().hide();
+                }
+            });
+        }
+        ContextThemeWrapper wrapper = new ContextThemeWrapper(requireContext(),R.style.FileViewerTheme);
+        LayoutInflater themedInflater = inflater.cloneInContext(wrapper);
+        ((EnhancedMainMenuActivity)getActivity()).hideStatusBar();
+        return themedInflater.inflate(R.layout.fragment_file_pager, container, false);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        ((SecureActivity)getActivity()).getSupportActionBar().hide();
+
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        ((SecureActivity)getActivity()).getSupportActionBar().show();
+
     }
 
     @Override
@@ -81,7 +106,7 @@ public class EnhancedFileViewFragment extends Fragment implements IFileViewer {
         collectionAdapter.addFiles(selectedFolder.getBaseItems());
         viewPager.setAdapter(collectionAdapter);
         super.onViewCreated(view, savedInstanceState);
-
+        hideSystemBars();
         fileNavigator.setFileTotal(collectionAdapter.getItemCount());
         viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
@@ -144,8 +169,14 @@ public class EnhancedFileViewFragment extends Fragment implements IFileViewer {
         fileName = topLayout.findViewById(R.id.file_name);
         fileNavigator = view.findViewById(R.id.fileviewer_navigator);
         backButton.setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("RestrictedApi")
             @Override
             public void onClick(View view) {
+                showSystemBars();
+                if(((SecureActivity)requireActivity()).getSupportActionBar() != null) {
+                    ((SecureActivity) requireActivity()).getSupportActionBar().setShowHideAnimationEnabled(false);
+                    ((SecureActivity) requireActivity()).getSupportActionBar().show();
+                }
                 getActivity().onBackPressed();
             }
         });
@@ -182,10 +213,9 @@ public class EnhancedFileViewFragment extends Fragment implements IFileViewer {
         windowInsetsController.setSystemBarsBehavior(
                 WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         );
-        // Hide both the status bar and the navigation bar
-        windowInsetsController.hide(WindowInsets.Type.systemBars());
-        WindowCompat.setDecorFitsSystemWindows(requireActivity().getWindow(),false);
-        viewModel.getSystemBarsHidden().setValue(true);
+        getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+
+        //viewModel.getSystemBarsHidden().setValue(true);
     }
 
     private void showSystemBars(){
@@ -195,13 +225,12 @@ public class EnhancedFileViewFragment extends Fragment implements IFileViewer {
             return;
         }
         // Configure the behavior of the hidden system bars
-        //windowInsetsController.setSystemBarsBehavior(
-        //        WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-        //);
-        // Hide both the status bar and the navigation bar
+        windowInsetsController.setSystemBarsBehavior(
+                WindowInsetsController.BEHAVIOR_DEFAULT
+        );
         windowInsetsController.show(WindowInsets.Type.systemBars());
-        WindowCompat.setDecorFitsSystemWindows(requireActivity().getWindow(),true);
-        viewModel.getSystemBarsHidden().setValue(false);
+        //viewModel.getSystemBarsHidden().setValue(false);
+        requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
 
     }
 
@@ -209,4 +238,20 @@ public class EnhancedFileViewFragment extends Fragment implements IFileViewer {
     public FileViewerNavigator getNavigator() {
         return fileNavigator;
     }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+
+        //((EnhancedMainMenuActivity)getActivity()).showStatusBar();
+        //showSystemBars();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        ((SecureActivity) requireActivity()).getSupportActionBar().setShowHideAnimationEnabled(true);
+
+    }
+
 }

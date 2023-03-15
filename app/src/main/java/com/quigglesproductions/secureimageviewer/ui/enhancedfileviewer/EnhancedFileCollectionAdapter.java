@@ -4,7 +4,9 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.adapter.FragmentViewHolder;
 
 import com.quigglesproductions.secureimageviewer.gson.ViewerGson;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
@@ -16,6 +18,7 @@ import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.fragments
 import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.fragments.VideoFileViewFragment;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class EnhancedFileCollectionAdapter extends FragmentStateAdapter {
     private ArrayList<EnhancedFile> files = new ArrayList<>();
@@ -34,7 +37,7 @@ public class EnhancedFileCollectionAdapter extends FragmentStateAdapter {
         switch (file.metadata.fileType)
         {
             case "IMAGE":
-                fragment = new ImageFileViewFragment(navigatorControls,new ZoomLevelChangeCallback() {
+                fragment = new ImageFileViewFragment(new ZoomLevelChangeCallback() {
                     @Override
                     public void zoomLevelChanged(boolean isZoomed) {
                         zoomCallback.zoomLevelChanged(isZoomed);
@@ -42,10 +45,10 @@ public class EnhancedFileCollectionAdapter extends FragmentStateAdapter {
                 });
                 break;
             case "VIDEO":
-                fragment = new VideoFileViewFragment(navigatorControls);
+                fragment = new VideoFileViewFragment();
                 break;
             default:
-                fragment = new ImageFileViewFragment(navigatorControls,new ZoomLevelChangeCallback() {
+                fragment = new ImageFileViewFragment(new ZoomLevelChangeCallback() {
                     @Override
                     public void zoomLevelChanged(boolean isZoomed) {
                         zoomCallback.zoomLevelChanged(isZoomed);
@@ -90,4 +93,15 @@ public class EnhancedFileCollectionAdapter extends FragmentStateAdapter {
     public interface ZoomLevelChangeCallback{
         void zoomLevelChanged(boolean isZoomed);
     }
+
+    @Override
+    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
+        super.onAttachedToRecyclerView(recyclerView);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull FragmentViewHolder holder, int position, @NonNull List<Object> payloads) {
+        super.onBindViewHolder(holder, position, payloads);
+    }
+
 }

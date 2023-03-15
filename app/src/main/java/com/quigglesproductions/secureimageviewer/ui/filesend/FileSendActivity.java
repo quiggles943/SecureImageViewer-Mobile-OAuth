@@ -22,9 +22,14 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.quigglesproductions.secureimageviewer.R;
 import com.quigglesproductions.secureimageviewer.database.DatabaseHandler;
 import com.quigglesproductions.secureimageviewer.database.DatabaseHelper;
+import com.quigglesproductions.secureimageviewer.database.enhanced.EnhancedDatabaseHandler;
 import com.quigglesproductions.secureimageviewer.managers.FolderManager;
 import com.quigglesproductions.secureimageviewer.managers.NotificationManager;
 import com.quigglesproductions.secureimageviewer.managers.SecurityManager;
+import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
+import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedDatabaseFolder;
+import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.ImageMetadata;
+import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.VideoMetadata;
 import com.quigglesproductions.secureimageviewer.models.file.FileModel;
 import com.quigglesproductions.secureimageviewer.models.folder.FolderModel;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
@@ -32,6 +37,7 @@ import com.quigglesproductions.secureimageviewer.utils.ViewerFileUtils;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 import static android.content.Intent.ACTION_SEND;
@@ -51,19 +57,14 @@ public class FileSendActivity extends SecureActivity {
         listView = findViewById(R.id.filesend_folderlist);
         adapter = new FolderListViewAdapter(context);
         listView.setAdapter(adapter);
-        FolderManager.getInstance().getFoldersFromDatabase(context, new FolderManager.FolderRetrievalResultCallback() {
-            @Override
-            public void FoldersRetrieved(ArrayList<FolderModel> folders, Exception exception) {
-                if(folders != null)
-                    adapter.setFolders(folders);
-            }
-        });
+        EnhancedDatabaseHandler databaseHandler =  new EnhancedDatabaseHandler(context);
+        adapter.setFolders(databaseHandler.getFolders());
         getFileUrisFromIntent(getIntent());
         setTitle("Select folder for upload");
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                FolderModel folder = adapter.getItem(position);
+                EnhancedDatabaseFolder folder = adapter.getItem(position);
                 MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(context,R.style.MaterialAlertDialog_rounded);
                 String message = "Upload "+fileUris.size();
                 if(fileUris.size()>1)
@@ -74,7 +75,7 @@ public class FileSendActivity extends SecureActivity {
                 AlertDialog dialog = builder.setTitle("Upload").setMessage(message).setPositiveButton("Upload", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        FolderModel folder = adapter.getItem(position);
+                        EnhancedDatabaseFolder folder = adapter.getItem(position);
                         for(Uri uri: fileUris){
                             uploadFile(uri,folder);
                         }
@@ -112,27 +113,35 @@ public class FileSendActivity extends SecureActivity {
         }
     }
 
-    public boolean uploadFile(Uri uri, FolderModel folder){
+    public boolean uploadFile(Uri uri, EnhancedDatabaseFolder folder){
             try {
                 ContentResolver contentResolver = context.getContentResolver();
                 String fileName = getFileName(uri);
                 String base64Name = java.util.Base64.getUrlEncoder().encodeToString(fileName.getBytes());
-                FileModel uploadFile = new FileModel(fileName, base64Name);
+                EnhancedDatabaseFile uploadFile = new EnhancedDatabaseFile();
+                uploadFile.normalName = fileName;
+                uploadFile.encodedName = base64Name;
+                uploadFile.setFolderId(folder.getId());
                 //MimeTypeMap map = MimeTypeMap.getSingleton();
                 String type = contentResolver.getType(uri);
                 if(type.startsWith("image")) {
                     uploadFile.contentType = "IMAGE";
+                    uploadFile.metadata = new ImageMetadata();
                     uploadFile = getFileImageSize(uri,uploadFile);
                 }
                 else if(type.startsWith("video")) {
+                    uploadFile.metadata = new VideoMetadata();
                     uploadFile.contentType = "VIDEO";
                 }
-
-                uploadFile.setIsUploaded(false);
-                DatabaseHelper helper = new DatabaseHelper(context);
-                DatabaseHandler handler = new DatabaseHandler(context,helper.getWritableDatabase());
-                uploadFile = handler.insertFileForUpload(uploadFile,folder);
+                    uploadFile.metadata.creationTime = LocalDateTime.now();
+                //uploadFile.setIsUploaded(false);
+                //DatabaseHelper helper = new DatabaseHelper(context);
+                //DatabaseHandler handler = new DatabaseHandler(context,helper.getWritableDatabase());
+                EnhancedDatabaseHandler databaseHandler = new EnhancedDatabaseHandler(context);
+                uploadFile = databaseHandler.insertFile(uploadFile,folder.getId());
+                //uploadFile = handler.insertFileForUpload(uploadFile,folder);
                 InputStream in = getContentResolver().openInputStream(uri);
+                ViewerFileUtils.createFileOnDisk(context,uploadFile,in);
                 //uploadFile = (FileModel) ViewerFileUtils.createFileOnDisk(context,uploadFile,in);
                 return true;
             } catch (Exception e) {
@@ -160,15 +169,15 @@ public class FileSendActivity extends SecureActivity {
         return result;
     }
 
-    private FileModel getFileImageSize(Uri uri,FileModel file) throws FileNotFoundException {
+    private EnhancedDatabaseFile getFileImageSize(Uri uri,EnhancedDatabaseFile file) throws FileNotFoundException {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
         BitmapFactory.decodeStream(
                 context.getContentResolver().openInputStream(uri),
                 null,
                 options);
-        file.fileWidth = options.outWidth;
-        file.fileHeight = options.outHeight;
+        file.metadata.width = options.outWidth;
+        file.metadata.height = options.outHeight;
         return file;
     }
 

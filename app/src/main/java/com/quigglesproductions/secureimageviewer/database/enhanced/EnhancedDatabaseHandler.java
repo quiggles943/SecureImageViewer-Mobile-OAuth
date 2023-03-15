@@ -13,6 +13,7 @@ import com.quigglesproductions.secureimageviewer.enums.DeviceInfoKey;
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedArtist;
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedCategory;
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedSubject;
+import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedOnlineFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.FileMetadata;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
@@ -841,5 +842,28 @@ public class EnhancedDatabaseHandler {
         }
         else
             return null;
+    }
+
+    public void clearArtists() {
+        database.delete(EnhancedDatabaseBuilder.Artists.TABLE_NAME,null,null);
+    }
+
+    public void clearSubjects() {
+        database.delete(EnhancedDatabaseBuilder.Subjects.TABLE_NAME,null,null);
+    }
+
+    public void clearCategories() {
+        database.delete(EnhancedDatabaseBuilder.Categories.TABLE_NAME,null,null);
+    }
+
+    public void insertCategory(EnhancedCategory catagory) {
+
+    }
+
+    public void updateFileOnlineId(EnhancedDatabaseFile fileModel) {
+        ContentValues values = new ContentValues();
+        values.put(EnhancedDatabaseBuilder.Files.ONLINE_ID, fileModel.getOnlineId());
+        values.put(EnhancedDatabaseBuilder.Files.ONLINE_FOLDER_ID, fileModel.getOnlineFolderId());
+        database.update(EnhancedDatabaseBuilder.Files.TABLE_NAME, values, "_id=?", new String[]{fileModel.getId() + ""});
     }
 }

@@ -11,6 +11,7 @@ import com.quigglesproductions.secureimageviewer.apprequest.callbacks.ItemListRe
 import com.quigglesproductions.secureimageviewer.gson.ViewerGson;
 import com.quigglesproductions.secureimageviewer.models.ArtistModel;
 import com.quigglesproductions.secureimageviewer.models.SubjectModel;
+import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedArtist;
 import com.quigglesproductions.secureimageviewer.models.file.FileModel;
 import com.quigglesproductions.secureimageviewer.utils.StreamUtils;
 import com.techyourchance.threadposter.BackgroundThreadPoster;
@@ -27,7 +28,7 @@ public class ArtistListRequest {
     private final BackgroundThreadPoster backgroundThreadPoster = new BackgroundThreadPoster();
     private final UiThreadPoster uiThreadPoster = new UiThreadPoster();
 
-    public void getArtists(Context context, ItemListRetrievalCallback<ArtistModel> callback) throws RequestServiceNotConfiguredException {
+    public void getArtists(Context context, ItemListRetrievalCallback<EnhancedArtist> callback) throws RequestServiceNotConfiguredException {
         final String urlString = RequestManager.getInstance().getUrlManager().getArtistUrlString();
         backgroundThreadPoster.post(()->{
             AuthManager.getInstance().getHttpsUrlConnection(context,urlString, new AuthManager.UrlConnectionRetrievalCallback() {
@@ -42,9 +43,9 @@ public class ArtistListRequest {
                                 } else {
                                     String result = StreamUtils.readInputStream(connection.getInputStream());
                                     Gson gson = ViewerGson.getGson();
-                                    Type listType = new TypeToken<ArrayList<ArtistModel>>() {
+                                    Type listType = new TypeToken<ArrayList<EnhancedArtist>>() {
                                     }.getType();
-                                    ArrayList<ArtistModel> artistModels = gson.fromJson(result, listType);
+                                    ArrayList<EnhancedArtist> artistModels = gson.fromJson(result, listType);
 
                                     //DownloaderResult<ArrayList<T>> downloaderResult = new DownloaderResult<>(files);
                                     uiThreadPoster.post(() -> {

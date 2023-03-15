@@ -68,7 +68,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="30dp"
                 android:padding="5dp"
-                android:text="Status"
+                android:text="Device Status"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="@id/device_status_header_layout" />
@@ -126,21 +126,44 @@
                 android:layout_height="match_parent"
                 android:layout_marginTop="20dp"
                 android:orientation="horizontal">
-
-                <TextView
+                <LinearLayout
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="20dp"
+                    android:layout_height="wrap_content">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
 
-                    android:text="Files on device:" />
-                <View
-                    android:layout_width="5dp"
-                    android:layout_height="match_parent"/>
-                <TextView
-                    android:id="@+id/overview_filesOnDevice"
+                        android:text="Files on device:" />
+                    <View
+                        android:layout_width="5dp"
+                        android:layout_height="match_parent"/>
+                    <TextView
+                        android:id="@+id/overview_filesOnDevice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"/>
+                </LinearLayout>
+
+                <LinearLayout
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="0"/>
+                    android:layout_height="wrap_content">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
+
+                        android:text="Folders on device:" />
+                    <View
+                        android:layout_width="5dp"
+                        android:layout_height="match_parent"/>
+                    <TextView
+                        android:id="@+id/overview_foldersOnDevice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"/>
+                </LinearLayout>
+
             </LinearLayout>
         </LinearLayout>
 
@@ -184,7 +207,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="30dp"
                     android:padding="5dp"
-                    android:text="Online Status"
+                    android:text="Server Status"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="@id/server_status_header_layout" />
@@ -270,22 +293,49 @@
                     android:layout_marginTop="20dp"
                     android:orientation="horizontal">
 
-                    <TextView
+                    <LinearLayout
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="20dp"
+                        android:layout_height="wrap_content">
 
-                        android:text="Files on server:" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="20dp"
 
-                    <View
-                        android:layout_width="5dp"
-                        android:layout_height="match_parent" />
+                            android:text="Files on server:" />
 
-                    <TextView
-                        android:id="@+id/overview_filesOnServer"
+                        <View
+                            android:layout_width="5dp"
+                            android:layout_height="match_parent" />
+
+                        <TextView
+                            android:id="@+id/overview_filesOnServer"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0" />
+                    </LinearLayout>
+
+                    <LinearLayout
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="0" />
+                        android:layout_height="wrap_content">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="20dp"
+
+                            android:text="Folders on server:" />
+
+                        <View
+                            android:layout_width="5dp"
+                            android:layout_height="match_parent" />
+
+                        <TextView
+                            android:id="@+id/overview_foldersOnServer"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0" />
+                    </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
 

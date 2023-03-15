@@ -77,7 +77,8 @@ public class StorageSettingsActivity  extends SecureActivity {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
                     FolderManager.getInstance().removeAllFolders();
-                    DatabaseHandler.getInstance().clearFiles();
+                    EnhancedDatabaseHandler databaseHandler = new EnhancedDatabaseHandler(getContext());
+                    //DatabaseHandler.getInstance().clearFiles();
                     NotificationManager.getInstance().showSnackbar("All folders removed", Snackbar.LENGTH_SHORT);
                     if(callback != null)
                         callback.informationUpdated();

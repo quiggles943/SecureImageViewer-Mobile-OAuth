@@ -77,6 +77,10 @@ public class EnhancedFile implements ItemBaseModel {
         return onlineId;
     }
 
+    public int getOnlineFolderId() {
+        return onlineFolderId;
+    }
+
     @Override
 
 
@@ -214,5 +218,9 @@ public class EnhancedFile implements ItemBaseModel {
             return null;
         else
             return metadata.categories;
+    }
+
+    public LocalDateTime getDefaultSortTime() {
+        return metadata.getCreationTime();
     }
 }

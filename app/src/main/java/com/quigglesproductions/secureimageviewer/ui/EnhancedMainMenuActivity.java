@@ -4,12 +4,15 @@ import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.WindowManager;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.ColorRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.WindowCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -32,16 +35,18 @@ public class EnhancedMainMenuActivity extends SecureActivity{
     Context mContext;
     EnhancedMainMenuViewModel viewModel;
     private AppBarConfiguration mAppBarConfiguration;
+    SupportActionBarSetListener mActionBarSetListener;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityMainNavigationBinding.inflate(getLayoutInflater());
-        viewModel = new ViewModelProvider(this).get(EnhancedMainMenuViewModel.class);
-        viewModel.getIsOnline().observe(this,this::setOnlineEnabled);
+        getViewModel().getIsOnline().observe(this,this::setOnlineEnabled);
         setContentView(binding.getRoot());
         mContext = this;
         setSupportActionBar(binding.appBarNavigation.toolbar);
+        if(mActionBarSetListener != null)
+            mActionBarSetListener.SupportActionBarSet();
         DrawerLayout drawer = binding.drawerLayout;
         NavigationView navigationView = binding.navView;
         // Passing each menu ID as a set of Ids because each
@@ -63,13 +68,27 @@ public class EnhancedMainMenuActivity extends SecureActivity{
                 .setType(NavType.StringType)
                 .setDefaultValue("offline")
                 .build());
-        viewModel.getIsOnline().setValue(ViewerConnectivityManager.getInstance().isConnected());
-
+        getViewModel().getIsOnline().setValue(ViewerConnectivityManager.getInstance().isConnected());
+        getViewModel().getAppBarTitle().observe(this, new Observer<String>() {
+            @Override
+            public void onChanged(String s) {
+                if(getSupportActionBar() != null)
+                    if(!s.isEmpty())
+                        getSupportActionBar().setTitle(s);
+            }
+        });
+        getWindow().setNavigationBarColor(context.getColor(R.color.transparent));
+    }
+    private EnhancedMainMenuViewModel getViewModel(){
+        if(viewModel == null){
+            viewModel = new ViewModelProvider(this).get(EnhancedMainMenuViewModel.class);
+        }
+        return viewModel;
     }
     @Override
     public void onConnectionRestored() {
         super.onConnectionRestored();
-        viewModel.getIsOnline().setValue(true);
+        getViewModel().getIsOnline().setValue(true);
     }
 
     @Override
@@ -89,7 +108,14 @@ public class EnhancedMainMenuActivity extends SecureActivity{
         onlineMenuItem.setEnabled(enabled);
     }
 
+    public void setActionBarTitle(String title){
+        getViewModel().getAppBarTitle().setValue(title);
+    }
+
     public void overrideActionBarTitle(String title){
+        if(getSupportActionBar() == null){
+
+        }
         getSupportActionBar().setTitle(title);
         //setTitle(title);
     }
@@ -99,5 +125,15 @@ public class EnhancedMainMenuActivity extends SecureActivity{
     }
     public void overrideActionBarColor(@ColorRes int color) {
         getSupportActionBar().setBackgroundDrawable(new ColorDrawable(ContextCompat.getColor(context,color)));
+    }
+
+    public void hideStatusBar(){
+        this.getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_FULLSCREEN);
+    }
+    public void showStatusBar(){
+        this.getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+    }
+    public void registerActionBarSetListener(SupportActionBarSetListener listener){
+        mActionBarSetListener = listener;
     }
 }

@@ -66,7 +66,8 @@ public class FolderManager {
 
     public File getThumbnailFileFromOnlineId(int id) {
         try {
-            FileModel file = DatabaseHandler.getInstance().getFileByOnlineId(id);
+            EnhancedDatabaseHandler handler = new EnhancedDatabaseHandler(rootContext);
+            EnhancedDatabaseFile file = handler.getFileByOnlineId(id);
             return file.getThumbnailFile();
         }
         catch(Exception e)

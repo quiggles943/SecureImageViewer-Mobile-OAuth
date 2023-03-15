@@ -11,6 +11,7 @@ import com.quigglesproductions.secureimageviewer.apprequest.callbacks.ItemListRe
 import com.quigglesproductions.secureimageviewer.gson.ViewerGson;
 import com.quigglesproductions.secureimageviewer.models.ArtistModel;
 import com.quigglesproductions.secureimageviewer.models.SubjectModel;
+import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedSubject;
 import com.quigglesproductions.secureimageviewer.utils.StreamUtils;
 import com.techyourchance.threadposter.BackgroundThreadPoster;
 import com.techyourchance.threadposter.UiThreadPoster;
@@ -25,7 +26,7 @@ public class SubjectListRequest {
     private final BackgroundThreadPoster backgroundThreadPoster = new BackgroundThreadPoster();
     private final UiThreadPoster uiThreadPoster = new UiThreadPoster();
 
-    public void getSubjects(Context context, ItemListRetrievalCallback<SubjectModel> callback) throws RequestServiceNotConfiguredException {
+    public void getSubjects(Context context, ItemListRetrievalCallback<EnhancedSubject> callback) throws RequestServiceNotConfiguredException {
         final String urlString = RequestManager.getInstance().getUrlManager().getSubjectUrlString();
         backgroundThreadPoster.post(()->{
             AuthManager.getInstance().getHttpsUrlConnection(context,urlString, new AuthManager.UrlConnectionRetrievalCallback() {
@@ -40,9 +41,9 @@ public class SubjectListRequest {
                                 } else {
                                     String result = StreamUtils.readInputStream(connection.getInputStream());
                                     Gson gson = ViewerGson.getGson();
-                                    Type listType = new TypeToken<ArrayList<SubjectModel>>() {
+                                    Type listType = new TypeToken<ArrayList<EnhancedSubject>>() {
                                     }.getType();
-                                    ArrayList<SubjectModel> subjectModels = gson.fromJson(result, listType);
+                                    ArrayList<EnhancedSubject> subjectModels = gson.fromJson(result, listType);
 
                                     //DownloaderResult<ArrayList<T>> downloaderResult = new DownloaderResult<>(files);
                                     uiThreadPoster.post(() -> {

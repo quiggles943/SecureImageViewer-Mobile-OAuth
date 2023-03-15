@@ -71,7 +71,7 @@ public class FolderGridAdapter extends BaseAdapter
     }
 
     public ArrayList<? extends Parcelable> getItems() {
-        return folders;
+        return null;
     }
 
     public void setMultiSelect(boolean multiSelect) {

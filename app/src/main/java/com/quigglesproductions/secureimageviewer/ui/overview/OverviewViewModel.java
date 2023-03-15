@@ -10,14 +10,20 @@ public class OverviewViewModel extends ViewModel {
 
     private MutableLiveData<Boolean> isOnline;
     private MutableLiveData<Long> filesOnDevice;
+    private MutableLiveData<Long> foldersOnDevice;
+
     private MutableLiveData<Long> filesOnServer;
+    private MutableLiveData<Long> foldersOnServer;
+
     private MutableLiveData<LocalDateTime> lastUpdateTime;
     private MutableLiveData<LocalDateTime> lastOnlineSyncTime;
 
     public OverviewViewModel(){
         isOnline = new MutableLiveData<>();
         filesOnDevice = new MutableLiveData<>();
+        foldersOnDevice = new MutableLiveData<>();
         filesOnServer = new MutableLiveData<>();
+        foldersOnServer = new MutableLiveData<>();
         lastUpdateTime = new MutableLiveData<>();
         lastOnlineSyncTime = new MutableLiveData<>();
     }
@@ -30,8 +36,16 @@ public class OverviewViewModel extends ViewModel {
         return filesOnDevice;
     }
 
+    public MutableLiveData<Long> getFoldersOnDevice() {
+        return foldersOnDevice;
+    }
+
     public MutableLiveData<Long> getFilesOnServer() {
         return filesOnServer;
+    }
+
+    public MutableLiveData<Long> getFoldersOnServer() {
+        return foldersOnServer;
     }
 
     public MutableLiveData<LocalDateTime> getLastUpdateTime() {

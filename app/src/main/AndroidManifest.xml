@@ -115,7 +115,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.login.LoginActivity"
+            android:name=".ui.login.ReauthenticateActivity"
             android:launchMode="singleTask"
             android:theme="@style/SplashScreenTheme" />
     </application>

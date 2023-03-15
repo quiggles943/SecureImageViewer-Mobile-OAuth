@@ -18,6 +18,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.gson.Gson;
 import com.quigglesproductions.secureimageviewer.R;
 import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
+import com.quigglesproductions.secureimageviewer.apprequest.RequestService;
 import com.quigglesproductions.secureimageviewer.managers.FolderManager;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedOnlineFile;
@@ -98,38 +99,15 @@ public class OnlineRecentFilesViewActivity extends SecureActivity {
                 if(layoutManager.findLastCompletelyVisibleItemPosition() >total-LIST_UPDATE_TRIGGER_THRESHOLD &&layoutManager.findLastCompletelyVisibleItemPosition() <=total-1){
                     if(scrollBottomReached == false) {
                         scrollBottomReached = true;
-                        RequestManager.getInstance().getRequestService().getRecentFiles(context,DOWNLOAD_FILE_COUNT, rvAdapter.getItemCount(), new RequestManager.RequestResultCallback<ArrayList<EnhancedOnlineFile>, Exception>() {
+                        RequestManager.getInstance().getRequestService().getRecentFiles(DOWNLOAD_FILE_COUNT, rvAdapter.getItemCount(), new RequestManager.RequestResultCallback<RequestService.RecentFileResult<EnhancedOnlineFile>, Exception>() {
                             @Override
-                            public void RequestResultRetrieved(ArrayList<EnhancedOnlineFile> result, Exception exception) {
+                            public void RequestResultRetrieved(RequestService.RecentFileResult<EnhancedOnlineFile> result, Exception exception) {
                                 if(result != null) {
-                                    rvAdapter.addItems(result);
+                                    rvAdapter.addItems(result.getRecentFiles());
                                 }
                                 scrollBottomReached = false;
                             }
-
                         });
-                        /*AuthManager.getInstance().performActionWithFreshTokens(context, new AuthState.AuthStateAction() {
-                            @Override
-                            public void execute(@Nullable String accessToken, @Nullable String idToken, @Nullable AuthorizationException ex) {
-                                if(ex != null){
-                                    scrollBottomReached = false;
-                                }
-                                else{
-                                    RequestManager.getInstance().getRequestService().getRecentFiles(accessToken, DOWNLOAD_FILE_COUNT, rvAdapter.getItemCount(), new RequestManager.RequestResultCallback<ArrayList<FileModel>, Exception>() {
-                                        @Override
-                                        public void RequestResultRetrieved(ArrayList<FileModel> result, Exception exception) {
-                                            if(result != null) {
-                                                rvAdapter.addItems(result);
-                                            }
-                                            scrollBottomReached = false;
-                                        }
-
-                                    });
-
-                                }
-
-                            }
-                        });*/
                     }
                 }
             }
@@ -160,33 +138,16 @@ public class OnlineRecentFilesViewActivity extends SecureActivity {
         registerForContextMenu(recyclerView);
     }
 
-    /*private void refreshFiles(String accessToken){
-        swipeContainer.setRefreshing(true);
-        RequestManager.getInstance().getRequestService().getRecentFiles(accessToken, DOWNLOAD_FILE_COUNT, 0, new RequestManager.RequestResultCallback<ArrayList<FileModel>, Exception>() {
-            @Override
-            public void RequestResultRetrieved(ArrayList<FileModel> result, Exception exception) {
-                if(result != null) {
-                    rvAdapter.clearItems();
-                    rvAdapter.addItems(result);
-                }
-                swipeContainer.setRefreshing(false);
-            }
-
-        });
-    }*/
-
     private void refreshFiles(){
         swipeContainer.setRefreshing(true);
-        RequestManager.getInstance().getRequestService().getRecentFiles(context,DOWNLOAD_FILE_COUNT,0, new RequestManager.RequestResultCallback<ArrayList<EnhancedOnlineFile>, Exception>() {
+        RequestManager.getInstance().getRequestService().getRecentFiles(DOWNLOAD_FILE_COUNT, 0, new RequestManager.RequestResultCallback<RequestService.RecentFileResult<EnhancedOnlineFile>, Exception>() {
             @Override
-            public void RequestResultRetrieved(ArrayList<EnhancedOnlineFile> result, Exception exception) {
-                if(result != null) {
+            public void RequestResultRetrieved(RequestService.RecentFileResult<EnhancedOnlineFile> result, Exception exception) {
+                if(result != null){
                     rvAdapter.clearItems();
-                    rvAdapter.addItems(result);
+                    rvAdapter.addItems(result.getRecentFiles());
                 }
-                swipeContainer.setRefreshing(false);
             }
-
         });
     }
 

@@ -15,11 +15,10 @@ import androidx.core.content.ContextCompat;
 import com.quigglesproductions.secureimageviewer.models.LoginModel;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
 import com.quigglesproductions.secureimageviewer.ui.login.BiometricAuthenticationException;
-import com.quigglesproductions.secureimageviewer.ui.login.LoginActivity;
+import com.quigglesproductions.secureimageviewer.ui.login.ReauthenticateActivity;
 
 import java.util.concurrent.Executor;
 
-import static android.app.Activity.RESULT_OK;
 import static android.content.Context.KEYGUARD_SERVICE;
 import static com.quigglesproductions.secureimageviewer.ui.SecureActivity.INTENT_AUTHENTICATE;
 
@@ -253,7 +252,7 @@ public class SecurityManager {
         KeyguardManager km = (KeyguardManager) activity.getSystemService(KEYGUARD_SERVICE);
         Intent authIntent = km.createConfirmDeviceCredentialIntent("Login for secure image viewer", "Login using your credentials");
         if(passthrough != null)
-            authIntent.putExtra(LoginActivity.EXTRA_PASSTHROUGH_INTENT,passthrough);
+            authIntent.putExtra(ReauthenticateActivity.EXTRA_PASSTHROUGH_INTENT,passthrough);
         if(authIntent != null) {
             activity.startActivityForResult(authIntent, INTENT_AUTHENTICATE);
         }

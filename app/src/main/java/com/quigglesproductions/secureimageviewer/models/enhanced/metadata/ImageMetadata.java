@@ -5,4 +5,9 @@ import com.google.gson.annotations.SerializedName;
 public class ImageMetadata extends FileMetadata{
     @SerializedName("IsAnimated")
     public boolean isAnimated;
+
+    public ImageMetadata(){
+        fileType = "IMAGE";
+        contentType = "IMAGE";
+    }
 }

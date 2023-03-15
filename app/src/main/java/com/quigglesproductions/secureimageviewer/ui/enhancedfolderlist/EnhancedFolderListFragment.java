@@ -1,14 +1,8 @@
 package com.quigglesproductions.secureimageviewer.ui.enhancedfolderlist;
 
 import android.annotation.SuppressLint;
-import android.app.SearchManager;
-import android.content.Context;
-import android.content.Intent;
 import android.content.res.TypedArray;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -16,16 +10,11 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.GridView;
-import android.widget.TextView;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.ColorRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavDirections;
@@ -44,16 +33,12 @@ import com.quigglesproductions.secureimageviewer.models.enhanced.folder.Enhanced
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedOnlineFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedRecentsFolder;
-import com.quigglesproductions.secureimageviewer.recycler.ContextMenuRecyclerView;
 import com.quigglesproductions.secureimageviewer.recycler.RecyclerViewSelectionMode;
 import com.quigglesproductions.secureimageviewer.ui.EnhancedMainMenuActivity;
-import com.quigglesproductions.secureimageviewer.ui.enhancedfolderviewer.EnhancedFolderViewerActivity;
 
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 public class EnhancedFolderListFragment extends Fragment {
@@ -94,18 +79,30 @@ public class EnhancedFolderListFragment extends Fragment {
             public void selectionModeChanged(RecyclerViewSelectionMode selectionMode) {
                 switch (selectionMode){
                     case SINGLE:
-                        myMenu.findItem(R.id.menu_download_selection_recent_files).setVisible(true);
-                        myMenu.findItem(R.id.menu_download_selection_btn).setVisible(false);
-                        setTitle("Online Viewer");
+                        if(state.contentEquals(STATE_ONLINE)) {
+                            myMenu.findItem(R.id.online_folder_recent_files).setVisible(true);
+                            myMenu.findItem(R.id.online_folder_download_selection).setVisible(false);
+                            setTitle("Online Viewer");
+                        }
+                        else{
+                            myMenu.findItem(R.id.offline_folder_delete).setVisible(false);
+                            setTitle("Local Folders");
+                        }
+
                         TypedArray ta = getContext().getTheme().obtainStyledAttributes(R.styleable.AppCompatTheme);
                         @SuppressLint("ResourceAsColor") int primaryColor = ta.getColor(R.styleable.AppCompatTheme_colorPrimary,R.color.white);
                         //getSupportActionBar().setBackgroundDrawable(null);
                         setActionBarColorFromInt(primaryColor);
                         break;
                     case MULTI:
-                        MenuItem recents = myMenu.findItem(R.id.menu_download_selection_recent_files);
-                        recents.setVisible(false);
-                        myMenu.findItem(R.id.menu_download_selection_btn).setVisible(true);
+                        if(state.contentEquals(STATE_ONLINE)) {
+                            myMenu.findItem(R.id.online_folder_recent_files).setVisible(false);
+                            myMenu.findItem(R.id.online_folder_download_selection).setVisible(true);
+                        }
+                        else{
+                            myMenu.findItem(R.id.offline_folder_delete).setVisible(true);
+                        }
+
                         setActionBarColor(R.color.selected);
                         break;
                 }
@@ -192,18 +189,26 @@ public class EnhancedFolderListFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()){
-            case R.id.menu_download_selection_recent_files:
+            case R.id.online_folder_recent_files:
                 EnhancedRecentsFolder recentsFolder = new EnhancedRecentsFolder();
                 FolderManager.getInstance().setCurrentFolder(recentsFolder);
                 NavDirections action = EnhancedFolderListFragmentDirections.actionEnhancedFolderListFragmentToEnhancedFolderViewerFragment();
                 Navigation.findNavController(binding.getRoot()).navigate(action);
                 break;
-            case R.id.menu_download_selection_btn:
+            case R.id.online_folder_download_selection:
                 NotificationManager.getInstance().showSnackbar("Downloading "+recyclerAdapter.getSelectedCount()+" folders",Snackbar.LENGTH_SHORT);
                 recyclerAdapter.setMultiSelect(false);
                 break;
             case R.id.offline_folder_sync_activate:
                 //TODO add sync functionality
+                return true;
+            case R.id.offline_folder_delete:
+                NotificationManager.getInstance().showSnackbar(recyclerAdapter.getSelectedCount()+" folders deleted",Snackbar.LENGTH_SHORT);
+                for(EnhancedFolder folder: recyclerAdapter.getSelectedFolders()){
+                    FolderManager.getInstance().removeLocalFolder((EnhancedDatabaseFolder) folder);
+                    recyclerAdapter.removeFolder(folder);
+                }
+                recyclerAdapter.setMultiSelect(false);
                 return true;
             default:
                 return false;
@@ -230,7 +235,7 @@ public class EnhancedFolderListFragment extends Fragment {
     }
 
     private void getOnlineFolders(EnhancedFolderListViewModel viewModel){
-        RequestManager.getInstance().getRequestService().getFolders(getContext(),new RequestManager.RequestResultCallback<ArrayList<EnhancedOnlineFolder>, Exception>() {
+        RequestManager.getInstance().getRequestService().getFolders(new RequestManager.RequestResultCallback<ArrayList<EnhancedOnlineFolder>, Exception>() {
             @Override
             public void RequestResultRetrieved(ArrayList<EnhancedOnlineFolder> result, Exception exception) {
                 if(exception != null){
@@ -255,7 +260,8 @@ public class EnhancedFolderListFragment extends Fragment {
     }
 
     private void setTitle(String title){
-        ((EnhancedMainMenuActivity)requireActivity()).overrideActionBarTitle(title);
+        //((EnhancedMainMenuActivity)requireActivity()).overrideActionBarTitle(title);
+        ((EnhancedMainMenuActivity)requireActivity()).setActionBarTitle(title);
     }
     private void setActionBarColorFromInt(@ColorInt int color){
         ((EnhancedMainMenuActivity)requireActivity()).overrideActionBarColorFromInt(color);

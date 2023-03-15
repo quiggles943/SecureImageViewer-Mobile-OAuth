@@ -1,7 +1,5 @@
 package com.quigglesproductions.secureimageviewer.ui.overview;
 
-import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,59 +18,24 @@ import androidx.transition.TransitionManager;
 
 import com.quigglesproductions.secureimageviewer.R;
 import com.quigglesproductions.secureimageviewer.database.enhanced.EnhancedDatabaseHandler;
-import com.quigglesproductions.secureimageviewer.databinding.ActivityMainBinding;
 import com.quigglesproductions.secureimageviewer.databinding.ActivityOverviewBinding;
 import com.quigglesproductions.secureimageviewer.managers.ViewerConnectivityManager;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
 
 public class OverviewFragment extends Fragment {
     ActivityOverviewBinding binding;
+    DateTimeFormatter sameYearPattern = DateTimeFormatter.ofPattern("hh:mm a, EEEE dd MMMM");
+    DateTimeFormatter previousYearPattern = DateTimeFormatter.ofPattern("hh:mm a, EEEE dd MMMM yyyy");
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = ActivityOverviewBinding.inflate(inflater,container,false);
         View root = binding.getRoot();
         OverviewViewModel viewModel = new ViewModelProvider(this).get(OverviewViewModel.class);
-        viewModel.getIsOnline().observe(getViewLifecycleOwner(),this::setConnectivityIndicator);
-        viewModel.getIsOnline().observe(getViewLifecycleOwner(),this::setOnlineStatusVisible);
-        viewModel.getFilesOnDevice().observe(getViewLifecycleOwner(), new Observer<Long>() {
-            @Override
-            public void onChanged(Long value) {
-                binding.overviewFilesOnDevice.setText(value+"");
-            }
-        });
-        viewModel.getFilesOnServer().observe(getViewLifecycleOwner(), new Observer<Long>() {
-            @Override
-            public void onChanged(Long value) {
-                binding.overviewFilesOnServer.setText(value+"");
-            }
-        });
-        viewModel.getLastUpdateTime().observe(getViewLifecycleOwner(), new Observer<LocalDateTime>() {
-            @Override
-            public void onChanged(LocalDateTime localDateTime) {
-                if(localDateTime == null)
-                    binding.overviewLastUpdateTime.setText("Never");
-                else {
-                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm");
-                    binding.overviewLastUpdateTime.setText(localDateTime.format(formatter));
-                }
-            }
-        });
-        viewModel.getLastOnlineSyncTime().observe(getViewLifecycleOwner(), new Observer<LocalDateTime>() {
-            @Override
-            public void onChanged(LocalDateTime localDateTime) {
-                if(localDateTime == null)
-                    binding.overviewLastSyncTime.setText("Never");
-                else {
-                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm");
-                    binding.overviewLastSyncTime.setText(localDateTime.format(formatter));
-                }
-            }
-        });
+        setDataObservers(viewModel);
+
         final ImageButton onlineStatusExpandButton = binding.serverStatusArrowButton;
         final ImageButton deviceStatusExpandButton = binding.deviceStatusArrowButton;
 
@@ -100,13 +63,86 @@ public class OverviewFragment extends Fragment {
                 }
             }
         });
+        setupViewModelData(viewModel);
+        expandDeviceStatusView(true);
+        return root;
+    }
+
+    /**
+     * Configure the View Model observers
+     * @param viewModel
+     */
+    private void setDataObservers(@NonNull OverviewViewModel viewModel){
+        viewModel.getIsOnline().observe(getViewLifecycleOwner(),this::setConnectivityIndicator);
+        viewModel.getIsOnline().observe(getViewLifecycleOwner(),this::setOnlineStatusVisible);
+        viewModel.getFilesOnDevice().observe(getViewLifecycleOwner(), new Observer<Long>() {
+            @Override
+            public void onChanged(Long value) {
+                binding.overviewFilesOnDevice.setText(value+"");
+            }
+        });
+        viewModel.getFilesOnServer().observe(getViewLifecycleOwner(), new Observer<Long>() {
+            @Override
+            public void onChanged(Long value) {
+                binding.overviewFilesOnServer.setText(value+"");
+            }
+        });
+        viewModel.getFoldersOnDevice().observe(getViewLifecycleOwner(), new Observer<Long>() {
+            @Override
+            public void onChanged(Long value) {
+                binding.overviewFoldersOnDevice.setText(value+"");
+            }
+        });
+        viewModel.getFoldersOnServer().observe(getViewLifecycleOwner(), new Observer<Long>() {
+            @Override
+            public void onChanged(Long value) {
+                binding.overviewFoldersOnServer.setText(value+"");
+            }
+        });
+        viewModel.getLastUpdateTime().observe(getViewLifecycleOwner(), new Observer<LocalDateTime>() {
+            @Override
+            public void onChanged(LocalDateTime localDateTime) {
+                if(localDateTime == null)
+                    binding.overviewLastUpdateTime.setText("Never");
+                else {
+                    String dateString;
+                    if(localDateTime.getYear() == LocalDateTime.now().getYear())
+                        dateString = localDateTime.format(sameYearPattern);
+                    else
+                        dateString = localDateTime.format(previousYearPattern);
+                    binding.overviewLastUpdateTime.setText(dateString);
+
+                }
+            }
+        });
+        viewModel.getLastOnlineSyncTime().observe(getViewLifecycleOwner(), new Observer<LocalDateTime>() {
+            @Override
+            public void onChanged(LocalDateTime localDateTime) {
+                if(localDateTime == null)
+                    binding.overviewLastSyncTime.setText("Never");
+                else {
+                    String dateString;
+                    if(localDateTime.getYear() == LocalDateTime.now().getYear())
+                        dateString = localDateTime.format(sameYearPattern);
+                    else
+                        dateString = localDateTime.format(previousYearPattern);
+                    binding.overviewLastSyncTime.setText(dateString);
+                }
+            }
+        });
+    }
+
+    /**
+     * Retrieve and set the values for the view model
+     * @param viewModel
+     */
+    private void setupViewModelData(@NonNull OverviewViewModel viewModel){
         viewModel.getIsOnline().setValue(ViewerConnectivityManager.getInstance().isConnected());
         EnhancedDatabaseHandler databaseHandler = new EnhancedDatabaseHandler(getContext());
         viewModel.getFilesOnDevice().setValue(databaseHandler.getFileCount());
+        viewModel.getFoldersOnDevice().setValue(databaseHandler.getFolderCount());
         viewModel.getLastUpdateTime().setValue(databaseHandler.getLastUpdateTime());
         viewModel.getLastOnlineSyncTime().setValue(databaseHandler.getLastOnlineSyncTime());
-        expandDeviceStatusView(true);
-        return root;
     }
 
 

@@ -12,9 +12,11 @@ import com.quigglesproductions.secureimageviewer.ui.compoundcontrols.FileViewerN
 
 public class EnhancedFileViewActivity extends SecureActivity implements IFileViewer {
     Context context;
+    int startPos;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //startPos = EnhancedFileViewActivityArgs.fromBundle(savedInstanceState).getStartPosition();
         context = this;
         setContentView(R.layout.activity_newfileview);
         int startPosition = getIntent().getIntExtra("position",0);

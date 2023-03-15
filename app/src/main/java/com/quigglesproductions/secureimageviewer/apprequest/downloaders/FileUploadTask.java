@@ -40,7 +40,7 @@ public class FileUploadTask extends AsyncTask<FileModel,Void,DownloaderResult<Ar
             for(int i = 0;i< fileModels.length;i++) {
                 FileModel response = sendFileModel(fileModels[i]);
                 response = sendFileContent(response);
-                DatabaseHandler.getInstance().updateFileIsUploaded(response);
+                //DatabaseHandler.getInstance().updateFileIsUploaded(response);
                 resultList.add(response);
             }
             return new DownloaderResult<>(resultList);

@@ -18,21 +18,22 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.signature.ObjectKey;
 import com.quigglesproductions.secureimageviewer.R;
+import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedDatabaseFolder;
 import com.quigglesproductions.secureimageviewer.models.folder.FolderModel;
 
 import java.util.ArrayList;
 
 public class FolderListViewAdapter extends BaseAdapter {
-    private ArrayList<FolderModel> folders = new ArrayList<>();
+    private ArrayList<EnhancedDatabaseFolder> folders = new ArrayList<>();
     private Context context;
     public FolderListViewAdapter(Context context){
         this.context = context;
     }
 
-    public void addFolder(FolderModel folderModel){
+    public void addFolder(EnhancedDatabaseFolder folderModel){
         folders.add(folderModel);
     }
-    public void setFolders(ArrayList<FolderModel> folders){
+    public void setFolders(ArrayList<EnhancedDatabaseFolder> folders){
         this.folders = folders;
         notifyDataSetChanged();
     }
@@ -42,7 +43,7 @@ public class FolderListViewAdapter extends BaseAdapter {
     }
 
     @Override
-    public FolderModel getItem(int position) {
+    public EnhancedDatabaseFolder getItem(int position) {
         return folders.get(position);
     }
 
@@ -53,7 +54,7 @@ public class FolderListViewAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        FolderModel item = folders.get(position);
+        EnhancedDatabaseFolder item = folders.get(position);
         View gridView = convertView;
         if (gridView == null)
         {

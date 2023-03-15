@@ -7,6 +7,7 @@ import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.Loca
 import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.OnlineFolderDataSource;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
+import com.quigglesproductions.secureimageviewer.ui.enhancedfolderviewer.FolderOrigin;
 
 import java.io.File;
 import java.time.LocalDateTime;
@@ -116,6 +117,10 @@ public class EnhancedDatabaseFolder extends EnhancedFolder implements ILocalFold
                 files.sort(Comparator.comparing(EnhancedFile::getName));
                 break;
         }
+    }
+    @Override
+    public FolderOrigin getFolderOrigin() {
+        return FolderOrigin.LOCAL;
     }
     @Override
     public List<EnhancedFile> getFiles(){

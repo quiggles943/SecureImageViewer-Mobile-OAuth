@@ -20,7 +20,9 @@ import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.quigglesproductions.secureimageviewer.R;
+import com.quigglesproductions.secureimageviewer.SortType;
 import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.IFileDataSource;
+import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
 import com.quigglesproductions.secureimageviewer.ui.onlinerecentfilelist.RecentFilesRecyclerViewAdapter;
 
@@ -28,6 +30,7 @@ import org.acra.ACRA;
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import kotlinx.coroutines.ObsoleteCoroutinesApi;
@@ -50,6 +53,28 @@ public class EnhancedFileGridRecyclerAdapter extends RecyclerView.Adapter<Enhanc
         for (EnhancedFile file: files) {
             this.files.add(file);
         }
+        notifyDataSetChanged();
+    }
+    private ArrayList<EnhancedFile> sortFiles(ArrayList<EnhancedFile> files, SortType sortType){
+        switch (sortType){
+            case NAME_ASC:
+                files.sort(Comparator.comparing(EnhancedFile::getName));
+                break;
+            case NAME_DESC:
+                files.sort(Comparator.comparing(EnhancedFile::getName).reversed());
+                break;
+            case NEWEST_FIRST:
+                files.sort(Comparator.comparing(EnhancedFile::getDefaultSortTime));
+                break;
+            case OLDEST_FIRST:
+                files.sort(Comparator.comparing(EnhancedFile::getDefaultSortTime).reversed());
+                break;
+        }
+        return files;
+    }
+
+    public void sort(SortType sortType) {
+        sortFiles(files,sortType);
         notifyDataSetChanged();
     }
 

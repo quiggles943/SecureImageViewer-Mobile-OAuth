@@ -22,6 +22,7 @@ import com.bumptech.glide.load.DecodeFormat;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.signature.ObjectKey;
 import com.quigglesproductions.secureimageviewer.R;
 import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.IFileDataSource;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
@@ -34,10 +35,12 @@ public class ImageFileViewFragment extends BaseFileViewFragment {
     TextView fileName;
     LinearLayout topLayout,imagePagerControls;
     EnhancedFileCollectionAdapter.ZoomLevelChangeCallback zoomLevelChangeCallback;
-    private FileViewerNavigator navigatorControls;
 
-    public ImageFileViewFragment(FileViewerNavigator viewerNavigator,EnhancedFileCollectionAdapter.ZoomLevelChangeCallback zoomCallback){
-        navigatorControls = viewerNavigator;
+    public ImageFileViewFragment(){
+
+    }
+
+    public ImageFileViewFragment(EnhancedFileCollectionAdapter.ZoomLevelChangeCallback zoomCallback){
         zoomLevelChangeCallback = zoomCallback;
     }
     @Nullable
@@ -48,6 +51,7 @@ public class ImageFileViewFragment extends BaseFileViewFragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+
         EnhancedFile file = getFile();
         view.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -64,20 +68,24 @@ public class ImageFileViewFragment extends BaseFileViewFragment {
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(navigatorControls.isFullyVisible())
-                    navigatorControls.hide();
+                if(getViewerNavigator() == null)
+                    return;
+                if(getViewerNavigator().isFullyVisible())
+                    getViewerNavigator().hide();
                 else
-                    navigatorControls.show();
+                    getViewerNavigator().show();
             }
         });
         imageView.setMaxZoom((float)3.2);
         imageView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                if(imageView.getCurrentZoom() == imageView.getMinZoom())
-                    zoomLevelChangeCallback.zoomLevelChanged(false);
-                else
-                    zoomLevelChangeCallback.zoomLevelChanged(true);
+                if(zoomLevelChangeCallback != null) {
+                    if (imageView.getCurrentZoom() == imageView.getMinZoom())
+                        zoomLevelChangeCallback.zoomLevelChanged(false);
+                    else
+                        zoomLevelChangeCallback.zoomLevelChanged(true);
+                }
                 return false;
             }
         });
@@ -116,7 +124,7 @@ public class ImageFileViewFragment extends BaseFileViewFragment {
                         public boolean onResourceReady(Object resource, Object model, Target<Object> target, DataSource dataSource, boolean isFirstResource) {
                             return false;
                         }
-                    }).load(fileDataSource).format(decodeFormat).thumbnail(Glide.with(getContext()).load(fileThumbnailDataSource).dontTransform()).dontTransform().format(decodeFormat).into(imageView);
+                    }).load(fileDataSource).format(decodeFormat).thumbnail(Glide.with(getContext()).load(fileThumbnailDataSource).signature(new ObjectKey(item.getMetadata().getCreationTime())).dontTransform()).dontTransform().format(decodeFormat).into(imageView);
                 }
             });
 

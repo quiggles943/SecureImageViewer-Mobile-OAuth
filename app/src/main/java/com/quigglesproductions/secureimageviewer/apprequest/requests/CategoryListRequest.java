@@ -11,6 +11,7 @@ import com.quigglesproductions.secureimageviewer.apprequest.callbacks.ItemListRe
 import com.quigglesproductions.secureimageviewer.gson.ViewerGson;
 import com.quigglesproductions.secureimageviewer.models.CatagoryModel;
 import com.quigglesproductions.secureimageviewer.models.SubjectModel;
+import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedCategory;
 import com.quigglesproductions.secureimageviewer.utils.StreamUtils;
 import com.techyourchance.threadposter.BackgroundThreadPoster;
 import com.techyourchance.threadposter.UiThreadPoster;
@@ -21,11 +22,11 @@ import java.util.ArrayList;
 
 import javax.net.ssl.HttpsURLConnection;
 
-public class CatagoryListRequest {
+public class CategoryListRequest {
     private final BackgroundThreadPoster backgroundThreadPoster = new BackgroundThreadPoster();
     private final UiThreadPoster uiThreadPoster = new UiThreadPoster();
 
-    public void getCatagories(Context context, ItemListRetrievalCallback<CatagoryModel> callback) throws RequestServiceNotConfiguredException {
+    public void getCategories(Context context, ItemListRetrievalCallback<EnhancedCategory> callback) throws RequestServiceNotConfiguredException {
         final String urlString = RequestManager.getInstance().getUrlManager().getCatagoryUrlString();
         backgroundThreadPoster.post(()->{
             AuthManager.getInstance().getHttpsUrlConnection(context,urlString, new AuthManager.UrlConnectionRetrievalCallback() {
@@ -40,9 +41,9 @@ public class CatagoryListRequest {
                                 } else {
                                     String result = StreamUtils.readInputStream(connection.getInputStream());
                                     Gson gson = ViewerGson.getGson();
-                                    Type listType = new TypeToken<ArrayList<CatagoryModel>>() {
+                                    Type listType = new TypeToken<ArrayList<EnhancedCategory>>() {
                                     }.getType();
-                                    ArrayList<CatagoryModel> catagoryModels = gson.fromJson(result, listType);
+                                    ArrayList<EnhancedCategory> catagoryModels = gson.fromJson(result, listType);
 
                                     //DownloaderResult<ArrayList<T>> downloaderResult = new DownloaderResult<>(files);
                                     uiThreadPoster.post(() -> {

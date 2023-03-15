@@ -1,5 +1,6 @@
 package com.quigglesproductions.secureimageviewer.ui.login;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
@@ -15,7 +16,7 @@ import com.quigglesproductions.secureimageviewer.R;
 import com.quigglesproductions.secureimageviewer.managers.SecurityManager;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
 
-public class LoginActivity extends SecureActivity {
+public class ReauthenticateActivity extends SecureActivity {
     public static String EXTRA_PASSTHROUGH_INTENT = "secureimageviewer.intent.extra.passthroughintent";
     private TextView infoTextView;
     private ProgressBar progressBar;
@@ -35,5 +36,18 @@ public class LoginActivity extends SecureActivity {
         Intent passthroughIntent = getIntent().getParcelableExtra(EXTRA_PASSTHROUGH_INTENT);
         //SecurityManager.getInstance().setupBiometrics(this,passthroughIntent);
         SecurityManager.getInstance().setupBiometrics(this,passthroughIntent);
+
+    }
+
+    @Override
+    public void onBackPressed() {
+        finishAffinity();
+        super.onBackPressed();
+    }
+
+    @Override
+    public void finishAndRemoveTask() {
+        moveTaskToBack(true);
+        super.finishAndRemoveTask();
     }
 }

@@ -24,7 +24,7 @@ public class StorageSettingsFragment extends PreferenceFragmentCompat {
             @Override
             public boolean onPreferenceClick(Preference preference) {
                 FolderManager.getInstance().removeAllFolders();
-                DatabaseHandler.getInstance().clearFiles();
+                //DatabaseHandler.getInstance().clearFiles();
                 NotificationManager.getInstance().showSnackbar("All folders removed", Snackbar.LENGTH_SHORT);
                 if(callback != null)
                     callback.informationUpdated();

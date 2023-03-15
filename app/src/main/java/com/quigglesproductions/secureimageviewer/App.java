@@ -104,7 +104,7 @@ public class App extends Application implements LifecycleObserver {
         AuthManager.getInstance().ConfigureAuthManager(context.getApplicationContext());
         FolderManager.getInstance().setRootContext(context.getApplicationContext());
         RequestManager.getInstance().setRootContext(context.getApplicationContext());
-        DatabaseHandler.getInstance().setRootContext(context.getApplicationContext());
+        //DatabaseHandler.getInstance().setRootContext(context.getApplicationContext());
         SecurityManager.getInstance().setRootContext(context.getApplicationContext());
         ApplicationPreferenceManager.getInstance().setContext(context.getApplicationContext());
         VideoPlaybackManager.getInstance().setContext(context.getApplicationContext());

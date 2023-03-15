@@ -73,10 +73,6 @@ public class EnhancedFolderGridAdapter extends BaseAdapter
         onItemSelectionChangedListener = listener;
     }
 
-    public ArrayList<? extends Parcelable> getItems() {
-        return folders;
-    }
-
     public void setMultiSelect(boolean multiSelect) {
         this.multiSelect = multiSelect;
         if(!multiSelect) {
