@@ -1,5 +1,7 @@
 package com.quigglesproductions.secureimageviewer.models.enhanced.datasource;
 
+import android.content.Context;
+
 import com.quigglesproductions.secureimageviewer.SortType;
 import com.quigglesproductions.secureimageviewer.appauth.RequestServiceNotConfiguredException;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
@@ -13,7 +15,7 @@ import java.util.List;
 public interface IFolderDataSource {
     URL getFolderURL() throws MalformedURLException, RequestServiceNotConfiguredException;
 
-    void getFilesFromDataSource(FolderDataSourceCallback callback, SortType sortType) throws MalformedURLException;
+    void getFilesFromDataSource(Context context, FolderDataSourceCallback callback, SortType sortType) throws MalformedURLException;
 
     void getThumbnailFromDataSource(FolderDataSourceCallback callback) throws MalformedURLException;
 
@@ -22,7 +24,7 @@ public interface IFolderDataSource {
     }
 
     interface FolderDataSourceCallback{
-        default void FolderFilesRetrieved(List<EnhancedFile> files,Exception exception){
+        default void FolderFilesRetrieved(List<EnhancedFile> files, Exception exception){
 
         }
 

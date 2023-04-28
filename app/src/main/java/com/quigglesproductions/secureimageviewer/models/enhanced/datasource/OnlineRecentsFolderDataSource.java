@@ -1,5 +1,7 @@
 package com.quigglesproductions.secureimageviewer.models.enhanced.datasource;
 
+import android.content.Context;
+
 import com.quigglesproductions.secureimageviewer.SortType;
 import com.quigglesproductions.secureimageviewer.appauth.RequestServiceNotConfiguredException;
 import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
@@ -29,7 +31,7 @@ public class OnlineRecentsFolderDataSource implements IFolderDataSource {
     }
 
     @Override
-    public void getFilesFromDataSource(FolderDataSourceCallback callback, SortType sortType) throws MalformedURLException {
+    public void getFilesFromDataSource(Context context, FolderDataSourceCallback callback, SortType sortType) throws MalformedURLException {
         RequestManager.getInstance().getRequestService().getRecentFiles(NUM_FILES_PER_REQUEST, count, new RequestManager.RequestResultCallback<RequestService.RecentFileResult<EnhancedOnlineFile>, Exception>() {
             @Override
             public void RequestResultRetrieved(RequestService.RecentFileResult<EnhancedOnlineFile> result, Exception exception) {

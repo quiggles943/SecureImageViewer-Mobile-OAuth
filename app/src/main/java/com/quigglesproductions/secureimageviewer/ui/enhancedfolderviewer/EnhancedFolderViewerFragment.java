@@ -2,6 +2,7 @@ package com.quigglesproductions.secureimageviewer.ui.enhancedfolderviewer;
 
 import static androidx.navigation.Navigation.findNavController;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Insets;
 import android.os.Bundle;
@@ -31,6 +32,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.snackbar.Snackbar;
+import com.quigglesproductions.secureimageviewer.App;
 import com.quigglesproductions.secureimageviewer.R;
 import com.quigglesproductions.secureimageviewer.SortType;
 import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
@@ -70,7 +72,7 @@ public class EnhancedFolderViewerFragment extends Fragment {
     FragmentFolderViewBinding binding;
     EnhancedFolder selectedFolder;
     private boolean scrollBottomReached;
-    private FolderOrigin folderOrigin;
+    SortType startingSortType;
     public EnhancedFolderViewerFragment(){
     }
     @Nullable
@@ -135,8 +137,18 @@ public class EnhancedFolderViewerFragment extends Fragment {
             }
         });
         viewModel.getFiles().observe(getViewLifecycleOwner(),enhancedAdapter::setFiles);
-        getFolderFiles(viewModel);
+        getFolderFiles(getContext(),viewModel);
         registerForContextMenu(binding.fileRecyclerview);
+        switch (selectedFolder.getFolderOrigin()){
+            case ONLINE:
+                startingSortType = ApplicationPreferenceManager.getInstance().getOnlineFolderSortType();
+                break;
+            case LOCAL:
+                startingSortType = ApplicationPreferenceManager.getInstance().getOfflineFolderSortType();
+                break;
+            default:
+                startingSortType = SortType.NAME_ASC;
+        }
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -150,13 +162,13 @@ public class EnhancedFolderViewerFragment extends Fragment {
                         scrollBottomReached = true;
                         if(selectedFolder.getDataSource().moreItemsAvailable()){
                             try {
-                                selectedFolder.getDataSource().getFilesFromDataSource(new IFolderDataSource.FolderDataSourceCallback() {
+                                selectedFolder.getDataSource().getFilesFromDataSource(getContext(),new IFolderDataSource.FolderDataSourceCallback() {
                                     @Override
                                     public void FolderFilesRetrieved(List<EnhancedFile> files, Exception exception) {
                                         enhancedAdapter.addFiles(files);
                                         scrollBottomReached = false;
                                     }
-                                },SortType.NAME_ASC);
+                                },startingSortType);
                             } catch (MalformedURLException e) {
                                 throw new RuntimeException(e);
                             }
@@ -259,7 +271,17 @@ public class EnhancedFolderViewerFragment extends Fragment {
         final CharSequence[] items = {"Name A-Z", "Name Z-A", "Newest First", "Oldest First"};
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle("Sort by");
-        SortType currentType = ApplicationPreferenceManager.getInstance().getOfflineFolderSortType();
+        SortType currentType;
+        switch (selectedFolder.getFolderOrigin()){
+            case ONLINE:
+                currentType = ApplicationPreferenceManager.getInstance().getOnlineFolderSortType();
+                break;
+            case LOCAL:
+                currentType = ApplicationPreferenceManager.getInstance().getOfflineFolderSortType();
+                break;
+            default:
+                currentType = SortType.NAME_ASC;
+        }
         int checkedItem = -1;
         switch (currentType){
             case NAME_ASC:
@@ -308,9 +330,9 @@ public class EnhancedFolderViewerFragment extends Fragment {
         alert.show();
     }
 
-    private void getFolderFiles(EnhancedFolderViewerViewModel viewModel){
+    private void getFolderFiles(Context context, EnhancedFolderViewerViewModel viewModel){
         try {
-            selectedFolder.getDataSource().getFilesFromDataSource(new IFolderDataSource.FolderDataSourceCallback() {
+            selectedFolder.getDataSource().getFilesFromDataSource(context,new IFolderDataSource.FolderDataSourceCallback() {
                 @Override
                 public void FolderFilesRetrieved(List<EnhancedFile> files, Exception exception) {
                     if(files != null){
@@ -332,7 +354,7 @@ public class EnhancedFolderViewerFragment extends Fragment {
                         NotificationManager.getInstance().showSnackbar("Unable to retrieve files for folder "+selectedFolder.getName(), Snackbar.LENGTH_SHORT);
                     }
                 }
-            }, SortType.NAME_ASC);
+            }, startingSortType);
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }

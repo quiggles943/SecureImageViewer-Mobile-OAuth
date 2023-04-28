@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -13,19 +14,38 @@ import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavDirections;
+import androidx.navigation.Navigation;
 import androidx.transition.AutoTransition;
 import androidx.transition.TransitionManager;
 
+import com.google.gson.reflect.TypeToken;
 import com.quigglesproductions.secureimageviewer.R;
+import com.quigglesproductions.secureimageviewer.appauth.RequestServiceNotConfiguredException;
+import com.quigglesproductions.secureimageviewer.apprequest.AppRequestError;
+import com.quigglesproductions.secureimageviewer.apprequest.callbacks.ItemRetrievalCallback;
+import com.quigglesproductions.secureimageviewer.apprequest.requests.FileUpdateStatusRequest;
+import com.quigglesproductions.secureimageviewer.apprequest.requests.ServerStatusRequest;
 import com.quigglesproductions.secureimageviewer.database.enhanced.EnhancedDatabaseHandler;
 import com.quigglesproductions.secureimageviewer.databinding.ActivityOverviewBinding;
+import com.quigglesproductions.secureimageviewer.gson.ViewerGson;
+import com.quigglesproductions.secureimageviewer.managers.ApplicationPreferenceManager;
 import com.quigglesproductions.secureimageviewer.managers.ViewerConnectivityManager;
+import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateLog;
+import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedServerStatus;
+import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
+import com.quigglesproductions.secureimageviewer.utils.FileSyncUtils;
+import com.quigglesproductions.secureimageviewer.utils.ViewerFileUtils;
 
+import java.lang.reflect.Type;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 public class OverviewFragment extends Fragment {
     ActivityOverviewBinding binding;
+    OverviewViewModel viewModel;
     DateTimeFormatter sameYearPattern = DateTimeFormatter.ofPattern("hh:mm a, EEEE dd MMMM");
     DateTimeFormatter previousYearPattern = DateTimeFormatter.ofPattern("hh:mm a, EEEE dd MMMM yyyy");
     @Nullable
@@ -33,11 +53,16 @@ public class OverviewFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = ActivityOverviewBinding.inflate(inflater,container,false);
         View root = binding.getRoot();
-        OverviewViewModel viewModel = new ViewModelProvider(this).get(OverviewViewModel.class);
+        viewModel = new ViewModelProvider(this).get(OverviewViewModel.class);
         setDataObservers(viewModel);
 
         final ImageButton onlineStatusExpandButton = binding.serverStatusArrowButton;
         final ImageButton deviceStatusExpandButton = binding.deviceStatusArrowButton;
+
+        final Button deviceFilesViewButton = binding.overviewLocalfilesButton;
+        final Button onlineFilesViewButton = binding.overviewServerfilesButton;
+
+        final Button onlineFileSyncButton = binding.overviewServersyncButton;
 
         onlineStatusExpandButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -63,8 +88,45 @@ public class OverviewFragment extends Fragment {
                 }
             }
         });
+
+        deviceFilesViewButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                NavDirections action = OverviewFragmentDirections.actionNavEnhancedMainMenuFragmentToNavEnhancedOfflineFolderListFragment("offline");
+                Navigation.findNavController(binding.getRoot()).navigate(action);
+            }
+        });
+        onlineFilesViewButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                NavDirections action = OverviewFragmentDirections.actionEnhancedMainMenuFragmentToEnhancedFolderListFragment("online");
+                Navigation.findNavController(binding.getRoot()).navigate(action);
+            }
+        });
+        onlineFileSyncButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                syncFolders();
+            }
+        });
         setupViewModelData(viewModel);
         expandDeviceStatusView(true);
+        ServerStatusRequest serverStatusRequest = new ServerStatusRequest();
+        try {
+            if(Boolean.TRUE.equals(viewModel.getIsOnline().getValue())) {
+                serverStatusRequest.getServerStatus(getContext(), new ItemRetrievalCallback<EnhancedServerStatus>() {
+                    @Override
+                    public void ItemRetrieved(EnhancedServerStatus item, AppRequestError exception) {
+                        if(item != null) {
+                            viewModel.getFilesOnServer().setValue(item.getFileCount());
+                            viewModel.getFoldersOnServer().setValue(item.getFolderCount());
+                        }
+                    }
+                });
+            }
+        } catch (RequestServiceNotConfiguredException e) {
+            throw new RuntimeException(e);
+        }
         return root;
     }
 
@@ -75,6 +137,7 @@ public class OverviewFragment extends Fragment {
     private void setDataObservers(@NonNull OverviewViewModel viewModel){
         viewModel.getIsOnline().observe(getViewLifecycleOwner(),this::setConnectivityIndicator);
         viewModel.getIsOnline().observe(getViewLifecycleOwner(),this::setOnlineStatusVisible);
+        viewModel.getIsOnline().observe(getViewLifecycleOwner(),this::retrieveSyncUpdates);
         viewModel.getFilesOnDevice().observe(getViewLifecycleOwner(), new Observer<Long>() {
             @Override
             public void onChanged(Long value) {
@@ -115,6 +178,12 @@ public class OverviewFragment extends Fragment {
                 }
             }
         });
+        viewModel.getOnlineUpdateStatus().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String s) {
+                binding.overviewUpdateStatus.setText(s);
+            }
+        });
         viewModel.getLastOnlineSyncTime().observe(getViewLifecycleOwner(), new Observer<LocalDateTime>() {
             @Override
             public void onChanged(LocalDateTime localDateTime) {
@@ -130,6 +199,16 @@ public class OverviewFragment extends Fragment {
                 }
             }
         });
+        viewModel.getHasOnlineUpdates().observe(getViewLifecycleOwner(), new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean aBoolean) {
+                binding.overviewServersyncButton.setEnabled(aBoolean);
+                if(aBoolean)
+                    binding.overviewServersyncButton.setVisibility(View.VISIBLE);
+                else
+                    binding.overviewServersyncButton.setVisibility(View.GONE);
+            }
+        });
     }
 
     /**
@@ -143,6 +222,7 @@ public class OverviewFragment extends Fragment {
         viewModel.getFoldersOnDevice().setValue(databaseHandler.getFolderCount());
         viewModel.getLastUpdateTime().setValue(databaseHandler.getLastUpdateTime());
         viewModel.getLastOnlineSyncTime().setValue(databaseHandler.getLastOnlineSyncTime());
+        viewModel.getHasOnlineUpdates().setValue(false);
     }
 
 
@@ -168,7 +248,6 @@ public class OverviewFragment extends Fragment {
             binding.serverStatusHeaderText.setEnabled(true);
             binding.serverStatusArrowButton.clearColorFilter();
             expandServerStatusView(true);
-            //onlineStatusCardView.setVisibility(View.VISIBLE);
         }
         else {
             onlineStatusCardView.setEnabled(false);
@@ -176,9 +255,41 @@ public class OverviewFragment extends Fragment {
             binding.serverStatusArrowButton.setEnabled(false);
             binding.serverStatusHeaderText.setEnabled(false);
             binding.serverStatusArrowButton.setColorFilter(getContext().getColor(R.color.imagebutton_greyout_filter));
-            //onlineStatusCardView.setVisibility(View.GONE);
         }
 
+    }
+
+    private void retrieveSyncUpdates(boolean isOnline) {
+        if(isOnline) {
+            FileUpdateStatusRequest fileUpdateStatusRequest = new FileUpdateStatusRequest();
+            EnhancedDatabaseHandler databaseHandler = new EnhancedDatabaseHandler(getContext());
+            try {
+                fileUpdateStatusRequest.getFileUpdateStatus(getContext(), databaseHandler.getFolders(), new ItemRetrievalCallback<ArrayList<EnhancedFileUpdateLog>>() {
+                    @Override
+                    public void ItemRetrieved(ArrayList<EnhancedFileUpdateLog> item, AppRequestError exception) {
+                        if (item != null) {
+                            ApplicationPreferenceManager.getInstance().setPreferenceString(ApplicationPreferenceManager.ManagedPreference.SYNC_VALUES, ViewerGson.getGson().toJson(item));
+                            if (item.size() > 0) {
+                                if (item.size() == 1)
+                                    viewModel.getOnlineUpdateStatus().setValue("Has " + item.size() + " update");
+                                else
+                                    viewModel.getOnlineUpdateStatus().setValue("Has " + item.size() + " updates");
+
+                                viewModel.getHasOnlineUpdates().setValue(true);
+                            } else {
+                                viewModel.getOnlineUpdateStatus().setValue("No updates");
+                                viewModel.getHasOnlineUpdates().setValue(false);
+                            }
+                        }
+                    }
+                });
+            } catch (RequestServiceNotConfiguredException ex) {
+
+            }
+        }
+        else{
+            ApplicationPreferenceManager.getInstance().setPreferenceString(ApplicationPreferenceManager.ManagedPreference.SYNC_VALUES, null);
+        }
     }
 
     private void expandDeviceStatusView(boolean expand){
@@ -211,5 +322,27 @@ public class OverviewFragment extends Fragment {
                 binding.serverStatusArrowButton.setImageResource(R.drawable.ic_baseline_expand_more_24);
             }
         }
+    }
+
+    private void syncFolders(){
+        EnhancedDatabaseHandler handler = new EnhancedDatabaseHandler(getContext());
+
+        ArrayList<EnhancedFileUpdateLog> deletedLogs = FileSyncUtils.getUpdateLogs(getContext(), EnhancedFileUpdateLog.UpdateType.Deleted);
+        for(EnhancedFileUpdateLog log : deletedLogs){
+            EnhancedDatabaseFile file = handler.getFileByOnlineId((int) log.getFileId());
+            if(file != null)
+                ViewerFileUtils.deleteFile(getContext(),file);
+        }
+
+        ArrayList<EnhancedFileUpdateLog> modifiedLogs = FileSyncUtils.getUpdateLogs(getContext(), EnhancedFileUpdateLog.UpdateType.Modified);
+        for(EnhancedFileUpdateLog log : modifiedLogs){
+
+        }
+
+        ArrayList<EnhancedFileUpdateLog> createdLogs = FileSyncUtils.getUpdateLogs(getContext(), EnhancedFileUpdateLog.UpdateType.Created);
+        for(EnhancedFileUpdateLog log : createdLogs){
+
+        }
+
     }
 }

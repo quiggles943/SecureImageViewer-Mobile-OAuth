@@ -70,6 +70,7 @@ public class AuthManager implements IAuthManager{
     SharedPreferences tokenPref;
     SharedPreferences registrationPref;
     private RegistrationCallback registrationCallback;
+    private boolean loginRequestInProgress;
 
     private final BackgroundThreadPoster backgroundThreadPoster = new BackgroundThreadPoster();
     private final UiThreadPoster uiThreadPoster = new UiThreadPoster();
@@ -213,8 +214,10 @@ public class AuthManager implements IAuthManager{
                         switch (ex.type){
                             case AuthorizationException.TYPE_OAUTH_AUTHORIZATION_ERROR:
                                 case AuthorizationException.TYPE_OAUTH_TOKEN_ERROR:
-                                setDelayedAction(action);
-                                requestLogin(context);
+                                    if(!loginRequestInProgress){
+                                        setDelayedAction(action);
+                                        requestLogin(context);
+                                    }
                                 break;
                         }
 
@@ -234,6 +237,7 @@ public class AuthManager implements IAuthManager{
             Intent intent = AuthManager.getInstance().getAuthorizationRequestIntent();
 
             if(intent != null) {
+                loginRequestInProgress = true;
                 activity.startActivityForResult(intent, AuthManager.AUTH_RESULT_CODE);
             }
             else
@@ -254,6 +258,7 @@ public class AuthManager implements IAuthManager{
     }
     public void updateAuthState(Context context,AuthorizationResponse resp,AuthorizationException ex) {
         authState.update(resp,ex);
+        loginRequestInProgress = false;
         saveAuthState(context);
     }
     public void updateAuthState(Context context,TokenResponse resp,AuthorizationException ex) {

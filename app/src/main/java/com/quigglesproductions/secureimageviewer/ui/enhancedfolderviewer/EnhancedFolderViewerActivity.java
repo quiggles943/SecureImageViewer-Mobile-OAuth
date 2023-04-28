@@ -76,7 +76,7 @@ public class EnhancedFolderViewerActivity extends SecureActivity {
 
 
         try {
-            selectedFolder.getDataSource().getFilesFromDataSource(new IFolderDataSource.FolderDataSourceCallback() {
+            selectedFolder.getDataSource().getFilesFromDataSource(context,new IFolderDataSource.FolderDataSourceCallback() {
                 @Override
                 public void FolderFilesRetrieved(List<EnhancedFile> files, Exception exception) {
                     if(files != null){

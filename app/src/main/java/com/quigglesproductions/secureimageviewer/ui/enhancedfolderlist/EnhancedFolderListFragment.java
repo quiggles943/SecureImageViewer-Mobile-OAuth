@@ -22,21 +22,33 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.volley.VolleyError;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.gson.reflect.TypeToken;
 import com.quigglesproductions.secureimageviewer.R;
+import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
 import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
 import com.quigglesproductions.secureimageviewer.database.enhanced.EnhancedDatabaseHandler;
 import com.quigglesproductions.secureimageviewer.databinding.FragmentFolderListBinding;
+import com.quigglesproductions.secureimageviewer.gson.ViewerGson;
+import com.quigglesproductions.secureimageviewer.managers.ApplicationPreferenceManager;
 import com.quigglesproductions.secureimageviewer.managers.FolderManager;
 import com.quigglesproductions.secureimageviewer.managers.NotificationManager;
+import com.quigglesproductions.secureimageviewer.managers.ViewerConnectivityManager;
+import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateLog;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedDatabaseFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedOnlineFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedRecentsFolder;
 import com.quigglesproductions.secureimageviewer.recycler.RecyclerViewSelectionMode;
 import com.quigglesproductions.secureimageviewer.ui.EnhancedMainMenuActivity;
+import com.quigglesproductions.secureimageviewer.utils.FileSyncUtils;
 
 
+import net.openid.appauth.AuthState;
+import net.openid.appauth.AuthorizationException;
+
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -197,6 +209,20 @@ public class EnhancedFolderListFragment extends Fragment {
                 break;
             case R.id.online_folder_download_selection:
                 NotificationManager.getInstance().showSnackbar("Downloading "+recyclerAdapter.getSelectedCount()+" folders",Snackbar.LENGTH_SHORT);
+                AuthManager.getInstance().performActionWithFreshTokens(new AuthState.AuthStateAction() {
+                    @Override
+                    public void execute(@Nullable String accessToken, @Nullable String idToken, @Nullable AuthorizationException ex) {
+                        for(EnhancedFolder folder: recyclerAdapter.getSelectedFolders()){
+                            FolderManager.getInstance().downloadFolder(folder, accessToken, new FolderManager.DownloadResultCallback<EnhancedDatabaseFolder, ArrayList<VolleyError>>() {
+                                @Override
+                                public void ResultReceived(EnhancedDatabaseFolder result, ArrayList<VolleyError> exception) {
+
+                                }
+                            });
+                        }
+                    }
+                });
+
                 recyclerAdapter.setMultiSelect(false);
                 break;
             case R.id.offline_folder_sync_activate:
@@ -231,6 +257,15 @@ public class EnhancedFolderListFragment extends Fragment {
     private void getOfflineFolders(EnhancedFolderListViewModel viewModel){
         EnhancedDatabaseHandler databaseHandler = new EnhancedDatabaseHandler(getContext());
         ArrayList<EnhancedFolder> folders = (ArrayList<EnhancedFolder>) databaseHandler.getFolders().stream().map(x -> (EnhancedFolder)x).collect(Collectors.toList());
+        if(ViewerConnectivityManager.getInstance().isConnected()) {
+            ArrayList<EnhancedFileUpdateLog> updateLogs = FileSyncUtils.getUpdateLogs(getContext());
+            if (updateLogs != null) {
+                ArrayList<Long> folderIds = (ArrayList<Long>) updateLogs.stream().map(x -> x.getFolderId()).distinct().collect(Collectors.toList());
+                for (Long folderId : folderIds) {
+                    folders.stream().filter(x -> x.getOnlineId() == folderId).findFirst().get().setHasUpdates(true);
+                }
+            }
+        }
         viewModel.getFolders().setValue(folders);
     }
 

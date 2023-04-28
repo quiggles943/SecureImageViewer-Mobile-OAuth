@@ -38,6 +38,9 @@
         android:name="com.quigglesproductions.secureimageviewer.ui.enhancedfolderlist.EnhancedFolderListFragment"
         android:label="Folders"
         tools:layout="@layout/fragment_folder_list" >
+        <argument
+            android:name="state"
+            app:argType="string"/>
         <action
             android:id="@+id/action_enhancedFolderListFragment_to_enhancedFolderViewerFragment"
             app:destination="@id/nav_enhancedFolderViewerFragment"

@@ -46,6 +46,7 @@ public abstract class EnhancedFolder {
     private transient IFolderDataSource dataSource;
 
     public boolean isDownloading = false;
+    boolean hasUpdates = false;
 
     public EnhancedFolder(){
 
@@ -74,6 +75,14 @@ public abstract class EnhancedFolder {
             return true;
         else
             return false;
+    }
+
+    public boolean hasUpdates() {
+        return hasUpdates;
+    }
+
+    public void setHasUpdates(boolean updates){
+        hasUpdates = updates;
     }
 
     public void clearItems() {

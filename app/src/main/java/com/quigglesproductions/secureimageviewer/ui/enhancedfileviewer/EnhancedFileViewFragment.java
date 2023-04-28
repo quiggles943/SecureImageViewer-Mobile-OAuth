@@ -172,11 +172,6 @@ public class EnhancedFileViewFragment extends Fragment implements IFileViewer {
             @SuppressLint("RestrictedApi")
             @Override
             public void onClick(View view) {
-                showSystemBars();
-                if(((SecureActivity)requireActivity()).getSupportActionBar() != null) {
-                    ((SecureActivity) requireActivity()).getSupportActionBar().setShowHideAnimationEnabled(false);
-                    ((SecureActivity) requireActivity()).getSupportActionBar().show();
-                }
                 getActivity().onBackPressed();
             }
         });
@@ -250,7 +245,10 @@ public class EnhancedFileViewFragment extends Fragment implements IFileViewer {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        ((SecureActivity) requireActivity()).getSupportActionBar().setShowHideAnimationEnabled(true);
+        showSystemBars();
+        if(((SecureActivity)requireActivity()).getSupportActionBar() != null) {
+            ((SecureActivity) requireActivity()).getSupportActionBar().show();
+        }
 
     }
 

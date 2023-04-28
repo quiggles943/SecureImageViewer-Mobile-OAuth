@@ -11,6 +11,7 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
 import com.google.android.material.snackbar.Snackbar;
+import com.quigglesproductions.secureimageviewer.BuildConfig;
 import com.quigglesproductions.secureimageviewer.R;
 import com.quigglesproductions.secureimageviewer.managers.FolderManager;
 import com.quigglesproductions.secureimageviewer.managers.NotificationManager;
@@ -132,8 +133,10 @@ public class DevSettingsFragment  extends PreferenceFragmentCompat {
         EnhancedDatabaseFolder insertedFolder2 = FolderManager.getInstance().insertFolder(dummyFolder2);
         ViewerFileUtils.createFileOnDisk(getContext(), (EnhancedDatabaseFile) insertedFolder.getFiles().get(0),generateInputStream(R.drawable.dummy_image_1));
         ViewerFileUtils.createFileOnDisk(getContext(), (EnhancedDatabaseFile) insertedFolder.getFiles().get(1),generateInputStream(R.drawable.dummy_image_2));
-        ViewerFileUtils.createFileOnDisk(getContext(), (EnhancedDatabaseFile) insertedFolder2.getFiles().get(0),generateInputStreamFromRawResource(R.raw.recording_20230307_172120));
-        ViewerFileUtils.createFileOnDisk(getContext(), (EnhancedDatabaseFile) insertedFolder2.getFiles().get(1),generateInputStreamFromRawResource(R.raw.recording_20230308_143931));
+        if(BuildConfig.DEBUG) {
+            //ViewerFileUtils.createFileOnDisk(getContext(), (EnhancedDatabaseFile) insertedFolder2.getFiles().get(0), generateInputStreamFromRawResource(R.raw.recording_20230307_172120));
+            //ViewerFileUtils.createFileOnDisk(getContext(), (EnhancedDatabaseFile) insertedFolder2.getFiles().get(1), generateInputStreamFromRawResource(R.raw.recording_20230308_143931));
+        }
 
         NotificationManager.getInstance().showSnackbar("Dummy data inserted", Snackbar.LENGTH_SHORT);
     }

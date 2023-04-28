@@ -19,10 +19,10 @@ import java.util.ArrayList;
 public class LocalFolderDataSource implements IFolderDataSource{
     private EnhancedDatabaseFolder folder;
     private Context context;
-    private EnhancedDatabaseHandler databaseHandler;
+    //private EnhancedDatabaseHandler databaseHandler;
     public LocalFolderDataSource(Context context,EnhancedDatabaseFolder folder){
         this.context = context;
-        databaseHandler = new EnhancedDatabaseHandler(context);
+        //databaseHandler = new EnhancedDatabaseHandler(context);
         this.folder = folder;
     }
     @Override
@@ -32,7 +32,8 @@ public class LocalFolderDataSource implements IFolderDataSource{
     }
 
     @Override
-    public void getFilesFromDataSource(FolderDataSourceCallback callback, SortType sortType) throws MalformedURLException {
+    public void getFilesFromDataSource(Context context,FolderDataSourceCallback callback, SortType sortType) throws MalformedURLException {
+        EnhancedDatabaseHandler databaseHandler = new EnhancedDatabaseHandler(context);
         if(folder.getItems() == null || folder.getItems().size() == 0){
             ArrayList<EnhancedDatabaseFile> itemList = databaseHandler.getFilesInFolder(folder);
             ArrayList<EnhancedFile> files = new ArrayList<>();

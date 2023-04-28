@@ -130,27 +130,11 @@ public  class FolderDownloadTask {
                     ArrayList<EnhancedFile> files = ViewerGson.getGson().fromJson(result, listType);
                     //folder.fileCount = files.size();
                     for (EnhancedFile file : files) {
-                        //file.setIsUploaded(true);
-                        /*for(SubjectModel subject:file.getSubjects()){
-                            DatabaseHandler.getInstance().addSubjectToFile(subject,file);
-                        }
-                        for(CatagoryModel catagory:file.getCatagories()){
-                            DatabaseHandler.getInstance().addCatagorytoFile(catagory,file);
-                        }*/
                         AuthManager.getInstance().performActionWithFreshTokens(context, new AuthState.AuthStateAction() {
                             @Override
                             public void execute(@Nullable String accessToken, @Nullable String idToken, @Nullable AuthorizationException ex) {
                                 if (ex == null) {
                                     EnhancedDatabaseFile insertedFile = dbHandler.insertFile(file, folder.getId());
-                                    //for(EnhancedSubject subject : file.getSubjects()){
-                                    //    dbHandler.addSubjectToFile(subject,insertedFile);
-                                    //}
-                                    //for(EnhancedCategory category : file.getCategories()){
-                                    //    dbHandler.addCategoryToFile(category,insertedFile);
-                                    //}
-                                    //if(file.getArtist() != null){
-                                    //    dbHandler.addArtistToFile(file.getArtist(),insertedFile);
-                                    //}
                                     try {
                                         VolleyFileDownloadRequest request = createVolleyFileDownloadRequest(insertedFile, accessToken);
                                         request.setShouldCache(false);

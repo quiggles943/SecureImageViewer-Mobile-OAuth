@@ -21,6 +21,7 @@ import com.quigglesproductions.secureimageviewer.models.file.FileModel;
 import com.quigglesproductions.secureimageviewer.models.file.OfflineFileModel;
 import com.quigglesproductions.secureimageviewer.models.folder.FolderModel;
 import com.quigglesproductions.secureimageviewer.models.folder.OfflineFolderModel;
+import com.quigglesproductions.secureimageviewer.utils.ViewerFileUtils;
 
 import java.io.File;
 import java.text.ParseException;
@@ -28,6 +29,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.stream.Collectors;
 
 public class FolderManager {
     private static final FolderManager instance = new FolderManager();
@@ -117,12 +119,15 @@ public class FolderManager {
         EnhancedDatabaseHandler handler = new EnhancedDatabaseHandler(rootContext);
 
         File folderFile = folder.getFolderFile();
-        ArrayList<EnhancedDatabaseFile> files = handler.getFilesInFolder(folder);
-        for(EnhancedDatabaseFile file: files){
+        //ArrayList<EnhancedDatabaseFile> files = handler.getFilesInFolder(folder);
+        EnhancedDatabaseFile[] files = handler.getFilesInFolder(folder).stream().toArray(EnhancedDatabaseFile[]::new);
+
+        ViewerFileUtils.deleteFile(rootContext,files);
+        /*for(EnhancedDatabaseFile file: files){
             handler.deleteFile(file);
             file.getThumbnailFile().delete();
             file.getImageFile().delete();
-        }
+        }*/
         handler.deleteFolder(folder);
         deleteRecursive(folderFile);
 

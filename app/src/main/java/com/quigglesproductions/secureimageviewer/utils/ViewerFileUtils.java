@@ -3,9 +3,12 @@ package com.quigglesproductions.secureimageviewer.utils;
 import android.content.Context;
 import android.util.Log;
 
+import com.quigglesproductions.secureimageviewer.database.enhanced.EnhancedDatabaseHandler;
 import com.quigglesproductions.secureimageviewer.models.ItemBaseModel;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
 import com.quigglesproductions.secureimageviewer.models.file.FileModel;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -85,5 +88,17 @@ public class ViewerFileUtils {
     }
     public static File getThumbnailFilePathForFile(Context context,FileModel file){
         return new File(context.getFilesDir() + File.separator + ".Pictures" + File.separator + file.getFolderId() + File.separator +".thumbnails"+File.separator+ file.getId());
+    }
+
+    public static boolean deleteFile(Context context,@NotNull EnhancedDatabaseFile... files){
+        if(files == null || files.length == 0)
+            return false;
+        EnhancedDatabaseHandler handler = new EnhancedDatabaseHandler(context);
+        for(EnhancedDatabaseFile file:files) {
+            handler.deleteFile(file);
+            file.getThumbnailFile().delete();
+            file.getImageFile().delete();
+        }
+        return true;
     }
 }

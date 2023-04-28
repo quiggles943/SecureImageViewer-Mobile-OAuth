@@ -64,17 +64,17 @@ public class EnhancedFileGridRecyclerAdapter extends RecyclerView.Adapter<Enhanc
                 files.sort(Comparator.comparing(EnhancedFile::getName).reversed());
                 break;
             case NEWEST_FIRST:
-                files.sort(Comparator.comparing(EnhancedFile::getDefaultSortTime));
+                files.sort(Comparator.comparing(EnhancedFile::getDefaultSortTime).reversed());
                 break;
             case OLDEST_FIRST:
-                files.sort(Comparator.comparing(EnhancedFile::getDefaultSortTime).reversed());
+                files.sort(Comparator.comparing(EnhancedFile::getDefaultSortTime));
                 break;
         }
         return files;
     }
 
     public void sort(SortType sortType) {
-        sortFiles(files,sortType);
+        files = sortFiles(files,sortType);
         notifyDataSetChanged();
     }
 

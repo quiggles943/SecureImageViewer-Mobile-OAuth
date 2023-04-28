@@ -38,7 +38,7 @@ public class VolleyFileDownloadRequest extends ViewerRequest<byte[]> {
         this.downloadFile = builder.file;
     }
 
-    public VolleyFileDownloadRequest(int method, String url, Response.Listener<byte[]> listener, @Nullable Response.ErrorListener errorListener, HashMap<String, String> params, EnhancedDatabaseFile file, String accessToken) {
+    /*public VolleyFileDownloadRequest(int method, String url, Response.Listener<byte[]> listener, @Nullable Response.ErrorListener errorListener, HashMap<String, String> params, EnhancedDatabaseFile file, String accessToken) {
         super(method, url, errorListener);
         // this request would never use cache.
         setShouldCache(false);
@@ -46,7 +46,7 @@ public class VolleyFileDownloadRequest extends ViewerRequest<byte[]> {
         mParams=params;
         this.downloadFile = file;
         this.accessToken = accessToken;
-    }
+    }*/
     @Override
     protected Map<String, String> getParams()
             throws com.android.volley.AuthFailureError {

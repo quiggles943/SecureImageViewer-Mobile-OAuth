@@ -17,6 +17,9 @@ public class OverviewViewModel extends ViewModel {
 
     private MutableLiveData<LocalDateTime> lastUpdateTime;
     private MutableLiveData<LocalDateTime> lastOnlineSyncTime;
+    private MutableLiveData<String> onlineUpdateStatus;
+
+    private MutableLiveData<Boolean> hasOnlineUpdates;
 
     public OverviewViewModel(){
         isOnline = new MutableLiveData<>();
@@ -26,6 +29,8 @@ public class OverviewViewModel extends ViewModel {
         foldersOnServer = new MutableLiveData<>();
         lastUpdateTime = new MutableLiveData<>();
         lastOnlineSyncTime = new MutableLiveData<>();
+        onlineUpdateStatus = new MutableLiveData<>();
+        hasOnlineUpdates = new MutableLiveData<>();
     }
 
     public MutableLiveData<Boolean> getIsOnline() {
@@ -54,5 +59,13 @@ public class OverviewViewModel extends ViewModel {
 
     public MutableLiveData<LocalDateTime> getLastOnlineSyncTime() {
         return lastOnlineSyncTime;
+    }
+
+    public MutableLiveData<String> getOnlineUpdateStatus() {
+        return onlineUpdateStatus;
+    }
+
+    public MutableLiveData<Boolean> getHasOnlineUpdates() {
+        return hasOnlineUpdates;
     }
 }

@@ -134,15 +134,20 @@ public class EnhancedFolderListRecyclerAdapter extends RecyclerView.Adapter<Enha
     public static class ViewHolder extends RecyclerView.ViewHolder{
         private final ImageView imageView;
         private final TextView folderName;
+        private ImageView syncView;
         public ViewHolder(View view){
             super(view);
             imageView = (ImageView) view.findViewById(R.id.grid_item_image);
             folderName = view.findViewById(R.id.grid_item_label);
+            syncView = view.findViewById(R.id.sync_icon);
         }
         public ImageView getImageView(){
             return imageView;
         }
         public TextView getFolderNameView(){ return folderName; }
+        public ImageView getSyncView(){
+            return syncView;
+        }
     }
     public EnhancedFolderListRecyclerAdapter(Context context){
         mContext = context;
@@ -198,6 +203,11 @@ public class EnhancedFolderListRecyclerAdapter extends RecyclerView.Adapter<Enha
             viewHolder.getImageView().setColorFilter(ContextCompat.getColor(mContext, R.color.selected), PorterDuff.Mode.SRC_ATOP);
         else
             viewHolder.getImageView().setColorFilter(null);
+        if(folder.hasUpdates()){
+            viewHolder.getSyncView().setVisibility(View.VISIBLE);
+        }
+        else
+            viewHolder.getSyncView().setVisibility(View.GONE);
         viewHolder.getFolderNameView().setText(folder.getName());
         viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override

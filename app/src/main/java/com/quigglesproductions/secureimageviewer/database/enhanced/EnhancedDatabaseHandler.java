@@ -43,6 +43,11 @@ public class EnhancedDatabaseHandler {
         this.database = new EnhancedDatabaseBuilder(context).getWritableDatabase();
     }
 
+    EnhancedDatabaseHandler(Context context,SQLiteDatabase database){
+        this.context = context;
+        this.database = database;
+    }
+
     public EnhancedDatabaseFolder getFolderFromCursor(Cursor cursor) throws DateTimeParseException {
         String normalName = cursor.getString(cursor.getColumnIndexOrThrow(EnhancedDatabaseBuilder.Folders.NORMAL_NAME));
         String encodedName = cursor.getString(cursor.getColumnIndexOrThrow(EnhancedDatabaseBuilder.Folders.ENCODED_NAME));

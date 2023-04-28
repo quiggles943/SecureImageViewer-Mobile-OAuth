@@ -80,7 +80,7 @@ public final class VolleySingleton {
         return req;
     }
 
-    public <T> VolleyFileDownloadRequest createFileDownloadRequest(int method, String url, Response.Listener<byte[]> listener, @Nullable Response.ErrorListener errorListener, HashMap<String, String> params, EnhancedDatabaseFile file, EnhancedFolder folder, String accessToken){
+    /*public <T> VolleyFileDownloadRequest createFileDownloadRequest(int method, String url, Response.Listener<byte[]> listener, @Nullable Response.ErrorListener errorListener, HashMap<String, String> params, EnhancedDatabaseFile file, EnhancedFolder folder, String accessToken){
         VolleyFileDownloadRequest request = new VolleyFileDownloadRequest(method, url, new Response.Listener<byte[]>() {
             @Override
             public void onResponse(byte[] response) {
@@ -97,7 +97,7 @@ public final class VolleySingleton {
         //getRequestQueue().add(request);
         setFolderRequestCount(folder,true);
         return request;
-    }
+    }*/
 
     public static class FolderDownloadCompleteCallback{
         public void onComplete(EnhancedFolder folder) {

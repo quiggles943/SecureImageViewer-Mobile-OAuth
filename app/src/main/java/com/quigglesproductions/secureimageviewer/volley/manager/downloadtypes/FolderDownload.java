@@ -46,7 +46,7 @@ public class FolderDownload extends BaseDownload<VolleyFileDownloadRequest> {
                 public void onResponse(byte[] response) {
                     requestComplete();
                     if(currentRequest != null)
-                        currentRequest.onResponse(response);
+                         currentRequest.onResponse(response);
                 }
             });
             Response.ErrorListener errorListener = request.getErrorListener();

@@ -60,6 +60,7 @@ import com.quigglesproductions.secureimageviewer.ui.filesend.FileSendActivity;
 import com.quigglesproductions.secureimageviewer.ui.login.BiometricAuthenticationException;
 import com.quigglesproductions.secureimageviewer.ui.login.EnhancedLoginActivity;
 
+import net.openid.appauth.AuthState;
 import net.openid.appauth.AuthorizationException;
 import net.openid.appauth.AuthorizationServiceConfiguration;
 
@@ -184,7 +185,63 @@ public class NewSplashScreenActivity extends SecureActivity {
                     }
                 }
                 else{
+                    fetchAuthServiceConfiguration(new AuthorizationServiceConfiguration.RetrieveConfigurationCallback() {
+                        @Override
+                        public void onFetchConfigurationCompleted(@Nullable AuthorizationServiceConfiguration serviceConfiguration, @Nullable AuthorizationException ex) {
+                            if(serviceConfiguration != null) {
+                                fetchRequestServiceConfiguration(new RequestServiceConfiguration.RetrieveConfigurationCallback() {
+                                    @Override
+                                    public void onFetchConfigurationCompleted(@Nullable RequestServiceConfiguration serviceConfiguration, @Nullable RequestConfigurationException ex) {
+                                        if(serviceConfiguration != null) {
+                                            checkDeviceAuthentication(context,new ItemRetrievalCallback<Boolean>() {
+                                                @Override
+                                                public void ItemRetrieved(Boolean authenticated, AppRequestError exception) {
+                                                    if (authenticated) {
+                                                        updateProgressBar(true,R.string.service_connected,ProgressBarState.GOOD);
+                                                        showBiometrics();
+                                                    }
+                                                    else{
+                                                        updateProgressBar(true,R.string.device_authenticate_error,ProgressBarState.ERROR);
+                                                        if(exception != null){
+                                                            NotificationManager.getInstance().showSnackbar(exception.getLocalizedMessage(),Snackbar.LENGTH_SHORT);
+                                                        }
+                                                    }
+                                                }
+                                            });
+                                        }
+                                        else{
+                                            if(AuthManager.getInstance().getDeviceRegistration().getDeviceAuthenticated()){
+                                                RegistrationId registrationId = AuthManager.getInstance().getDeviceRegistration().getRegistrationID();
+                                                if(registrationId.getNextCheckIn() != null){
+                                                    if(registrationId.getNextCheckIn().isAfter(LocalDateTime.now())){
+                                                        setupOfflineLogin();
+                                                    }
+                                                    else{
+                                                        updateProgressBar(true,R.string.online_authentication_required,ProgressBarState.ERROR);
+                                                    }
+                                                }
 
+                                            }
+                                        }
+                                    }
+                                });
+                            }
+                            else{
+                                if(AuthManager.getInstance().getDeviceRegistration().getDeviceAuthenticated()){
+                                    RegistrationId registrationId = AuthManager.getInstance().getDeviceRegistration().getRegistrationID();
+                                    if(registrationId.getNextCheckIn() != null){
+                                        if(registrationId.getNextCheckIn().isAfter(LocalDateTime.now())){
+                                            setupOfflineLogin();
+                                        }
+                                        else{
+                                            updateProgressBar(true,R.string.online_authentication_required,ProgressBarState.ERROR);
+                                        }
+                                    }
+
+                                }
+                            }
+                        }
+                    });
                 }
             }
         });
@@ -233,7 +290,8 @@ public class NewSplashScreenActivity extends SecureActivity {
     }
 
     private void fetchRequestServiceConfiguration(RequestServiceConfiguration.RetrieveConfigurationCallback callback){
-        infoTextView.setText(R.string.requestservice_connecting);
+        updateProgressBar(false,R.string.requestservice_connecting,ProgressBarState.INPROGRESS);
+        //infoTextView.setText(R.string.requestservice_connecting);
         RequestManager.getInstance().checkForConfiguration(configUrl, new RequestServiceConfiguration.RetrieveConfigurationCallback() {
             @Override
             public void onFetchConfigurationCompleted(@Nullable RequestServiceConfiguration serviceConfiguration, @Nullable RequestConfigurationException ex) {

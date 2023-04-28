@@ -205,17 +205,18 @@ public class SecureActivity extends AppCompatActivity {
                 AuthorizationResponse resp = AuthorizationResponse.fromIntent(data);
                 AuthorizationException ex = AuthorizationException.fromIntent(data);
                 AuthManager.getInstance().updateAuthState(context, resp, ex);
-                AuthManager.getInstance().getToken(context, resp, ex, new AuthorizationService.TokenResponseCallback() {
-                    @Override
-                    public void onTokenRequestCompleted(@Nullable TokenResponse response, @Nullable AuthorizationException ex) {
-                        //AuthManager.getInstance().updateAuthState(context, response, ex);
-                        //AuthManager.getInstance().retrieveUserInfo(context);
-                        if(AuthManager.getInstance().hasDelayedAction())
-                        {
-                            AuthManager.getInstance().performActionWithFreshTokens(context,AuthManager.getInstance().getDelayedAction());
+                if(resp != null) {
+                    AuthManager.getInstance().getToken(context, resp, ex, new AuthorizationService.TokenResponseCallback() {
+                        @Override
+                        public void onTokenRequestCompleted(@Nullable TokenResponse response, @Nullable AuthorizationException ex) {
+                            //AuthManager.getInstance().updateAuthState(context, response, ex);
+                            //AuthManager.getInstance().retrieveUserInfo(context);
+                            if (AuthManager.getInstance().hasDelayedAction()) {
+                                AuthManager.getInstance().performActionWithFreshTokens(context, AuthManager.getInstance().getDelayedAction());
+                            }
                         }
-                    }
-                });
+                    });
+                }
                 break;
             case RC_BARCODE_CAPTURE:
                 if(data != null) {

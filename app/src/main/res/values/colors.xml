@@ -33,4 +33,6 @@
     <color name="navigationHeader_gradient_middle">@color/blue_500</color>
     <color name="navigationHeader_gradient_end">@color/blue_700</color>
 
+    <color name="AppYellow">#FAB123</color>
+
 </resources>

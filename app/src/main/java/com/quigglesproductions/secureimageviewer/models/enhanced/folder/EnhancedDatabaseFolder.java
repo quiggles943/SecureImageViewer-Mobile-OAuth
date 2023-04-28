@@ -32,6 +32,11 @@ public class EnhancedDatabaseFolder extends EnhancedFolder implements ILocalFold
         this.id = id;
         setDataSource(new LocalFolderDataSource(context,this));
     }
+
+    public EnhancedDatabaseFolder(LocalFolderDataSource dataSource){
+        super();
+        setDataSource(dataSource);
+    }
     public LocalDateTime getAccessTime(){
         return accessTime;
     }

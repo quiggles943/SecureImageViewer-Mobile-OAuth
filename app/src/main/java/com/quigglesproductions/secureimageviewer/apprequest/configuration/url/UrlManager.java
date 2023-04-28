@@ -55,6 +55,9 @@ public class UrlManager {
     public String getArtistUrlString(){
         return baseUrl+artistEndpoint+endSeparator;
     }
+    public String getServerStatusString(){
+        return baseUrl+serverStatusEndpoint+endSeparator;
+    }
     public String getRecentFileUrlString() {
         return baseUrl+fileEndpoint+endSeparator+"recents";
     }
