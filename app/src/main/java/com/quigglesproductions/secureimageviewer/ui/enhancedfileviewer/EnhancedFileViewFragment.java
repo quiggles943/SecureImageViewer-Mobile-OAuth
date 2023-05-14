@@ -47,6 +47,7 @@ public class EnhancedFileViewFragment extends Fragment implements IFileViewer {
     int currentPagerSlopMultiplier;
     boolean hasStartPosition;
     EnhancedFileViewerViewModel viewModel;
+    EnhancedFileCollectionAdapter collectionAdapter;
     public EnhancedFileViewFragment(){
         hasStartPosition = false;
     }
@@ -100,7 +101,7 @@ public class EnhancedFileViewFragment extends Fragment implements IFileViewer {
         if(!hasStartPosition)
             startPos = EnhancedFileViewFragmentArgs.fromBundle(getArguments()).getStartPosition();
         setupNavigationControls(view);
-        EnhancedFileCollectionAdapter collectionAdapter = new EnhancedFileCollectionAdapter(this);
+        collectionAdapter = new EnhancedFileCollectionAdapter(this);
         collectionAdapter.setFileNavigator(fileNavigator);
         EnhancedFolder selectedFolder = FolderManager.getInstance().getCurrentFolder();
         collectionAdapter.addFiles(selectedFolder.getBaseItems());
@@ -250,6 +251,10 @@ public class EnhancedFileViewFragment extends Fragment implements IFileViewer {
             ((SecureActivity) requireActivity()).getSupportActionBar().show();
         }
 
+    }
+
+    public EnhancedFileCollectionAdapter.ZoomLevelChangeCallback getZoomCallback(){
+        return collectionAdapter.getZoomLevelCallback();
     }
 
 }

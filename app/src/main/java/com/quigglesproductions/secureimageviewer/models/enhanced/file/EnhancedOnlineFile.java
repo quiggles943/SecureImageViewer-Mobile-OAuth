@@ -8,7 +8,7 @@ public class EnhancedOnlineFile extends EnhancedFile{
 
     public EnhancedOnlineFile(){
         super();
-        setDataSource(new OnlineFileDataSource(this));
+        //setDataSource(new OnlineFileDataSource(this));
     }
     protected EnhancedOnlineFile(Parcel in) {
         super(in);

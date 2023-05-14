@@ -14,6 +14,10 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.PreferenceManager;
@@ -22,21 +26,31 @@ import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.gson.Gson;
 import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
+import com.quigglesproductions.secureimageviewer.authentication.AuthenticationManager;
 import com.quigglesproductions.secureimageviewer.barcodescanner.BarcodeCaptureActivity;
+import com.quigglesproductions.secureimageviewer.dagger.hilt.module.DownloadManager;
 import com.quigglesproductions.secureimageviewer.managers.NotificationManager;
 import com.quigglesproductions.secureimageviewer.managers.SecurityManager;
 import com.quigglesproductions.secureimageviewer.managers.ViewerConnectivityManager;
 import com.quigglesproductions.secureimageviewer.models.LoginModel;
 import com.quigglesproductions.secureimageviewer.models.WebServerConfig;
+import com.quigglesproductions.secureimageviewer.retrofit.RequestManager;
 import com.quigglesproductions.secureimageviewer.ui.login.EnhancedLoginActivity;
 import com.quigglesproductions.secureimageviewer.ui.login.ReauthenticateActivity;
 import com.quigglesproductions.secureimageviewer.ui.splash.NewSplashScreenActivity;
+import com.quigglesproductions.secureimageviewer.ui.startup.EnhancedStartupScreen;
+import com.quigglesproductions.secureimageviewer.ui.ui.login.LoginActivity;
 
 import net.openid.appauth.AuthorizationException;
 import net.openid.appauth.AuthorizationResponse;
 import net.openid.appauth.AuthorizationService;
 import net.openid.appauth.TokenResponse;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class SecureActivity extends AppCompatActivity {
     Context context;
     public static final int RC_BARCODE_CAPTURE = 9001;
@@ -45,9 +59,20 @@ public class SecureActivity extends AppCompatActivity {
     public static final int INTENT_AUTHENTICATE = 5;
 
     public static final boolean NEW_LOGIN_METHOD= false;
+    private ActivityResultLauncher<Intent> activityResultLauncher;
+
+    @Inject
+    RequestManager requestManager;
+    @Inject
+    AuthenticationManager authenticationManager;
+    @Inject
+    Gson gson;
+    @Inject
+    DownloadManager downloadManager;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setupActivityResultLauncher();
         context = this;
         UiModeManager uiModeManager = (UiModeManager) context.getSystemService(Context.UI_MODE_SERVICE);
         float density = context.getResources().getDisplayMetrics().densityDpi;
@@ -100,7 +125,7 @@ public class SecureActivity extends AppCompatActivity {
             }
         });
         if(!SecurityManager.getInstance().isUserAuthenticated()){
-            if(!ReauthenticateActivity.class.isInstance(this) && !NewSplashScreenActivity.class.isInstance(this) && !EnhancedLoginActivity.class.isInstance(this)){
+            if(!ReauthenticateActivity.class.isInstance(this) && !NewSplashScreenActivity.class.isInstance(this) && !EnhancedLoginActivity.class.isInstance(this)&& !EnhancedStartupScreen.class.isInstance(this) && !LoginActivity.class.isInstance(this)){
                 authenticateUser();
             }
         }
@@ -133,7 +158,7 @@ public class SecureActivity extends AppCompatActivity {
             }
         });
         if(!SecurityManager.getInstance().isUserAuthenticated()){
-            if(!ReauthenticateActivity.class.isInstance(this) && !NewSplashScreenActivity.class.isInstance(this) && !EnhancedLoginActivity.class.isInstance(this)){
+            if(!ReauthenticateActivity.class.isInstance(this) && !NewSplashScreenActivity.class.isInstance(this) && !EnhancedLoginActivity.class.isInstance(this)&& !EnhancedStartupScreen.class.isInstance(this) && !LoginActivity.class.isInstance(this)){
                 authenticateUser();
             }
         }
@@ -202,20 +227,22 @@ public class SecureActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode){
             case AuthManager.AUTH_RESULT_CODE:
-                AuthorizationResponse resp = AuthorizationResponse.fromIntent(data);
-                AuthorizationException ex = AuthorizationException.fromIntent(data);
-                AuthManager.getInstance().updateAuthState(context, resp, ex);
-                if(resp != null) {
-                    AuthManager.getInstance().getToken(context, resp, ex, new AuthorizationService.TokenResponseCallback() {
-                        @Override
-                        public void onTokenRequestCompleted(@Nullable TokenResponse response, @Nullable AuthorizationException ex) {
-                            //AuthManager.getInstance().updateAuthState(context, response, ex);
-                            //AuthManager.getInstance().retrieveUserInfo(context);
-                            if (AuthManager.getInstance().hasDelayedAction()) {
-                                AuthManager.getInstance().performActionWithFreshTokens(context, AuthManager.getInstance().getDelayedAction());
+                if(data != null) {
+                    AuthorizationResponse resp = AuthorizationResponse.fromIntent(data);
+                    AuthorizationException ex = AuthorizationException.fromIntent(data);
+                    AuthManager.getInstance().updateAuthState(context, resp, ex);
+                    if (resp != null) {
+                        AuthManager.getInstance().getToken(context, resp, ex, new AuthorizationService.TokenResponseCallback() {
+                            @Override
+                            public void onTokenRequestCompleted(@Nullable TokenResponse response, @Nullable AuthorizationException ex) {
+                                //AuthManager.getInstance().updateAuthState(context, response, ex);
+                                //AuthManager.getInstance().retrieveUserInfo(context);
+                                if (AuthManager.getInstance().hasDelayedAction()) {
+                                    AuthManager.getInstance().performActionWithFreshTokens(context, AuthManager.getInstance().getDelayedAction());
+                                }
                             }
-                        }
-                    });
+                        });
+                    }
                 }
                 break;
             case RC_BARCODE_CAPTURE:
@@ -226,6 +253,11 @@ public class SecureActivity extends AppCompatActivity {
                     WebServerConfig config = gson.fromJson(scanResult, WebServerConfig.class);
                     Log.d("QR Code", scanResult);
                     Toast.makeText(getBaseContext(), "QR code scanned", Toast.LENGTH_SHORT).show();
+                }
+                break;
+            case AuthenticationManager.AUTHENTICATION_RESPONSE:
+                if(data != null){
+
                 }
                 break;
             case SecurityManager.LOGIN:
@@ -259,5 +291,39 @@ public class SecureActivity extends AppCompatActivity {
         }
         return false;
         //return netInfo != null && netInfo.isConnectedOrConnecting();
+    }
+
+    public ActivityResultLauncher<Intent> getActivityResultLauncher(){
+        return activityResultLauncher;
+    }
+
+    private void setupActivityResultLauncher(){
+        ActivityResultLauncher<Intent> resultLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                new ActivityResultCallback<ActivityResult>() {
+                    @Override
+                    public void onActivityResult(ActivityResult result) {
+                        if(requestManager.hasSuspendedCall())
+                            requestManager.enqueueSuspendedCall();
+                    }
+                }
+        );
+        activityResultLauncher = resultLauncher;
+    }
+
+    public RequestManager getRequestManager(){
+        return requestManager;
+    }
+
+    public AuthenticationManager getAuthenticationManager() {
+        return authenticationManager;
+    }
+
+    public Gson getGson() {
+        return gson;
+    }
+
+    public DownloadManager getDownloadManager(){
+        return downloadManager;
     }
 }

@@ -2,6 +2,7 @@ package com.quigglesproductions.secureimageviewer.models.enhanced.datasource;
 
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.FileMetadata;
+import com.quigglesproductions.secureimageviewer.retrofit.RequestManager;
 
 import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
@@ -49,7 +50,7 @@ public class LocalFileDataSource implements IFileDataSource {
     }
 
     @Override
-    public void getFileMetadata(DataSourceFileMetadataCallback callback) {
+    public void getFileMetadata(RequestManager requestManager, DataSourceFileMetadataCallback callback) {
         FileMetadata metadata = new FileMetadata();
         metadata.categories = file.getCategories();
         metadata.subjects = file.getSubjects();

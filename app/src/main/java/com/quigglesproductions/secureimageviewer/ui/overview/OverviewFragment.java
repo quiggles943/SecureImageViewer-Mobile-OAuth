@@ -1,5 +1,6 @@
 package com.quigglesproductions.secureimageviewer.ui.overview;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,8 +33,12 @@ import com.quigglesproductions.secureimageviewer.gson.ViewerGson;
 import com.quigglesproductions.secureimageviewer.managers.ApplicationPreferenceManager;
 import com.quigglesproductions.secureimageviewer.managers.ViewerConnectivityManager;
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateLog;
+import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateSendModel;
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedServerStatus;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
+import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedDatabaseFolder;
+import com.quigglesproductions.secureimageviewer.ui.SecureFragment;
+import com.quigglesproductions.secureimageviewer.ui.ui.login.LoginActivity;
 import com.quigglesproductions.secureimageviewer.utils.FileSyncUtils;
 import com.quigglesproductions.secureimageviewer.utils.ViewerFileUtils;
 
@@ -41,9 +46,14 @@ import java.lang.reflect.Type;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
-public class OverviewFragment extends Fragment {
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+public class OverviewFragment extends SecureFragment {
     ActivityOverviewBinding binding;
     OverviewViewModel viewModel;
     DateTimeFormatter sameYearPattern = DateTimeFormatter.ofPattern("hh:mm a, EEEE dd MMMM");
@@ -111,7 +121,24 @@ public class OverviewFragment extends Fragment {
         });
         setupViewModelData(viewModel);
         expandDeviceStatusView(true);
-        ServerStatusRequest serverStatusRequest = new ServerStatusRequest();
+        if(Boolean.TRUE.equals(viewModel.getIsOnline().getValue())) {
+            getRequestService().doGetServerStatus().enqueue(new Callback<EnhancedServerStatus>() {
+                @Override
+                public void onResponse(Call<EnhancedServerStatus> call, Response<EnhancedServerStatus> response) {
+                    if (response.isSuccessful()) {
+                        EnhancedServerStatus status = response.body();
+                        viewModel.getFilesOnServer().setValue(status.getFileCount());
+                        viewModel.getFoldersOnServer().setValue(status.getFolderCount());
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<EnhancedServerStatus> call, Throwable t) {
+
+                }
+            });
+        }
+        /*ServerStatusRequest serverStatusRequest = new ServerStatusRequest();
         try {
             if(Boolean.TRUE.equals(viewModel.getIsOnline().getValue())) {
                 serverStatusRequest.getServerStatus(getContext(), new ItemRetrievalCallback<EnhancedServerStatus>() {
@@ -126,7 +153,7 @@ public class OverviewFragment extends Fragment {
             }
         } catch (RequestServiceNotConfiguredException e) {
             throw new RuntimeException(e);
-        }
+        }*/
         return root;
     }
 
@@ -261,8 +288,36 @@ public class OverviewFragment extends Fragment {
 
     private void retrieveSyncUpdates(boolean isOnline) {
         if(isOnline) {
-            FileUpdateStatusRequest fileUpdateStatusRequest = new FileUpdateStatusRequest();
             EnhancedDatabaseHandler databaseHandler = new EnhancedDatabaseHandler(getContext());
+            EnhancedFileUpdateSendModel sendModel = new EnhancedFileUpdateSendModel();
+            sendModel.folders = databaseHandler.getFolders().stream().map(EnhancedDatabaseFolder::getOnlineId).collect(Collectors.toList());
+            getRequestService().doGetFileUpdates(sendModel).enqueue(new Callback<List<EnhancedFileUpdateLog>>() {
+                @Override
+                public void onResponse(Call<List<EnhancedFileUpdateLog>> call, Response<List<EnhancedFileUpdateLog>> response) {
+                    if(response.isSuccessful()){
+                        List<EnhancedFileUpdateLog> updateLogs = response.body();
+                        ApplicationPreferenceManager.getInstance().setPreferenceString(ApplicationPreferenceManager.ManagedPreference.SYNC_VALUES, ViewerGson.getGson().toJson(updateLogs));
+                        if (updateLogs.size() > 0) {
+                            if (updateLogs.size() == 1)
+                                viewModel.getOnlineUpdateStatus().setValue("Has " + updateLogs.size() + " update");
+                            else
+                                viewModel.getOnlineUpdateStatus().setValue("Has " + updateLogs.size() + " updates");
+
+                            viewModel.getHasOnlineUpdates().setValue(true);
+                        } else {
+                            viewModel.getOnlineUpdateStatus().setValue("No updates");
+                            viewModel.getHasOnlineUpdates().setValue(false);
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<List<EnhancedFileUpdateLog>> call, Throwable t) {
+
+                }
+            });
+            /*FileUpdateStatusRequest fileUpdateStatusRequest = new FileUpdateStatusRequest();
+
             try {
                 fileUpdateStatusRequest.getFileUpdateStatus(getContext(), databaseHandler.getFolders(), new ItemRetrievalCallback<ArrayList<EnhancedFileUpdateLog>>() {
                     @Override
@@ -285,7 +340,7 @@ public class OverviewFragment extends Fragment {
                 });
             } catch (RequestServiceNotConfiguredException ex) {
 
-            }
+            }*/
         }
         else{
             ApplicationPreferenceManager.getInstance().setPreferenceString(ApplicationPreferenceManager.ManagedPreference.SYNC_VALUES, null);

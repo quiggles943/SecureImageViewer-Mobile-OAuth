@@ -43,6 +43,7 @@ public class OnlineFolderDataSource implements IFolderDataSource{
 
     @Override
     public void getFilesFromDataSource(Context context,FolderDataSourceCallback callback, SortType sortType) throws MalformedURLException {
+
         RequestManager.getInstance().getRequestService().getFolderFiles(folder.getOnlineId(), new RequestManager.RequestResultCallback<ArrayList<EnhancedOnlineFile>, Exception>() {
             @Override
             public void RequestResultRetrieved(ArrayList<EnhancedOnlineFile> result, Exception exception) {

@@ -1,5 +1,6 @@
 package com.quigglesproductions.secureimageviewer.ui.enhancedfolderlist;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.PorterDuff;
 import android.os.Parcelable;
@@ -39,9 +40,9 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EnhancedFolderListRecyclerAdapter extends RecyclerView.Adapter<EnhancedFolderListRecyclerAdapter.ViewHolder> {
+public class EnhancedFolderListRecyclerAdapter<T extends EnhancedFolder> extends RecyclerView.Adapter<EnhancedFolderListRecyclerAdapter.ViewHolder> {
     private RecyclerView recyclerView;
-    private List<EnhancedFolder> folders = new ArrayList<>();
+    private List<T> folders = new ArrayList<>();
     private ArrayList<Integer> selected = new ArrayList<>();
     private Context mContext;
     private boolean multiSelect = false;
@@ -52,7 +53,7 @@ public class EnhancedFolderListRecyclerAdapter extends RecyclerView.Adapter<Enha
         this.onClickListener = onClickListener;
     }
 
-    public EnhancedFolder getItem(int position) {
+    public T getItem(int position) {
         return folders.get(position);
     }
 
@@ -107,28 +108,32 @@ public class EnhancedFolderListRecyclerAdapter extends RecyclerView.Adapter<Enha
         this.selectionModeChangeListener = selectionModeChangeListener;
     }
 
-    public void add(EnhancedFolder folder) {
+    public void add(T folder) {
         this.folders.add(folder);
         notifyDataSetChanged();
     }
 
-    public void setFolders(List<EnhancedFolder> enhancedFolders) {
+    public void setFolders(List<T> enhancedFolders) {
         this.folders = enhancedFolders;
         notifyDataSetChanged();
     }
 
-    public List<EnhancedFolder> getSelectedFolders() {
-        List<EnhancedFolder> result = new ArrayList<>();
+    public List<T> getSelectedFolders() {
+        List<T> result = new ArrayList<>();
         for (Integer pos : getSelectedPositions())
             result.add(getItem(pos));
 
         return result;
     }
 
-    public void removeFolder(EnhancedFolder folder) {
+    public void removeFolder(T folder) {
         int position = folders.indexOf(folder);
         folders.remove(position);
         notifyItemRemoved(position);
+    }
+
+    public List<T> getFolders() {
+        return folders;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder{
@@ -153,7 +158,7 @@ public class EnhancedFolderListRecyclerAdapter extends RecyclerView.Adapter<Enha
         mContext = context;
     }
 
-    public EnhancedFolderListRecyclerAdapter(Context context, ArrayList<EnhancedFolder> files){
+    public EnhancedFolderListRecyclerAdapter(Context context, ArrayList<T> files){
         mContext = context;
         this.folders = files;
     }
@@ -162,7 +167,7 @@ public class EnhancedFolderListRecyclerAdapter extends RecyclerView.Adapter<Enha
     public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
         // Create a new view, which defines the UI of the list item
         View view = LayoutInflater.from(viewGroup.getContext())
-                .inflate(R.layout.foldergrid_layout_constrained, viewGroup, false);
+                .inflate(R.layout.foldergrid_layout_constrained_tile, viewGroup, false);
         return new ViewHolder(view);
     }
 
@@ -176,16 +181,17 @@ public class EnhancedFolderListRecyclerAdapter extends RecyclerView.Adapter<Enha
 
         // Get element from your dataset at this position and replace the
         // contents of the view with that element
-        EnhancedFolder folder = folders.get(position);
+        T folder = folders.get(position);
         try {
             folder.getDataSource().getThumbnailFromDataSource(new IFolderDataSource.FolderDataSourceCallback() {
+                @SuppressLint("ResourceType")
                 @Override
                 public void FolderThumbnailRetrieved(Object thumbnailDataSource, Exception exception) {
-                    Glide.with(mContext).addDefaultRequestListener(new RequestListener<Object>() {
+                    Glide.with(viewHolder.itemView.getContext()).addDefaultRequestListener(new RequestListener<Object>() {
                         @Override
                         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Object> target, boolean isFirstResource) {
-                            Log.e("Image Load Fail", e.getMessage());
-                            e.logRootCauses("Image Load Fail");
+                            //Log.e("Image Load Fail", e.getMessage());
+                            //e.logRootCauses("Image Load Fail");
                             return false;
                         }
 
@@ -193,7 +199,7 @@ public class EnhancedFolderListRecyclerAdapter extends RecyclerView.Adapter<Enha
                         public boolean onResourceReady(Object resource, Object model, Target<Object> target, DataSource dataSource, boolean isFirstResource) {
                             return false;
                         }
-                    }).load(thumbnailDataSource).into(viewHolder.getImageView());
+                    }).load(thumbnailDataSource).error(R.drawable.ic_broken_image).fitCenter().into(viewHolder.getImageView());
                 }
             });
         }catch (MalformedURLException ex){
@@ -236,7 +242,7 @@ public class EnhancedFolderListRecyclerAdapter extends RecyclerView.Adapter<Enha
         folders.clear();
         notifyDataSetChanged();
     }
-    public void addList(ArrayList<EnhancedFolder> folders){
+    public void addList(ArrayList<T> folders){
         this.folders.addAll(folders);
         notifyDataSetChanged();
     }

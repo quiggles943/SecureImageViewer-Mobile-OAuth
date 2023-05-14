@@ -20,8 +20,19 @@
 
         <service android:name=".apprequest.services.AppAuthorizedService" />
 
-        <activity
+        <!--<activity
             android:name=".ui.splash.NewSplashScreenActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:theme="@style/SplashScreenTheme" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>-->
+        <activity
+            android:name=".ui.startup.EnhancedStartupScreen"
             android:exported="true"
             android:launchMode="singleTask"
             android:theme="@style/SplashScreenTheme" >
@@ -37,16 +48,13 @@
         <activity android:name=".ui.EnhancedMainMenuActivity"
             android:theme="@style/Theme.SecureImageViewer.NoActionBar"/>
         <activity
-            android:name=".login.LoginActivity"
-            android:noHistory="true"
-            android:theme="@style/Theme.SecureImageViewer.NoActionBar" />
-        <activity
             android:name=".ui.onlinefolderview.OnlineFolderViewActivity"
             android:launchMode="singleTask" />
         <activity
             android:name=".ui.MainMenuActivity"
             android:label="@string/app_name"
             android:launchMode="singleTask" />
+        <activity android:name=".ui.ui.login.LoginActivity"/>
 
         <meta-data
             android:name="android.app.default_searchable"

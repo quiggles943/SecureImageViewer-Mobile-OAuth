@@ -37,23 +37,13 @@ public class EnhancedFileCollectionAdapter extends FragmentStateAdapter {
         switch (file.metadata.fileType)
         {
             case "IMAGE":
-                fragment = new ImageFileViewFragment(new ZoomLevelChangeCallback() {
-                    @Override
-                    public void zoomLevelChanged(boolean isZoomed) {
-                        zoomCallback.zoomLevelChanged(isZoomed);
-                    }
-                });
+                fragment = new ImageFileViewFragment();
                 break;
             case "VIDEO":
                 fragment = new VideoFileViewFragment();
                 break;
             default:
-                fragment = new ImageFileViewFragment(new ZoomLevelChangeCallback() {
-                    @Override
-                    public void zoomLevelChanged(boolean isZoomed) {
-                        zoomCallback.zoomLevelChanged(isZoomed);
-                    }
-                });
+                fragment = new ImageFileViewFragment();
         }
         Bundle args = new Bundle();
         String json = ViewerGson.getGson().toJson(file);
@@ -84,10 +74,20 @@ public class EnhancedFileCollectionAdapter extends FragmentStateAdapter {
 
     public void setFileZoomLevelCallback(ZoomLevelChangeCallback callback){
         this.zoomCallback = callback;
+
     }
 
     public void setFileNavigator(FileViewerNavigator fileNavigator) {
         navigatorControls = fileNavigator;
+    }
+
+    public ZoomLevelChangeCallback getZoomLevelCallback() {
+        return new ZoomLevelChangeCallback() {
+            @Override
+            public void zoomLevelChanged(boolean isZoomed) {
+                zoomCallback.zoomLevelChanged(isZoomed);
+            }
+        };
     }
 
     public interface ZoomLevelChangeCallback{
@@ -103,5 +103,6 @@ public class EnhancedFileCollectionAdapter extends FragmentStateAdapter {
     public void onBindViewHolder(@NonNull FragmentViewHolder holder, int position, @NonNull List<Object> payloads) {
         super.onBindViewHolder(holder, position, payloads);
     }
+
 
 }

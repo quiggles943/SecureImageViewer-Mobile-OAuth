@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import com.quigglesproductions.secureimageviewer.R;
-import com.quigglesproductions.secureimageviewer.login.LoginActivity;
 import com.quigglesproductions.secureimageviewer.managers.ViewerConnectivityManager;
 import com.quigglesproductions.secureimageviewer.ui.offlinefolderlist.FolderListActivity;
 
@@ -20,6 +19,9 @@ import net.openid.appauth.AuthState;
 import net.openid.appauth.AuthorizationService;
 import net.openid.appauth.AuthorizationServiceConfiguration;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class MainMenuActivity extends SecureActivity {
 
     private static final int RC_AUTH = 0;
@@ -33,7 +35,6 @@ public class MainMenuActivity extends SecureActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Intent intent = getIntent();
-        int loginType = intent.getIntExtra(LoginActivity.EXTRA_LOGIN_TYPE,-1);
         context = this;
         setContentView(R.layout.activity_main);
         //Toolbar toolbar = findViewById(R.id.toolbar);

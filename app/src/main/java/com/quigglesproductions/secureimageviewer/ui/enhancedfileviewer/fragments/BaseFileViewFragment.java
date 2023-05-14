@@ -12,12 +12,13 @@ import com.quigglesproductions.secureimageviewer.gson.ViewerGson;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedOnlineFile;
+import com.quigglesproductions.secureimageviewer.ui.SecureFragment;
 import com.quigglesproductions.secureimageviewer.ui.compoundcontrols.FileViewerNavigator;
 import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.EnhancedFileViewFragment;
 
 import java.util.Locale;
 
-public class BaseFileViewFragment extends Fragment {
+public class BaseFileViewFragment extends SecureFragment {
     public static final String ARG_FILE_ID = "fileid";
     public static final String ARG_FILE = "file";
     public static final String ARG_FILE_SOURCE_TYPE = "sourceType";
@@ -42,10 +43,10 @@ public class BaseFileViewFragment extends Fragment {
         EnhancedFile file;
         switch (sourceType){
             case ONLINE:
-                file = ViewerGson.getGson().fromJson(args.getString(ARG_FILE), EnhancedOnlineFile.class);
+                file = getGson().fromJson(args.getString(ARG_FILE), EnhancedOnlineFile.class);
                 break;
             case DATABASE:
-                file = ViewerGson.getGson().fromJson(args.getString(ARG_FILE), EnhancedDatabaseFile.class);
+                file = getGson().fromJson(args.getString(ARG_FILE), EnhancedDatabaseFile.class);
                 break;
             default:
                 file = null;

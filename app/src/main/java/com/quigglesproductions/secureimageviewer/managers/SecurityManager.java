@@ -12,8 +12,10 @@ import androidx.biometric.BiometricManager;
 import androidx.biometric.BiometricPrompt;
 import androidx.core.content.ContextCompat;
 
+import com.google.gson.Gson;
 import com.quigglesproductions.secureimageviewer.models.LoginModel;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
+import com.quigglesproductions.secureimageviewer.ui.data.model.LoggedInUser;
 import com.quigglesproductions.secureimageviewer.ui.login.BiometricAuthenticationException;
 import com.quigglesproductions.secureimageviewer.ui.login.ReauthenticateActivity;
 
@@ -28,9 +30,12 @@ public class SecurityManager {
     private static final int RESULT_NO_BIOMETRIC = 128;
     private static final int RESULT_AUTH_ERROR = 111;
     public static final String ERROR_RESULT = "SecurityManager.Error";
+    private static final String userPreferences = "com.secureimageviewer.preference.security.user";
     private static SecurityManager singleton;
     private Context rootContext;
     private LoginModel login;
+
+    private LoggedInUser loggedInUser;
 
     public static SecurityManager getInstance(){
         if(singleton == null)
@@ -39,6 +44,11 @@ public class SecurityManager {
     }
     public void setRootContext(Context context){
         rootContext = context.getApplicationContext();
+    }
+
+    private SharedPreferences getSecurityPref(){
+        SharedPreferences tokenPref = rootContext.getSharedPreferences(userPreferences,Context.MODE_PRIVATE);
+        return tokenPref;
     }
 
     public LoginModel getLoginModel(){
@@ -148,6 +158,62 @@ public class SecurityManager {
                 activity.startActivity(loginIntent);
             }
         }*/
+    }
+
+    public void callBiometricLogin(SecureActivity activity,BiometricResultCallback callback){
+        Executor executor;
+        BiometricPrompt biometricPrompt;
+        BiometricPrompt.PromptInfo promptInfo;
+        //int canAuthenticate = BiometricManager.from(rootContext).canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_WEAK);
+        //if(canAuthenticate == BiometricManager.BIOMETRIC_SUCCESS) {
+        executor = ContextCompat.getMainExecutor(rootContext);
+        biometricPrompt = new BiometricPrompt(activity,
+                executor, new BiometricPrompt.AuthenticationCallback() {
+            @Override
+            public void onAuthenticationError(int errorCode,
+                                              @NonNull CharSequence errString) {
+                super.onAuthenticationError(errorCode, errString);
+                switch (errorCode) {
+                    case BiometricPrompt.ERROR_NO_BIOMETRICS:
+                        break;
+                    //No Fingerprints enrolled
+                    default:
+                        BiometricAuthenticationException exception = new BiometricAuthenticationException(errorCode,errString);
+                        callback.BiometricResultReceived(false,exception);
+                        break;
+                }
+                //finishAndRemoveTask();
+            }
+
+            @Override
+            public void onAuthenticationSucceeded(
+                    @NonNull BiometricPrompt.AuthenticationResult result) {
+                super.onAuthenticationSucceeded(result);
+                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(rootContext);
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putBoolean("loggedIn", true);
+                editor.apply();
+                LoginModel loginModel = new LoginModel();
+                loginModel.setAuthenticated(true);
+                loginModel.setLoggedIn(true);
+                SecurityManager.getInstance().setLogin(loginModel);
+                callback.BiometricResultReceived(true,null);
+            }
+
+            @Override
+            public void onAuthenticationFailed() {
+                super.onAuthenticationFailed();
+                //finishAndRemoveTask();
+            }
+        });
+
+        promptInfo = new BiometricPrompt.PromptInfo.Builder()
+                .setTitle("Biometric login for secure image viewer")
+                .setSubtitle("Log in using your biometric credential")
+                .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG | BiometricManager.Authenticators.DEVICE_CREDENTIAL)
+                //.setNegativeButtonText("Close")
+                .build();
+        biometricPrompt.authenticate(promptInfo);
     }
 
     public void setupBiometricsForResult(SecureActivity activity, Intent intent) {
@@ -263,6 +329,32 @@ public class SecurityManager {
             error.putExtra(ERROR_RESULT,exception);
             activity.onActivityResult(SecurityManager.LOGIN,00,error);
         }
+    }
+
+    public void setLoggedInUser(LoggedInUser data) {
+        loggedInUser = data;
+        saveUser(data);
+    }
+
+    private void saveUser(LoggedInUser user){
+        Gson gson = new Gson();
+        SharedPreferences.Editor editor = getSecurityPref().edit();
+        editor.putString("user",gson.toJson(user));
+        editor.commit();
+    }
+    private LoggedInUser retrieveLoggedInUser(){
+        String json = getSecurityPref().getString("user",null);
+        if(json == null)
+            return null;
+        Gson gson = new Gson();
+        LoggedInUser user = gson.fromJson(json,LoggedInUser.class);
+        return user;
+    }
+
+    public LoggedInUser getLoggedInUser(){
+        if(loggedInUser == null)
+            loggedInUser = retrieveLoggedInUser();
+        return loggedInUser;
     }
 
     public interface BiometricResultCallback{

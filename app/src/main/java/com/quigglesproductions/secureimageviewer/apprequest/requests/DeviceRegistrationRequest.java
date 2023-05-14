@@ -4,14 +4,9 @@ import android.content.Context;
 
 import com.google.gson.Gson;
 import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
-import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
-import com.quigglesproductions.secureimageviewer.apprequest.callbacks.ItemRetrievalCallback;
-import com.quigglesproductions.secureimageviewer.gson.ViewerGson;
-import com.quigglesproductions.secureimageviewer.models.DeviceStatus;
 import com.quigglesproductions.secureimageviewer.registration.DeviceRegistrationModel;
 import com.quigglesproductions.secureimageviewer.registration.DeviceRegistrationResponseModel;
 import com.quigglesproductions.secureimageviewer.registration.RegistrationId;
-import com.quigglesproductions.secureimageviewer.utils.StreamUtils;
 import com.techyourchance.threadposter.BackgroundThreadPoster;
 import com.techyourchance.threadposter.UiThreadPoster;
 
@@ -20,12 +15,10 @@ import org.acra.ACRA;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.net.URL;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -49,8 +42,8 @@ public class DeviceRegistrationRequest {
                                 connection.setDoOutput(true);
 
                                 DeviceRegistrationModel sendModel = new DeviceRegistrationModel();
-                                sendModel.device_name = model.getDeviceName();
-                                sendModel.device_id = model.getDeviceId();
+                                sendModel.deviceName = model.getDeviceName();
+                                sendModel.deviceId = model.getDeviceId();
 
                                 BufferedOutputStream out = new BufferedOutputStream(connection.getOutputStream());
                                 BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out));

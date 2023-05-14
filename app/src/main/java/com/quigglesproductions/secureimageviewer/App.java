@@ -17,6 +17,8 @@ import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
 import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
 import com.quigglesproductions.secureimageviewer.apprequest.configuration.RequestConfigurationException;
 import com.quigglesproductions.secureimageviewer.apprequest.configuration.RequestServiceConfiguration;
+import com.quigglesproductions.secureimageviewer.authentication.AuthenticationManager;
+import com.quigglesproductions.secureimageviewer.authentication.TokenManager;
 import com.quigglesproductions.secureimageviewer.database.DatabaseHandler;
 import com.quigglesproductions.secureimageviewer.gson.ViewerGson;
 import com.quigglesproductions.secureimageviewer.managers.ApplicationPreferenceManager;
@@ -34,6 +36,9 @@ import org.acra.sender.HttpSender;
 
 import java.util.Arrays;
 
+import dagger.hilt.android.HiltAndroidApp;
+
+@HiltAndroidApp
 public class App extends Application implements LifecycleObserver {
     Context context;
     @Override
@@ -43,7 +48,6 @@ public class App extends Application implements LifecycleObserver {
         ProcessLifecycleOwner.get().getLifecycle().addObserver(this);
         TooLargeTool.startLogging(this);
         initializeSingletons();
-        int nightMode = AppCompatDelegate.getDefaultNightMode();
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String darkModePreference = preferences.getString("display_darkmode","device");
         switch (darkModePreference){
@@ -63,13 +67,7 @@ public class App extends Application implements LifecycleObserver {
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
         HttpSenderConfiguration httpSenderConfiguration = new HttpSenderConfigurationBuilder()
-                //required. Https recommended
-                //.withUri("http://192.168.0.17:10500/api/report")
                 .withUri("https://quigleyserver.ddns.net:14500/api/report/ ")
-                //optional. Enables http basic auth
-                //.withBasicAuthLogin("acra")
-                //required if above set
-                //.withBasicAuthPassword("password")
                 // defaults to POST
                 .withHttpMethod(HttpSender.Method.POST)
                 //defaults to 5000ms
@@ -83,7 +81,6 @@ public class App extends Application implements LifecycleObserver {
                 .withCompress(false)
                 //defaults to all
                 .build();
-        //String[] additionalSharedPreferences = new String[]{AuthManager.AUTHMANAGER_PREF_NAME,AuthManager.TOKEN_PREF,AuthManager.USERINFO_PREF};
         ACRA.init(this, new CoreConfigurationBuilder()
                 //core configuration:
                 .withBuildConfigClass(BuildConfig.class)
@@ -95,7 +92,6 @@ public class App extends Application implements LifecycleObserver {
                                 .build(),httpSenderConfiguration
                 )
                 .withSendReportsInDevMode(true)
-                //.withAdditionalSharedPreferences(additionalSharedPreferences)
         );
     }
 
@@ -108,22 +104,8 @@ public class App extends Application implements LifecycleObserver {
         SecurityManager.getInstance().setRootContext(context.getApplicationContext());
         ApplicationPreferenceManager.getInstance().setContext(context.getApplicationContext());
         VideoPlaybackManager.getInstance().setContext(context.getApplicationContext());
+        //AuthenticationManager.setSingleton(context.getApplicationContext());
     }
-
-    /*private void initializeRequestmanager(){
-        if(!RequestManager.getInstance().hasValidConfiguration()){
-            String configUrl = "https://quigleyserver.ddns.net:14500/api/v1/info/metadata";
-            //String configUrl = "https://192.168.0.17:10501/api/v1/info/metadata";
-            RequestManager.getInstance().checkForConfiguration(configUrl, new RequestServiceConfiguration.RetrieveConfigurationCallback() {
-                @Override
-                public void onFetchConfigurationCompleted(@Nullable RequestServiceConfiguration serviceConfiguration, @Nullable RequestConfigurationException ex) {
-                    //if(ex != null)
-                        //NotificationManager.getInstance().showToast("Unable to connect to file server", Toast.LENGTH_SHORT);
-                    RequestManager.getInstance().ConfigureRequestManager(serviceConfiguration,ex);
-                }
-            });
-        }
-    }*/
 
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
     public void onAppBackgrounded() {

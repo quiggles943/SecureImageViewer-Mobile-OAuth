@@ -25,8 +25,8 @@ public class DeviceRegistrationTask  extends AsyncTask<String, Integer, Registra
         this.context = context;
         this.model = model;
         this.callback = callback;
-        sendModel.device_name = model.getDeviceName();
-        sendModel.device_id = model.getDeviceId();
+        sendModel.deviceName = model.getDeviceName();
+        sendModel.deviceId = model.getDeviceId();
     }
     @Override
     protected RegistrationId doInBackground(String... strings) {

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="5dp">
+        <TextView
+            android:id="@+id/folderDownload_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Test Header Line"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+            android:textSize="16sp"/>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="5dp">
+        <TextView
+            android:id="@+id/folderDownload_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Test status"/>
+    </LinearLayout>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="5dp"
+        android:paddingHorizontal="5dp"
+        android:gravity="right">
+        <TextView
+            android:id="@+id/folderDownload_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="2"/>
+        <TextView
+            android:id="@+id/folderDownload_delimiter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/folderDownload_count"
+            android:text="/"/>
+
+        <TextView
+            android:id="@+id/folderDownload_total"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/folderDownload_delimiter"
+            android:text="10" />
+
+    </RelativeLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <ProgressBar
+            android:indeterminate="false"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:id="@+id/folderDownload_progressbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Test status"/>
+    </LinearLayout>
+
+
+</LinearLayout>

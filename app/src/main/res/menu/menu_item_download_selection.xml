@@ -6,6 +6,11 @@
         android:title="Recents"
         app:showAsAction="always"/>
     <item
+        android:id="@+id/online_folder_download_viewer"
+        android:title="View Downloads"
+        android:icon="@drawable/baseline_download_viewer"
+        app:showAsAction="ifRoom"/>
+    <item
         android:visible="false"
         android:icon="@android:drawable/stat_sys_download"
         android:id="@+id/online_folder_download_selection"

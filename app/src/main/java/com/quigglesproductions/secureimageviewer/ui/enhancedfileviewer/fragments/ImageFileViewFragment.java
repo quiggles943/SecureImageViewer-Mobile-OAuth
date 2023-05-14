@@ -29,6 +29,7 @@ import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFi
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.FileType;
 import com.quigglesproductions.secureimageviewer.ui.compoundcontrols.FileViewerNavigator;
 import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.EnhancedFileCollectionAdapter;
+import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.EnhancedFileViewFragment;
 import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.NewTouchImageView;
 
 public class ImageFileViewFragment extends BaseFileViewFragment {
@@ -39,10 +40,6 @@ public class ImageFileViewFragment extends BaseFileViewFragment {
     public ImageFileViewFragment(){
 
     }
-
-    public ImageFileViewFragment(EnhancedFileCollectionAdapter.ZoomLevelChangeCallback zoomCallback){
-        zoomLevelChangeCallback = zoomCallback;
-    }
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -51,8 +48,11 @@ public class ImageFileViewFragment extends BaseFileViewFragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-
+        EnhancedFileViewFragment parentFragment = (EnhancedFileViewFragment) getParentFragment();
+        zoomLevelChangeCallback = parentFragment.getZoomCallback();
         EnhancedFile file = getFile();
+
+
         view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -89,6 +89,18 @@ public class ImageFileViewFragment extends BaseFileViewFragment {
                 return false;
             }
         });
+        /*imageView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if(zoomLevelChangeCallback != null) {
+                    if (imageView.getCurrentZoom() == imageView.getMinZoom())
+                        zoomLevelChangeCallback.zoomLevelChanged(false);
+                    else
+                        zoomLevelChangeCallback.zoomLevelChanged(true);
+                }
+                return false;
+            }
+        });*/
         try {
             IFileDataSource dataSource = item.getDataSource();
             FileType fileType = item.getFileType();
@@ -139,7 +151,7 @@ public class ImageFileViewFragment extends BaseFileViewFragment {
         // Adding the View
     }
 
-    private void setupControls(View view){
+    /*private void setupControls(View view){
         View.OnClickListener prevFileClick = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -170,5 +182,5 @@ public class ImageFileViewFragment extends BaseFileViewFragment {
         //imageCountText = findViewById(R.id.imagecount);
         //imageTotalText = findViewById(R.id.imagetotal);
 
-    }
+    }*/
 }

@@ -9,4 +9,15 @@
             android:persistent="false"
             android:summary="Add dummy data into the system for testing"/>
     </PreferenceCategory>
+
+    <PreferenceCategory android:title="Login">
+        <Preference
+            android:key="test_login"
+            android:title="Test Login"
+            android:persistent="false"/>
+        <Preference
+            android:key="test_request"
+            android:title="Test Retrofit Request"
+            android:persistent="false"/>
+    </PreferenceCategory>
 </PreferenceScreen>

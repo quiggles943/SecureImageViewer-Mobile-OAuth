@@ -229,7 +229,7 @@ public class EnhancedFolderViewerActivity extends SecureActivity {
                 TextView artistNameText = bottomSheetDialog.findViewById(R.id.artist_name);
                 TextView catagoriesText = bottomSheetDialog.findViewById(R.id.catagories);
                 TextView subjectsText = bottomSheetDialog.findViewById(R.id.subjects);
-                selectedFile.getDataSource().getFileMetadata(new IFileDataSource.DataSourceFileMetadataCallback() {
+                selectedFile.getDataSource().getFileMetadata(getRequestManager(),new IFileDataSource.DataSourceFileMetadataCallback() {
                     @Override
                     public void FileMetadataRetrieved(FileMetadata metadata, Exception exception) {
                         selectedFile.metadata = metadata;

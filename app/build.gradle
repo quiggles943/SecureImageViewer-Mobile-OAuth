@@ -2,6 +2,8 @@ plugins {
     id 'com.android.application'
     id 'androidx.navigation.safeargs'
     id 'com.google.devtools.ksp' version '1.8.0-1.0.8'
+    id 'dagger.hilt.android.plugin'
+
 }
 
 android {
@@ -77,12 +79,19 @@ dependencies {
     implementation "androidx.media3:media3-cast:$mediaVersion"
     implementation "androidx.biometric:biometric:1.1.0"
 
+    implementation 'com.github.mike14u:shimmer-recyclerview-x:1.0.4'
+
     testImplementation 'androidx.test:core:1.5.0'
 
     implementation 'com.techyourchance:threadposter:1.0.1'
 
     implementation 'com.squareup.retrofit2:converter-gson:2.1.0'
     implementation 'com.squareup.retrofit2:retrofit:2.1.0'
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.4.1'
+
+    implementation 'com.google.dagger:hilt-android:2.41'
+    implementation 'androidx.hilt:hilt-navigation-fragment:1.0.0'
+    annotationProcessor 'com.google.dagger:hilt-compiler:2.41'
 
     implementation "ch.acra:acra-http:$acraVersion"
     implementation "ch.acra:acra-core:$acraVersion"
@@ -91,9 +100,16 @@ dependencies {
     implementation "ch.acra:acra-toast:$acraVersion"
     implementation "ch.acra:acra-advanced-scheduler:$acraVersion"
     
-    implementation 'com.github.bumptech.glide:glide:4.13.0'
+    implementation 'com.github.bumptech.glide:glide:4.14.2'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.14.2'
+    implementation "com.github.bumptech.glide:okhttp3-integration:4.14.2"
+    implementation ("com.github.bumptech.glide:recyclerview-integration:4.14.2") {
+        // Excludes the support library because it's already included by Glide.
+        transitive = false
+    }
+
     implementation 'com.github.MikeOrtiz:TouchImageView:1.4.1'
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.13.0'
+
     testImplementation "org.robolectric:robolectric:4.7.3"
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'androidx.test.ext:junit:1.1.5'
@@ -104,7 +120,6 @@ dependencies {
 
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
-
 
 
 }

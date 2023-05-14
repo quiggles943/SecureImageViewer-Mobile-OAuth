@@ -48,6 +48,13 @@
             app:exitAnim="@anim/fade_out"
             app:popEnterAnim="@anim/fade_in"
             app:popExitAnim="@anim/slide_out_horizontal" />
+        <action
+            android:id="@+id/action_nav_enhancedFolderListFragment_to_downloadViewerFragment"
+            app:destination="@id/nav_downloadViewerFragment"
+            app:enterAnim="@anim/slide_in_horizontal"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/slide_out_horizontal" />
     </fragment>
     <fragment
         android:id="@+id/nav_enhancedFolderViewerFragment"
@@ -61,6 +68,11 @@
             app:popEnterAnim="@anim/fade_in"
             app:popExitAnim="@anim/fade_out" />
     </fragment>
+    <fragment
+        android:id="@+id/nav_downloadViewerFragment"
+        android:name="com.quigglesproductions.secureimageviewer.ui.downloadviewer.DownloadViewerFragment"
+        android:label="Download Viewer"
+        tools:layout="@layout/fragment_download_viewer"/>
     <fragment
         android:id="@+id/nav_enhancedFileViewFragment"
         android:name="com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.EnhancedFileViewFragment"
@@ -175,4 +187,9 @@
         android:id="@+id/webEndpointsFragment"
         android:name="com.quigglesproductions.secureimageviewer.ui.preferences.WebEndpointsFragment"
         android:label="WebEndpointsFragment" />
+    <fragment
+        android:id="@+id/downloadViewerFragment"
+        android:name="com.quigglesproductions.secureimageviewer.ui.downloadviewer.DownloadViewerFragment"
+        android:label="DownloadViewerFragment"
+        tools:layout="@layout/fragment_download_viewer"/>
 </navigation>
