@@ -103,7 +103,8 @@ public class AppAuthorizedService extends Service {
                                             }
                                         }
                                         if (exception != null) {
-                                            Log.e("PHONE-HOME", exception.getLocalizedMessage());
+                                            if(exception.getLocalizedMessage() != null)
+                                                Log.e("PHONE-HOME", exception.getLocalizedMessage());
                                         }
                                     }
                                 });

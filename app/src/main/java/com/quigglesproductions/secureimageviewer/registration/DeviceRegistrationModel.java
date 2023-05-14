@@ -1,10 +1,13 @@
 package com.quigglesproductions.secureimageviewer.registration;
 
 import com.google.gson.Gson;
+import com.google.gson.annotations.SerializedName;
 
 public class DeviceRegistrationModel {
-    public String device_id;
-    public String device_name;
+    @SerializedName("device_id")
+    public String deviceId;
+    @SerializedName("device_name")
+    public String deviceName;
     private static Gson gson = new Gson();
 
     public String toJsonString(){

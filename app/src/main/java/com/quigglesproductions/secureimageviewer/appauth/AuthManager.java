@@ -549,6 +549,15 @@ public class AuthManager implements IAuthManager{
         return deviceRegistration;
     }
 
+    public String getAccessToken() {
+        if(authState == null)
+            return null;
+        if(authState.getAccessToken() == null)
+            return null;
+        else
+            return authState.getAccessToken();
+    }
+
     public interface UrlConnectionRetrievalCallback{
         void UrlConnectionRetrieved(HttpsURLConnection connection, IOException exception);
     }

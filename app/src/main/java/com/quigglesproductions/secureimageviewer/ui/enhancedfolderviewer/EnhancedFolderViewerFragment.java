@@ -32,12 +32,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.gson.reflect.TypeToken;
+import com.mikelau.views.shimmer.ShimmerRecyclerViewX;
 import com.quigglesproductions.secureimageviewer.App;
 import com.quigglesproductions.secureimageviewer.R;
 import com.quigglesproductions.secureimageviewer.SortType;
 import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
 import com.quigglesproductions.secureimageviewer.database.enhanced.EnhancedDatabaseHandler;
 import com.quigglesproductions.secureimageviewer.databinding.FragmentFolderViewBinding;
+import com.quigglesproductions.secureimageviewer.gson.ViewerGson;
 import com.quigglesproductions.secureimageviewer.managers.ApplicationPreferenceManager;
 import com.quigglesproductions.secureimageviewer.managers.FolderManager;
 import com.quigglesproductions.secureimageviewer.managers.NotificationManager;
@@ -54,14 +57,18 @@ import com.quigglesproductions.secureimageviewer.models.enhanced.folder.ILocalFo
 import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.FileMetadata;
 import com.quigglesproductions.secureimageviewer.ui.EnhancedMainMenuActivity;
 import com.quigglesproductions.secureimageviewer.ui.EnhancedMainMenuViewModel;
+import com.quigglesproductions.secureimageviewer.ui.SecureFragment;
 import com.quigglesproductions.secureimageviewer.ui.enhancedfolderlist.EnhancedFolderListFragmentDirections;
+import com.techyourchance.threadposter.BackgroundThreadPoster;
+import com.techyourchance.threadposter.UiThreadPoster;
 
+import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class EnhancedFolderViewerFragment extends Fragment {
+public class EnhancedFolderViewerFragment extends SecureFragment {
     private static final int CONTEXTMENU_INFO = 0;
     private static final int CONTEXTMENU_SET_THUMBNAIL = 1;
     private static final int CONTEXTMENU_UPLOAD = 2;
@@ -73,6 +80,10 @@ public class EnhancedFolderViewerFragment extends Fragment {
     EnhancedFolder selectedFolder;
     private boolean scrollBottomReached;
     SortType startingSortType;
+    EnhancedFolderViewerViewModel viewModel;
+    ShimmerRecyclerViewX recyclerView;
+    private final BackgroundThreadPoster backgroundThreadPoster = new BackgroundThreadPoster();
+    private final UiThreadPoster uiThreadPoster = new UiThreadPoster();
     public EnhancedFolderViewerFragment(){
     }
     @Nullable
@@ -82,15 +93,19 @@ public class EnhancedFolderViewerFragment extends Fragment {
         setHasOptionsMenu(true);
         binding = FragmentFolderViewBinding.inflate(inflater,container,false);
         View root = binding.getRoot();
-        EnhancedFolderViewerViewModel viewModel = new ViewModelProvider(this).get(EnhancedFolderViewerViewModel.class);
+        viewModel = new ViewModelProvider(this).get(EnhancedFolderViewerViewModel.class);
         EnhancedMainMenuViewModel mainMenuViewModel = new ViewModelProvider(this).get(EnhancedMainMenuViewModel.class);
         //gridview = binding.fileGridview;
-        final RecyclerView recyclerView = binding.fileRecyclerview;;
+        recyclerView = binding.fileShimmerRecyclerView;
         enhancedAdapter = new EnhancedFileGridRecyclerAdapter(getContext());
+        enhancedAdapter.setStateRestorationPolicy(RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY);
         int columnCount = getResources().getInteger(R.integer.column_count_filelist);
         final GridLayoutManager layoutManager = new GridLayoutManager(getContext(),columnCount);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(enhancedAdapter);
+        recyclerView.showShimmerAdapter();
+
+        restoreInstanceState(savedInstanceState);
         /*gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
@@ -104,6 +119,7 @@ public class EnhancedFolderViewerFragment extends Fragment {
         enhancedAdapter.setOnClickListener(new EnhancedFileGridRecyclerAdapter.EnhancedRecyclerViewOnClickListener() {
             @Override
             public void onClick(int position) {
+                saveInstanceState();
                 NavDirections action = EnhancedFolderViewerFragmentDirections.actionEnhancedFolderViewerFragmentToEnhancedFileViewFragment(position);
                 findNavController(root).navigate(action);
             }
@@ -137,8 +153,7 @@ public class EnhancedFolderViewerFragment extends Fragment {
             }
         });
         viewModel.getFiles().observe(getViewLifecycleOwner(),enhancedAdapter::setFiles);
-        getFolderFiles(getContext(),viewModel);
-        registerForContextMenu(binding.fileRecyclerview);
+        registerForContextMenu(recyclerView);
         switch (selectedFolder.getFolderOrigin()){
             case ONLINE:
                 startingSortType = ApplicationPreferenceManager.getInstance().getOnlineFolderSortType();
@@ -149,14 +164,13 @@ public class EnhancedFolderViewerFragment extends Fragment {
             default:
                 startingSortType = SortType.NAME_ASC;
         }
-
-        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+        /*recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                int test = layoutManager.findLastCompletelyVisibleItemPosition();
-                int test2 = layoutManager.findLastVisibleItemPosition();
+                //int test = layoutManager.findLastCompletelyVisibleItemPosition();
+                //int test2 = layoutManager.findLastVisibleItemPosition();
                 int total = enhancedAdapter.getItemCount();
-                int test3 = total - (columnCount % total);
+                //int test3 = total - (columnCount % total);
                 if(layoutManager.findLastCompletelyVisibleItemPosition() >total-LIST_UPDATE_TRIGGER_THRESHOLD &&layoutManager.findLastCompletelyVisibleItemPosition() <=total-1){
                     if(scrollBottomReached == false) {
                         scrollBottomReached = true;
@@ -185,11 +199,30 @@ public class EnhancedFolderViewerFragment extends Fragment {
                 if(!recyclerView.canScrollVertically(1)){
 
                 }
-            }*/
-        });
+            }*//*
+        });*/
 
 
         return root;
+    }
+
+    private void restoreInstanceState(Bundle savedInstanceState){
+        //if(savedInstanceState != null) {
+            String fileListJson = viewModel.getState().get("FileList");
+            //String fileListJson = savedInstanceState.getString("FileList");
+            if (fileListJson != null) {
+                Type listType = new TypeToken<ArrayList<EnhancedFile>>() {
+                }.getType();
+                ArrayList<EnhancedFile> files = getGson().fromJson(fileListJson, listType);
+                enhancedAdapter.setFiles(files);
+                recyclerView.hideShimmerAdapter();
+            }
+        //}
+    }
+
+    private void saveInstanceState(){
+        if(enhancedAdapter.getItemCount()>0)
+            viewModel.getState().set("FileList",getGson().toJson(enhancedAdapter.getFiles()));
     }
 
     @Override
@@ -206,7 +239,7 @@ public class EnhancedFolderViewerFragment extends Fragment {
                 TextView artistNameText = bottomSheetDialog.findViewById(R.id.artist_name);
                 TextView catagoriesText = bottomSheetDialog.findViewById(R.id.catagories);
                 TextView subjectsText = bottomSheetDialog.findViewById(R.id.subjects);
-                selectedFile.getDataSource().getFileMetadata(new IFileDataSource.DataSourceFileMetadataCallback() {
+                selectedFile.getDataSource().getFileMetadata(requiresRequestManager(),new IFileDataSource.DataSourceFileMetadataCallback() {
                     @Override
                     public void FileMetadataRetrieved(FileMetadata metadata, Exception exception) {
                         selectedFile.metadata = metadata;
@@ -248,6 +281,9 @@ public class EnhancedFolderViewerFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         setTitle(selectedFolder.getName());
+        restoreInstanceState(savedInstanceState);
+        getFolderFiles(getContext(),viewModel);
+
     }
 
     @Override
@@ -331,33 +367,60 @@ public class EnhancedFolderViewerFragment extends Fragment {
     }
 
     private void getFolderFiles(Context context, EnhancedFolderViewerViewModel viewModel){
-        try {
-            selectedFolder.getDataSource().getFilesFromDataSource(context,new IFolderDataSource.FolderDataSourceCallback() {
-                @Override
-                public void FolderFilesRetrieved(List<EnhancedFile> files, Exception exception) {
-                    if(files != null){
-                        //itemList = (ArrayList<EnhancedFile>) files;
-                        SortType initialSort;
-                        if(selectedFolder.getFolderOrigin() == FolderOrigin.LOCAL)
-                            initialSort = ApplicationPreferenceManager.getInstance().getOfflineFolderSortType();
-                        else
-                            initialSort = ApplicationPreferenceManager.getInstance().getOnlineFolderSortType();
-                        selectedFolder.sortFiles(initialSort);
-                        ArrayList<EnhancedFile> itemList = (ArrayList<EnhancedFile>) selectedFolder.getFiles();
-                        viewModel.getFiles().setValue( itemList);
-                        //adapter = new FileGridAdapter(context,itemList);
-                        //gridview.setAdapter(adapter);
+            if(enhancedAdapter.getItemCount() == 0) {
+                backgroundThreadPoster.post(() -> {
+                    try {
+                        selectedFolder.getDataSource().getFilesFromDataSource(context, new IFolderDataSource.FolderDataSourceCallback() {
+                            @Override
+                            public void FolderFilesRetrieved(List<EnhancedFile> files, Exception exception) {
+                                if (files != null) {
+                                    //itemList = (ArrayList<EnhancedFile>) files;
+                                    SortType initialSort;
+                                    if (selectedFolder.getFolderOrigin() == FolderOrigin.LOCAL)
+                                        initialSort = ApplicationPreferenceManager.getInstance().getOfflineFolderSortType();
+                                    else
+                                        initialSort = ApplicationPreferenceManager.getInstance().getOnlineFolderSortType();
+                                    selectedFolder.sortFiles(initialSort);
+                                    ArrayList<EnhancedFile> itemList = (ArrayList<EnhancedFile>) selectedFolder.getFiles();
+                                    uiThreadPoster.post(() -> {
+                                        viewModel.getFiles().setValue(itemList);
+                                        recyclerView.hideShimmerAdapter();
+                                    });
 
+                                    //adapter = new FileGridAdapter(context,itemList);
+                                    //gridview.setAdapter(adapter);
+
+                                }
+                                if (exception != null) {
+                                    uiThreadPoster.post(() -> {
+                                        Navigation.findNavController(binding.getRoot()).popBackStack();
+                                        NotificationManager.getInstance().showSnackbar("Unable to retrieve files for folder " + selectedFolder.getName(), Snackbar.LENGTH_SHORT);
+                                        recyclerView.hideShimmerAdapter();
+                                    });
+
+                                }
+                            }
+                        }, startingSortType);
+                    } catch (MalformedURLException e) {
+                        throw new RuntimeException(e);
                     }
-                    if(exception != null){
-                        Navigation.findNavController(binding.getRoot()).popBackStack();
-                        NotificationManager.getInstance().showSnackbar("Unable to retrieve files for folder "+selectedFolder.getName(), Snackbar.LENGTH_SHORT);
-                    }
-                }
-            }, startingSortType);
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
+                });
+            }
+
+
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        if(enhancedAdapter.getItemCount()>0)
+            viewModel.getState().set("FileList",getGson().toJson(enhancedAdapter.getFiles()));
+            //outState.putString("FileList",getGson().toJson(enhancedAdapter.getFiles()));
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
     }
 
     private void setTitle(String title){

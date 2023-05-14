@@ -20,6 +20,7 @@ public class EnhancedDatabaseFolder extends EnhancedFolder implements ILocalFold
     private LocalDateTime accessTime;
 
     private File thumbnailFile;
+    private String thumbnailFileUri;
     private File folderFile;
     private ArrayList<EnhancedDatabaseFile> files;
     public EnhancedDatabaseFolder(Context context){
@@ -62,6 +63,7 @@ public class EnhancedDatabaseFolder extends EnhancedFolder implements ILocalFold
     }
     public void setThumbnailFile(File file) {
         this.thumbnailFile = file;
+        this.thumbnailFileUri = file.getAbsolutePath();
     }
     public File getThumbnailFile() {
         return thumbnailFile;
@@ -130,5 +132,9 @@ public class EnhancedDatabaseFolder extends EnhancedFolder implements ILocalFold
     @Override
     public List<EnhancedFile> getFiles(){
         return new ArrayList<>(files);
+    }
+
+    public String getThumbnailFileUri() {
+        return thumbnailFileUri;
     }
 }

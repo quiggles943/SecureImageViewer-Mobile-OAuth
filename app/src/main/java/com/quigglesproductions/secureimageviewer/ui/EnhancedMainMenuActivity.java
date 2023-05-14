@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.TextView;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.ColorRes;
@@ -28,8 +29,13 @@ import com.google.android.material.navigation.NavigationView;
 import com.quigglesproductions.secureimageviewer.R;
 import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
 import com.quigglesproductions.secureimageviewer.databinding.ActivityMainNavigationBinding;
+import com.quigglesproductions.secureimageviewer.managers.SecurityManager;
 import com.quigglesproductions.secureimageviewer.managers.ViewerConnectivityManager;
+import com.quigglesproductions.secureimageviewer.ui.data.model.LoggedInUser;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class EnhancedMainMenuActivity extends SecureActivity{
     ActivityMainNavigationBinding binding;
     Context mContext;
@@ -45,6 +51,12 @@ public class EnhancedMainMenuActivity extends SecureActivity{
         setContentView(binding.getRoot());
         mContext = this;
         setSupportActionBar(binding.appBarNavigation.toolbar);
+        final TextView usernameView = binding.navView.getHeaderView(0).findViewById(R.id.user_name);
+        final TextView userEmailView = binding.navView.getHeaderView(0).findViewById(R.id.user_email);
+        LoggedInUser user = SecurityManager.getInstance().getLoggedInUser();
+        usernameView.setText(user.getDisplayName());
+        userEmailView.setText(user.getEmailAddress());
+
         if(mActionBarSetListener != null)
             mActionBarSetListener.SupportActionBarSet();
         DrawerLayout drawer = binding.drawerLayout;

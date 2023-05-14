@@ -78,6 +78,10 @@ public class EnhancedFileGridRecyclerAdapter extends RecyclerView.Adapter<Enhanc
         notifyDataSetChanged();
     }
 
+    public List<EnhancedFile> getFiles() {
+        return files;
+    }
+
     public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnCreateContextMenuListener {
         private final ImageView imageView;
 

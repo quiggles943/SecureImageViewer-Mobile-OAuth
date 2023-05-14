@@ -32,6 +32,10 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.qualifiers.ApplicationContext;
+
 public class EnhancedDatabaseHandler {
     Context context;
     SQLiteDatabase database;
@@ -58,7 +62,7 @@ public class EnhancedDatabaseHandler {
         int defaultSubjectId = cursor.getInt(cursor.getColumnIndexOrThrow(EnhancedDatabaseBuilder.Folders.DEFAULT_SUBJECT));
         String lastAccessTimeString = cursor.getString(cursor.getColumnIndexOrThrow(EnhancedDatabaseBuilder.Folders.LAST_ACCESS_TIME));
         LocalDateTime accessTime = null;
-        if(lastAccessTimeString.length()>0)
+        if(lastAccessTimeString != null && lastAccessTimeString.length()>0)
             accessTime = LocalDateTime.parse(lastAccessTimeString);
         String status = cursor.getString(cursor.getColumnIndexOrThrow(EnhancedDatabaseBuilder.Folders.STATUS));
 

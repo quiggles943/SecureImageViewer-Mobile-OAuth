@@ -1,5 +1,7 @@
 package com.quigglesproductions.secureimageviewer.ui.preferences;
 
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -7,22 +9,35 @@ import android.os.Bundle;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.RawRes;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
 import com.google.android.material.snackbar.Snackbar;
+import com.quigglesproductions.secureimageviewer.App;
 import com.quigglesproductions.secureimageviewer.BuildConfig;
 import com.quigglesproductions.secureimageviewer.R;
+import com.quigglesproductions.secureimageviewer.database.enhanced.EnhancedDatabaseHandler;
 import com.quigglesproductions.secureimageviewer.managers.FolderManager;
 import com.quigglesproductions.secureimageviewer.managers.NotificationManager;
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedArtist;
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedCategory;
+import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateLog;
+import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateSendModel;
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedSubject;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
+import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedOnlineFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedDatabaseFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedFolder;
+import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedOnlineFolder;
+import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.FileMetadata;
 import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.ImageMetadata;
 import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.VideoMetadata;
+import com.quigglesproductions.secureimageviewer.retrofit.RequestManager;
+import com.quigglesproductions.secureimageviewer.retrofit.RequestService;
+import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
+import com.quigglesproductions.secureimageviewer.ui.SecurePreferenceFragmentCompat;
+import com.quigglesproductions.secureimageviewer.ui.ui.login.LoginActivity;
 import com.quigglesproductions.secureimageviewer.utils.Base64Utils;
 import com.quigglesproductions.secureimageviewer.utils.ViewerFileUtils;
 
@@ -31,11 +46,32 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
-public class DevSettingsFragment  extends PreferenceFragmentCompat {
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
+import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+@AndroidEntryPoint
+public class DevSettingsFragment  extends SecurePreferenceFragmentCompat {
+    DevSettingsViewModel viewModel;
+    //@Inject
+    //RequestManager requestManager;
+    /*@Inject
+    public DevSettingsFragment(RequestService requestService){
+        this.requestService = requestService;
+    }*/
+
+
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.dev_preferences, rootKey);
+        viewModel = new ViewModelProvider(this).get(DevSettingsViewModel.class);
         androidx.preference.Preference networkRefresh  = getPreferenceManager().findPreference("data_inject");
         networkRefresh.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
@@ -44,6 +80,37 @@ public class DevSettingsFragment  extends PreferenceFragmentCompat {
                 return true;
             }
         });
+        androidx.preference.Preference testLogin  = getPreferenceManager().findPreference("test_login");
+        testLogin.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                Intent intent = new Intent(getActivity(), LoginActivity.class);
+                startActivity(intent);
+                return true;
+            }
+        });
+
+
+        androidx.preference.Preference testRequest  = getPreferenceManager().findPreference("test_request");
+        testRequest.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                //RequestService requestService = APIClient.getClient(getContext()).create(RequestService.class);
+                getSecureActivity().getRequestManager().enqueue(getSecureActivity().getRequestManager().getRequestService().doGetFileMetadata(2672), new Callback<FileMetadata>() {
+                    @Override
+                    public void onResponse(Call<FileMetadata> call, Response<FileMetadata> response) {
+
+                     }
+
+                    @Override
+                    public void onFailure(Call<FileMetadata> call, Throwable t) {
+
+                    }
+                });
+                return true;
+            }
+        });
+
     }
 
     private void injectDummyData(){

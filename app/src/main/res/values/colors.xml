@@ -6,6 +6,8 @@
     <color name="purple_700">#FF3700B3</color>
     <color name="teal_200">#FF03DAC5</color>
     <color name="teal_700">#FF018786</color>
+    <color name="green_200">#5DDA03</color>
+    <color name="green_700">#298701</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="transparent">#00FFFFFF</color>
@@ -29,10 +31,13 @@
     <color name="imagebutton_greyout_filter">#40808080</color>
     <color name="progressBar_default_tint">@color/teal_200</color>
 
+    <color name="progressBar_complete_tint">@color/green_200</color>
+
     <color name="navigationHeader_gradient_start">@color/blue_200</color>
     <color name="navigationHeader_gradient_middle">@color/blue_500</color>
     <color name="navigationHeader_gradient_end">@color/blue_700</color>
 
     <color name="AppYellow">#FAB123</color>
 
+    <color name="demo_dark_transparent">#24000000</color>
 </resources>

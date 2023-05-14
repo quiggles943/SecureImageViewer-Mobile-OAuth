@@ -1,4 +1,4 @@
-package com.quigglesproductions.secureimageviewer.data;
+package com.quigglesproductions.secureimageviewer.ui.data;
 
 /**
  * A generic class that holds a result success w/ data or an error exception.

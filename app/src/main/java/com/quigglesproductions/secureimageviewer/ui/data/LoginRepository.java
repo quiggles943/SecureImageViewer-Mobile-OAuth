@@ -1,11 +1,21 @@
-package com.quigglesproductions.secureimageviewer.data;
+package com.quigglesproductions.secureimageviewer.ui.data;
 
-import com.quigglesproductions.secureimageviewer.data.model.LoggedInUser;
+import com.quigglesproductions.secureimageviewer.ui.data.model.LoggedInUser;
+import com.quigglesproductions.secureimageviewer.ui.ui.login.LoginViewModel;
+
+import javax.inject.Inject;
+
+import dagger.Module;
+import dagger.hilt.InstallIn;
+import dagger.hilt.components.SingletonComponent;
+import dagger.hilt.migration.DisableInstallInCheck;
 
 /**
  * Class that requests authentication and user information from the remote data source and
  * maintains an in-memory cache of login status and user credentials information.
  */
+@Module
+@InstallIn(SingletonComponent.class)
 public class LoginRepository {
 
     private static volatile LoginRepository instance;
@@ -17,7 +27,8 @@ public class LoginRepository {
     private LoggedInUser user = null;
 
     // private constructor : singleton access
-    private LoginRepository(LoginDataSource dataSource) {
+    @Inject
+    LoginRepository(LoginDataSource dataSource) {
         this.dataSource = dataSource;
     }
 
@@ -43,12 +54,20 @@ public class LoginRepository {
         // @see https://developer.android.com/training/articles/keystore
     }
 
-    public Result<LoggedInUser> login(String username, String password) {
+    public void login(String username,String password,LoginRequestCallback callback){
+        dataSource.login(username,password,callback);
+    }
+
+    /*public Result<LoggedInUser> login(String username, String password) {
         // handle login
         Result<LoggedInUser> result = dataSource.login(username, password);
         if (result instanceof Result.Success) {
             setLoggedInUser(((Result.Success<LoggedInUser>) result).getData());
         }
         return result;
+    }*/
+
+    public interface LoginRequestCallback{
+        void loginComplete(Result<LoggedInUser> result);
     }
 }

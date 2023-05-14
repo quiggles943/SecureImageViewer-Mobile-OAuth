@@ -86,7 +86,7 @@ public class OnlineFileDataSource implements IFileDataSource,ISecureDataSource {
     }
 
     @Override
-    public void getFileMetadata(DataSourceFileMetadataCallback callback) {
+    public void getFileMetadata(com.quigglesproductions.secureimageviewer.retrofit.RequestManager requestManager,DataSourceFileMetadataCallback callback) {
         RequestManager.getInstance().getRequestService().getFileMetadata(file.getOnlineId(), new RequestManager.RequestResultCallback<FileMetadata, Exception>() {
             @Override
             public void RequestResultRetrieved(FileMetadata result, Exception exception) {
