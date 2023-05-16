@@ -15,7 +15,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.quigglesproductions.secureimageviewer.App;
-import com.quigglesproductions.secureimageviewer.Downloaders.UserInfoDownloader;
 import com.quigglesproductions.secureimageviewer.apprequest.requests.DeviceRegistrationRequest;
 import com.quigglesproductions.secureimageviewer.models.oauth.UserInfo;
 import com.quigglesproductions.secureimageviewer.registration.RegistrationId;
@@ -336,33 +335,6 @@ public class AuthManager implements IAuthManager{
         }
         else
             updateAuthState(context, resp, ex);
-    }
-    public void retrieveUserInfo(Context context) {
-        performActionWithFreshTokens(context, new AuthState.AuthStateAction() {
-            @Override
-            public void execute(@Nullable String accessToken, @Nullable String idToken, @Nullable AuthorizationException ex) {
-                if(ex!= null){
-
-                }
-                else
-                {
-                    try {
-                        userInfo = new UserInfoDownloader(context).execute(accessToken).get();
-                        SharedPreferences.Editor editor = getTokenPref().edit();
-                        editor.putString(USERINFO_PREF,userInfo.jsonSerializeString());
-                        editor.apply();
-                    } catch (ExecutionException e) {
-                        e.printStackTrace();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-                SharedPreferences tokenPref  = context.getSharedPreferences(AUTHMANAGER_PREF_NAME, Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = tokenPref.edit();
-                editor.putString(TOKEN_PREF,authState.jsonSerializeString());
-                editor.apply();
-            }
-        });
     }
     public UserInfo getUserInfo(){
         if(userInfo != null) {
