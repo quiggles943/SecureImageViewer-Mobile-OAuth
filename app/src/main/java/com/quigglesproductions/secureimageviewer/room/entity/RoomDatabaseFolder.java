@@ -22,6 +22,7 @@ import java.util.List;
 
 @Entity(tableName = "Folders")
 public class RoomDatabaseFolder implements ILocalFolder {
+    @ColumnInfo(name = "FolderId")
     @PrimaryKey(autoGenerate = true)
     private long uid;
 

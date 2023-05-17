@@ -55,6 +55,7 @@ import com.quigglesproductions.secureimageviewer.models.enhanced.folder.Enhanced
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedRecentsFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.ILocalFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.FileMetadata;
+import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.IFileMetadata;
 import com.quigglesproductions.secureimageviewer.ui.EnhancedMainMenuActivity;
 import com.quigglesproductions.secureimageviewer.ui.EnhancedMainMenuViewModel;
 import com.quigglesproductions.secureimageviewer.ui.SecureFragment;
@@ -241,8 +242,8 @@ public class EnhancedFolderViewerFragment extends SecureFragment {
                 TextView subjectsText = bottomSheetDialog.findViewById(R.id.subjects);
                 selectedFile.getDataSource().getFileMetadata(requiresRequestManager(),new IFileDataSource.DataSourceFileMetadataCallback() {
                     @Override
-                    public void FileMetadataRetrieved(FileMetadata metadata, Exception exception) {
-                        selectedFile.metadata = metadata;
+                    public void FileMetadataRetrieved(IFileMetadata metadata, Exception exception) {
+                        //selectedFile.metadata = metadata;
                         itemNameText.setText(selectedFile.getName());
                         folderNameText.setText(selectedFolder.getName());
                         artistNameText.setText(selectedFile.getArtistName());

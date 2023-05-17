@@ -5,7 +5,7 @@ import android.os.Parcelable;
 import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.IFileDataSource;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.FileType;
 
-public interface ItemBaseModel extends Parcelable {
+public interface ItemBaseModel{
 
     public String getName();
 

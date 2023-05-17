@@ -48,31 +48,6 @@ public class EnhancedFile implements ItemBaseModel {
 
     }
 
-    protected EnhancedFile(Parcel in) {
-        onlineId = in.readInt();
-        encodedName = in.readString();
-        normalName = in.readString();
-        size = in.readLong();
-        onlineUri = in.readString();
-        onlineFolderId = in.readInt();
-        contentType = in.readString();
-        onlineThumbnailUri = in.readString();
-        onlineAnimatedThumbnailUri = in.readString();
-        hasVarients = in.readByte() != 0;
-    }
-
-    public static final Creator<EnhancedFile> CREATOR = new Creator<EnhancedFile>() {
-        @Override
-        public EnhancedFile createFromParcel(Parcel in) {
-            return new EnhancedFile(in);
-        }
-
-        @Override
-        public EnhancedFile[] newArray(int size) {
-            return new EnhancedFile[size];
-        }
-    };
-
     public int getOnlineId() {
         return onlineId;
     }
@@ -178,25 +153,6 @@ public class EnhancedFile implements ItemBaseModel {
         if(metadata == null)
             return LocalDateTime.MIN;
         return metadata.getCreationTime();
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(@NonNull Parcel parcel, int i) {
-        parcel.writeInt(onlineId);
-        parcel.writeString(encodedName);
-        parcel.writeString(normalName);
-        parcel.writeLong(size);
-        parcel.writeString(onlineUri);
-        parcel.writeInt(onlineFolderId);
-        parcel.writeString(contentType);
-        parcel.writeString(onlineThumbnailUri);
-        parcel.writeString(onlineAnimatedThumbnailUri);
-        parcel.writeByte((byte) (hasVarients ? 1 : 0));
     }
 
     public EnhancedArtist getArtist(){

@@ -6,6 +6,7 @@ import androidx.room.Insert;
 import androidx.room.Query;
 
 import com.quigglesproductions.secureimageviewer.room.entity.RoomDatabaseFolder;
+import com.quigglesproductions.secureimageviewer.room.relations.FolderWithFiles;
 
 import java.util.List;
 
@@ -13,10 +14,10 @@ import java.util.List;
 public interface FolderDao {
 
     @Query("SELECT * FROM Folders")
-    List<RoomDatabaseFolder> getAll();
+    List<FolderWithFiles> getAll();
 
-    @Query("SELECT * FROM Folders WHERE uid IN (:folderIds)")
-    List<RoomDatabaseFolder> loadAllByIds(int[] folderIds);
+    @Query("SELECT * FROM Folders WHERE FolderId IN (:folderIds)")
+    List<FolderWithFiles> loadAllByIds(int[] folderIds);
 
     @Insert
     long insert(RoomDatabaseFolder folder);

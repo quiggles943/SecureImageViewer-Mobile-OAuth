@@ -1,6 +1,5 @@
 package com.quigglesproductions.secureimageviewer.ui.preferences;
 
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -11,41 +10,30 @@ import androidx.annotation.DrawableRes;
 import androidx.annotation.RawRes;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.preference.Preference;
-import androidx.preference.PreferenceFragmentCompat;
-import androidx.room.Room;
 
 import com.google.android.material.snackbar.Snackbar;
-import com.quigglesproductions.secureimageviewer.App;
 import com.quigglesproductions.secureimageviewer.BuildConfig;
 import com.quigglesproductions.secureimageviewer.R;
-import com.quigglesproductions.secureimageviewer.database.enhanced.EnhancedDatabaseHandler;
 import com.quigglesproductions.secureimageviewer.managers.FolderManager;
 import com.quigglesproductions.secureimageviewer.managers.NotificationManager;
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedArtist;
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedCategory;
-import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateLog;
-import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateSendModel;
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedSubject;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
-import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedOnlineFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedDatabaseFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedFolder;
-import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedOnlineFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.FileMetadata;
 import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.ImageMetadata;
 import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.VideoMetadata;
-import com.quigglesproductions.secureimageviewer.retrofit.RequestManager;
-import com.quigglesproductions.secureimageviewer.retrofit.RequestService;
-import com.quigglesproductions.secureimageviewer.room.FileDatabase;
 import com.quigglesproductions.secureimageviewer.room.entity.RoomDatabaseArtist;
 import com.quigglesproductions.secureimageviewer.room.entity.RoomDatabaseCategory;
 import com.quigglesproductions.secureimageviewer.room.entity.RoomDatabaseFile;
 import com.quigglesproductions.secureimageviewer.room.entity.RoomDatabaseFolder;
 import com.quigglesproductions.secureimageviewer.room.entity.RoomDatabaseSubject;
 import com.quigglesproductions.secureimageviewer.room.entity.RoomFileMetadata;
-import com.quigglesproductions.secureimageviewer.room.relations.RoomFileMetadataWithEntities;
-import com.quigglesproductions.secureimageviewer.room.relations.RoomFileWithMetadata;
-import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
+import com.quigglesproductions.secureimageviewer.room.exceptions.DatabaseInsertionException;
+import com.quigglesproductions.secureimageviewer.room.relations.FileWithMetadata;
+import com.quigglesproductions.secureimageviewer.room.relations.FileMetadataWithEntities;
 import com.quigglesproductions.secureimageviewer.ui.SecurePreferenceFragmentCompat;
 import com.quigglesproductions.secureimageviewer.ui.ui.login.LoginActivity;
 import com.quigglesproductions.secureimageviewer.utils.Base64Utils;
@@ -57,13 +45,8 @@ import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
-import okhttp3.RequestBody;
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -143,9 +126,9 @@ public class DevSettingsFragment  extends SecurePreferenceFragmentCompat {
                 Thread thread = new Thread(){
                     @Override
                     public void run() {
-                        List<RoomFileWithMetadata> files = getFileDatabase().fileDao().getAll();
+                        List<FileWithMetadata> files = getFileDatabase().fileDao().getAll();
 
-                        for(RoomFileWithMetadata file: files){
+                        for(FileWithMetadata file: files){
 
                         }
                     }
@@ -177,9 +160,9 @@ public class DevSettingsFragment  extends SecurePreferenceFragmentCompat {
         dummyFile1Metadata.width = 854;
         dummyFile1Metadata.height = 480;
         dummyFile1Metadata.onlineFileId = 999998;
-        RoomFileMetadataWithEntities dummyFile1MetadataComplete = new RoomFileMetadataWithEntities();
+        FileMetadataWithEntities dummyFile1MetadataComplete = new FileMetadataWithEntities();
         dummyFile1MetadataComplete.metadata = dummyFile1Metadata;
-        RoomFileWithMetadata dummyFile1Complete = new RoomFileWithMetadata();
+        FileWithMetadata dummyFile1Complete = new FileWithMetadata();
         dummyFile1Complete.file = dummyFile1;
         dummyFile1Complete.metadata = dummyFile1MetadataComplete;
 
@@ -197,9 +180,9 @@ public class DevSettingsFragment  extends SecurePreferenceFragmentCompat {
         dummyFile2Metadata.width = 546;
         dummyFile2Metadata.height = 340;
         dummyFile2Metadata.onlineFileId = 999999;
-        RoomFileMetadataWithEntities dummyFile2MetadataComplete = new RoomFileMetadataWithEntities();
+        FileMetadataWithEntities dummyFile2MetadataComplete = new FileMetadataWithEntities();
         dummyFile2MetadataComplete.metadata = dummyFile2Metadata;
-        RoomFileWithMetadata dummyFile2Complete = new RoomFileWithMetadata();
+        FileWithMetadata dummyFile2Complete = new FileWithMetadata();
         dummyFile2Complete.file = dummyFile2;
         dummyFile2Complete.metadata = dummyFile2MetadataComplete;
 
@@ -224,9 +207,9 @@ public class DevSettingsFragment  extends SecurePreferenceFragmentCompat {
         dummyFile3Metadata.width = 1146;
         dummyFile3Metadata.height = 300;
         dummyFile3Metadata.onlineFileId = 999997;
-        RoomFileMetadataWithEntities dummyFile3MetadataComplete = new RoomFileMetadataWithEntities();
+        FileMetadataWithEntities dummyFile3MetadataComplete = new FileMetadataWithEntities();
         dummyFile3MetadataComplete.metadata = dummyFile3Metadata;
-        RoomFileWithMetadata dummyFile3Complete = new RoomFileWithMetadata();
+        FileWithMetadata dummyFile3Complete = new FileWithMetadata();
         dummyFile3Complete.file = dummyFile3;
         dummyFile3Complete.metadata = dummyFile3MetadataComplete;
 
@@ -257,7 +240,7 @@ public class DevSettingsFragment  extends SecurePreferenceFragmentCompat {
         dummyArtist.name = "Dummy Artist 1";
         dummyArtist.onlineId = 999999;
 
-        RoomFileMetadataWithEntities dummyFile4MetadataComplete = new RoomFileMetadataWithEntities();
+        FileMetadataWithEntities dummyFile4MetadataComplete = new FileMetadataWithEntities();
         dummyFile4MetadataComplete.metadata = dummyFile4Metadata;
         dummyFile4MetadataComplete.subjects = new ArrayList<>();
         dummyFile4MetadataComplete.subjects.add(dummySubject1);
@@ -265,7 +248,7 @@ public class DevSettingsFragment  extends SecurePreferenceFragmentCompat {
         dummyFile4MetadataComplete.categories.add(dummyCategory1);
         dummyFile4MetadataComplete.categories.add(dummyCategory2);
         dummyFile4MetadataComplete.artist = dummyArtist;
-        RoomFileWithMetadata dummyFile4Complete = new RoomFileWithMetadata();
+        FileWithMetadata dummyFile4Complete = new FileWithMetadata();
         dummyFile4Complete.file = dummyFile4;
         dummyFile4Complete.metadata = dummyFile4MetadataComplete;
 
@@ -274,10 +257,14 @@ public class DevSettingsFragment  extends SecurePreferenceFragmentCompat {
         Thread thread = new Thread(){
             @Override
             public void run() {
-                List<RoomFileWithMetadata> files = getFileDatabase().fileDao().getAll();
+                List<FileWithMetadata> files = getFileDatabase().fileDao().getAll();
                 long folderId = getFileDatabase().folderDao().insert(dummyFolder);
                 dummyFolder.setUid(folderId);
-                getFileDatabase().fileDao().insertAll(dummyFolder,dummyFile1Complete,dummyFile2Complete,dummyFile3Complete,dummyFile4Complete);
+                try {
+                    getFileDatabase().fileDao().insertAll(dummyFolder,dummyFile1Complete,dummyFile2Complete,dummyFile3Complete,dummyFile4Complete);
+                } catch (DatabaseInsertionException e) {
+                    throw new RuntimeException(e);
+                }
             }
         };
         thread.start();

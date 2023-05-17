@@ -258,7 +258,7 @@ public class FileViewActivity extends SecureActivity implements ViewPager.OnPage
     @Override
     protected void onSaveInstanceState(Bundle state) {
         super.onSaveInstanceState(state);
-        state.putParcelableArrayList("myAdapter", mViewPagerAdapter.getItems());
+        //state.putParcelableArrayList("myAdapter", mViewPagerAdapter.getItems());
         state.putInt("currentPos",mPager.getCurrentItem());
         long currentPos = VideoPlaybackManager.getInstance().getCurrentPosition();
         state.putLong(KEY_PLAYER_POSITION, currentPos);

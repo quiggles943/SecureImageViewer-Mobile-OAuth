@@ -24,11 +24,6 @@ public class EnhancedDatabaseFile extends EnhancedFile{
         super();
         setDataSource(new LocalFileDataSource(this));
     }
-
-    protected EnhancedDatabaseFile(Parcel in) {
-        super(in);
-        setDataSource(new LocalFileDataSource(this));
-    }
     public EnhancedDatabaseFile(int itemId, int onlineId, String name, String base64Name, int folderId, int onlineFolderId, File imageFile, File thumbnailFile) {
         id = itemId;
         this.onlineId = onlineId;

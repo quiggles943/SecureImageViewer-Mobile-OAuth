@@ -14,7 +14,9 @@ import com.quigglesproductions.secureimageviewer.room.entity.RoomDatabaseSubject
 import com.quigglesproductions.secureimageviewer.room.entity.RoomFileCategoryCrossRef;
 import com.quigglesproductions.secureimageviewer.room.entity.RoomFileMetadata;
 import com.quigglesproductions.secureimageviewer.room.entity.RoomFileSubjectCrossRef;
-import com.quigglesproductions.secureimageviewer.room.relations.RoomFileWithMetadata;
+import com.quigglesproductions.secureimageviewer.room.exceptions.DatabaseInsertionException;
+import com.quigglesproductions.secureimageviewer.room.exceptions.NotInDatabaseException;
+import com.quigglesproductions.secureimageviewer.room.relations.FileWithMetadata;
 
 import java.util.List;
 
@@ -23,24 +25,26 @@ public abstract class FileDao {
 
     @Transaction
     @Query("SELECT * FROM Files")
-    public abstract List<RoomFileWithMetadata> getAll();
+    public abstract List<FileWithMetadata> getAll();
 
     @Transaction
     @Query("SELECT * FROM Files WHERE FileId IN (:fileIds)")
-    public abstract List<RoomFileWithMetadata> loadAllByIds(int[] fileIds);
+    public abstract List<FileWithMetadata> loadAllByIds(int[] fileIds);
 
     @Transaction
     @Query("SELECT * FROM Files WHERE FolderId IN (:folderId)")
-    public abstract List<RoomFileWithMetadata> loadAllInFolder(int folderId);
+    public abstract List<FileWithMetadata> loadAllInFolder(int folderId);
 
     @Transaction
     @Query("SELECT * FROM Files WHERE OnlineFolderId IN (:onlineFolderId)")
-    public abstract List<RoomFileWithMetadata> loadAllInOnlineFolder(int onlineFolderId);
+    public abstract List<FileWithMetadata> loadAllInOnlineFolder(int onlineFolderId);
 
     @Insert
-    public void insertAll(RoomDatabaseFolder folder, RoomFileWithMetadata... files){
+    public void insertAll(RoomDatabaseFolder folder, FileWithMetadata... files) throws DatabaseInsertionException {
         if(files != null && files.length>0){
-            for(RoomFileWithMetadata file : files){
+            for(FileWithMetadata file : files){
+                if(folder.getUid() == 0)
+                    throw new DatabaseInsertionException(new NotInDatabaseException());
                 file.file.setFolderId(folder.getUid());
                 long fileId = insert(file.file);
                 file.metadata.metadata.uid = fileId;
