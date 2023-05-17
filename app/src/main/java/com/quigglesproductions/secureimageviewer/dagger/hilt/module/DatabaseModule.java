@@ -2,8 +2,11 @@ package com.quigglesproductions.secureimageviewer.dagger.hilt.module;
 
 import android.content.Context;
 
+import androidx.room.Room;
+
 import com.quigglesproductions.secureimageviewer.database.enhanced.EnhancedDatabaseHandler;
 import com.quigglesproductions.secureimageviewer.retrofit.AuthenticationInterceptor;
+import com.quigglesproductions.secureimageviewer.room.FileDatabase;
 
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -27,5 +30,13 @@ public class DatabaseModule {
     public static EnhancedDatabaseHandler provideDatabaseHandler(@ApplicationContext Context context){
         EnhancedDatabaseHandler databaseHandler = new EnhancedDatabaseHandler(context);
         return databaseHandler;
+    }
+
+    @Provides
+    public static FileDatabase provideFileDatabase(@ApplicationContext Context context){
+        FileDatabase fileDatabase = Room.databaseBuilder(context,FileDatabase.class,"File Database")
+                                        .fallbackToDestructiveMigration()
+                                        .build();
+        return fileDatabase;
     }
 }

@@ -54,8 +54,10 @@ public class EnhancedMainMenuActivity extends SecureActivity{
         final TextView usernameView = binding.navView.getHeaderView(0).findViewById(R.id.user_name);
         final TextView userEmailView = binding.navView.getHeaderView(0).findViewById(R.id.user_email);
         LoggedInUser user = SecurityManager.getInstance().getLoggedInUser();
-        usernameView.setText(user.getDisplayName());
-        userEmailView.setText(user.getEmailAddress());
+        if(user != null) {
+            usernameView.setText(user.getDisplayName());
+            userEmailView.setText(user.getEmailAddress());
+        }
 
         if(mActionBarSetListener != null)
             mActionBarSetListener.SupportActionBarSet();

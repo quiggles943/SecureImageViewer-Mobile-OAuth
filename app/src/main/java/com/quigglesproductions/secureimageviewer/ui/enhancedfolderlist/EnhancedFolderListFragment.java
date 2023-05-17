@@ -34,7 +34,6 @@ import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
 import com.quigglesproductions.secureimageviewer.dagger.hilt.module.DownloadManager;
 import com.quigglesproductions.secureimageviewer.database.enhanced.EnhancedDatabaseHandler;
 import com.quigglesproductions.secureimageviewer.databinding.FragmentFolderListBinding;
-import com.quigglesproductions.secureimageviewer.glide.GlideApp;
 import com.quigglesproductions.secureimageviewer.managers.FolderManager;
 import com.quigglesproductions.secureimageviewer.managers.NotificationManager;
 import com.quigglesproductions.secureimageviewer.managers.ViewerConnectivityManager;

@@ -2,6 +2,7 @@ package com.quigglesproductions.secureimageviewer.room.entity;
 
 import androidx.annotation.VisibleForTesting;
 import androidx.room.ColumnInfo;
+import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
@@ -17,9 +18,11 @@ import java.io.File;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
+@Entity(tableName = "Files")
 public class RoomDatabaseFile {
-    @PrimaryKey
-    private int uid;
+    @ColumnInfo(name = "FileId")
+    @PrimaryKey(autoGenerate = true)
+    private long uid;
     @ColumnInfo(name = "OnlineId")
     @SerializedName("Id")
     public int onlineId;
@@ -55,10 +58,10 @@ public class RoomDatabaseFile {
     public boolean hasVarients;
 
     //TODO update
-    @SerializedName("Metadata")
-    public FileMetadata metadata;
+    //@SerializedName("Metadata")
+    //public FileMetadata metadata;
     @ColumnInfo(name = "FolderId")
-    private int folderId;
+    private long folderId;
     @ColumnInfo(name = "FilePath")
     private String filePath;
     @ColumnInfo(name = "ThumbnailPath")
@@ -92,7 +95,7 @@ public class RoomDatabaseFile {
 
 
 
-    public void setWidth(int imageWidth) {
+    /*public void setWidth(int imageWidth) {
         if(metadata == null)
             return;
         metadata.width = imageWidth;
@@ -155,7 +158,7 @@ public class RoomDatabaseFile {
         if(metadata.fileExtension.isEmpty())
             return FileType.UNKNOWN;
         return FileType.getFileTypeFromExtension(metadata.fileExtension);
-    }
+    }*/
 
     public void setDataSource(IFileDataSource dataSource){
         this.dataSource = dataSource;
@@ -165,7 +168,7 @@ public class RoomDatabaseFile {
         return dataSource;
     }
 
-    public FileMetadata getMetadata(){
+    /*public FileMetadata getMetadata(){
         return metadata;
     }
 
@@ -198,13 +201,13 @@ public class RoomDatabaseFile {
 
     public LocalDateTime getDefaultSortTime() {
         return metadata.getCreationTime();
-    }
+    }*/
 
-    public int getUid() {
+    public long getUid() {
         return uid;
     }
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    public void setUid(int uid){
+    public void setUid(long uid){
         if(this.uid >0)
             return;
         this.uid = uid;
@@ -222,7 +225,7 @@ public class RoomDatabaseFile {
         return thumbnailFile;
     }
 
-    public int getFolderId() {
+    public long getFolderId() {
         return folderId;
     }
 
@@ -242,7 +245,7 @@ public class RoomDatabaseFile {
         return folderName;
     }
 
-    public LocalDateTime getDownloadTime() {
+    /*public LocalDateTime getDownloadTime() {
         if(metadata != null) {
             if(metadata.downloadTime == null)
                 return LocalDateTime.now();
@@ -250,11 +253,27 @@ public class RoomDatabaseFile {
         }
         else
             return LocalDateTime.now();
-    }
+    }*/
 
-    public void setFolderId(int folderId) {
+    public void setFolderId(long folderId) {
         if(this.folderId>0)
             return;
         this.folderId = folderId;
+    }
+
+    public String getFilePath() {
+        return filePath;
+    }
+
+    public String getThumbnailPath() {
+        return thumbnailPath;
+    }
+
+    public void setFilePath(String filePath){
+        this.filePath = filePath;
+    }
+
+    public void setThumbnailPath(String thumbnailPath) {
+        this.thumbnailPath = thumbnailPath;
     }
 }

@@ -22,8 +22,8 @@ import java.util.List;
 
 @Entity(tableName = "Folders")
 public class RoomDatabaseFolder implements ILocalFolder {
-    @PrimaryKey
-    private int uid;
+    @PrimaryKey(autoGenerate = true)
+    private long uid;
 
     @ColumnInfo(name = "OnlineId")
     @SerializedName("Id")
@@ -136,7 +136,7 @@ public class RoomDatabaseFolder implements ILocalFolder {
         return accessTime;
     }
 
-    public int getUid(){
+    public long getUid(){
         return uid;
     }
 
@@ -152,7 +152,7 @@ public class RoomDatabaseFolder implements ILocalFolder {
         else
             return accessTime.toString();
     }
-    public void setUid(int uid) {
+    public void setUid(long uid) {
         this.uid = uid;
     }
     public void setThumbnailFile(File file) {

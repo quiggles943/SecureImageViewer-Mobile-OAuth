@@ -35,6 +35,7 @@ import com.quigglesproductions.secureimageviewer.managers.ViewerConnectivityMana
 import com.quigglesproductions.secureimageviewer.models.LoginModel;
 import com.quigglesproductions.secureimageviewer.models.WebServerConfig;
 import com.quigglesproductions.secureimageviewer.retrofit.RequestManager;
+import com.quigglesproductions.secureimageviewer.room.FileDatabase;
 import com.quigglesproductions.secureimageviewer.ui.login.EnhancedLoginActivity;
 import com.quigglesproductions.secureimageviewer.ui.login.ReauthenticateActivity;
 import com.quigglesproductions.secureimageviewer.ui.splash.NewSplashScreenActivity;
@@ -69,6 +70,8 @@ public class SecureActivity extends AppCompatActivity {
     Gson gson;
     @Inject
     DownloadManager downloadManager;
+    @Inject
+    FileDatabase fileDatabase;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -325,5 +328,9 @@ public class SecureActivity extends AppCompatActivity {
 
     public DownloadManager getDownloadManager(){
         return downloadManager;
+    }
+
+    public FileDatabase getFileDatabase() {
+        return fileDatabase;
     }
 }

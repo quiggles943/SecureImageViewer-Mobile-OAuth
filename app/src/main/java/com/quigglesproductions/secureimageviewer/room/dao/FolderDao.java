@@ -19,6 +19,8 @@ public interface FolderDao {
     List<RoomDatabaseFolder> loadAllByIds(int[] folderIds);
 
     @Insert
+    long insert(RoomDatabaseFolder folder);
+    @Insert
     void insertAll(RoomDatabaseFolder... folders);
 
     @Delete

@@ -12,6 +12,7 @@ import androidx.annotation.RawRes;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
+import androidx.room.Room;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.quigglesproductions.secureimageviewer.App;
@@ -35,6 +36,15 @@ import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.ImageM
 import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.VideoMetadata;
 import com.quigglesproductions.secureimageviewer.retrofit.RequestManager;
 import com.quigglesproductions.secureimageviewer.retrofit.RequestService;
+import com.quigglesproductions.secureimageviewer.room.FileDatabase;
+import com.quigglesproductions.secureimageviewer.room.entity.RoomDatabaseArtist;
+import com.quigglesproductions.secureimageviewer.room.entity.RoomDatabaseCategory;
+import com.quigglesproductions.secureimageviewer.room.entity.RoomDatabaseFile;
+import com.quigglesproductions.secureimageviewer.room.entity.RoomDatabaseFolder;
+import com.quigglesproductions.secureimageviewer.room.entity.RoomDatabaseSubject;
+import com.quigglesproductions.secureimageviewer.room.entity.RoomFileMetadata;
+import com.quigglesproductions.secureimageviewer.room.relations.RoomFileMetadataWithEntities;
+import com.quigglesproductions.secureimageviewer.room.relations.RoomFileWithMetadata;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
 import com.quigglesproductions.secureimageviewer.ui.SecurePreferenceFragmentCompat;
 import com.quigglesproductions.secureimageviewer.ui.ui.login.LoginActivity;
@@ -111,8 +121,167 @@ public class DevSettingsFragment  extends SecurePreferenceFragmentCompat {
             }
         });
 
+        androidx.preference.Preference testDbInsertRequest  = getPreferenceManager().findPreference("test_db_insert" );
+        testDbInsertRequest.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                //FileDatabase fileDatabase = Room.databaseBuilder(getContext(),FileDatabase.class,"File Database").fallbackToDestructiveMigration().build();
+                Thread thread = new Thread(() -> {
+                    getFileDatabase().clearAllTables();
+                    injectDummyDataRoom();
+                });
+                thread.start();
+                return true;
+            }
+        });
+
+        androidx.preference.Preference testDbRetrieveRequest  = getPreferenceManager().findPreference("test_db_retrieve" );
+        testDbRetrieveRequest.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                //FileDatabase fileDatabase = Room.databaseBuilder(getContext(),FileDatabase.class,"File Database").fallbackToDestructiveMigration().build();
+                Thread thread = new Thread(){
+                    @Override
+                    public void run() {
+                        List<RoomFileWithMetadata> files = getFileDatabase().fileDao().getAll();
+
+                        for(RoomFileWithMetadata file: files){
+
+                        }
+                    }
+                };
+                thread.start();
+                return true;
+            }
+        });
     }
 
+    private void injectDummyDataRoom(){
+        RoomDatabaseFolder dummyFolder = new RoomDatabaseFolder();
+        dummyFolder.onlineId = 999;
+        dummyFolder.normalName = "Dummy Test Folder";
+        dummyFolder.encodedName = Base64Utils.base64EncodeString(dummyFolder.normalName);
+        dummyFolder.onlineAccessTime = LocalDateTime.now();
+        dummyFolder.setStatus(EnhancedFolder.Status.DOWNLOADED);
+        RoomDatabaseFile dummyFile1 = new RoomDatabaseFile();
+        dummyFile1.normalName = "Test Image 1";
+        dummyFile1.encodedName = Base64Utils.base64EncodeString(dummyFile1.normalName);
+        dummyFile1.contentType = "IMAGE";
+        dummyFile1.onlineId = 999998;
+        RoomFileMetadata dummyFile1Metadata = new RoomFileMetadata();
+        dummyFile1Metadata.downloadTime = LocalDateTime.now();
+        dummyFile1Metadata.creationTime = LocalDateTime.now().minusHours(1);
+        dummyFile1Metadata.contentType = "IMAGE";
+        dummyFile1Metadata.fileType = "IMAGE";
+        dummyFile1Metadata.hasAnimatedThumbnail = false;
+        dummyFile1Metadata.width = 854;
+        dummyFile1Metadata.height = 480;
+        dummyFile1Metadata.onlineFileId = 999998;
+        RoomFileMetadataWithEntities dummyFile1MetadataComplete = new RoomFileMetadataWithEntities();
+        dummyFile1MetadataComplete.metadata = dummyFile1Metadata;
+        RoomFileWithMetadata dummyFile1Complete = new RoomFileWithMetadata();
+        dummyFile1Complete.file = dummyFile1;
+        dummyFile1Complete.metadata = dummyFile1MetadataComplete;
+
+        RoomDatabaseFile dummyFile2 = new RoomDatabaseFile();
+        dummyFile2.normalName = "Test Image 2";
+        dummyFile2.encodedName = Base64Utils.base64EncodeString(dummyFile2.normalName);
+        dummyFile2.contentType = "IMAGE";
+        dummyFile2.onlineId = 999999;
+        RoomFileMetadata dummyFile2Metadata = new RoomFileMetadata();
+        dummyFile2Metadata.downloadTime = LocalDateTime.now();
+        dummyFile2Metadata.creationTime = LocalDateTime.now().minusHours(1);
+        dummyFile2Metadata.contentType = "IMAGE";
+        dummyFile2Metadata.fileType = "IMAGE";
+        dummyFile2Metadata.hasAnimatedThumbnail = false;
+        dummyFile2Metadata.width = 546;
+        dummyFile2Metadata.height = 340;
+        dummyFile2Metadata.onlineFileId = 999999;
+        RoomFileMetadataWithEntities dummyFile2MetadataComplete = new RoomFileMetadataWithEntities();
+        dummyFile2MetadataComplete.metadata = dummyFile2Metadata;
+        RoomFileWithMetadata dummyFile2Complete = new RoomFileWithMetadata();
+        dummyFile2Complete.file = dummyFile2;
+        dummyFile2Complete.metadata = dummyFile2MetadataComplete;
+
+
+        RoomDatabaseFolder dummyFolder2 = new RoomDatabaseFolder();
+        dummyFolder2.onlineId = 9999;
+        dummyFolder2.normalName = "Dummy Test Folder 2";
+        dummyFolder2.encodedName = Base64Utils.base64EncodeString(dummyFolder2.normalName);
+        dummyFolder2.onlineAccessTime = LocalDateTime.now();
+        dummyFolder2.setStatus(EnhancedFolder.Status.DOWNLOADED);
+        RoomDatabaseFile dummyFile3 = new RoomDatabaseFile();
+        dummyFile3.normalName = "Test Video 1";
+        dummyFile3.encodedName = Base64Utils.base64EncodeString(dummyFile3.normalName);
+        dummyFile3.contentType = "VIDEO";
+        dummyFile3.onlineId = 999997;
+        RoomFileMetadata dummyFile3Metadata = new RoomFileMetadata();
+        dummyFile3Metadata.downloadTime = LocalDateTime.now();
+        dummyFile3Metadata.creationTime = LocalDateTime.now().minusHours(1);
+        dummyFile3Metadata.contentType = "VIDEO";
+        dummyFile3Metadata.fileType = "VIDEO";
+        dummyFile3Metadata.hasAnimatedThumbnail = false;
+        dummyFile3Metadata.width = 1146;
+        dummyFile3Metadata.height = 300;
+        dummyFile3Metadata.onlineFileId = 999997;
+        RoomFileMetadataWithEntities dummyFile3MetadataComplete = new RoomFileMetadataWithEntities();
+        dummyFile3MetadataComplete.metadata = dummyFile3Metadata;
+        RoomFileWithMetadata dummyFile3Complete = new RoomFileWithMetadata();
+        dummyFile3Complete.file = dummyFile3;
+        dummyFile3Complete.metadata = dummyFile3MetadataComplete;
+
+        RoomDatabaseFile dummyFile4 = new RoomDatabaseFile();
+        dummyFile4.normalName = "Test Video 2";
+        dummyFile4.encodedName = Base64Utils.base64EncodeString(dummyFile4.normalName);
+        dummyFile4.contentType = "VIDEO";
+        dummyFile4.onlineId = 999996;
+        RoomFileMetadata dummyFile4Metadata = new RoomFileMetadata();
+        dummyFile4Metadata.downloadTime = LocalDateTime.now();
+        dummyFile4Metadata.creationTime = LocalDateTime.now().minusHours(1);
+        dummyFile4Metadata.contentType = "VIDEO";
+        dummyFile4Metadata.fileType = "VIDEO";
+        dummyFile4Metadata.hasAnimatedThumbnail = false;
+        dummyFile4Metadata.width = 1146;
+        dummyFile4Metadata.height = 300;
+        dummyFile4Metadata.onlineFileId = 999996;
+        RoomDatabaseSubject dummySubject1 = new RoomDatabaseSubject();
+        dummySubject1.name = "Dummy Subject";
+        dummySubject1.onlineId = 999999;
+        RoomDatabaseCategory dummyCategory1 = new RoomDatabaseCategory();
+        dummyCategory1.name = "Dummy Category 1";
+        dummyCategory1.onlineId = 999999;
+        RoomDatabaseCategory dummyCategory2 = new RoomDatabaseCategory();
+        dummyCategory2.name = "Dummy Category 2";
+        dummyCategory2.onlineId = 999991;
+        RoomDatabaseArtist dummyArtist = new RoomDatabaseArtist();
+        dummyArtist.name = "Dummy Artist 1";
+        dummyArtist.onlineId = 999999;
+
+        RoomFileMetadataWithEntities dummyFile4MetadataComplete = new RoomFileMetadataWithEntities();
+        dummyFile4MetadataComplete.metadata = dummyFile4Metadata;
+        dummyFile4MetadataComplete.subjects = new ArrayList<>();
+        dummyFile4MetadataComplete.subjects.add(dummySubject1);
+        dummyFile4MetadataComplete.categories = new ArrayList<>();
+        dummyFile4MetadataComplete.categories.add(dummyCategory1);
+        dummyFile4MetadataComplete.categories.add(dummyCategory2);
+        dummyFile4MetadataComplete.artist = dummyArtist;
+        RoomFileWithMetadata dummyFile4Complete = new RoomFileWithMetadata();
+        dummyFile4Complete.file = dummyFile4;
+        dummyFile4Complete.metadata = dummyFile4MetadataComplete;
+
+        dummyFolder.onlineThumbnailId = 999999;
+        //dummyFolder.addItem(dummyFile1);
+        Thread thread = new Thread(){
+            @Override
+            public void run() {
+                List<RoomFileWithMetadata> files = getFileDatabase().fileDao().getAll();
+                long folderId = getFileDatabase().folderDao().insert(dummyFolder);
+                dummyFolder.setUid(folderId);
+                getFileDatabase().fileDao().insertAll(dummyFolder,dummyFile1Complete,dummyFile2Complete,dummyFile3Complete,dummyFile4Complete);
+            }
+        };
+        thread.start();
+    }
     private void injectDummyData(){
         EnhancedDatabaseFolder dummyFolder = new EnhancedDatabaseFolder(getContext());
         dummyFolder.onlineId = 999;
