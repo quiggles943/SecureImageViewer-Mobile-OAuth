@@ -1,8 +1,6 @@
 package com.quigglesproductions.secureimageviewer.managers;
 
 import com.google.android.material.snackbar.BaseTransientBottomBar;
-import com.quigglesproductions.secureimageviewer.notifications.NotificationHelper;
-import com.quigglesproductions.secureimageviewer.volley.manager.DownloadManager;
 
 public class NotificationManager {
 

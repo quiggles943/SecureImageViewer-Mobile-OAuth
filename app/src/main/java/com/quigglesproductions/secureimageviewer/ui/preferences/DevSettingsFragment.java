@@ -25,15 +25,16 @@ import com.quigglesproductions.secureimageviewer.models.enhanced.folder.Enhanced
 import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.FileMetadata;
 import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.ImageMetadata;
 import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.VideoMetadata;
-import com.quigglesproductions.secureimageviewer.room.entity.RoomDatabaseArtist;
-import com.quigglesproductions.secureimageviewer.room.entity.RoomDatabaseCategory;
-import com.quigglesproductions.secureimageviewer.room.entity.RoomDatabaseFile;
-import com.quigglesproductions.secureimageviewer.room.entity.RoomDatabaseFolder;
-import com.quigglesproductions.secureimageviewer.room.entity.RoomDatabaseSubject;
-import com.quigglesproductions.secureimageviewer.room.entity.RoomFileMetadata;
+import com.quigglesproductions.secureimageviewer.room.databases.file.entity.RoomDatabaseArtist;
+import com.quigglesproductions.secureimageviewer.room.databases.file.entity.RoomDatabaseCategory;
+import com.quigglesproductions.secureimageviewer.room.databases.file.entity.RoomDatabaseFile;
+import com.quigglesproductions.secureimageviewer.room.databases.file.entity.RoomDatabaseFolder;
+import com.quigglesproductions.secureimageviewer.room.databases.file.entity.RoomDatabaseSubject;
+import com.quigglesproductions.secureimageviewer.room.databases.file.entity.RoomFileMetadata;
 import com.quigglesproductions.secureimageviewer.room.exceptions.DatabaseInsertionException;
-import com.quigglesproductions.secureimageviewer.room.relations.FileWithMetadata;
-import com.quigglesproductions.secureimageviewer.room.relations.FileMetadataWithEntities;
+import com.quigglesproductions.secureimageviewer.room.databases.file.relations.FileWithMetadata;
+import com.quigglesproductions.secureimageviewer.room.databases.file.relations.FileMetadataWithEntities;
+import com.quigglesproductions.secureimageviewer.room.databases.file.relations.FolderWithFiles;
 import com.quigglesproductions.secureimageviewer.ui.SecurePreferenceFragmentCompat;
 import com.quigglesproductions.secureimageviewer.ui.ui.login.LoginActivity;
 import com.quigglesproductions.secureimageviewer.utils.Base64Utils;
@@ -126,6 +127,7 @@ public class DevSettingsFragment  extends SecurePreferenceFragmentCompat {
                 Thread thread = new Thread(){
                     @Override
                     public void run() {
+                        FolderWithFiles folder = getFileDatabase().folderDao().loadFolderById(1);
                         List<FileWithMetadata> files = getFileDatabase().fileDao().getAll();
 
                         for(FileWithMetadata file: files){
@@ -162,7 +164,7 @@ public class DevSettingsFragment  extends SecurePreferenceFragmentCompat {
         dummyFile1Metadata.onlineFileId = 999998;
         FileMetadataWithEntities dummyFile1MetadataComplete = new FileMetadataWithEntities();
         dummyFile1MetadataComplete.metadata = dummyFile1Metadata;
-        FileWithMetadata dummyFile1Complete = new FileWithMetadata();
+        FileWithMetadata dummyFile1Complete = new FileWithMetadata.Creator().build();
         dummyFile1Complete.file = dummyFile1;
         dummyFile1Complete.metadata = dummyFile1MetadataComplete;
 
@@ -182,7 +184,7 @@ public class DevSettingsFragment  extends SecurePreferenceFragmentCompat {
         dummyFile2Metadata.onlineFileId = 999999;
         FileMetadataWithEntities dummyFile2MetadataComplete = new FileMetadataWithEntities();
         dummyFile2MetadataComplete.metadata = dummyFile2Metadata;
-        FileWithMetadata dummyFile2Complete = new FileWithMetadata();
+        FileWithMetadata dummyFile2Complete = new FileWithMetadata.Creator().build();
         dummyFile2Complete.file = dummyFile2;
         dummyFile2Complete.metadata = dummyFile2MetadataComplete;
 
@@ -209,7 +211,7 @@ public class DevSettingsFragment  extends SecurePreferenceFragmentCompat {
         dummyFile3Metadata.onlineFileId = 999997;
         FileMetadataWithEntities dummyFile3MetadataComplete = new FileMetadataWithEntities();
         dummyFile3MetadataComplete.metadata = dummyFile3Metadata;
-        FileWithMetadata dummyFile3Complete = new FileWithMetadata();
+        FileWithMetadata dummyFile3Complete = new FileWithMetadata.Creator().build();
         dummyFile3Complete.file = dummyFile3;
         dummyFile3Complete.metadata = dummyFile3MetadataComplete;
 
@@ -248,7 +250,7 @@ public class DevSettingsFragment  extends SecurePreferenceFragmentCompat {
         dummyFile4MetadataComplete.categories.add(dummyCategory1);
         dummyFile4MetadataComplete.categories.add(dummyCategory2);
         dummyFile4MetadataComplete.artist = dummyArtist;
-        FileWithMetadata dummyFile4Complete = new FileWithMetadata();
+        FileWithMetadata dummyFile4Complete = new FileWithMetadata.Creator().build();
         dummyFile4Complete.file = dummyFile4;
         dummyFile4Complete.metadata = dummyFile4MetadataComplete;
 
@@ -352,10 +354,10 @@ public class DevSettingsFragment  extends SecurePreferenceFragmentCompat {
 
         dummyFolder.onlineThumbnailId = 999999;
 
-        EnhancedDatabaseFolder insertedFolder = FolderManager.getInstance().insertFolder(dummyFolder);
-        EnhancedDatabaseFolder insertedFolder2 = FolderManager.getInstance().insertFolder(dummyFolder2);
-        ViewerFileUtils.createFileOnDisk(getContext(), (EnhancedDatabaseFile) insertedFolder.getFiles().get(0),generateInputStream(R.drawable.dummy_image_1));
-        ViewerFileUtils.createFileOnDisk(getContext(), (EnhancedDatabaseFile) insertedFolder.getFiles().get(1),generateInputStream(R.drawable.dummy_image_2));
+        //EnhancedDatabaseFolder insertedFolder = FolderManager.getInstance().insertFolder(dummyFolder);
+        //EnhancedDatabaseFolder insertedFolder2 = FolderManager.getInstance().insertFolder(dummyFolder2);
+        //ViewerFileUtils.createFileOnDisk(getContext(), (EnhancedDatabaseFile) insertedFolder.getFiles().get(0),generateInputStream(R.drawable.dummy_image_1));
+        //ViewerFileUtils.createFileOnDisk(getContext(), (EnhancedDatabaseFile) insertedFolder.getFiles().get(1),generateInputStream(R.drawable.dummy_image_2));
         if(BuildConfig.DEBUG) {
             //ViewerFileUtils.createFileOnDisk(getContext(), (EnhancedDatabaseFile) insertedFolder2.getFiles().get(0), generateInputStreamFromRawResource(R.raw.recording_20230307_172120));
             //ViewerFileUtils.createFileOnDisk(getContext(), (EnhancedDatabaseFile) insertedFolder2.getFiles().get(1), generateInputStreamFromRawResource(R.raw.recording_20230308_143931));

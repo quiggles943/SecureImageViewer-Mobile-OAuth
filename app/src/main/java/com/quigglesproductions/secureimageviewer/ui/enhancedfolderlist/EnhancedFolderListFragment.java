@@ -21,16 +21,10 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.android.volley.VolleyError;
-import com.bumptech.glide.ListPreloader;
-import com.bumptech.glide.RequestBuilder;
-import com.bumptech.glide.util.FixedPreloadSizeProvider;
-import com.bumptech.glide.util.ViewPreloadSizeProvider;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.gson.reflect.TypeToken;
 import com.mikelau.views.shimmer.ShimmerRecyclerViewX;
 import com.quigglesproductions.secureimageviewer.R;
-import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
 import com.quigglesproductions.secureimageviewer.dagger.hilt.module.DownloadManager;
 import com.quigglesproductions.secureimageviewer.database.enhanced.EnhancedDatabaseHandler;
 import com.quigglesproductions.secureimageviewer.databinding.FragmentFolderListBinding;
@@ -41,15 +35,17 @@ import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpd
 import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.LocalFolderDataSource;
 import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.RetrofitFolderDataSource;
 import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.RetrofitRecentFilesDataSource;
+import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.RoomFolderDataSource;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedOnlineFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedDatabaseFolder;
-import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedOnlineFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedRecentsFolder;
-import com.quigglesproductions.secureimageviewer.recycler.RecyclerViewMargin;
+import com.quigglesproductions.secureimageviewer.models.enhanced.folder.IDisplayFolder;
 import com.quigglesproductions.secureimageviewer.recycler.RecyclerViewSelectionMode;
 import com.quigglesproductions.secureimageviewer.retrofit.RetrofitException;
+import com.quigglesproductions.secureimageviewer.room.databases.file.relations.FileWithMetadata;
+import com.quigglesproductions.secureimageviewer.room.databases.file.relations.FolderWithFiles;
 import com.quigglesproductions.secureimageviewer.ui.EnhancedMainMenuActivity;
 import com.quigglesproductions.secureimageviewer.ui.SecureFragment;
 import com.quigglesproductions.secureimageviewer.utils.FileSyncUtils;
@@ -57,15 +53,11 @@ import com.techyourchance.threadposter.BackgroundThreadPoster;
 import com.techyourchance.threadposter.UiThreadPoster;
 
 
-import net.openid.appauth.AuthState;
-import net.openid.appauth.AuthorizationException;
-
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import javax.inject.Inject;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -79,6 +71,7 @@ public class EnhancedFolderListFragment extends SecureFragment {
     EnhancedFolderListViewModel enhancedFolderListViewModel;
     public static final String STATE_ONLINE = "online";
     public static final String STATE_OFFLINE = "offline";
+    public static final String STATE_ROOM = "offline-room";
     private Menu myMenu;
     private String state;
     ShimmerRecyclerViewX recyclerView;
@@ -103,11 +96,12 @@ public class EnhancedFolderListFragment extends SecureFragment {
         enhancedFolderListViewModel.getFolders().observe(getViewLifecycleOwner(),this::updateListViewVisibility);
         restoreInstanceState();
         switch (state){
-            case STATE_OFFLINE:
-                getOfflineFolders(enhancedFolderListViewModel,false);
-                break;
             case STATE_ONLINE:
                 getOnlineFolders(enhancedFolderListViewModel,false);
+                break;
+            case STATE_ROOM:
+                getRoomFolders(enhancedFolderListViewModel,false);
+                break;
         }
 
         getDownloadManager().setCallback(new DownloadManager.FolderDownloadCallback() {
@@ -138,6 +132,9 @@ public class EnhancedFolderListFragment extends SecureFragment {
             case STATE_ONLINE:
                 recyclerAdapter = new EnhancedFolderListRecyclerAdapter<EnhancedOnlineFolder>(getContext());
                 break;
+            case STATE_ROOM:
+                recyclerAdapter = new EnhancedFolderListRecyclerAdapter<FolderWithFiles>(getContext());
+
         }
         //recyclerAdapter = new EnhancedFolderListRecyclerAdapter(getContext());
         enhancedFolderListViewModel.getFolders().observe(getViewLifecycleOwner(),recyclerAdapter::setFolders);
@@ -197,7 +194,7 @@ public class EnhancedFolderListFragment extends SecureFragment {
                         recyclerAdapter.setMultiSelect(false);
                 }
                 else {
-                    EnhancedFolder value = recyclerAdapter.getItem(position);
+                    IDisplayFolder value = recyclerAdapter.getItem(position);
                     saveInstanceState();
                     NavDirections action = EnhancedFolderListFragmentDirections.actionEnhancedFolderListFragmentToEnhancedFolderViewerFragment();
                     FolderManager.getInstance().setCurrentFolder(value);
@@ -208,7 +205,7 @@ public class EnhancedFolderListFragment extends SecureFragment {
 
             @Override
             public void onLongClick(int position) {
-                EnhancedFolder value = recyclerAdapter.getItem(position);
+                IDisplayFolder value = recyclerAdapter.getItem(position);
                 if(recyclerAdapter.getSelectedCount() == 0){
                     //vibrator.vibrate(10);
                     recyclerAdapter.setMultiSelect(true);
@@ -249,17 +246,19 @@ public class EnhancedFolderListFragment extends SecureFragment {
                     listType = new TypeToken<ArrayList<EnhancedOnlineFolder>>() {
                     }.getType();
                     break;
+                case STATE_ROOM:
+                    listType = new TypeToken<ArrayList<FolderWithFiles>>() {
+                    }.getType();
             }
-            ArrayList<EnhancedFolder> folders = getGson().fromJson(folderListJson, listType);
-            for (EnhancedFolder folder:folders){
+            ArrayList<IDisplayFolder> folders = getGson().fromJson(folderListJson, listType);
+            for (IDisplayFolder folder:folders){
                 if(folder instanceof EnhancedOnlineFolder){
                     folder.setDataSource(new RetrofitFolderDataSource((EnhancedOnlineFolder) folder,requiresRequestManager(),requiresAuthenticationManager()));
                 }
-                else{
-                    folder.setDataSource(new LocalFolderDataSource(getContext(), (EnhancedDatabaseFolder) folder));
-                }
+                else if(folder instanceof FolderWithFiles )
+                    folder.setDataSource(new RoomFolderDataSource((FolderWithFiles) folder));
             }
-            enhancedFolderListViewModel.getFolders().setValue(folders);
+            enhancedFolderListViewModel.getFolders().setValue(folders.stream().map(x->(IDisplayFolder)x).collect(Collectors.toList()));
             recyclerAdapter.setFolders(folders);
             recyclerView.hideShimmerAdapter();
         }
@@ -269,6 +268,7 @@ public class EnhancedFolderListFragment extends SecureFragment {
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         switch (state){
             case STATE_OFFLINE:
+            case STATE_ROOM:
                 inflater.inflate(R.menu.menu_offline_folder, menu);
                 break;
             case STATE_ONLINE:
@@ -293,14 +293,11 @@ public class EnhancedFolderListFragment extends SecureFragment {
             case R.id.online_folder_download_selection:
                 List<EnhancedOnlineFolder> onlineFolders = (List<EnhancedOnlineFolder>) recyclerAdapter.getSelectedFolders().stream().map(x->(EnhancedOnlineFolder)x).collect(Collectors.toList());
                 for(EnhancedOnlineFolder folder: onlineFolders) {
-
-                        getRequestService().doGetFolderFiles(folder.getOnlineId(),"name_asc").enqueue(new Callback<List<EnhancedOnlineFile>>() {
+                        getRequestService().doGetFolderFiles((int) folder.getOnlineId(),true,"name_asc").enqueue(new Callback<List<EnhancedOnlineFile>>() {
                             @Override
                             public void onResponse(Call<List<EnhancedOnlineFile>> call, Response<List<EnhancedOnlineFile>> response) {
                                 if(response.isSuccessful()){
                                     try {
-                                        NotificationManager.getInstance().showSnackbar("Downloading "+recyclerAdapter.getSelectedCount()+" folders",Snackbar.LENGTH_SHORT);
-                                        recyclerAdapter.setMultiSelect(false);
                                         getDownloadManager().addToDownloadQueue(getRequestService(), folder, response.body().toArray(new EnhancedFile[0]));
                                         getDownloadManager().downloadFolder(folder, requiresRequestManager());
                                     }catch(RetrofitException exception){
@@ -308,16 +305,14 @@ public class EnhancedFolderListFragment extends SecureFragment {
                                     }
                                 }
                             }
-
                             @Override
                             public void onFailure(Call<List<EnhancedOnlineFile>> call, Throwable t) {
 
                             }
                         });
-
-
                 }
-
+                recyclerAdapter.setMultiSelect(false);
+                NotificationManager.getInstance().showSnackbar("Downloading "+recyclerAdapter.getSelectedCount()+" folders",Snackbar.LENGTH_SHORT);
 
                 break;
             case R.id.online_folder_download_viewer:
@@ -329,9 +324,9 @@ public class EnhancedFolderListFragment extends SecureFragment {
                 return true;
             case R.id.offline_folder_delete:
                 NotificationManager.getInstance().showSnackbar(recyclerAdapter.getSelectedCount()+" folders deleted",Snackbar.LENGTH_SHORT);
-                List<EnhancedDatabaseFolder> offlineFolders = (List<EnhancedDatabaseFolder>) recyclerAdapter.getSelectedFolders().stream().map(x->(EnhancedDatabaseFolder)x).collect(Collectors.toList());
-                for(EnhancedDatabaseFolder folder: offlineFolders){
-                    FolderManager.getInstance().removeLocalFolder(folder);
+                List<FolderWithFiles> offlineFolders = (List<FolderWithFiles>) recyclerAdapter.getSelectedFolders().stream().map(x->(FolderWithFiles)x).collect(Collectors.toList());
+                for(FolderWithFiles folder: offlineFolders){
+                    FolderManager.getInstance().removeLocalFolder(getFileDatabase(),folder);
                     recyclerAdapter.removeFolder(folder);
                 }
                 recyclerAdapter.setMultiSelect(false);
@@ -342,7 +337,7 @@ public class EnhancedFolderListFragment extends SecureFragment {
         return true;
     }
 
-    private void updateListViewVisibility(List<EnhancedFolder> folders){
+    private void updateListViewVisibility(List<IDisplayFolder> folders){
         //binding.folderShimmerRecyclerView.hideShimmerAdapter();
         if(folders.size() == 0)
         {
@@ -355,30 +350,6 @@ public class EnhancedFolderListFragment extends SecureFragment {
         }
     }
 
-    private void getOfflineFolders(EnhancedFolderListViewModel viewModel,boolean forceRefresh){
-        if(recyclerAdapter.getItemCount() == 0 || forceRefresh) {
-            backgroundThreadPoster.post(() -> {
-                EnhancedDatabaseHandler databaseHandler = new EnhancedDatabaseHandler(getContext());
-                ArrayList<EnhancedFolder> folders = (ArrayList<EnhancedFolder>) databaseHandler.getFolders().stream().map(x -> (EnhancedFolder) x).collect(Collectors.toList());
-                if (ViewerConnectivityManager.getInstance().isConnected()) {
-                    ArrayList<EnhancedFileUpdateLog> updateLogs = FileSyncUtils.getUpdateLogs(getContext());
-                    if (updateLogs != null) {
-                        ArrayList<Long> folderIds = (ArrayList<Long>) updateLogs.stream().map(x -> x.getFolderId()).distinct().collect(Collectors.toList());
-                        for (Long folderId : folderIds) {
-                            folders.stream().filter(x -> x.getOnlineId() == folderId).findFirst().get().setHasUpdates(true);
-                        }
-                    }
-                }
-                uiThreadPoster.post(() -> {
-                    viewModel.getFolders().setValue(folders);
-                    recyclerView.hideShimmerAdapter();
-                });
-
-            });
-        }
-
-    }
-
     private void getOnlineFolders(EnhancedFolderListViewModel viewModel,boolean forceRefresh){
         if(recyclerAdapter.getItemCount() == 0 || forceRefresh) {
             backgroundThreadPoster.post(() -> {
@@ -386,10 +357,10 @@ public class EnhancedFolderListFragment extends SecureFragment {
                     @Override
                     public void onResponse(Call<List<EnhancedOnlineFolder>> call, Response<List<EnhancedOnlineFolder>> response) {
                         if (response.isSuccessful()) {
-                            ArrayList<EnhancedFolder> folders = (ArrayList<EnhancedFolder>) response.body().stream().map(x -> (EnhancedFolder) x).collect(Collectors.toList());
+                            ArrayList<IDisplayFolder> folders = (ArrayList<IDisplayFolder>) response.body().stream().map(x -> (IDisplayFolder) x).collect(Collectors.toList());
                             folders.forEach(x -> x.setDataSource(new RetrofitFolderDataSource((EnhancedOnlineFolder) x, requiresRequestManager(), requiresAuthenticationManager())));
                             uiThreadPoster.post(() -> {
-                                viewModel.getFolders().setValue(folders);
+                                viewModel.getFolders().setValue(folders.stream().map(x->(IDisplayFolder)x).collect(Collectors.toList()));
                                 recyclerView.hideShimmerAdapter();
                             });
 
@@ -411,6 +382,31 @@ public class EnhancedFolderListFragment extends SecureFragment {
 
                     }
                 });
+            });
+        }
+
+    }
+
+    private void getRoomFolders(EnhancedFolderListViewModel viewModel,boolean forceRefresh){
+        if(recyclerAdapter.getItemCount() == 0 || forceRefresh) {
+            backgroundThreadPoster.post(() -> {
+                List<FolderWithFiles> folders = getFileDatabase().folderDao().getAll().stream().sorted(Comparator.comparing(FolderWithFiles::getName)).collect(Collectors.toList());
+                //EnhancedDatabaseHandler databaseHandler = new EnhancedDatabaseHandler(getContext());
+                //ArrayList<EnhancedFolder> folders = (ArrayList<EnhancedFolder>) databaseHandler.getFolders().stream().map(x -> (EnhancedFolder) x).collect(Collectors.toList());
+                if (ViewerConnectivityManager.getInstance().isConnected()) {
+                    ArrayList<EnhancedFileUpdateLog> updateLogs = FileSyncUtils.getUpdateLogs(getContext());
+                    /*if (updateLogs != null) {
+                        ArrayList<Long> folderIds = (ArrayList<Long>) updateLogs.stream().map(x -> x.getFolderId()).distinct().collect(Collectors.toList());
+                        for (Long folderId : folderIds) {
+                            folders.stream().filter(x -> x.getOnlineId() == folderId).findFirst().get().setHasUpdates(true);
+                        }
+                    }*/
+                }
+                uiThreadPoster.post(() -> {
+                    viewModel.getFolders().setValue(folders.stream().map(x->(IDisplayFolder)x).collect(Collectors.toList()));
+                    recyclerView.hideShimmerAdapter();
+                });
+
             });
         }
 

@@ -5,13 +5,11 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 
-import com.quigglesproductions.secureimageviewer.gson.ViewerGson;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
-import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedOnlineFile;
+import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile;
+import com.quigglesproductions.secureimageviewer.room.databases.file.relations.FileWithMetadata;
 import com.quigglesproductions.secureimageviewer.ui.SecureFragment;
 import com.quigglesproductions.secureimageviewer.ui.compoundcontrols.FileViewerNavigator;
 import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.EnhancedFileViewFragment;
@@ -37,16 +35,19 @@ public class BaseFileViewFragment extends SecureFragment {
     FileViewerNavigator getViewerNavigator(){
         return viewerNavigator;
     }
-    public EnhancedFile getFile(){
+    public IDisplayFile getFile(){
         Bundle args = getArguments();
         FileSourceType sourceType = FileSourceType.getFromKey(args.getString(ARG_FILE_SOURCE_TYPE));
-        EnhancedFile file;
+        IDisplayFile file;
         switch (sourceType){
             case ONLINE:
-                file = getGson().fromJson(args.getString(ARG_FILE), EnhancedOnlineFile.class);
+                file = (IDisplayFile) getGson().fromJson(args.getString(ARG_FILE), EnhancedOnlineFile.class);
                 break;
             case DATABASE:
-                file = getGson().fromJson(args.getString(ARG_FILE), EnhancedDatabaseFile.class);
+                file = (IDisplayFile) getGson().fromJson(args.getString(ARG_FILE), EnhancedDatabaseFile.class);
+                break;
+            case ROOM:
+                file = (IDisplayFile) getGson().fromJson(args.getString(ARG_FILE), FileWithMetadata.class);
                 break;
             default:
                 file = null;
@@ -58,6 +59,7 @@ public class BaseFileViewFragment extends SecureFragment {
     public enum FileSourceType{
         UNKNOWN,
         DATABASE,
+        ROOM,
         ONLINE;
 
         public static FileSourceType getFromKey(String key){

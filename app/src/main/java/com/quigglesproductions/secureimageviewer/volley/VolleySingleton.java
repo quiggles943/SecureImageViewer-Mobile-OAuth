@@ -2,19 +2,10 @@ package com.quigglesproductions.secureimageviewer.volley;
 
 import android.content.Context;
 
-import androidx.annotation.Nullable;
-
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
-import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
-import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedDatabaseFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedFolder;
-import com.quigglesproductions.secureimageviewer.models.file.FileModel;
-import com.quigglesproductions.secureimageviewer.models.folder.FolderModel;
-import com.quigglesproductions.secureimageviewer.volley.requests.VolleyFileDownloadRequest;
 
 import java.util.HashMap;
 

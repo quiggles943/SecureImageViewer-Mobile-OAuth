@@ -1,10 +1,7 @@
 package com.quigglesproductions.secureimageviewer.models.enhanced.datasource;
 
-import com.quigglesproductions.secureimageviewer.appauth.RequestServiceNotConfiguredException;
-import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
-import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.FileMetadata;
 import com.quigglesproductions.secureimageviewer.retrofit.RequestManager;
-import com.quigglesproductions.secureimageviewer.room.relations.FileWithMetadata;
+import com.quigglesproductions.secureimageviewer.room.databases.file.relations.FileWithMetadata;
 
 import java.io.FileNotFoundException;
 import java.net.MalformedURLException;

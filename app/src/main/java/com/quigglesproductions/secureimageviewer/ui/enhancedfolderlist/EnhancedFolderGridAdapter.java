@@ -2,7 +2,6 @@ package com.quigglesproductions.secureimageviewer.ui.enhancedfolderlist;
 
 import android.content.Context;
 import android.graphics.PorterDuff;
-import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,12 +20,10 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
-import com.bumptech.glide.signature.ObjectKey;
 import com.quigglesproductions.secureimageviewer.R;
 import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.IFolderDataSource;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedDatabaseFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedFolder;
-import com.quigglesproductions.secureimageviewer.models.folder.FolderModel;
 import com.quigglesproductions.secureimageviewer.volley.VolleySingleton;
 
 import java.net.MalformedURLException;
@@ -147,10 +144,6 @@ public class EnhancedFolderGridAdapter extends BaseAdapter
     public EnhancedFolder getItem(int position)
     {
         return folders.get(position);
-    }
-    public int getItemPosition(FolderModel folder){
-        int index = folders.indexOf(folder);
-        return index;
     }
     @Override
     public long getItemId(int position)

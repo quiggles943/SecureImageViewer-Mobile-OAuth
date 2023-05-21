@@ -16,6 +16,7 @@ import androidx.media3.ui.PlayerView;
 import com.quigglesproductions.secureimageviewer.R;
 import com.quigglesproductions.secureimageviewer.managers.VideoPlaybackManager;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
+import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile;
 import com.quigglesproductions.secureimageviewer.ui.compoundcontrols.FileViewerNavigator;
 
 public class VideoFileViewFragment extends BaseFileViewFragment {
@@ -43,7 +44,7 @@ public class VideoFileViewFragment extends BaseFileViewFragment {
                     getNavigator().show();
             }
         });*/
-        EnhancedFile file = getFile();
+        IDisplayFile file = getFile();
         loadVideo(view,file);
         super.onViewCreated(view, savedInstanceState);
 
@@ -68,7 +69,7 @@ public class VideoFileViewFragment extends BaseFileViewFragment {
     }
 
     @OptIn(markerClass = UnstableApi.class)
-    private void loadVideo(View itemView, EnhancedFile item){
+    private void loadVideo(View itemView, IDisplayFile item){
         try {
             if (itemView != null) {
 

@@ -9,7 +9,7 @@ import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.Loca
 import java.io.File;
 import java.time.LocalDateTime;
 
-public class EnhancedDatabaseFile extends EnhancedFile{
+public class EnhancedDatabaseFile extends EnhancedFile implements IDatabaseFile{
     private int id;
     private int folderId;
     private String filePath;
@@ -37,8 +37,8 @@ public class EnhancedDatabaseFile extends EnhancedFile{
         this.thumbnailFile = thumbnailFile;
         setDataSource(new LocalFileDataSource(this));
     }
-
-    public int getId() {
+    @Override
+    public long getId() {
         return id;
     }
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
@@ -59,8 +59,8 @@ public class EnhancedDatabaseFile extends EnhancedFile{
             thumbnailFile = new File(thumbnailPath);
         return thumbnailFile;
     }
-
-    public int getFolderId() {
+    @Override
+    public long getFolderId() {
         return folderId;
     }
 
@@ -95,5 +95,25 @@ public class EnhancedDatabaseFile extends EnhancedFile{
         if(this.folderId>0)
             return;
         this.folderId = folderId;
+    }
+
+    @Override
+    public String getFilePath() {
+        return filePath;
+    }
+
+    @Override
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
+    }
+
+    @Override
+    public String getThumbnailPath() {
+        return thumbnailPath;
+    }
+
+    @Override
+    public void setThumbnailPath(String thumbnailPath) {
+        this.thumbnailPath = thumbnailPath;
     }
 }

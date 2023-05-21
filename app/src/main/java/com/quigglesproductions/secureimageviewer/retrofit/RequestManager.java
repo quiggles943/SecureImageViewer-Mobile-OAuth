@@ -10,12 +10,15 @@ import com.quigglesproductions.secureimageviewer.database.enhanced.EnhancedDatab
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedOnlineFile;
+import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedDatabaseFolder;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
 import com.quigglesproductions.secureimageviewer.ui.ui.login.LoginActivity;
 import com.quigglesproductions.secureimageviewer.utils.ViewerFileUtils;
 
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -38,8 +41,7 @@ public class RequestManager {
     Context context;
     private Call suspendedCall;
     private Callback suspendedCallback;
-    @Inject
-    EnhancedDatabaseHandler databaseHandler;
+
 
     @Inject
     DownloadManager downloadManager;
@@ -48,7 +50,6 @@ public class RequestManager {
     public RequestManager(@ActivityContext Context context){
         this.context = context;
     }
-
     public <T> void enqueue(@NotNull Call<T> call, @NotNull Callback<T> callback){
         call.enqueue(new Callback<T>() {
             @Override
@@ -86,41 +87,5 @@ public class RequestManager {
         call.enqueue(suspendedCallback);
         suspendedCall = null;
     }
-    public <T extends EnhancedOnlineFile> void downloadToDatabase(@NotNull Call<T> requestCall){
-        enqueue(requestCall, new Callback<T>() {
-            @Override
-            public void onResponse(Call<T> call, Response<T> response) {
-                if(response.isSuccessful()){
-                    EnhancedOnlineFile file = response.body();
-                    EnhancedDatabaseFolder databaseFolder = databaseHandler.getFolderByOnlineId(file.getOnlineFolderId());
-                    if(databaseFolder == null){
 
-                    }
-                    EnhancedDatabaseFile databaseFile = databaseHandler.insertFile(file,databaseFolder.getId());
-
-                }
-            }
-
-            @Override
-            public void onFailure(Call<T> call, Throwable t) {
-
-            }
-        });
-    }
-    public <T extends ResponseBody> void downloadFile(@NotNull Call<T> requestCall,EnhancedDatabaseFile databaseFile){
-        enqueue(requestCall, new Callback<T>() {
-            @Override
-            public void onResponse(Call<T> call, Response<T> response) {
-                if(response.isSuccessful()){
-                    ResponseBody body = response.body();
-                    ViewerFileUtils.createFileOnDisk(context,databaseFile,body.byteStream());
-                }
-            }
-
-            @Override
-            public void onFailure(Call<T> call, Throwable t) {
-
-            }
-        });
-    }
 }

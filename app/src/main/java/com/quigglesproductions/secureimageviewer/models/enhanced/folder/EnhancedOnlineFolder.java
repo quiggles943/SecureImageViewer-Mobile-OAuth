@@ -7,6 +7,7 @@ import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.Onli
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedOnlineFile;
+import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile;
 import com.quigglesproductions.secureimageviewer.ui.enhancedfolderviewer.FolderOrigin;
 
 import java.util.ArrayList;
@@ -16,32 +17,32 @@ import java.util.stream.Collectors;
 
 public class EnhancedOnlineFolder extends EnhancedFolder implements IRemoteFolder{
 
-    private ArrayList<EnhancedOnlineFile> files = new ArrayList<>();
+    private ArrayList<IDisplayFile> files = new ArrayList<>();
     public EnhancedOnlineFolder(){
         super();
         setDataSource(new OnlineFolderDataSource(this));
     }
 
-    public void setItems(ArrayList<EnhancedOnlineFile> files) {
+    public void setItems(ArrayList<IDisplayFile> files) {
         this.files = files;
     }
 
-    public void addItem(EnhancedOnlineFile item) {
+    public void addItem(IDisplayFile item) {
         if(this.files == null){
             this.files = new ArrayList<>();
         }
         files.add(item);
     }
 
-    public ArrayList<EnhancedOnlineFile> getItems() {
+    public ArrayList<IDisplayFile> getItems() {
         return files;
     }
 
-    public ArrayList<EnhancedFile> getBaseItems() {
-        ArrayList<EnhancedFile> baseFiles = new ArrayList<>();
+    public ArrayList<IDisplayFile> getBaseItems() {
+        ArrayList<IDisplayFile> baseFiles = new ArrayList<>();
         if(files == null)
             return baseFiles;
-        for(EnhancedOnlineFile file:files){
+        for(IDisplayFile file:files){
             baseFiles.add(file);
         }
         return baseFiles;
@@ -67,21 +68,21 @@ public class EnhancedOnlineFolder extends EnhancedFolder implements IRemoteFolde
     public void sortFiles(SortType newSortType) {
         switch (newSortType){
             case NAME_ASC:
-                files.sort(Comparator.comparing(EnhancedFile::getName));
+                files.sort(Comparator.comparing(IDisplayFile::getName));
                 break;
             case NAME_DESC:
-                files.sort(Comparator.comparing(EnhancedFile::getName).reversed());
+                files.sort(Comparator.comparing(IDisplayFile::getName).reversed());
                 break;
             case NEWEST_FIRST:
-                files.sort(Comparator.comparing(EnhancedFile::getImportTime).reversed());
+                files.sort(Comparator.comparing(IDisplayFile::getDefaultSortTime).reversed());
                 //files.sort(Comparator.comparing(EnhancedFile::getDownloadTime));
                 break;
             case OLDEST_FIRST:
-                files.sort(Comparator.comparing(EnhancedFile::getImportTime));
+                files.sort(Comparator.comparing(IDisplayFile::getDefaultSortTime));
                 //files.sort(Comparator.comparing(EnhancedFile::getDownloadTime).reversed());
                 break;
             default:
-                files.sort(Comparator.comparing(EnhancedFile::getName));
+                files.sort(Comparator.comparing(IDisplayFile::getName));
                 break;
         }
     }
@@ -92,7 +93,7 @@ public class EnhancedOnlineFolder extends EnhancedFolder implements IRemoteFolde
     }
 
     @Override
-    public List<EnhancedFile> getFiles(){
+    public List<IDisplayFile> getFiles(){
         return new ArrayList<>(files);
     }
 }

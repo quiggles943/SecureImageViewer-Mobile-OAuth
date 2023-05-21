@@ -26,6 +26,8 @@ import com.quigglesproductions.secureimageviewer.dagger.hilt.module.DownloadMana
 import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.IFolderDataSource;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedFolder;
 import com.quigglesproductions.secureimageviewer.recycler.RecyclerViewSelectionMode;
+import com.quigglesproductions.secureimageviewer.room.databases.download.entity.FolderDownloadRecord;
+import com.quigglesproductions.secureimageviewer.room.databases.download.entity.FolderDownloadRecord;
 import com.quigglesproductions.secureimageviewer.ui.enhancedfolderlist.EnhancedFolderListRecyclerAdapter;
 
 import java.net.MalformedURLException;
@@ -34,7 +36,7 @@ import java.util.List;
 
 public class DownloadViewerRecyclerAdapter extends RecyclerView.Adapter<DownloadViewerRecyclerAdapter.ViewHolder> {
     private RecyclerView recyclerView;
-    private List<DownloadManager.FolderDownload> folderDownloads = new ArrayList<>();
+    private List<FolderDownloadRecord> folderDownloads = new ArrayList<>();
     private ArrayList<Integer> selected = new ArrayList<>();
     private boolean multiSelect = false;
     private EnhancedFolderListRecyclerAdapter.SelectionChangedListener selectionModeChangeListener;
@@ -44,7 +46,7 @@ public class DownloadViewerRecyclerAdapter extends RecyclerView.Adapter<Download
         this.onClickListener = onClickListener;
     }
 
-    public DownloadManager.FolderDownload getItem(int position) {
+    public FolderDownloadRecord getItem(int position) {
         return folderDownloads.get(position);
     }
 
@@ -99,25 +101,25 @@ public class DownloadViewerRecyclerAdapter extends RecyclerView.Adapter<Download
         this.selectionModeChangeListener = selectionModeChangeListener;
     }
 
-    public void add(DownloadManager.FolderDownload folder) {
+    public void add(FolderDownloadRecord folder) {
         this.folderDownloads.add(folder);
         notifyDataSetChanged();
     }
 
-    public void setFolderDownloads(List<DownloadManager.FolderDownload> enhancedFolders) {
+    public void setFolderDownloads(List<FolderDownloadRecord> enhancedFolders) {
         this.folderDownloads = enhancedFolders;
         notifyDataSetChanged();
     }
 
-    public List<DownloadManager.FolderDownload> getSelectedFolderDownloads() {
-        List<DownloadManager.FolderDownload> result = new ArrayList<>();
+    public List<FolderDownloadRecord> getSelectedFolderDownloads() {
+        List<FolderDownloadRecord> result = new ArrayList<>();
         for (Integer pos : getSelectedPositions())
             result.add(getItem(pos));
 
         return result;
     }
 
-    public void removeFolderDownload(DownloadManager.FolderDownload folder) {
+    public void removeFolderDownload(FolderDownloadRecord folder) {
         int position = folderDownloads.indexOf(folder);
         folderDownloads.remove(position);
         notifyItemRemoved(position);
@@ -161,7 +163,7 @@ public class DownloadViewerRecyclerAdapter extends RecyclerView.Adapter<Download
     public DownloadViewerRecyclerAdapter(){
     }
 
-    public DownloadViewerRecyclerAdapter(ArrayList<DownloadManager.FolderDownload> folderDownloads){
+    public DownloadViewerRecyclerAdapter(ArrayList<FolderDownloadRecord> folderDownloads){
         this.folderDownloads = folderDownloads;
     }
 
@@ -182,14 +184,14 @@ public class DownloadViewerRecyclerAdapter extends RecyclerView.Adapter<Download
 
         // Get element from your dataset at this position and replace the
         // contents of the view with that element
-        DownloadManager.FolderDownload folder = folderDownloads.get(position);
-        viewHolder.getDownloadName().setText(folder.getFolderName());
-        viewHolder.getDownloadStatus().setText(folder.getStatus());
-        viewHolder.getDownloadCount().setText(folder.getDownloadCount()+"");
-        viewHolder.getDownloadTotal().setText(folder.getDownloadTotal()+"");
-        viewHolder.getProgressBar().setProgress((int) (((double)folder.getDownloadCount()/(double) folder.getDownloadTotal())*100));
+        FolderDownloadRecord folder = folderDownloads.get(position);
+        viewHolder.getDownloadName().setText(folder.folderName);
+        //viewHolder.getDownloadStatus().setText(folder.getStatus());
+        viewHolder.getDownloadCount().setText(folder.progress+"");
+        viewHolder.getDownloadTotal().setText(folder.fileCount+"");
+        viewHolder.getProgressBar().setProgress((int) (((double)folder.progress/(double) folder.fileCount)*100));
         viewHolder.getProgressBar().setMax(100);
-        folder.setDownloadCallback(new DownloadManager.FolderDownloadCallback() {
+        /*folder.setDownloadCallback(new DownloadManager.FolderDownloadCallback() {
             @Override
             public void fileDownloaded(int downloaded, int remaining) {
                 viewHolder.getDownloadCount().setText(downloaded+"");
@@ -206,7 +208,7 @@ public class DownloadViewerRecyclerAdapter extends RecyclerView.Adapter<Download
                 else
                     viewHolder.getDownloadStatus().setText("Completed with errors");
             }
-        });
+        });*/
     }
 
     // Return the size of your dataset (invoked by the layout manager)
@@ -219,7 +221,7 @@ public class DownloadViewerRecyclerAdapter extends RecyclerView.Adapter<Download
         folderDownloads.clear();
         notifyDataSetChanged();
     }
-    public void addList(ArrayList<DownloadManager.FolderDownload> folderDownloads){
+    public void addList(ArrayList<FolderDownloadRecord> folderDownloads){
         this.folderDownloads.addAll(folderDownloads);
         notifyDataSetChanged();
     }

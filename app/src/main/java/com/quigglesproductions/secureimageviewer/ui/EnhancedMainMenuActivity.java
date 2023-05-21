@@ -80,7 +80,8 @@ public class EnhancedMainMenuActivity extends SecureActivity{
         NavDestination offlineFolderListDestination = navController.getGraph().findNode(R.id.nav_enhancedOfflineFolderListFragment);
         offlineFolderListDestination.addArgument("state", new NavArgument.Builder()
                 .setType(NavType.StringType)
-                .setDefaultValue("offline")
+                //.setDefaultValue("offline")
+                .setDefaultValue("offline-room")
                 .build());
         getViewModel().getIsOnline().setValue(ViewerConnectivityManager.getInstance().isConnected());
         getViewModel().getAppBarTitle().observe(this, new Observer<String>() {

@@ -9,18 +9,16 @@ import androidx.room.Room;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
-import com.quigglesproductions.secureimageviewer.room.dao.FileDao;
+import com.quigglesproductions.secureimageviewer.room.databases.file.FileDatabase;
+import com.quigglesproductions.secureimageviewer.room.databases.file.dao.FileDao;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import org.mockito.Mock;
 
 import java.io.IOException;
-import java.util.List;
 
 @RunWith(AndroidJUnit4.class)
 public class FileDatabaseTest {
@@ -33,7 +31,7 @@ public class FileDatabaseTest {
     public void createDb(){
         initMocks(this);
         Context context = ApplicationProvider.getApplicationContext();
-        fileDatabase = Room.inMemoryDatabaseBuilder(context,FileDatabase.class).build();
+        fileDatabase = Room.inMemoryDatabaseBuilder(context, FileDatabase.class).build();
         fileDao = fileDatabase.fileDao();
     }
 

@@ -210,8 +210,9 @@ public class LoginFragment extends SecureFragment {
             usernameEditText.setEnabled(false);
             passwordEditText.setText("********");
             passwordEditText.setEnabled(false);
-        }
             setupBiometrics();
+        }
+
     }
 
     private void setupBiometrics(){

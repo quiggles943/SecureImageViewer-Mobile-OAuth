@@ -8,9 +8,8 @@ import android.os.CancellationSignal;
 import android.os.FileUtils;
 import android.util.Size;
 
-import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
+import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDatabaseFile;
 import com.quigglesproductions.secureimageviewer.models.file.FileModel;
-import com.quigglesproductions.secureimageviewer.models.folder.FolderModel;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -118,7 +117,7 @@ public class ImageUtils {
             return file; // it will return null
         }
     }
-    public static File createThumbnail(Context context, EnhancedDatabaseFile item) {
+    public static File createThumbnail(Context context, IDatabaseFile item) {
         //create a file to write bitmap data
         File file = null;
         File folder = new File(context.getFilesDir(),".Pictures");
@@ -156,6 +155,7 @@ public class ImageUtils {
             fos.write(bitmapdata);
             fos.flush();
             fos.close();
+            thumbnail.recycle();
             return file;
         }catch (Exception e){
             e.printStackTrace();
@@ -163,47 +163,6 @@ public class ImageUtils {
         }
     }
 
-    public static File createThumbnail(Context context, FolderModel itemFolder) {
-        //create a file to write bitmap data
-        if(itemFolder.getThumbnailFile()!= null) {
-            File file = null;
-            File folder = new File(context.getFilesDir(), ".Pictures");
-            if (!folder.exists()) {
-                folder.mkdirs();
-            } else {
-                folder = new File(context.getFilesDir() + "/.Pictures" + File.separator + itemFolder.getId() + File.separator);
-                if (!folder.exists()) {
-                    folder.mkdirs();
-                } else {
-                }
-            }
-            try {
-                file = new File(folder, ".thumbnail");
-                file.createNewFile();
-                int size = dpToPx(150, context);
-                Size size1 = new Size(size, size);
-                Bitmap thumbnail = ThumbnailUtils.createImageThumbnail(itemFolder.getThumbnailFile(), size1, new CancellationSignal());
-                //Bitmap thumbnail = ThumbnailUtils.extractThumbnail(image,size,size);
-                //image = Utils.decodeSampledBitmapFromFile(item.getImageFile(),size,size);
-//Convert bitmap to byte array
-                ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                thumbnail.compress(Bitmap.CompressFormat.PNG, 0, bos); // YOU can also save it in JPEG
-                byte[] bitmapdata = bos.toByteArray();
-
-//write the bytes in file
-                FileOutputStream fos = new FileOutputStream(file);
-                fos.write(bitmapdata);
-                fos.flush();
-                fos.close();
-                return file;
-            } catch (Exception e) {
-                e.printStackTrace();
-                return file; // it will return null
-            }
-        }
-        else
-            return null;
-    }
 
     public static File getThumbnailIfExists(Context context, FileModel item){
         File file = null;
@@ -253,27 +212,5 @@ public class ImageUtils {
         return null;
     }
 
-    public static File getThumbnailIfExists(Context context, FolderModel itemFolder){
-        File file = null;
-        File folder = new File(context.getFilesDir(),".Pictures");
-        if (!folder.exists()) {
-            folder.mkdirs();
-        } else {
-            folder = new File(context.getFilesDir()+"/.Pictures"+File.separator+ itemFolder.getName()+File.separator);
-            if (!folder.exists()) {
-                folder.mkdirs();
-            } else {
-            }
-        }
-        try {
-            file = new File(folder,".thumbnail");
-            if(file.exists())
-                return file;
-            else
-                return null;
-        }catch(Exception e){
 
-        }
-        return null;
-    }
 }

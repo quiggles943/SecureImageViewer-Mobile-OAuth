@@ -15,7 +15,7 @@ import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.FileMe
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
-public class EnhancedFile implements ItemBaseModel {
+public class EnhancedFile implements ItemBaseModel,IDisplayFile {
     //public int id;
     @SerializedName("Id")
     public int onlineId;
@@ -116,6 +116,13 @@ public class EnhancedFile implements ItemBaseModel {
         }
     }
 
+    @Override
+    public String getFileTypeString() {
+        if(metadata == null)
+            return "";
+        return metadata.fileType;
+    }
+
     public String getArtistName() {
         if(metadata == null)
             return "";
@@ -126,7 +133,8 @@ public class EnhancedFile implements ItemBaseModel {
                 return metadata.artist.name;
         }
     }
-
+    @NonNull
+    @Override
     public FileType getFileType() {
         if(metadata == null)
             return FileType.UNKNOWN;
@@ -139,6 +147,16 @@ public class EnhancedFile implements ItemBaseModel {
 
     public void setDataSource(IFileDataSource dataSource){
         this.dataSource = dataSource;
+    }
+
+    @Override
+    public long getFolderId() {
+        return onlineFolderId;
+    }
+
+    @Override
+    public long getId() {
+        return onlineId;
     }
 
     public IFileDataSource getDataSource() {

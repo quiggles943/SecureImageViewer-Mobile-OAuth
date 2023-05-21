@@ -24,7 +24,7 @@ import com.quigglesproductions.secureimageviewer.SortType;
 import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.IFileDataSource;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
-import com.quigglesproductions.secureimageviewer.ui.onlinerecentfilelist.RecentFilesRecyclerViewAdapter;
+import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile;
 
 import org.acra.ACRA;
 
@@ -35,39 +35,39 @@ import java.util.List;
 
 import kotlinx.coroutines.ObsoleteCoroutinesApi;
 
-public class EnhancedFileGridRecyclerAdapter extends RecyclerView.Adapter<EnhancedFileGridRecyclerAdapter.ViewHolder> {
-    private ArrayList<EnhancedFile> files = new ArrayList<>();
+public class EnhancedFileGridRecyclerAdapter<T extends IDisplayFile> extends RecyclerView.Adapter<EnhancedFileGridRecyclerAdapter.ViewHolder> {
+    private ArrayList<T> files = new ArrayList<>();
     private Context mContext;
     private EnhancedRecyclerViewOnClickListener onClickListener;
 
-    public void setFiles(ArrayList<EnhancedFile> enhancedFiles) {
+    public void setFiles(ArrayList<T> enhancedFiles) {
         files = enhancedFiles;
         notifyDataSetChanged();
     }
 
-    public EnhancedFile get(int position) {
+    public T get(int position) {
         return files.get(position);
     }
 
-    public void addFiles(List<EnhancedFile> files) {
-        for (EnhancedFile file: files) {
+    public void addFiles(List<T> files) {
+        for (T file: files) {
             this.files.add(file);
         }
         notifyDataSetChanged();
     }
-    private ArrayList<EnhancedFile> sortFiles(ArrayList<EnhancedFile> files, SortType sortType){
+    private ArrayList<T> sortFiles(ArrayList<T> files, SortType sortType){
         switch (sortType){
             case NAME_ASC:
-                files.sort(Comparator.comparing(EnhancedFile::getName));
+                files.sort(Comparator.comparing(T::getName));
                 break;
             case NAME_DESC:
-                files.sort(Comparator.comparing(EnhancedFile::getName).reversed());
+                files.sort(Comparator.comparing(T::getName).reversed());
                 break;
             case NEWEST_FIRST:
-                files.sort(Comparator.comparing(EnhancedFile::getDefaultSortTime).reversed());
+                files.sort(Comparator.comparing(T::getDefaultSortTime).reversed());
                 break;
             case OLDEST_FIRST:
-                files.sort(Comparator.comparing(EnhancedFile::getDefaultSortTime));
+                files.sort(Comparator.comparing(T::getDefaultSortTime));
                 break;
         }
         return files;
@@ -78,7 +78,7 @@ public class EnhancedFileGridRecyclerAdapter extends RecyclerView.Adapter<Enhanc
         notifyDataSetChanged();
     }
 
-    public List<EnhancedFile> getFiles() {
+    public List<T> getFiles() {
         return files;
     }
 
@@ -120,7 +120,7 @@ public class EnhancedFileGridRecyclerAdapter extends RecyclerView.Adapter<Enhanc
     // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, final int position) {
-        EnhancedFile file = files.get(position);
+        T file = files.get(position);
         viewHolder.getImageView().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

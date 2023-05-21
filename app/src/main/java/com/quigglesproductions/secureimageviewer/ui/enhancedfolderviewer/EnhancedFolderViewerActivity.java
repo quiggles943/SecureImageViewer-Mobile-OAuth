@@ -27,10 +27,12 @@ import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.IFil
 import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.IFolderDataSource;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
+import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedDatabaseFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedOnlineFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedRecentsFolder;
+import com.quigglesproductions.secureimageviewer.models.enhanced.folder.IDisplayFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.ILocalFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.IRemoteFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.FileMetadata;
@@ -47,17 +49,15 @@ public class EnhancedFolderViewerActivity extends SecureActivity {
     private static final int CONTEXTMENU_SET_THUMBNAIL = 1;
     private static final int CONTEXTMENU_UPLOAD = 2;
     private Context context;
-    EnhancedDatabaseHandler databaseHandler;
-    EnhancedFolder selectedFolder;
+    IDisplayFolder selectedFolder;
     FileGridAdapter adapter;
     GridView gridview;
-    public ArrayList<EnhancedFile> itemList = new ArrayList<>();
+    public ArrayList<IDisplayFile> itemList = new ArrayList<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.context = this;
         setContentView(R.layout.activity_folder_view);
-        databaseHandler = new EnhancedDatabaseHandler(context);
 
         setupView();
 
@@ -79,12 +79,12 @@ public class EnhancedFolderViewerActivity extends SecureActivity {
         try {
             selectedFolder.getDataSource().getFilesFromDataSource(context,new IFolderDataSource.FolderDataSourceCallback() {
                 @Override
-                public void FolderFilesRetrieved(List<EnhancedFile> files, Exception exception) {
+                public void FolderFilesRetrieved(List<IDisplayFile> files, Exception exception) {
                     if(files != null){
                         //itemList = (ArrayList<EnhancedFile>) files;
                         SortType initialSort = ApplicationPreferenceManager.getInstance().getOfflineFolderSortType();
                         selectedFolder.sortFiles(initialSort);
-                        itemList = (ArrayList<EnhancedFile>) selectedFolder.getFiles();
+                        itemList = (ArrayList<IDisplayFile>) selectedFolder.getFiles();
                         adapter = new FileGridAdapter(context,itemList);
                         gridview.setAdapter(adapter);
                     }
@@ -208,7 +208,7 @@ public class EnhancedFolderViewerActivity extends SecureActivity {
         super.onCreateContextMenu(menu, v, menuInfo);
         menu.setHeaderTitle("Options");
         AdapterView.AdapterContextMenuInfo cmi = (AdapterView.AdapterContextMenuInfo) menuInfo;
-        EnhancedFile selectedFile = itemList.get(((AdapterView.AdapterContextMenuInfo) menuInfo).position);
+        IDisplayFile selectedFile = itemList.get(((AdapterView.AdapterContextMenuInfo) menuInfo).position);
         menu.add(CONTEXTMENU_INFO, cmi.position, 0, "Info");
         if(selectedFolder instanceof ILocalFolder)
             menu.add(CONTEXTMENU_SET_THUMBNAIL, cmi.position, 0, "Set as Thumbnail");
@@ -218,7 +218,7 @@ public class EnhancedFolderViewerActivity extends SecureActivity {
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         int id = item.getItemId();
-        EnhancedFile selectedFile = adapter.getItem(item.getItemId());
+        IDisplayFile selectedFile = adapter.getItem(item.getItemId());
         switch (item.getGroupId()){
             case CONTEXTMENU_INFO:
                 //new ItemInfoDialog(adapter.getItem(item.getItemId())).show(getSupportFragmentManager(),ItemInfoDialog.TAG);
@@ -246,8 +246,7 @@ public class EnhancedFolderViewerActivity extends SecureActivity {
 
                 break;
             case CONTEXTMENU_SET_THUMBNAIL:
-                FolderManager.getInstance().changeFolderThumbnailFile((EnhancedDatabaseFolder) selectedFolder,(EnhancedDatabaseFile) adapter.getItem(item.getItemId()));
-                databaseHandler.setFolderThumbnail((EnhancedDatabaseFolder) selectedFolder,(EnhancedDatabaseFile) adapter.getItem(item.getItemId()));
+                //FolderManager.getInstance().changeFolderThumbnailFile((EnhancedDatabaseFolder) selectedFolder,(EnhancedDatabaseFile) adapter.getItem(item.getItemId()));
                 break;
             case CONTEXTMENU_UPLOAD:
                 /*AuthManager.getInstance().performActionWithFreshTokens(context, new AuthState.AuthStateAction() {

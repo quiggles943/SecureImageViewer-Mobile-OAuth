@@ -19,7 +19,8 @@ import com.quigglesproductions.secureimageviewer.R;
 import com.quigglesproductions.secureimageviewer.SortType;
 import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.IFileDataSource;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
-import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
+import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile;
+import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile;
 
 import org.acra.ACRA;
 
@@ -30,38 +31,38 @@ import java.util.List;
 
 public class FileGridAdapter extends BaseAdapter {
     private Context mContext;
-    private ArrayList<EnhancedFile> items;
+    private ArrayList<IDisplayFile> items;
     private int folderId;
     private boolean isEncrypted;
     private SortType sortType = SortType.NAME_ASC;
-    public FileGridAdapter(Context c, List<EnhancedFile> files)
+    public FileGridAdapter(Context c, List<IDisplayFile> files)
     {
         mContext = c;
-        this.items = (ArrayList<EnhancedFile>) files;
+        this.items = (ArrayList<IDisplayFile>) files;
     }
-    public FileGridAdapter(Context c, List<EnhancedFile> files, SortType initialSort)
+    public FileGridAdapter(Context c, List<IDisplayFile> files, SortType initialSort)
     {
         mContext = c;
-        this.items = sortFiles((ArrayList<EnhancedFile>) files,initialSort);
+        this.items = sortFiles((ArrayList<IDisplayFile>) files,initialSort);
     }
-    public ArrayList<EnhancedFile> sortFiles(ArrayList<EnhancedFile> files, SortType sortType){
+    public ArrayList<IDisplayFile> sortFiles(ArrayList<IDisplayFile> files, SortType sortType){
         switch (sortType){
             case NAME_ASC:
-                files.sort(Comparator.comparing(EnhancedFile::getName));
+                files.sort(Comparator.comparing(IDisplayFile::getName));
                 break;
             case NAME_DESC:
-                files.sort(Comparator.comparing(EnhancedFile::getName).reversed());
+                files.sort(Comparator.comparing(IDisplayFile::getName).reversed());
                 break;
             case NEWEST_FIRST:
-                files.sort(Comparator.comparing(EnhancedFile::getImportTime).reversed());
-                //files.sort(Comparator.comparing(EnhancedFile::getDownloadTime));
+                files.sort(Comparator.comparing(IDisplayFile::getDefaultSortTime).reversed());
+                //files.sort(Comparator.comparing(IDisplayFile::getDownloadTime));
                 break;
             case OLDEST_FIRST:
-                files.sort(Comparator.comparing(EnhancedFile::getImportTime));
-                //files.sort(Comparator.comparing(EnhancedFile::getDownloadTime).reversed());
+                files.sort(Comparator.comparing(IDisplayFile::getDefaultSortTime));
+                //files.sort(Comparator.comparing(IDisplayFile::getDownloadTime).reversed());
                 break;
             default:
-                files.sort(Comparator.comparing(EnhancedFile::getName));
+                files.sort(Comparator.comparing(IDisplayFile::getName));
                 break;
         }
         return files;
@@ -77,7 +78,7 @@ public class FileGridAdapter extends BaseAdapter {
         return items.size();
     }
     @Override
-    public EnhancedFile getItem(int position)
+    public IDisplayFile getItem(int position)
     {
         return items.get(position);
     }
@@ -89,7 +90,7 @@ public class FileGridAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent)
     {
-        EnhancedFile item = items.get(position);
+        IDisplayFile item = items.get(position);
         View gridView = convertView;
         if (gridView == null)
         {
@@ -150,8 +151,8 @@ public class FileGridAdapter extends BaseAdapter {
         notifyDataSetChanged();
     }
 
-    public void setFiles(ArrayList<EnhancedFile> enhancedFiles) {
-        this.items = sortFiles(enhancedFiles,sortType);
+    public void setFiles(ArrayList<IDisplayFile> IDisplayFiles) {
+        this.items = sortFiles(IDisplayFiles,sortType);
         notifyDataSetChanged();
     }
 }

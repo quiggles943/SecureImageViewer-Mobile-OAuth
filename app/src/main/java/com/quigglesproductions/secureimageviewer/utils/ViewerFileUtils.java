@@ -6,7 +6,11 @@ import android.util.Log;
 import com.quigglesproductions.secureimageviewer.database.enhanced.EnhancedDatabaseHandler;
 import com.quigglesproductions.secureimageviewer.models.ItemBaseModel;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
+import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDatabaseFile;
+import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile;
 import com.quigglesproductions.secureimageviewer.models.file.FileModel;
+import com.quigglesproductions.secureimageviewer.room.databases.file.FileDatabase;
+import com.quigglesproductions.secureimageviewer.room.databases.file.relations.FileWithMetadata;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -20,7 +24,7 @@ import java.io.OutputStream;
 
 public class ViewerFileUtils {
 
-    private static File createFile(Context context,EnhancedDatabaseFile fileToCreate) throws IOException {
+    private static File createFile(Context context,IDatabaseFile fileToCreate) throws IOException {
         File folder = new File(context.getFilesDir(), ".Pictures");
         if (!folder.exists()) {
             folder.mkdirs();
@@ -50,7 +54,7 @@ public class ViewerFileUtils {
         //fileToInsert.setImageFile(file);
         //ImageUtils.createThumbnail(context, fileToInsert);
     }
-    public static ItemBaseModel createFileOnDisk(Context context, EnhancedDatabaseFile fileToInsert, InputStream inputStream){
+    public static IDatabaseFile createFileOnDisk(Context context, IDatabaseFile fileToInsert, InputStream inputStream){
         try {
             File file = createFile(context, fileToInsert);
             writeStreamToFile(inputStream,file);
@@ -63,41 +67,23 @@ public class ViewerFileUtils {
                 return fileToInsert;
             }
     }
-    public static ItemBaseModel createFileOnDisk(Context context, EnhancedDatabaseFile fileToInsert, byte[] data){
-        try {
-            int count;
-            int lengthOfFile = data.length;
-            InputStream input = new ByteArrayInputStream(data);
-            File file = createFile(context,fileToInsert);
-            writeStreamToFile(input,file);
-            fileToInsert.setImageFile(file);
-            fileToInsert.setThumbnailFile(ImageUtils.createThumbnail(context, fileToInsert));
-            return fileToInsert;
-        }
-        catch(Exception e){
-            Log.e("ERROR", e.getMessage(), e);
-            return fileToInsert;
-        }
-    }
 
     public static File getFilePathForFile(Context context,FileModel file){
         return new File(context.getFilesDir() + File.separator + ".Pictures" + File.separator + file.getFolderId() + File.separator + file.getId());
     }
-    public static File getFilePathForFile(Context context,EnhancedDatabaseFile file){
-        return new File(context.getFilesDir() + File.separator + ".Pictures" + File.separator + file.getFolderId() + File.separator + file.getId());
-    }
-    public static File getThumbnailFilePathForFile(Context context,FileModel file){
-        return new File(context.getFilesDir() + File.separator + ".Pictures" + File.separator + file.getFolderId() + File.separator +".thumbnails"+File.separator+ file.getId());
-    }
 
-    public static boolean deleteFile(Context context,@NotNull EnhancedDatabaseFile... files){
+    public static boolean deleteFile(FileDatabase database, @NotNull FileWithMetadata... files){
         if(files == null || files.length == 0)
             return false;
-        EnhancedDatabaseHandler handler = new EnhancedDatabaseHandler(context);
-        for(EnhancedDatabaseFile file:files) {
-            handler.deleteFile(file);
-            file.getThumbnailFile().delete();
-            file.getImageFile().delete();
+        for(FileWithMetadata file:files) {
+            boolean thumbnailDeleted = true;
+            boolean fileDeleted = true;
+            if(file.getThumbnailFile() != null)
+                thumbnailDeleted = file.getThumbnailFile().delete();
+            if(file.getImageFile() != null)
+                fileDeleted = file.getImageFile().delete();
+            if(thumbnailDeleted && fileDeleted)
+                database.fileDao().delete(file);
         }
         return true;
     }

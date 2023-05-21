@@ -35,12 +35,16 @@ import com.quigglesproductions.secureimageviewer.managers.ViewerConnectivityMana
 import com.quigglesproductions.secureimageviewer.models.LoginModel;
 import com.quigglesproductions.secureimageviewer.models.WebServerConfig;
 import com.quigglesproductions.secureimageviewer.retrofit.RequestManager;
-import com.quigglesproductions.secureimageviewer.room.FileDatabase;
+import com.quigglesproductions.secureimageviewer.room.databases.download.DownloadRecordDatabase;
+import com.quigglesproductions.secureimageviewer.room.databases.file.FileDatabase;
+import com.quigglesproductions.secureimageviewer.room.databases.system.SystemDatabase;
 import com.quigglesproductions.secureimageviewer.ui.login.EnhancedLoginActivity;
 import com.quigglesproductions.secureimageviewer.ui.login.ReauthenticateActivity;
 import com.quigglesproductions.secureimageviewer.ui.splash.NewSplashScreenActivity;
 import com.quigglesproductions.secureimageviewer.ui.startup.EnhancedStartupScreen;
 import com.quigglesproductions.secureimageviewer.ui.ui.login.LoginActivity;
+import com.techyourchance.threadposter.BackgroundThreadPoster;
+import com.techyourchance.threadposter.UiThreadPoster;
 
 import net.openid.appauth.AuthorizationException;
 import net.openid.appauth.AuthorizationResponse;
@@ -61,7 +65,8 @@ public class SecureActivity extends AppCompatActivity {
 
     public static final boolean NEW_LOGIN_METHOD= false;
     private ActivityResultLauncher<Intent> activityResultLauncher;
-
+    final BackgroundThreadPoster backgroundThreadPoster = new BackgroundThreadPoster();
+    final UiThreadPoster uiThreadPoster = new UiThreadPoster();
     @Inject
     RequestManager requestManager;
     @Inject
@@ -72,6 +77,10 @@ public class SecureActivity extends AppCompatActivity {
     DownloadManager downloadManager;
     @Inject
     FileDatabase fileDatabase;
+    @Inject
+    DownloadRecordDatabase recordDatabase;
+    @Inject
+    SystemDatabase systemDatabase;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -225,6 +234,14 @@ public class SecureActivity extends AppCompatActivity {
 
     }
 
+    public BackgroundThreadPoster getBackgroundThreadPoster(){
+        return backgroundThreadPoster;
+    }
+
+    public UiThreadPoster getUiThreadPoster() {
+        return uiThreadPoster;
+    }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -332,5 +349,13 @@ public class SecureActivity extends AppCompatActivity {
 
     public FileDatabase getFileDatabase() {
         return fileDatabase;
+    }
+
+    public DownloadRecordDatabase getRecordDatabase() {
+        return recordDatabase;
+    }
+
+    public SystemDatabase getSystemDatabase() {
+        return systemDatabase;
     }
 }

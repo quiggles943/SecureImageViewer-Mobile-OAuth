@@ -4,7 +4,7 @@ import android.os.Bundle;
 
 import androidx.preference.PreferenceFragmentCompat;
 
-import com.quigglesproductions.secureimageviewer.room.FileDatabase;
+import com.quigglesproductions.secureimageviewer.room.databases.file.FileDatabase;
 
 public class SecurePreferenceFragmentCompat extends PreferenceFragmentCompat {
     @Override

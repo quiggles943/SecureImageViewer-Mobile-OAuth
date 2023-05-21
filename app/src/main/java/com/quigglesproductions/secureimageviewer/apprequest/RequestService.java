@@ -2,18 +2,12 @@ package com.quigglesproductions.secureimageviewer.apprequest;
 
 import android.content.Context;
 
-import com.android.volley.VolleyError;
-import com.google.android.material.snackbar.Snackbar;
 import com.quigglesproductions.secureimageviewer.SortType;
 import com.quigglesproductions.secureimageviewer.appauth.RequestServiceNotConfiguredException;
 import com.quigglesproductions.secureimageviewer.apprequest.callbacks.ItemListRetrievalCallback;
 import com.quigglesproductions.secureimageviewer.apprequest.callbacks.ItemRetrievalCallback;
 import com.quigglesproductions.secureimageviewer.apprequest.configuration.RequestConfigurationException;
 import com.quigglesproductions.secureimageviewer.apprequest.configuration.RequestServiceConfiguration;
-import com.quigglesproductions.secureimageviewer.apprequest.downloaders.DownloadCompleteCallback;
-import com.quigglesproductions.secureimageviewer.apprequest.downloaders.FileContentUploadTask;
-import com.quigglesproductions.secureimageviewer.apprequest.downloaders.FileModelUploadTask;
-import com.quigglesproductions.secureimageviewer.apprequest.downloaders.FolderDownloadTask;
 import com.quigglesproductions.secureimageviewer.apprequest.requests.ArtistListRequest;
 import com.quigglesproductions.secureimageviewer.apprequest.requests.CategoryListRequest;
 import com.quigglesproductions.secureimageviewer.apprequest.requests.FileMetadataRequest;
@@ -21,20 +15,12 @@ import com.quigglesproductions.secureimageviewer.apprequest.requests.FolderFiles
 import com.quigglesproductions.secureimageviewer.apprequest.requests.FolderListRequest;
 import com.quigglesproductions.secureimageviewer.apprequest.requests.RecentFilesRequest;
 import com.quigglesproductions.secureimageviewer.apprequest.requests.SubjectListRequest;
-import com.quigglesproductions.secureimageviewer.database.DatabaseHandler;
-import com.quigglesproductions.secureimageviewer.database.enhanced.EnhancedDatabaseHandler;
-import com.quigglesproductions.secureimageviewer.managers.NotificationManager;
-import com.quigglesproductions.secureimageviewer.models.ArtistModel;
-import com.quigglesproductions.secureimageviewer.models.CatagoryModel;
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedArtist;
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedCategory;
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedSubject;
-import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedOnlineFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedOnlineFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.FileMetadata;
-import com.quigglesproductions.secureimageviewer.models.file.FileModel;
-import com.quigglesproductions.secureimageviewer.models.SubjectModel;
 import com.techyourchance.threadposter.BackgroundThreadPoster;
 import com.techyourchance.threadposter.UiThreadPoster;
 
@@ -80,31 +66,6 @@ public class RequestService {
         }
     }
 
-    /**
-     * Begins the process of downloading the folder specified by the provided {@link DownloadRequest}
-     * @param request The request containing the folder to download
-     * @param accessToken The access token used to request the folder from the server
-     * @param resultCallback The callback used to retrieve the completed download from the background thread
-     */
-    public void getFolderForDownload(DownloadRequest request, String accessToken, RequestManager.RequestResultCallback<DownloadRequest,ArrayList<VolleyError>> resultCallback){
-        request.setStatus(DownloadRequest.RequestStatus.IN_PROGRESS);
-        FolderDownloadTask.getFolderForDownload(context, (EnhancedFolder) request.object, accessToken, new DownloadCompleteCallback<EnhancedFolder, ArrayList<VolleyError>>() {
-            @Override
-            public void downloadComplete(EnhancedFolder folder, ArrayList<VolleyError> volleyErrors) {
-                folder.isDownloading = false;
-                folder.setStatus(EnhancedFolder.Status.DOWNLOADED);
-                EnhancedDatabaseHandler databaseHandler = new EnhancedDatabaseHandler(context);
-                databaseHandler.insertOrUpdateFolder(folder);
-                //DatabaseHandler.getInstance().insertOrUpdateFolder(folder);
-                request.updateObject(folder);
-                if(volleyErrors != null && volleyErrors.size()>0){
-                    for(VolleyError error:volleyErrors)
-                        request.addException(error);
-                }
-                resultCallback.RequestResultRetrieved(request,volleyErrors);
-            }
-        });
-    }
     /**
      * Retrieves recent files from the server
      * @param count The number of files to retrieve

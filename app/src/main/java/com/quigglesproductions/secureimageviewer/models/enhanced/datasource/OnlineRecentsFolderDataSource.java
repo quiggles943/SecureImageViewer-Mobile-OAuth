@@ -8,6 +8,7 @@ import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
 import com.quigglesproductions.secureimageviewer.apprequest.RequestService;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedOnlineFile;
+import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedRecentsFolder;
 
 import java.io.FileNotFoundException;
@@ -38,7 +39,7 @@ public class OnlineRecentsFolderDataSource implements IFolderDataSource {
                 for(EnhancedOnlineFile file : result.getRecentFiles()){
                     folder.addItem(file);
                 }
-                ArrayList<EnhancedFile> files = (ArrayList<EnhancedFile>) result.getRecentFiles().stream().map(x->(EnhancedFile)x).collect(Collectors.toList());
+                ArrayList<IDisplayFile> files = (ArrayList<IDisplayFile>) result.getRecentFiles().stream().map(x->(IDisplayFile)x).collect(Collectors.toList());
                 callback.FolderFilesRetrieved(files, exception);
                 count = count+files.size();
                 if(!startedCount) {

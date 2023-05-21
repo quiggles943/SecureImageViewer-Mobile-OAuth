@@ -5,18 +5,12 @@ import android.os.AsyncTask;
 
 import com.google.gson.Gson;
 import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
-import com.quigglesproductions.secureimageviewer.database.DatabaseHandler;
 import com.quigglesproductions.secureimageviewer.models.file.FileModel;
 import com.quigglesproductions.secureimageviewer.utils.ViewerFileUtils;
 
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.ArrayList;

@@ -7,6 +7,7 @@ import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.Loca
 import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.OnlineFolderDataSource;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
+import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile;
 import com.quigglesproductions.secureimageviewer.ui.enhancedfolderviewer.FolderOrigin;
 
 import java.io.File;
@@ -15,7 +16,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-public class EnhancedDatabaseFolder extends EnhancedFolder implements ILocalFolder{
+public class EnhancedDatabaseFolder extends EnhancedFolder implements ILocalFolder,IDatabaseFolder{
     private int id;
     private LocalDateTime accessTime;
 
@@ -25,24 +26,25 @@ public class EnhancedDatabaseFolder extends EnhancedFolder implements ILocalFold
     private ArrayList<EnhancedDatabaseFile> files;
     public EnhancedDatabaseFolder(Context context){
         super();
-        setDataSource(new LocalFolderDataSource(context,this));
+        //setDataSource(new LocalFolderDataSource(context,this));
     }
 
     public EnhancedDatabaseFolder(int id,Context context){
         super();
         this.id = id;
-        setDataSource(new LocalFolderDataSource(context,this));
+        //setDataSource(new LocalFolderDataSource(context,this));
     }
 
-    public EnhancedDatabaseFolder(LocalFolderDataSource dataSource){
+    /*public EnhancedDatabaseFolder(LocalFolderDataSource dataSource){
         super();
         setDataSource(dataSource);
-    }
+    }*/
     public LocalDateTime getAccessTime(){
         return accessTime;
     }
 
-    public int getId(){
+    @Override
+    public long getId(){
         return id;
     }
 
@@ -65,6 +67,7 @@ public class EnhancedDatabaseFolder extends EnhancedFolder implements ILocalFold
         this.thumbnailFile = file;
         this.thumbnailFileUri = file.getAbsolutePath();
     }
+    @Override
     public File getThumbnailFile() {
         return thumbnailFile;
     }
@@ -95,8 +98,8 @@ public class EnhancedDatabaseFolder extends EnhancedFolder implements ILocalFold
         return files;
     }
 
-    public ArrayList<EnhancedFile> getBaseItems() {
-        ArrayList<EnhancedFile> baseFiles = new ArrayList<>();
+    public ArrayList<IDisplayFile> getBaseItems() {
+        ArrayList<IDisplayFile> baseFiles = new ArrayList<>();
         for(EnhancedDatabaseFile file:files){
             baseFiles.add(file);
         }
@@ -130,7 +133,7 @@ public class EnhancedDatabaseFolder extends EnhancedFolder implements ILocalFold
         return FolderOrigin.LOCAL;
     }
     @Override
-    public List<EnhancedFile> getFiles(){
+    public List<IDisplayFile> getFiles(){
         return new ArrayList<>(files);
     }
 

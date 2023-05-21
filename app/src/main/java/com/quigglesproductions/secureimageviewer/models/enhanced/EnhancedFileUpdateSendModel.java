@@ -9,5 +9,5 @@ public class EnhancedFileUpdateSendModel {
     @SerializedName("LastUpdateTime")
     public LocalDateTime lastUpdateTime;
     @SerializedName("Folders")
-    public List<Integer> folders;
+    public List<Long> folders;
 }

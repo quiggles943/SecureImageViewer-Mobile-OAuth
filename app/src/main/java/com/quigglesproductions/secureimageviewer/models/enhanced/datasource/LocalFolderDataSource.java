@@ -8,9 +8,11 @@ import com.quigglesproductions.secureimageviewer.appauth.RequestServiceNotConfig
 import com.quigglesproductions.secureimageviewer.database.enhanced.EnhancedDatabaseHandler;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
+import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedDatabaseFolder;
 
 import java.io.File;
+import java.io.NotActiveException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -33,10 +35,10 @@ public class LocalFolderDataSource implements IFolderDataSource{
 
     @Override
     public void getFilesFromDataSource(Context context,FolderDataSourceCallback callback, SortType sortType) throws MalformedURLException {
-        EnhancedDatabaseHandler databaseHandler = new EnhancedDatabaseHandler(context);
+        /*EnhancedDatabaseHandler databaseHandler = new EnhancedDatabaseHandler(context);
         if(folder.getItems() == null || folder.getItems().size() == 0){
             ArrayList<EnhancedDatabaseFile> itemList = databaseHandler.getFilesInFolder(folder);
-            ArrayList<EnhancedFile> files = new ArrayList<>();
+            ArrayList<IDisplayFile> files = new ArrayList<>();
             for(EnhancedDatabaseFile file : itemList) {
                 files.add(file);
                 folder.addItem(file);
@@ -44,11 +46,12 @@ public class LocalFolderDataSource implements IFolderDataSource{
             callback.FolderFilesRetrieved(files,null);
         }
         else if(folder.getItems() != null && folder.getItems().size()>0){
-            ArrayList<EnhancedFile> files = new ArrayList<>();
+            ArrayList<IDisplayFile> files = new ArrayList<>();
             for(EnhancedDatabaseFile file : folder.getItems())
                 files.add(file);
             callback.FolderFilesRetrieved(files,null);
-        }
+        }*/
+        callback.FolderFilesRetrieved(null,new NotActiveException());
     }
 
     @Override

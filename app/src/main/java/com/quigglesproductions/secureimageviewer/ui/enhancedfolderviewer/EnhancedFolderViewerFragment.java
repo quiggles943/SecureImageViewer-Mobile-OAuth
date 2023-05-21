@@ -4,7 +4,6 @@ import static androidx.navigation.Navigation.findNavController;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.graphics.Insets;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -14,15 +13,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.view.WindowInsets;
 import android.widget.AdapterView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.core.view.WindowInsetsCompat;
-import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavDirections;
@@ -34,32 +30,26 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.gson.reflect.TypeToken;
 import com.mikelau.views.shimmer.ShimmerRecyclerViewX;
-import com.quigglesproductions.secureimageviewer.App;
 import com.quigglesproductions.secureimageviewer.R;
 import com.quigglesproductions.secureimageviewer.SortType;
-import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
 import com.quigglesproductions.secureimageviewer.database.enhanced.EnhancedDatabaseHandler;
 import com.quigglesproductions.secureimageviewer.databinding.FragmentFolderViewBinding;
-import com.quigglesproductions.secureimageviewer.gson.ViewerGson;
 import com.quigglesproductions.secureimageviewer.managers.ApplicationPreferenceManager;
 import com.quigglesproductions.secureimageviewer.managers.FolderManager;
 import com.quigglesproductions.secureimageviewer.managers.NotificationManager;
 import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.IFileDataSource;
 import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.IFolderDataSource;
-import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.OnlineRecentsFolderDataSource;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
-import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedOnlineFile;
+import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedDatabaseFolder;
-import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedFolder;
-import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedRecentsFolder;
-import com.quigglesproductions.secureimageviewer.models.enhanced.folder.ILocalFolder;
-import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.FileMetadata;
+import com.quigglesproductions.secureimageviewer.models.enhanced.folder.IDisplayFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.IFileMetadata;
+import com.quigglesproductions.secureimageviewer.room.databases.file.relations.FileWithMetadata;
+import com.quigglesproductions.secureimageviewer.room.databases.file.relations.FolderWithFiles;
 import com.quigglesproductions.secureimageviewer.ui.EnhancedMainMenuActivity;
 import com.quigglesproductions.secureimageviewer.ui.EnhancedMainMenuViewModel;
 import com.quigglesproductions.secureimageviewer.ui.SecureFragment;
-import com.quigglesproductions.secureimageviewer.ui.enhancedfolderlist.EnhancedFolderListFragmentDirections;
 import com.techyourchance.threadposter.BackgroundThreadPoster;
 import com.techyourchance.threadposter.UiThreadPoster;
 
@@ -67,7 +57,6 @@ import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class EnhancedFolderViewerFragment extends SecureFragment {
     private static final int CONTEXTMENU_INFO = 0;
@@ -78,7 +67,7 @@ public class EnhancedFolderViewerFragment extends SecureFragment {
     EnhancedFileGridRecyclerAdapter enhancedAdapter;
     //GridView gridview;
     FragmentFolderViewBinding binding;
-    EnhancedFolder selectedFolder;
+    IDisplayFolder selectedFolder;
     private boolean scrollBottomReached;
     SortType startingSortType;
     EnhancedFolderViewerViewModel viewModel;
@@ -130,7 +119,7 @@ public class EnhancedFolderViewerFragment extends SecureFragment {
                 menu.setHeaderTitle("Options");
                 AdapterView.AdapterContextMenuInfo cmi = (AdapterView.AdapterContextMenuInfo) menuInfo;
                 //EnhancedFile selectedFile = enhancedAdapter.get(position);
-                EnhancedFile selectedFile = enhancedAdapter.get(cmi.position);
+                IDisplayFile selectedFile = enhancedAdapter.get(cmi.position);
                 menu.add(CONTEXTMENU_INFO, cmi.position, 0, "Info");
                 if(selectedFolder.getFolderOrigin() == FolderOrigin.LOCAL)
                     menu.add(CONTEXTMENU_SET_THUMBNAIL, cmi.position, 0, "Set as Thumbnail");
@@ -139,9 +128,9 @@ public class EnhancedFolderViewerFragment extends SecureFragment {
         //gridview.setAdapter(adapter);
         selectedFolder = FolderManager.getInstance().getCurrentFolder();
 
-        viewModel.getFiles().observe(getViewLifecycleOwner(), new Observer<ArrayList<EnhancedFile>>() {
+        viewModel.getFiles().observe(getViewLifecycleOwner(), new Observer<ArrayList<IDisplayFile>>() {
             @Override
-            public void onChanged(ArrayList<EnhancedFile> enhancedFiles) {
+            public void onChanged(ArrayList<IDisplayFile> enhancedFiles) {
                 enhancedAdapter.setFiles(enhancedFiles);
                 container.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
                     @Override
@@ -160,6 +149,7 @@ public class EnhancedFolderViewerFragment extends SecureFragment {
                 startingSortType = ApplicationPreferenceManager.getInstance().getOnlineFolderSortType();
                 break;
             case LOCAL:
+            case ROOM:
                 startingSortType = ApplicationPreferenceManager.getInstance().getOfflineFolderSortType();
                 break;
             default:
@@ -209,12 +199,28 @@ public class EnhancedFolderViewerFragment extends SecureFragment {
 
     private void restoreInstanceState(Bundle savedInstanceState){
         //if(savedInstanceState != null) {
-            String fileListJson = viewModel.getState().get("FileList");
+        String fileListJson = viewModel.getState().get("FileList");
             //String fileListJson = savedInstanceState.getString("FileList");
+        Type listType;
             if (fileListJson != null) {
-                Type listType = new TypeToken<ArrayList<EnhancedFile>>() {
-                }.getType();
-                ArrayList<EnhancedFile> files = getGson().fromJson(fileListJson, listType);
+                switch (selectedFolder.getFolderOrigin()){
+                    case ONLINE:
+                        listType = new TypeToken<ArrayList<EnhancedOnlineFile>>() {
+                        }.getType();
+                        break;
+                    case LOCAL:
+                        listType = new TypeToken<ArrayList<EnhancedDatabaseFile>>() {
+                        }.getType();
+                        break;
+                    case ROOM:
+                        listType = new TypeToken<ArrayList<FileWithMetadata>>() {
+                        }.getType();
+                        break;
+                    default:
+                        listType = null;
+                }
+
+                ArrayList<IDisplayFile> files = getGson().fromJson(fileListJson, listType);
                 enhancedAdapter.setFiles(files);
                 recyclerView.hideShimmerAdapter();
             }
@@ -228,7 +234,7 @@ public class EnhancedFolderViewerFragment extends SecureFragment {
 
     @Override
     public boolean onContextItemSelected(@NonNull MenuItem item) {
-        EnhancedFile selectedFile = enhancedAdapter.get(item.getItemId());
+        IDisplayFile selectedFile = enhancedAdapter.get(item.getItemId());
         switch (item.getGroupId()){
             case CONTEXTMENU_INFO:
                 //new ItemInfoDialog(adapter.getItem(item.getItemId())).show(getSupportFragmentManager(),ItemInfoDialog.TAG);
@@ -256,9 +262,13 @@ public class EnhancedFolderViewerFragment extends SecureFragment {
 
                 break;
             case CONTEXTMENU_SET_THUMBNAIL:
-                EnhancedDatabaseHandler databaseHandler = new EnhancedDatabaseHandler(getContext());
-                FolderManager.getInstance().changeFolderThumbnailFile((EnhancedDatabaseFolder) selectedFolder,(EnhancedDatabaseFile) enhancedAdapter.get(item.getItemId()));
-                databaseHandler.setFolderThumbnail((EnhancedDatabaseFolder) selectedFolder,(EnhancedDatabaseFile) enhancedAdapter.get(item.getItemId()));
+                IDisplayFile file = enhancedAdapter.get(item.getItemId());
+                if(file instanceof FileWithMetadata) {
+                    backgroundThreadPoster.post(()->{
+                        getFileDatabase().folderDao().setThumbnail((FolderWithFiles)selectedFolder,(FileWithMetadata) file);
+                    });
+
+                }
                 break;
             case CONTEXTMENU_UPLOAD:
                 /*AuthManager.getInstance().performActionWithFreshTokens(context, new AuthState.AuthStateAction() {
@@ -373,7 +383,7 @@ public class EnhancedFolderViewerFragment extends SecureFragment {
                     try {
                         selectedFolder.getDataSource().getFilesFromDataSource(context, new IFolderDataSource.FolderDataSourceCallback() {
                             @Override
-                            public void FolderFilesRetrieved(List<EnhancedFile> files, Exception exception) {
+                            public void FolderFilesRetrieved(List<IDisplayFile> files, Exception exception) {
                                 if (files != null) {
                                     //itemList = (ArrayList<EnhancedFile>) files;
                                     SortType initialSort;
@@ -382,7 +392,7 @@ public class EnhancedFolderViewerFragment extends SecureFragment {
                                     else
                                         initialSort = ApplicationPreferenceManager.getInstance().getOnlineFolderSortType();
                                     selectedFolder.sortFiles(initialSort);
-                                    ArrayList<EnhancedFile> itemList = (ArrayList<EnhancedFile>) selectedFolder.getFiles();
+                                    ArrayList<IDisplayFile> itemList = (ArrayList<IDisplayFile>) selectedFolder.getFiles();
                                     uiThreadPoster.post(() -> {
                                         viewModel.getFiles().setValue(itemList);
                                         recyclerView.hideShimmerAdapter();

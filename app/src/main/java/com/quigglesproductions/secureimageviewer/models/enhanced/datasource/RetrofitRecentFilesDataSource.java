@@ -11,6 +11,7 @@ import com.quigglesproductions.secureimageviewer.apprequest.RequestService;
 import com.quigglesproductions.secureimageviewer.authentication.AuthenticationManager;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedOnlineFile;
+import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedRecentsFolder;
 
 import java.io.FileNotFoundException;
@@ -54,7 +55,7 @@ public class RetrofitRecentFilesDataSource implements IFolderDataSource{
                     for(EnhancedOnlineFile file : result){
                         folder.addItem(file);
                     }
-                    ArrayList<EnhancedFile> files = (ArrayList<EnhancedFile>) result.stream().map(x->(EnhancedFile)x).collect(Collectors.toList());
+                    ArrayList<IDisplayFile> files = (ArrayList<IDisplayFile>) result.stream().map(x->(IDisplayFile)x).collect(Collectors.toList());
                     callback.FolderFilesRetrieved(files, null);
                     count = count+files.size();
                     if(!startedCount) {
