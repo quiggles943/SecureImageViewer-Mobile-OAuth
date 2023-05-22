@@ -30,4 +30,12 @@ public class RoomDatabaseSubject implements IRoomFileTag {
     public long getUid() {
         return uid;
     }
+
+    public String getName() {
+        return name;
+    }
+
+    public long getOnlineId(){
+        return onlineId;
+    }
 }

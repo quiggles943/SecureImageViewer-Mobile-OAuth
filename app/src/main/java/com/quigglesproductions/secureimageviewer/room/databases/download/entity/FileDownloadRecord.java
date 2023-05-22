@@ -22,6 +22,8 @@ public class FileDownloadRecord {
     public LocalDateTime endTime;
     @ColumnInfo(name = "WasSuccessful")
     public boolean wasSuccessful;
+    @ColumnInfo(name = "IsArchived")
+    public boolean isArchived;
 
     public void setFolderRecordId(long folderRecordId){
         this.folderRecordId = folderRecordId;

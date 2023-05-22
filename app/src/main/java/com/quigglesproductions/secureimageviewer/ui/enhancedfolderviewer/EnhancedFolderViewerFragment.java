@@ -32,7 +32,6 @@ import com.google.gson.reflect.TypeToken;
 import com.mikelau.views.shimmer.ShimmerRecyclerViewX;
 import com.quigglesproductions.secureimageviewer.R;
 import com.quigglesproductions.secureimageviewer.SortType;
-import com.quigglesproductions.secureimageviewer.database.enhanced.EnhancedDatabaseHandler;
 import com.quigglesproductions.secureimageviewer.databinding.FragmentFolderViewBinding;
 import com.quigglesproductions.secureimageviewer.managers.ApplicationPreferenceManager;
 import com.quigglesproductions.secureimageviewer.managers.FolderManager;
@@ -42,7 +41,6 @@ import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.IFol
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedOnlineFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile;
-import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedDatabaseFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.IDisplayFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.IFileMetadata;
 import com.quigglesproductions.secureimageviewer.room.databases.file.relations.FileWithMetadata;

@@ -2,7 +2,6 @@ package com.quigglesproductions.secureimageviewer.dagger.hilt.module;
 
 import android.content.Context;
 
-import com.quigglesproductions.secureimageviewer.database.enhanced.EnhancedDatabaseHandler;
 import com.quigglesproductions.secureimageviewer.room.databases.download.DownloadRecordDatabase;
 import com.quigglesproductions.secureimageviewer.room.databases.file.FileDatabase;
 

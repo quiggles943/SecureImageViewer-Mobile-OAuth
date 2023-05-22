@@ -27,6 +27,14 @@ public abstract class DownloadRecordDao {
     @Query("SELECT * FROM FolderDownloadRecord")
     public abstract LiveData<List<FolderDownloadRecord>> getAllFoldersLive();
 
+    @Query("SELECT * FROM FolderDownloadRecord")
+    public abstract List<FolderDownloadRecord> getAllFolderRecords();
+    @Query("SELECT * FROM FolderDownloadRecord WHERE IsArchived = 0")
+    public abstract List<FolderDownloadRecord> getAllActiveFolderRecords();
+    @Transaction
+    @Query("SELECT * FROM FolderDownloadRecord WHERE IsArchived = 0")
+    public abstract List<FolderDownloadPackage> getAllActiveFolderPackages();
+
     @Transaction
     @Query("SELECT * FROM FolderDownloadRecord WHERE EndTime IS NULL")
     public abstract List<FolderDownloadPackage> getAllNotComplete();
@@ -53,4 +61,17 @@ public abstract class DownloadRecordDao {
     public abstract void update(FolderDownloadRecord downloadRecord);
     @Update
     public abstract void update(FileDownloadRecord downloadRecord);
+
+    public void archiveAll(){
+        List<FolderDownloadPackage> folderDownloadRecords = getAllActiveFolderPackages();
+        for(FolderDownloadPackage record : folderDownloadRecords){
+            record.folderDownloadRecord.isArchived = true;
+            update(record.folderDownloadRecord);
+            for(FileDownloadRecord fileDownloadRecord : record.fileDownloadRecords){
+                fileDownloadRecord.isArchived = true;
+                update(fileDownloadRecord);
+            }
+        }
+
+    }
 }

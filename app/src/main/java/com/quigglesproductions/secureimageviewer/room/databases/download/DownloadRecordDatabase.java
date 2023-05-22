@@ -10,7 +10,7 @@ import com.quigglesproductions.secureimageviewer.room.databases.download.entity.
 import com.quigglesproductions.secureimageviewer.room.databases.download.entity.FolderDownloadRecord;
 
 @Database(entities = {FileDownloadRecord.class,
-        FolderDownloadRecord.class}, version = 3)
+        FolderDownloadRecord.class}, version = 4)
 @TypeConverters({Converters.class})
 public abstract class DownloadRecordDatabase extends RoomDatabase {
 

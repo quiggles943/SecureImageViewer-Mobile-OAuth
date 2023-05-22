@@ -6,19 +6,10 @@ import android.content.Intent;
 import androidx.activity.result.ActivityResultLauncher;
 
 import com.quigglesproductions.secureimageviewer.dagger.hilt.module.DownloadManager;
-import com.quigglesproductions.secureimageviewer.database.enhanced.EnhancedDatabaseHandler;
-import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
-import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
-import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedOnlineFile;
-import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile;
-import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedDatabaseFolder;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
 import com.quigglesproductions.secureimageviewer.ui.ui.login.LoginActivity;
-import com.quigglesproductions.secureimageviewer.utils.ViewerFileUtils;
 
 import org.jetbrains.annotations.NotNull;
-
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -26,7 +17,6 @@ import dagger.Module;
 import dagger.hilt.InstallIn;
 import dagger.hilt.android.components.ActivityComponent;
 import dagger.hilt.android.qualifiers.ActivityContext;
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;

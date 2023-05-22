@@ -10,7 +10,6 @@ import androidx.preference.Preference;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.quigglesproductions.secureimageviewer.R;
-import com.quigglesproductions.secureimageviewer.database.enhanced.EnhancedDatabaseHandler;
 import com.quigglesproductions.secureimageviewer.managers.FolderManager;
 import com.quigglesproductions.secureimageviewer.managers.NotificationManager;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
@@ -81,6 +80,8 @@ public class StorageSettingsActivity  extends SecureActivity {
                     new Thread(()->{
                         FolderManager.getInstance().removeAllFolders(getFileDatabase());
                         getFileDatabase().clearAllTables();
+                        getRecordDatabase().clearAllTables();
+                        //getRecordDatabase().downloadRecordDao().archiveAll();
                         NotificationManager.getInstance().showSnackbar("All folders removed", Snackbar.LENGTH_SHORT);
                         if(callback != null)
                             callback.informationUpdated();

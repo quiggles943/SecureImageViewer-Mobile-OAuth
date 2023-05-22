@@ -26,13 +26,11 @@ import com.google.gson.reflect.TypeToken;
 import com.mikelau.views.shimmer.ShimmerRecyclerViewX;
 import com.quigglesproductions.secureimageviewer.R;
 import com.quigglesproductions.secureimageviewer.dagger.hilt.module.DownloadManager;
-import com.quigglesproductions.secureimageviewer.database.enhanced.EnhancedDatabaseHandler;
 import com.quigglesproductions.secureimageviewer.databinding.FragmentFolderListBinding;
 import com.quigglesproductions.secureimageviewer.managers.FolderManager;
 import com.quigglesproductions.secureimageviewer.managers.NotificationManager;
 import com.quigglesproductions.secureimageviewer.managers.ViewerConnectivityManager;
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateLog;
-import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.LocalFolderDataSource;
 import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.RetrofitFolderDataSource;
 import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.RetrofitRecentFilesDataSource;
 import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.RoomFolderDataSource;
@@ -44,7 +42,6 @@ import com.quigglesproductions.secureimageviewer.models.enhanced.folder.Enhanced
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.IDisplayFolder;
 import com.quigglesproductions.secureimageviewer.recycler.RecyclerViewSelectionMode;
 import com.quigglesproductions.secureimageviewer.retrofit.RetrofitException;
-import com.quigglesproductions.secureimageviewer.room.databases.file.relations.FileWithMetadata;
 import com.quigglesproductions.secureimageviewer.room.databases.file.relations.FolderWithFiles;
 import com.quigglesproductions.secureimageviewer.ui.EnhancedMainMenuActivity;
 import com.quigglesproductions.secureimageviewer.ui.SecureFragment;
@@ -311,9 +308,8 @@ public class EnhancedFolderListFragment extends SecureFragment {
                             }
                         });
                 }
-                recyclerAdapter.setMultiSelect(false);
                 NotificationManager.getInstance().showSnackbar("Downloading "+recyclerAdapter.getSelectedCount()+" folders",Snackbar.LENGTH_SHORT);
-
+                recyclerAdapter.setMultiSelect(false);
                 break;
             case R.id.online_folder_download_viewer:
                 //NavDirections downloadViewerAction = EnhancedFolderListFragmentDirections.actionNavEnhancedFolderListFragmentToDownloadViewerFragment();

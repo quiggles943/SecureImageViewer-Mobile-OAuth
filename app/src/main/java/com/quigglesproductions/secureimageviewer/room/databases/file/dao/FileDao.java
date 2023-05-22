@@ -72,6 +72,7 @@ public abstract class FileDao {
      * @return the uid of the inserted file
      * @throws DatabaseInsertionException
      */
+    @Transaction
     @Insert
     public long insert(RoomDatabaseFolder folder,FileWithMetadata file)throws DatabaseInsertionException{
         if(file != null){
@@ -121,6 +122,7 @@ public abstract class FileDao {
      * @param files The files to insert to the database
      * @throws DatabaseInsertionException
      */
+    @Transaction
     @Insert
     public void insertAll(RoomDatabaseFolder folder, FileWithMetadata... files) throws DatabaseInsertionException {
         if(files != null && files.length>0){

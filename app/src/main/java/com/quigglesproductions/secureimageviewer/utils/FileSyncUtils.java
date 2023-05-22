@@ -3,7 +3,6 @@ package com.quigglesproductions.secureimageviewer.utils;
 import android.content.Context;
 
 import com.google.gson.reflect.TypeToken;
-import com.quigglesproductions.secureimageviewer.database.enhanced.EnhancedDatabaseHandler;
 import com.quigglesproductions.secureimageviewer.gson.ViewerGson;
 import com.quigglesproductions.secureimageviewer.managers.ApplicationPreferenceManager;
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateLog;

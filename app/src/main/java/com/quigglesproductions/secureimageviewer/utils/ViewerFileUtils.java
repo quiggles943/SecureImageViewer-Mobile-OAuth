@@ -3,19 +3,13 @@ package com.quigglesproductions.secureimageviewer.utils;
 import android.content.Context;
 import android.util.Log;
 
-import com.quigglesproductions.secureimageviewer.database.enhanced.EnhancedDatabaseHandler;
-import com.quigglesproductions.secureimageviewer.models.ItemBaseModel;
-import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDatabaseFile;
-import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile;
 import com.quigglesproductions.secureimageviewer.models.file.FileModel;
 import com.quigglesproductions.secureimageviewer.room.databases.file.FileDatabase;
 import com.quigglesproductions.secureimageviewer.room.databases.file.relations.FileWithMetadata;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;

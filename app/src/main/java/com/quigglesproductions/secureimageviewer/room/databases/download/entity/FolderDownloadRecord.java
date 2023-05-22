@@ -12,6 +12,8 @@ public class FolderDownloadRecord {
     public long uid;
     @ColumnInfo(name = "WorkerId")
     public String workerId;
+    @ColumnInfo(name = "FolderId")
+    public long folderId;
     @ColumnInfo(name = "FolderName")
     public String folderName;
     @ColumnInfo(name = "DownloadProgress")
@@ -24,8 +26,21 @@ public class FolderDownloadRecord {
     public LocalDateTime endTime;
     @ColumnInfo(name = "WasSuccessful")
     public boolean wasSuccessful;
+    @ColumnInfo(name = "IsArchived")
+    public boolean isArchived;
 
     public void setUid(long uid){
         this.uid = uid;
+    }
+
+    public String getStatus(){
+        if(endTime == null)
+            return "Downloading";
+        else if(!wasSuccessful){
+            return "Downloaded with errors";
+        }
+        else {
+            return "Downloaded";
+        }
     }
 }

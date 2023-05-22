@@ -2,14 +2,9 @@ package com.quigglesproductions.secureimageviewer.dagger.hilt.module;
 
 import android.content.Context;
 
-import androidx.room.Room;
-
-import com.quigglesproductions.secureimageviewer.database.enhanced.EnhancedDatabaseHandler;
-import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedOnlineFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDatabaseFile;
-import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedDatabaseFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedOnlineFolder;
 import com.quigglesproductions.secureimageviewer.retrofit.RequestManager;
@@ -17,7 +12,6 @@ import com.quigglesproductions.secureimageviewer.retrofit.RequestService;
 import com.quigglesproductions.secureimageviewer.retrofit.RetrofitException;
 import com.quigglesproductions.secureimageviewer.room.databases.download.DownloadRecordDatabase;
 import com.quigglesproductions.secureimageviewer.room.databases.download.entity.FileDownloadRecord;
-import com.quigglesproductions.secureimageviewer.room.databases.download.entity.FolderDownloadPackage;
 import com.quigglesproductions.secureimageviewer.room.databases.download.entity.FolderDownloadRecord;
 import com.quigglesproductions.secureimageviewer.room.databases.file.FileDatabase;
 import com.quigglesproductions.secureimageviewer.room.databases.file.entity.RoomDatabaseFolder;
@@ -28,6 +22,7 @@ import com.techyourchance.threadposter.BackgroundThreadPoster;
 import com.techyourchance.threadposter.UiThreadPoster;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -143,6 +138,7 @@ public class DownloadManager {
         List<FileDownload> fileDownloads = new ArrayList<>();
         private FolderDownloadCallback downloadCallback;
         private int downloadedCount = 0;
+        private int failedCount = 0;
         private FileDatabase database;
         private DownloadRecordDatabase recordDatabase;
         private FolderDownloadRecord downloadRecord;
@@ -166,13 +162,19 @@ public class DownloadManager {
         public void fileDownloadComplete(FileDownload fileDownload, Exception exception) {
             FileDownload storedDownload = fileDownloads.get(fileDownloads.indexOf(fileDownload));
             storedDownload.isComplete = true;
-            downloadedCount++;
+            if(exception != null)
+                failedCount++;
+            else
+                downloadedCount++;
             downloadRecord.progress = downloadedCount;
             if(downloadCallback != null)
                 downloadCallback.fileDownloaded(downloadedCount, remainingDownloads());
             if(isDownloadComplete()){
                 downloadRecord.endTime = LocalDateTime.now();
-            }
+                if(failedCount == 0)
+                    downloadRecord.wasSuccessful = true;            }
+                else
+                    downloadRecord.wasSuccessful = false;
             backgroundThreadPoster.post(()->{
                 recordDatabase.downloadRecordDao().update(downloadRecord);
             });
@@ -203,13 +205,7 @@ public class DownloadManager {
             backgroundThreadPoster.post(()->{
                 //Existing Database
                 //EnhancedDatabaseFolder databaseFolder;
-                downloadRecord = new FolderDownloadRecord();
-                downloadRecord.initiationTime = LocalDateTime.now();
-                downloadRecord.fileCount = fileDownloads.size();
-                downloadRecord.workerId = folder.getName()+"/"+folder.getOnlineId();
-                downloadRecord.folderName = folder.getName();
-                long folderRecordId = recordDatabase.downloadRecordDao().insert(downloadRecord);
-                downloadRecord.setUid(folderRecordId);
+
 
                 RoomDatabaseFolder roomDatabaseFolder;
                 if(folder instanceof EnhancedOnlineFolder) {
@@ -227,6 +223,14 @@ public class DownloadManager {
                     roomDatabaseFolder = new RoomDatabaseFolder.Creator().loadFromOnlineFolder((EnhancedOnlineFolder) folder).build();
 
                 }
+                downloadRecord = new FolderDownloadRecord();
+                downloadRecord.initiationTime = LocalDateTime.now();
+                downloadRecord.fileCount = fileDownloads.size();
+                downloadRecord.workerId = folder.getName()+"/"+folder.getOnlineId();
+                downloadRecord.folderName = folder.getName();
+                downloadRecord.folderId = roomDatabaseFolder.getId();
+                long folderRecordId = recordDatabase.downloadRecordDao().insert(downloadRecord);
+                downloadRecord.setUid(folderRecordId);
                 for (FileDownload file: fileDownloads){
                     //FileDownloadRecord fileDownloadRecord = new FileDownloadRecord();
                     //fileDownloadRecord.initiationTime = LocalDateTime.now();
@@ -334,6 +338,16 @@ public class DownloadManager {
                                     callback.fileDownloaded(fileDownload, null);
                                 });
 
+                            });
+                        }
+                        else{
+                            uiThreadPoster.post(()->{
+                                try {
+                                    callback.fileDownloaded(fileDownload, new RetrofitException(response.errorBody().string()));
+                                } catch (IOException e) {
+                                    callback.fileDownloaded(fileDownload,new RetrofitException(e));
+                                    throw new RuntimeException(e);
+                                }
                             });
                         }
                     }

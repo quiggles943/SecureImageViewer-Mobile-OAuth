@@ -186,29 +186,11 @@ public class DownloadViewerRecyclerAdapter extends RecyclerView.Adapter<Download
         // contents of the view with that element
         FolderDownloadRecord folder = folderDownloads.get(position);
         viewHolder.getDownloadName().setText(folder.folderName);
-        //viewHolder.getDownloadStatus().setText(folder.getStatus());
+        viewHolder.getDownloadStatus().setText(folder.getStatus());
         viewHolder.getDownloadCount().setText(folder.progress+"");
         viewHolder.getDownloadTotal().setText(folder.fileCount+"");
         viewHolder.getProgressBar().setProgress((int) (((double)folder.progress/(double) folder.fileCount)*100));
         viewHolder.getProgressBar().setMax(100);
-        /*folder.setDownloadCallback(new DownloadManager.FolderDownloadCallback() {
-            @Override
-            public void fileDownloaded(int downloaded, int remaining) {
-                viewHolder.getDownloadCount().setText(downloaded+"");
-                //viewHolder.getDownloadTotal().setText(remaining+"");
-                //viewHolder.getProgressBar().setProgress(downloaded);
-                viewHolder.getProgressBar().setProgress((int) (((double)downloaded/(double) folder.getDownloadTotal())*100));
-
-            }
-
-            @Override
-            public void folderDownloadComplete(DownloadManager.FolderDownload folderDownload, Exception exception) {
-                if(exception == null)
-                    viewHolder.getDownloadStatus().setText(folder.getStatus());
-                else
-                    viewHolder.getDownloadStatus().setText("Completed with errors");
-            }
-        });*/
     }
 
     // Return the size of your dataset (invoked by the layout manager)

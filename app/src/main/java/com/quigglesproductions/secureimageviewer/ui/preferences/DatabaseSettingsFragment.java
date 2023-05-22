@@ -6,7 +6,6 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
 import com.quigglesproductions.secureimageviewer.R;
-import com.quigglesproductions.secureimageviewer.database.enhanced.EnhancedDatabaseHandler;
 
 public class DatabaseSettingsFragment  extends PreferenceFragmentCompat {
     @Override

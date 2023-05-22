@@ -3,8 +3,6 @@ package com.quigglesproductions.secureimageviewer.managers;
 import android.content.Context;
 
 import com.quigglesproductions.secureimageviewer.apprequest.RequestService;
-import com.quigglesproductions.secureimageviewer.database.enhanced.EnhancedDatabaseHandler;
-import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedDatabaseFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.IDisplayFolder;
 import com.quigglesproductions.secureimageviewer.models.file.FileModel;

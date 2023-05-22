@@ -4,7 +4,6 @@ import android.content.Context;
 
 import androidx.room.Room;
 
-import com.quigglesproductions.secureimageviewer.database.enhanced.EnhancedDatabaseHandler;
 import com.quigglesproductions.secureimageviewer.room.databases.download.DownloadRecordDatabase;
 import com.quigglesproductions.secureimageviewer.room.databases.file.FileDatabase;
 import com.quigglesproductions.secureimageviewer.room.databases.system.SystemDatabase;

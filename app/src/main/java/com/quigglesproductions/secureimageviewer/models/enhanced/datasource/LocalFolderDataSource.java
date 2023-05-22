@@ -2,13 +2,8 @@ package com.quigglesproductions.secureimageviewer.models.enhanced.datasource;
 
 import android.content.Context;
 
-import com.quigglesproductions.secureimageviewer.App;
 import com.quigglesproductions.secureimageviewer.SortType;
 import com.quigglesproductions.secureimageviewer.appauth.RequestServiceNotConfiguredException;
-import com.quigglesproductions.secureimageviewer.database.enhanced.EnhancedDatabaseHandler;
-import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
-import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
-import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedDatabaseFolder;
 
 import java.io.File;
@@ -16,7 +11,6 @@ import java.io.NotActiveException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import java.util.ArrayList;
 
 public class LocalFolderDataSource implements IFolderDataSource{
     private EnhancedDatabaseFolder folder;

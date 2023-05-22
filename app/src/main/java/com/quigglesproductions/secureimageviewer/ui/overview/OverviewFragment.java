@@ -1,6 +1,5 @@
 package com.quigglesproductions.secureimageviewer.ui.overview;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,7 +11,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
-import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavDirections;
@@ -20,14 +18,7 @@ import androidx.navigation.Navigation;
 import androidx.transition.AutoTransition;
 import androidx.transition.TransitionManager;
 
-import com.google.gson.reflect.TypeToken;
 import com.quigglesproductions.secureimageviewer.R;
-import com.quigglesproductions.secureimageviewer.appauth.RequestServiceNotConfiguredException;
-import com.quigglesproductions.secureimageviewer.apprequest.AppRequestError;
-import com.quigglesproductions.secureimageviewer.apprequest.callbacks.ItemRetrievalCallback;
-import com.quigglesproductions.secureimageviewer.apprequest.requests.FileUpdateStatusRequest;
-import com.quigglesproductions.secureimageviewer.apprequest.requests.ServerStatusRequest;
-import com.quigglesproductions.secureimageviewer.database.enhanced.EnhancedDatabaseHandler;
 import com.quigglesproductions.secureimageviewer.databinding.ActivityOverviewBinding;
 import com.quigglesproductions.secureimageviewer.gson.ViewerGson;
 import com.quigglesproductions.secureimageviewer.managers.ApplicationPreferenceManager;
@@ -35,19 +26,13 @@ import com.quigglesproductions.secureimageviewer.managers.ViewerConnectivityMana
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateLog;
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateSendModel;
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedServerStatus;
-import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
-import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedDatabaseFolder;
 import com.quigglesproductions.secureimageviewer.room.databases.file.entity.RoomDatabaseFolder;
 import com.quigglesproductions.secureimageviewer.room.databases.file.relations.FileWithMetadata;
 import com.quigglesproductions.secureimageviewer.room.databases.system.enums.SystemParameter;
 import com.quigglesproductions.secureimageviewer.ui.SecureFragment;
-import com.quigglesproductions.secureimageviewer.ui.ui.login.LoginActivity;
 import com.quigglesproductions.secureimageviewer.utils.FileSyncUtils;
 import com.quigglesproductions.secureimageviewer.utils.ViewerFileUtils;
-import com.techyourchance.threadposter.BackgroundThreadPoster;
-import com.techyourchance.threadposter.UiThreadPoster;
 
-import java.lang.reflect.Type;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
