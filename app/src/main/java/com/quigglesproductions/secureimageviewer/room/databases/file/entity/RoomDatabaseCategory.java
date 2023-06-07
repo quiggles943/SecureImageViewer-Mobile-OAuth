@@ -27,6 +27,11 @@ public class RoomDatabaseCategory implements IRoomFileTag {
         this.name = name;
     }
 
+    @Override
+    public String getName() {
+        return name;
+    }
+
     public long getUid() {
         return uid;
     }

@@ -19,7 +19,7 @@ public class FolderDownloadRecord {
     @ColumnInfo(name = "DownloadProgress")
     public int progress;
     @ColumnInfo(name = "DownloadTotal")
-    public int fileCount;
+    public int fileTotalCount;
     @ColumnInfo(name = "InitiationTime")
     public LocalDateTime initiationTime;
     @ColumnInfo(name = "EndTime")

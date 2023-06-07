@@ -26,7 +26,7 @@ public class FileMetadataWithEntities implements IFileMetadata {
     public List<RoomDatabaseSubject> subjects;
     @Relation(parentColumn = "FileId",entityColumn = "CategoryId",associateBy = @Junction(RoomFileCategoryCrossRef.class))
     public List<RoomDatabaseCategory> categories;
-    @Relation(parentColumn = "ArtistId",entityColumn = "uid")
+    @Relation(parentColumn = "ArtistId",entityColumn = "ArtistId")
     public RoomDatabaseArtist artist;
     public FileMetadataWithEntities(){}
 

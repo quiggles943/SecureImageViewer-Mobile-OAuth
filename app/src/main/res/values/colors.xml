@@ -32,6 +32,8 @@
     <color name="progressBar_default_tint">@color/teal_200</color>
 
     <color name="progressBar_complete_tint">@color/green_200</color>
+    <color name="progressBar_complete_with_errors_tint">#D39D30</color>
+    <color name="progressBar_error_tint">#B71C1C</color>
 
     <color name="navigationHeader_gradient_start">@color/blue_200</color>
     <color name="navigationHeader_gradient_middle">@color/blue_500</color>

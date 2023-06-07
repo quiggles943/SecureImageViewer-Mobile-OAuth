@@ -2,6 +2,7 @@ package com.quigglesproductions.secureimageviewer.room.databases.download.dao;
 
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
+import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
 import androidx.room.Transaction;
@@ -39,6 +40,9 @@ public abstract class DownloadRecordDao {
     @Query("SELECT * FROM FolderDownloadRecord WHERE EndTime IS NULL")
     public abstract List<FolderDownloadPackage> getAllNotComplete();
 
+    @Transaction
+    @Query("SELECT * FROM FolderDownloadRecord WHERE EndTime IS NOT NULL")
+    public abstract List<FolderDownloadRecord> getAllComplete();
     @Insert
     public long insert(FolderDownloadPackage downloadRecord){
         long folderId = insert(downloadRecord.folderDownloadRecord);
@@ -74,4 +78,12 @@ public abstract class DownloadRecordDao {
         }
 
     }
+
+    public void deleteAllComplete(){
+        List<FolderDownloadRecord> records = getAllComplete();
+        deleteAll(records.toArray(new FolderDownloadRecord[0]));
+    }
+
+    @Delete
+    public abstract void deleteAll(FolderDownloadRecord... downloadRecord);
 }

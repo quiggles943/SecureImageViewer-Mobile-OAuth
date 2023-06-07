@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.quigglesproductions.secureimageviewer.SortType;
+import com.quigglesproductions.secureimageviewer.enums.FileGroupBy;
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateLog;
 
 public class ApplicationPreferenceManager {
@@ -47,6 +48,12 @@ public class ApplicationPreferenceManager {
         String sortString = sharedPreferences.getString(ManagedPreference.SORT_ONLINE.getPreferenceKey(),def.toString());
         return SortType.getFromName(sortString);
     }
+    public FileGroupBy getFileGroupBy(FileGroupBy def){
+        if(sharedPreferences == null)
+            sharedPreferences = context.getSharedPreferences(PREFERENCES_MAIN, Context.MODE_PRIVATE);
+        String sortString = sharedPreferences.getString(ManagedPreference.OFFLINE_FILE_GROUP_BY.getPreferenceKey(),def.toString());
+        return FileGroupBy.fromDisplayName(sortString);
+    }
     public void setOfflineFolderSortType(SortType newSortType) {
         if(sharedPreferences == null)
             sharedPreferences = context.getSharedPreferences(PREFERENCES_MAIN, Context.MODE_PRIVATE);
@@ -56,6 +63,11 @@ public class ApplicationPreferenceManager {
         if(sharedPreferences == null)
             sharedPreferences = context.getSharedPreferences(PREFERENCES_MAIN, Context.MODE_PRIVATE);
         sharedPreferences.edit().putString(ManagedPreference.SORT_ONLINE.getPreferenceKey(),newSortType.toString()).commit();
+    }
+    public void setFileGroupBy(FileGroupBy newSortType) {
+        if(sharedPreferences == null)
+            sharedPreferences = context.getSharedPreferences(PREFERENCES_MAIN, Context.MODE_PRIVATE);
+        sharedPreferences.edit().putString(ManagedPreference.OFFLINE_FILE_GROUP_BY.getPreferenceKey(),newSortType.toString()).commit();
     }
 
     public String getPreferenceString(ManagedPreference preference,String defaultValue){
@@ -93,6 +105,7 @@ public class ApplicationPreferenceManager {
     public enum ManagedPreference{
         SORT_OFFLINE("com.secureimageviewer.preference.folder.sort.offline"),
         SORT_ONLINE("com.secureimageviewer.preference.folder.sort.online"),
+        OFFLINE_FILE_GROUP_BY("com.secureimageviewer.preference.folderlist.groupby"),
         SYNC_VALUES("com.secureimageviewer.preference.sync.values");
 
         public String preferenceKey;

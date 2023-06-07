@@ -56,6 +56,9 @@ public class RequestManager {
                             activityLauncher.launch(intent);
                     }
                  }
+                else{
+                    callback.onResponse(call,response);
+                }
             }
 
             @Override

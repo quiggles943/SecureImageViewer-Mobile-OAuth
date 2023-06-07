@@ -92,7 +92,7 @@ public class EnhancedFolderViewerFragment extends SecureFragment {
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(enhancedAdapter);
         recyclerView.showShimmerAdapter();
-
+        selectedFolder = FolderManager.getInstance().getCurrentFolder();
         restoreInstanceState(savedInstanceState);
         /*gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -124,7 +124,7 @@ public class EnhancedFolderViewerFragment extends SecureFragment {
             }
         });
         //gridview.setAdapter(adapter);
-        selectedFolder = FolderManager.getInstance().getCurrentFolder();
+
 
         viewModel.getFiles().observe(getViewLifecycleOwner(), new Observer<ArrayList<IDisplayFile>>() {
             @Override
@@ -421,9 +421,7 @@ public class EnhancedFolderViewerFragment extends SecureFragment {
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
-        if(enhancedAdapter.getItemCount()>0)
-            viewModel.getState().set("FileList",getGson().toJson(enhancedAdapter.getFiles()));
-            //outState.putString("FileList",getGson().toJson(enhancedAdapter.getFiles()));
+
         super.onSaveInstanceState(outState);
     }
 

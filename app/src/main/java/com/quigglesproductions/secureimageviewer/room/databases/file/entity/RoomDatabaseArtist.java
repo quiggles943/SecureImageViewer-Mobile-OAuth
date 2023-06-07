@@ -8,6 +8,7 @@ import com.google.gson.annotations.SerializedName;
 
 @Entity(tableName = "Artists")
 public class RoomDatabaseArtist implements IRoomFileTag {
+    @ColumnInfo(name = "ArtistId")
     @PrimaryKey(autoGenerate = true)
     public long uid;
     @ColumnInfo(name = "OnlineId")
@@ -24,6 +25,16 @@ public class RoomDatabaseArtist implements IRoomFileTag {
     @Override
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public long getOnlineId() {
+        return onlineId;
     }
 
     public long getUid() {

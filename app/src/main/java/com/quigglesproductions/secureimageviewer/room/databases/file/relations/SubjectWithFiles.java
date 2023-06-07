@@ -3,6 +3,7 @@ package com.quigglesproductions.secureimageviewer.room.databases.file.relations;
 import android.content.Context;
 
 import androidx.room.Embedded;
+import androidx.room.Ignore;
 import androidx.room.Junction;
 import androidx.room.Relation;
 
@@ -33,11 +34,12 @@ import java.util.stream.Collectors;
 public class SubjectWithFiles implements IDisplayFolder, IDatabaseFolder {
     @Embedded
     public RoomDatabaseSubject subject;
-    @Relation(parentColumn = "SubjectId",entityColumn = "FileId",associateBy = @Junction(RoomFileSubjectCrossRef.class))
+    @Relation(parentColumn = "SubjectId",entityColumn = "FileId",associateBy = @Junction(RoomFileSubjectCrossRef.class),entity = RoomDatabaseFile.class)
     public List<FileWithMetadata> files;
     //@Relation(parentColumn = "OnlineThumbnailId",entityColumn = "OnlineId",entity = RoomDatabaseFile.class)
+    @Ignore
     public FileWithMetadata thumbnailFile;
-
+    @Ignore
     IFolderDataSource dataSource;
 
     public SubjectWithFiles(){
@@ -60,7 +62,7 @@ public class SubjectWithFiles implements IDisplayFolder, IDatabaseFolder {
                 @Override
                 public void getThumbnailFromDataSource(FolderDataSourceCallback callback) {
                     if(thumbnailFile == null && files.size()>0)
-                        callback.FolderThumbnailRetrieved(files.get(0),null);
+                        callback.FolderThumbnailRetrieved(files.get(0).getThumbnailFile(),null);
                     else
                         callback.FolderThumbnailRetrieved(null, new FileNotFoundException());
                 }

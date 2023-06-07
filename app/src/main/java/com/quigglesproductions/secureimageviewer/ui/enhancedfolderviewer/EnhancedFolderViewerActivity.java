@@ -133,10 +133,6 @@ public class EnhancedFolderViewerActivity extends SecureActivity {
             case android.R.id.home:
                 onBackPressed();
                 break;
-            case R.id.offline_folder_sync_activate:
-                Snackbar snackbar = Snackbar.make(findViewById(R.id.offline_folder_layout),"Folder sync in progress",Snackbar.LENGTH_SHORT);
-                snackbar.show();
-                break;
             case R.id.add_to_folder:
                 Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
                 intent.addCategory(Intent.CATEGORY_OPENABLE);

@@ -1,6 +1,7 @@
 package com.quigglesproductions.secureimageviewer.ui.enhancedfolderlist;
 
 import android.annotation.SuppressLint;
+import android.content.DialogInterface;
 import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.view.ContextMenu;
@@ -15,6 +16,7 @@ import androidx.annotation.ColorInt;
 import androidx.annotation.ColorRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavDirections;
 import androidx.navigation.Navigation;
@@ -27,10 +29,10 @@ import com.mikelau.views.shimmer.ShimmerRecyclerViewX;
 import com.quigglesproductions.secureimageviewer.R;
 import com.quigglesproductions.secureimageviewer.dagger.hilt.module.DownloadManager;
 import com.quigglesproductions.secureimageviewer.databinding.FragmentFolderListBinding;
+import com.quigglesproductions.secureimageviewer.enums.FileGroupBy;
+import com.quigglesproductions.secureimageviewer.managers.ApplicationPreferenceManager;
 import com.quigglesproductions.secureimageviewer.managers.FolderManager;
 import com.quigglesproductions.secureimageviewer.managers.NotificationManager;
-import com.quigglesproductions.secureimageviewer.managers.ViewerConnectivityManager;
-import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateLog;
 import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.RetrofitFolderDataSource;
 import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.RetrofitRecentFilesDataSource;
 import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.RoomFolderDataSource;
@@ -42,10 +44,11 @@ import com.quigglesproductions.secureimageviewer.models.enhanced.folder.Enhanced
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.IDisplayFolder;
 import com.quigglesproductions.secureimageviewer.recycler.RecyclerViewSelectionMode;
 import com.quigglesproductions.secureimageviewer.retrofit.RetrofitException;
+import com.quigglesproductions.secureimageviewer.room.databases.file.relations.CategoryWithFiles;
 import com.quigglesproductions.secureimageviewer.room.databases.file.relations.FolderWithFiles;
+import com.quigglesproductions.secureimageviewer.room.databases.file.relations.SubjectWithFiles;
 import com.quigglesproductions.secureimageviewer.ui.EnhancedMainMenuActivity;
 import com.quigglesproductions.secureimageviewer.ui.SecureFragment;
-import com.quigglesproductions.secureimageviewer.utils.FileSyncUtils;
 import com.techyourchance.threadposter.BackgroundThreadPoster;
 import com.techyourchance.threadposter.UiThreadPoster;
 
@@ -143,6 +146,7 @@ public class EnhancedFolderListFragment extends SecureFragment {
                         if(state.contentEquals(STATE_ONLINE)) {
                             myMenu.findItem(R.id.online_folder_recent_files).setVisible(true);
                             myMenu.findItem(R.id.online_folder_download_selection).setVisible(false);
+                            myMenu.findItem(R.id.online_folder_download_viewer).setVisible(true);
                             setTitle("Online Viewer");
                         }
                         else{
@@ -159,6 +163,8 @@ public class EnhancedFolderListFragment extends SecureFragment {
                         if(state.contentEquals(STATE_ONLINE)) {
                             myMenu.findItem(R.id.online_folder_recent_files).setVisible(false);
                             myMenu.findItem(R.id.online_folder_download_selection).setVisible(true);
+                            myMenu.findItem(R.id.online_folder_download_viewer).setVisible(false);
+
                         }
                         else{
                             myMenu.findItem(R.id.offline_folder_delete).setVisible(true);
@@ -226,6 +232,39 @@ public class EnhancedFolderListFragment extends SecureFragment {
         registerForContextMenu(recyclerView);
     }
 
+    private void displayFilesByGrouping(FileGroupBy groupBy){
+        backgroundThreadPoster.post(()->{
+            List<IDisplayFolder> displayFolders = null;
+            switch (groupBy){
+                case FOLDERS:
+                    displayFolders = getFileDatabase().folderDao().getAll().stream().map(x->(IDisplayFolder)x).sorted(Comparator.comparing(x->x.getName())).collect(Collectors.toList());
+                    uiThreadPoster.post(()->{
+                        setTitle("Local Folders");
+                    });
+                    break;
+                case CATEGORIES:
+                    displayFolders = getFileDatabase().categoryDao().getAllCategoriesWithFiles().stream().map(x->(IDisplayFolder)x).sorted(Comparator.comparing(x->x.getName())).collect(Collectors.toList());
+                    uiThreadPoster.post(()->{
+                        setTitle("Local Categories");
+                    });
+
+                    break;
+                case SUBJECTS:
+                    displayFolders = getFileDatabase().subjectDao().getAllSubjectsWithFiles().stream().map(x->(IDisplayFolder)x).sorted(Comparator.comparing(x->x.getName())).collect(Collectors.toList());
+                    uiThreadPoster.post(()->{
+                        setTitle("Local Subjects");
+                    });
+                    break;
+
+            }
+            List<IDisplayFolder> finalDisplayFolders = displayFolders;
+            uiThreadPoster.post(()->{
+                enhancedFolderListViewModel.getFolders().setValue(finalDisplayFolders);
+            });
+        });
+
+    }
+
     private void saveInstanceState(){
         if(recyclerAdapter.getItemCount()>0)
             enhancedFolderListViewModel.getState().set("FolderList",getGson().toJson(recyclerAdapter.getFolders()));
@@ -244,8 +283,22 @@ public class EnhancedFolderListFragment extends SecureFragment {
                     }.getType();
                     break;
                 case STATE_ROOM:
-                    listType = new TypeToken<ArrayList<FolderWithFiles>>() {
-                    }.getType();
+                    FileGroupBy currentType = ApplicationPreferenceManager.getInstance().getFileGroupBy(FileGroupBy.FOLDERS);
+                    switch (currentType){
+                        case FOLDERS:
+                            listType = new TypeToken<ArrayList<FolderWithFiles>>() {
+                            }.getType();
+                            break;
+                        case CATEGORIES:
+                            listType = new TypeToken<ArrayList<CategoryWithFiles>>() {
+                            }.getType();
+                            break;
+                        case SUBJECTS:
+                            listType = new TypeToken<ArrayList<SubjectWithFiles>>() {
+                            }.getType();
+                            break;
+                    }
+
             }
             ArrayList<IDisplayFolder> folders = getGson().fromJson(folderListJson, listType);
             for (IDisplayFolder folder:folders){
@@ -315,9 +368,7 @@ public class EnhancedFolderListFragment extends SecureFragment {
                 //NavDirections downloadViewerAction = EnhancedFolderListFragmentDirections.actionNavEnhancedFolderListFragmentToDownloadViewerFragment();
                 Navigation.findNavController(binding.getRoot()).navigate(R.id.action_nav_enhancedFolderListFragment_to_downloadViewerFragment);
                 break;
-            case R.id.offline_folder_sync_activate:
-                //TODO add sync functionality
-                return true;
+
             case R.id.offline_folder_delete:
                 NotificationManager.getInstance().showSnackbar(recyclerAdapter.getSelectedCount()+" folders deleted",Snackbar.LENGTH_SHORT);
                 List<FolderWithFiles> offlineFolders = (List<FolderWithFiles>) recyclerAdapter.getSelectedFolders().stream().map(x->(FolderWithFiles)x).collect(Collectors.toList());
@@ -326,7 +377,9 @@ public class EnhancedFolderListFragment extends SecureFragment {
                     recyclerAdapter.removeFolder(folder);
                 }
                 recyclerAdapter.setMultiSelect(false);
-                return true;
+                break;
+            case R.id.offline_folder_sort_type:
+                showSortDialog();
             default:
                 return false;
         }
@@ -384,19 +437,33 @@ public class EnhancedFolderListFragment extends SecureFragment {
     }
 
     private void getRoomFolders(EnhancedFolderListViewModel viewModel,boolean forceRefresh){
+
         if(recyclerAdapter.getItemCount() == 0 || forceRefresh) {
             backgroundThreadPoster.post(() -> {
-                List<FolderWithFiles> folders = getFileDatabase().folderDao().getAll().stream().sorted(Comparator.comparing(FolderWithFiles::getName)).collect(Collectors.toList());
-                //EnhancedDatabaseHandler databaseHandler = new EnhancedDatabaseHandler(getContext());
-                //ArrayList<EnhancedFolder> folders = (ArrayList<EnhancedFolder>) databaseHandler.getFolders().stream().map(x -> (EnhancedFolder) x).collect(Collectors.toList());
-                if (ViewerConnectivityManager.getInstance().isConnected()) {
-                    ArrayList<EnhancedFileUpdateLog> updateLogs = FileSyncUtils.getUpdateLogs(getContext());
-                    /*if (updateLogs != null) {
-                        ArrayList<Long> folderIds = (ArrayList<Long>) updateLogs.stream().map(x -> x.getFolderId()).distinct().collect(Collectors.toList());
-                        for (Long folderId : folderIds) {
-                            folders.stream().filter(x -> x.getOnlineId() == folderId).findFirst().get().setHasUpdates(true);
-                        }
-                    }*/
+                FileGroupBy currentType = ApplicationPreferenceManager.getInstance().getFileGroupBy(FileGroupBy.FOLDERS);
+                List<IDisplayFolder> folders;
+                switch (currentType){
+                    case FOLDERS:
+                        folders = getFileDatabase().folderDao().getAll().stream().sorted(Comparator.comparing(FolderWithFiles::getName)).collect(Collectors.toList());
+                        uiThreadPoster.post(()->{
+                            setTitle("Local Folders");
+                        });
+                        break;
+                    case CATEGORIES:
+                        folders = getFileDatabase().categoryDao().getAllCategoriesWithFiles().stream().sorted(Comparator.comparing(CategoryWithFiles::getName)).collect(Collectors.toList());
+                        uiThreadPoster.post(()->{
+                            setTitle("Local Categories");
+                        });
+                        break;
+                    case SUBJECTS:
+                        folders = getFileDatabase().subjectDao().getAllSubjectsWithFiles().stream().sorted(Comparator.comparing(SubjectWithFiles::getName)).collect(Collectors.toList());
+                        uiThreadPoster.post(()->{
+                            setTitle("Local Subjects");
+                        });
+                        break;
+                    default:
+                        folders = getFileDatabase().folderDao().getAll().stream().sorted(Comparator.comparing(FolderWithFiles::getName)).collect(Collectors.toList());
+
                 }
                 uiThreadPoster.post(() -> {
                     viewModel.getFolders().setValue(folders.stream().map(x->(IDisplayFolder)x).collect(Collectors.toList()));
@@ -406,6 +473,37 @@ public class EnhancedFolderListFragment extends SecureFragment {
             });
         }
 
+    }
+
+    private void showSortDialog(){
+        final CharSequence[] items = {FileGroupBy.FOLDERS.getDisplayName(), FileGroupBy.CATEGORIES.getDisplayName(), FileGroupBy.SUBJECTS.getDisplayName()};
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Group By");
+        FileGroupBy currentType = ApplicationPreferenceManager.getInstance().getFileGroupBy(FileGroupBy.FOLDERS);
+        int checkedItem = -1;
+        switch (currentType){
+            case FOLDERS:
+                checkedItem = 0;
+                break;
+            case CATEGORIES:
+                checkedItem = 1;
+                break;
+            case SUBJECTS:
+                checkedItem = 2;
+        }
+        builder.setSingleChoiceItems(items, checkedItem, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String resultString = items[which].toString();
+                FileGroupBy result = FileGroupBy.fromDisplayName(resultString);
+                ApplicationPreferenceManager.getInstance().setFileGroupBy(result);
+                displayFilesByGrouping(result);
+                dialog.dismiss();
+            }
+        });
+        AlertDialog alert = builder.create();
+        //display dialog box
+        alert.show();
     }
 
     @Override
@@ -432,7 +530,8 @@ public class EnhancedFolderListFragment extends SecureFragment {
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
-        saveInstanceState();
+        //saveInstanceState();
         super.onSaveInstanceState(outState);
     }
+
 }

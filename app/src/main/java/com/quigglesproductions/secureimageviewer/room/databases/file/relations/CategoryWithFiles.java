@@ -3,6 +3,7 @@ package com.quigglesproductions.secureimageviewer.room.databases.file.relations;
 import android.content.Context;
 
 import androidx.room.Embedded;
+import androidx.room.Ignore;
 import androidx.room.Junction;
 import androidx.room.Relation;
 
@@ -12,6 +13,7 @@ import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFi
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.IDatabaseFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.IDisplayFolder;
 import com.quigglesproductions.secureimageviewer.room.databases.file.entity.RoomDatabaseCategory;
+import com.quigglesproductions.secureimageviewer.room.databases.file.entity.RoomDatabaseFile;
 import com.quigglesproductions.secureimageviewer.room.databases.file.entity.RoomFileCategoryCrossRef;
 import com.quigglesproductions.secureimageviewer.ui.enhancedfolderviewer.FolderOrigin;
 
@@ -26,11 +28,12 @@ import java.util.stream.Collectors;
 public class CategoryWithFiles implements IDisplayFolder, IDatabaseFolder {
     @Embedded
     public RoomDatabaseCategory category;
-    @Relation(parentColumn = "CategoryId",entityColumn = "FileId",associateBy = @Junction(RoomFileCategoryCrossRef.class))
+    @Relation(parentColumn = "CategoryId",entityColumn = "FileId",associateBy = @Junction(RoomFileCategoryCrossRef.class),entity = RoomDatabaseFile.class)
     public List<FileWithMetadata> files;
     //@Relation(parentColumn = "OnlineThumbnailId",entityColumn = "OnlineId",entity = RoomDatabaseFile.class)
+    @Ignore
     public FileWithMetadata thumbnailFile;
-
+    @Ignore
     IFolderDataSource dataSource;
 
     public CategoryWithFiles(){
@@ -53,7 +56,7 @@ public class CategoryWithFiles implements IDisplayFolder, IDatabaseFolder {
                 @Override
                 public void getThumbnailFromDataSource(FolderDataSourceCallback callback) {
                     if(thumbnailFile == null && files.size()>0)
-                        callback.FolderThumbnailRetrieved(files.get(0),null);
+                        callback.FolderThumbnailRetrieved(files.get(0).getThumbnailFile(),null);
                     else
                         callback.FolderThumbnailRetrieved(null, new FileNotFoundException());
                 }

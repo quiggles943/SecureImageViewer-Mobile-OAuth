@@ -164,8 +164,7 @@ public class DownloadManager {
             storedDownload.isComplete = true;
             if(exception != null)
                 failedCount++;
-            else
-                downloadedCount++;
+            downloadedCount++;
             downloadRecord.progress = downloadedCount;
             if(downloadCallback != null)
                 downloadCallback.fileDownloaded(downloadedCount, remainingDownloads());
@@ -225,7 +224,7 @@ public class DownloadManager {
                 }
                 downloadRecord = new FolderDownloadRecord();
                 downloadRecord.initiationTime = LocalDateTime.now();
-                downloadRecord.fileCount = fileDownloads.size();
+                downloadRecord.fileTotalCount = fileDownloads.size();
                 downloadRecord.workerId = folder.getName()+"/"+folder.getOnlineId();
                 downloadRecord.folderName = folder.getName();
                 downloadRecord.folderId = roomDatabaseFolder.getId();
