@@ -86,7 +86,6 @@ public class CategoryWithFiles implements IDisplayFolder, IDatabaseFolder {
     @Override
     public void setDataSource(IFolderDataSource retrofitFolderDataSource) {
         dataSource = retrofitFolderDataSource;
-        //folder.setDataSource(retrofitFolderDataSource);
     }
 
     @Override
@@ -105,11 +104,9 @@ public class CategoryWithFiles implements IDisplayFolder, IDatabaseFolder {
                 break;
             case NEWEST_FIRST:
                 files.sort(Comparator.comparing(IDisplayFile::getDefaultSortTime).reversed());
-                //files.sort(Comparator.comparing(EnhancedFile::getDownloadTime));
                 break;
             case OLDEST_FIRST:
                 files.sort(Comparator.comparing(IDisplayFile::getDefaultSortTime));
-                //files.sort(Comparator.comparing(EnhancedFile::getDownloadTime).reversed());
                 break;
             default:
                 files.sort(Comparator.comparing(IDisplayFile::getName));
