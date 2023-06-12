@@ -2,7 +2,8 @@ package com.quigglesproductions.secureimageviewer.dagger.hilt.module;
 
 import android.content.Context;
 
-import com.quigglesproductions.secureimageviewer.database.enhanced.EnhancedDatabaseHandler;
+import com.quigglesproductions.secureimageviewer.room.databases.download.DownloadRecordDatabase;
+import com.quigglesproductions.secureimageviewer.room.databases.file.FileDatabase;
 
 import dagger.Module;
 import dagger.Provides;
@@ -15,8 +16,9 @@ import dagger.hilt.components.SingletonComponent;
 public class DownloadModule {
 
     @Provides
-    public static DownloadManager providesDownloadManager(@ApplicationContext Context context, EnhancedDatabaseHandler databaseHandler){
-        DownloadManager downloadManager = new DownloadManager(context,databaseHandler);
+    public static DownloadManager providesDownloadManager(@ApplicationContext Context context, FileDatabase fileDatabase, DownloadRecordDatabase recordDatabase){
+        DownloadManager downloadManager = new DownloadManager(context,recordDatabase);
+        downloadManager.setFileDatabase(fileDatabase);
 
         return downloadManager;
     }

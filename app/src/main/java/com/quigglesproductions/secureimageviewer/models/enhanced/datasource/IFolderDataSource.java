@@ -5,6 +5,7 @@ import android.content.Context;
 import com.quigglesproductions.secureimageviewer.SortType;
 import com.quigglesproductions.secureimageviewer.appauth.RequestServiceNotConfiguredException;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
+import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile;
 
 import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
@@ -24,7 +25,7 @@ public interface IFolderDataSource {
     }
 
     interface FolderDataSourceCallback{
-        default void FolderFilesRetrieved(List<EnhancedFile> files, Exception exception){
+        default void FolderFilesRetrieved(List<IDisplayFile> files, Exception exception){
 
         }
 

@@ -12,7 +12,9 @@ import com.quigglesproductions.secureimageviewer.SortType;
 import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
 import com.quigglesproductions.secureimageviewer.appauth.RequestServiceNotConfiguredException;
 import com.quigglesproductions.secureimageviewer.authentication.AuthenticationManager;
+import com.quigglesproductions.secureimageviewer.models.ItemBaseModel;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedOnlineFile;
+import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedOnlineFolder;
 import com.quigglesproductions.secureimageviewer.retrofit.RequestManager;
 import com.quigglesproductions.secureimageviewer.retrofit.RequestService;
@@ -54,12 +56,12 @@ public class RetrofitFolderDataSource implements IFolderDataSource {
 
     @Override
     public void getFilesFromDataSource(Context context,FolderDataSourceCallback callback, @NotNull SortType sortType) throws MalformedURLException {
-        requestManager.enqueue(requestManager.getRequestService().doGetFolderFiles(folder.getOnlineId(),sortType.name()), new Callback<List<EnhancedOnlineFile>>() {
+        requestManager.enqueue(requestManager.getRequestService().doGetFolderFiles((int)folder.getOnlineId(),true,sortType.name()), new Callback<List<EnhancedOnlineFile>>() {
             @Override
             public void onResponse(Call<List<EnhancedOnlineFile>> call, Response<List<EnhancedOnlineFile>> response) {
                 if(response.isSuccessful()){
                     folder.clearItems();
-                    for(EnhancedOnlineFile file : response.body()){
+                    for(IDisplayFile file : response.body()){
                         file.setDataSource(new RetrofitFileDataSource(file,authenticationManager));
                         folder.addItem(file);
                     }
@@ -93,19 +95,14 @@ public class RetrofitFolderDataSource implements IFolderDataSource {
 
     @Override
     public void getThumbnailFromDataSource(FolderDataSourceCallback callback) throws MalformedURLException {
-        AuthManager.getInstance().performActionWithFreshTokens(new AuthState.AuthStateAction() {
-            @Override
-            public void execute(@Nullable String accessToken, @Nullable String idToken, @Nullable AuthorizationException ex) {
-                try{
-                    RequestOptions requestOptions = new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL);
-                    GlideUrl glideUrl = new GlideUrl(getFileURL(folder.onlineThumbnailId) + "/thumbnail", new LazyHeaders.Builder()
-                            .addHeader("Authorization", "Bearer " + accessToken).build());
-                    callback.FolderThumbnailRetrieved(glideUrl,null);
-                } catch (MalformedURLException | RequestServiceNotConfiguredException e) {
-                    e.printStackTrace();
-                    callback.FolderThumbnailRetrieved(null,e);
-                }
-            }
-        });
+        try{
+            RequestOptions requestOptions = new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL);
+            GlideUrl glideUrl = new GlideUrl(getFileURL(folder.onlineThumbnailId) + "/thumbnail", new LazyHeaders.Builder()
+                    .addHeader("Authorization", "Bearer " + authenticationManager.getTokenManager().getAccessToken()).build());
+            callback.FolderThumbnailRetrieved(glideUrl,null);
+        } catch (MalformedURLException | RequestServiceNotConfiguredException e) {
+            e.printStackTrace();
+            callback.FolderThumbnailRetrieved(null,e);
+        }
     }
 }

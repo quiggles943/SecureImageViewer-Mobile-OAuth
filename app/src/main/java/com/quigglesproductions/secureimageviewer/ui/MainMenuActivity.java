@@ -7,7 +7,6 @@ import android.os.Bundle;
 
 import com.quigglesproductions.secureimageviewer.R;
 import com.quigglesproductions.secureimageviewer.managers.ViewerConnectivityManager;
-import com.quigglesproductions.secureimageviewer.ui.offlinefolderlist.FolderListActivity;
 
 import android.view.View;
 
@@ -65,8 +64,8 @@ public class MainMenuActivity extends SecureActivity {
         offlineImageViewerBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent offlineViewerIntent = new Intent(context, FolderListActivity.class);
-                startActivity(offlineViewerIntent);
+                //Intent offlineViewerIntent = new Intent(context, FolderListActivity.class);
+                //startActivity(offlineViewerIntent);
             }
         });
 

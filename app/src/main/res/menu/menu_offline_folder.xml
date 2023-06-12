@@ -10,9 +10,10 @@
         android:icon="@drawable/ic_baseline_sync"
         app:showAsAction="always"
         android:visible="false"/>
-    <item android:id="@+id/offline_folder_sync_activate"
-        android:title="View/Hide Sync Status"
-        app:showAsAction="never"/>
+    <item android:id="@+id/offline_folder_sort_type"
+        android:title="Sort By"
+        android:icon="@drawable/ic_baseline_sort"
+        app:showAsAction="always"/>
     <!--<item android:id="@+id/offline_folder_multiselect"
         android:title="Single"
         app:showAsAction="never"/>-->

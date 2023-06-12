@@ -3,15 +3,14 @@ package com.quigglesproductions.secureimageviewer.ui.preferences;
 import android.os.Bundle;
 
 import androidx.preference.Preference;
-import androidx.preference.PreferenceFragmentCompat;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.quigglesproductions.secureimageviewer.R;
-import com.quigglesproductions.secureimageviewer.database.DatabaseHandler;
 import com.quigglesproductions.secureimageviewer.managers.FolderManager;
 import com.quigglesproductions.secureimageviewer.managers.NotificationManager;
+import com.quigglesproductions.secureimageviewer.ui.SecurePreferenceFragmentCompat;
 
-public class StorageSettingsFragment extends PreferenceFragmentCompat {
+public class StorageSettingsFragment extends SecurePreferenceFragmentCompat {
     StorageSettingsActivity.SettingsFragment.StorageInformationUpdatedCallback callback;
     public StorageSettingsFragment(StorageSettingsActivity.SettingsFragment.StorageInformationUpdatedCallback callback){
         this.callback = callback;
@@ -23,7 +22,11 @@ public class StorageSettingsFragment extends PreferenceFragmentCompat {
         resetPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                FolderManager.getInstance().removeAllFolders();
+                FolderManager.getInstance().removeAllFolders(getFileDatabase());
+                new Thread(()->{
+                    getFileDatabase().clearAllTables();
+                }).start();
+
                 //DatabaseHandler.getInstance().clearFiles();
                 NotificationManager.getInstance().showSnackbar("All folders removed", Snackbar.LENGTH_SHORT);
                 if(callback != null)

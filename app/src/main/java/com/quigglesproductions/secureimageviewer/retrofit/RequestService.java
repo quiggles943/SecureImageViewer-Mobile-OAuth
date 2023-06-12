@@ -36,7 +36,7 @@ public interface RequestService {
     @GET("/api/v2/enhancedfolder/{id}")
     Call<EnhancedOnlineFolder> doGetFolder(@Path("id")int id);
     @GET("/api/v2/enhancedfolder/{id}/files")
-    Call<List<EnhancedOnlineFile>> doGetFolderFiles(@Path("id")int id, @Query("sort_type") String sortType);
+    Call<List<EnhancedOnlineFile>> doGetFolderFiles(@Path("id")int id,@Query("metadata")boolean includeMetadata, @Query("sort_type") String sortType);
     @GET("/api/v2/enhancedfolder/{id}/thumbnail")
     Call<EnhancedOnlineFolder> doGetFolderThumbnail(@Path("id")int id);
 

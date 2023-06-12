@@ -2,6 +2,7 @@ package com.quigglesproductions.secureimageviewer.models.enhanced.datasource;
 
 import com.quigglesproductions.secureimageviewer.appauth.RequestServiceNotConfiguredException;
 import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.FileMetadata;
+import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.IFileMetadata;
 import com.quigglesproductions.secureimageviewer.retrofit.RequestManager;
 
 import java.net.MalformedURLException;
@@ -24,6 +25,6 @@ public interface IFileDataSource {
     }
 
     interface DataSourceFileMetadataCallback{
-        void FileMetadataRetrieved(FileMetadata metadata, Exception exception);
+        void FileMetadataRetrieved(IFileMetadata metadata, Exception exception);
     }
 }

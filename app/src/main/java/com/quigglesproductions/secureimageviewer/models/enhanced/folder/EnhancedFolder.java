@@ -1,28 +1,16 @@
 package com.quigglesproductions.secureimageviewer.models.enhanced.folder;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
-import androidx.annotation.NonNull;
-
-import com.bumptech.glide.load.Key;
 import com.google.gson.annotations.SerializedName;
 import com.quigglesproductions.secureimageviewer.SortType;
-import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.IFileDataSource;
 import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.IFolderDataSource;
-import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
-import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedOnlineFile;
-import com.quigglesproductions.secureimageviewer.models.folder.FolderModel;
+import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile;
 import com.quigglesproductions.secureimageviewer.ui.enhancedfolderviewer.FolderOrigin;
 
-import java.nio.ByteBuffer;
-import java.security.MessageDigest;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
-public class EnhancedFolder {
+public class EnhancedFolder implements IDisplayFolder {
 
     @SerializedName("Id")
     public int onlineId;
@@ -57,11 +45,9 @@ public class EnhancedFolder {
         return normalName;
     }
 
-    public int getOnlineId() {
+    public long getOnlineId() {
         return onlineId;
     }
-
-
 
 
     public Status getStatus() {
@@ -88,7 +74,7 @@ public class EnhancedFolder {
     public void clearItems() {
 
     }
-
+    @Override
     public void setDataSource(IFolderDataSource dataSource){
         this.dataSource = dataSource;
     }
@@ -101,11 +87,11 @@ public class EnhancedFolder {
 
     }
 
-    public List<EnhancedFile> getFiles(){
+    public List<IDisplayFile> getFiles(){
         return null;
     }
 
-    public ArrayList<EnhancedFile> getBaseItems() {
+    public ArrayList<IDisplayFile> getBaseItems() {
         return null;
     }
 

@@ -31,6 +31,7 @@ import com.quigglesproductions.secureimageviewer.appauth.RequestServiceNotConfig
 import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
 import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.IFolderDataSource;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedFolder;
+import com.quigglesproductions.secureimageviewer.models.enhanced.folder.IDisplayFolder;
 import com.quigglesproductions.secureimageviewer.recycler.RecyclerViewSelectionMode;
 
 import net.openid.appauth.AuthState;
@@ -40,7 +41,7 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EnhancedFolderListRecyclerAdapter<T extends EnhancedFolder> extends RecyclerView.Adapter<EnhancedFolderListRecyclerAdapter.ViewHolder> {
+public class EnhancedFolderListRecyclerAdapter<T extends IDisplayFolder> extends RecyclerView.Adapter<EnhancedFolderListRecyclerAdapter.ViewHolder> {
     private RecyclerView recyclerView;
     private List<T> folders = new ArrayList<>();
     private ArrayList<Integer> selected = new ArrayList<>();

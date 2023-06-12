@@ -2,24 +2,18 @@ package com.quigglesproductions.secureimageviewer.apprequest.requests;
 
 import android.content.Context;
 
-import com.google.gson.reflect.TypeToken;
-import com.quigglesproductions.secureimageviewer.SortType;
 import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
 import com.quigglesproductions.secureimageviewer.appauth.RequestServiceNotConfiguredException;
 import com.quigglesproductions.secureimageviewer.apprequest.AppRequestError;
 import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
 import com.quigglesproductions.secureimageviewer.apprequest.callbacks.ItemRetrievalCallback;
-import com.quigglesproductions.secureimageviewer.database.enhanced.EnhancedDatabaseBuilder;
 import com.quigglesproductions.secureimageviewer.gson.ViewerGson;
-import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedOnlineFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.FileMetadata;
 import com.quigglesproductions.secureimageviewer.utils.StreamUtils;
 import com.techyourchance.threadposter.BackgroundThreadPoster;
 import com.techyourchance.threadposter.UiThreadPoster;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
 
 import javax.net.ssl.HttpsURLConnection;
 

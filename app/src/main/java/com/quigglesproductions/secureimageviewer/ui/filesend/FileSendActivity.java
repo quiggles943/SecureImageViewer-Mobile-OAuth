@@ -8,7 +8,6 @@ import android.database.Cursor;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.OpenableColumns;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.AdapterView;
@@ -20,18 +19,13 @@ import androidx.appcompat.app.AlertDialog;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.quigglesproductions.secureimageviewer.R;
-import com.quigglesproductions.secureimageviewer.database.DatabaseHandler;
-import com.quigglesproductions.secureimageviewer.database.DatabaseHelper;
-import com.quigglesproductions.secureimageviewer.database.enhanced.EnhancedDatabaseHandler;
-import com.quigglesproductions.secureimageviewer.managers.FolderManager;
 import com.quigglesproductions.secureimageviewer.managers.NotificationManager;
 import com.quigglesproductions.secureimageviewer.managers.SecurityManager;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
-import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedDatabaseFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.ImageMetadata;
 import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.VideoMetadata;
-import com.quigglesproductions.secureimageviewer.models.file.FileModel;
-import com.quigglesproductions.secureimageviewer.models.folder.FolderModel;
+import com.quigglesproductions.secureimageviewer.room.databases.file.entity.RoomDatabaseFolder;
+import com.quigglesproductions.secureimageviewer.room.databases.file.relations.FileWithMetadata;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
 import com.quigglesproductions.secureimageviewer.utils.ViewerFileUtils;
 
@@ -57,14 +51,13 @@ public class FileSendActivity extends SecureActivity {
         listView = findViewById(R.id.filesend_folderlist);
         adapter = new FolderListViewAdapter(context);
         listView.setAdapter(adapter);
-        EnhancedDatabaseHandler databaseHandler =  new EnhancedDatabaseHandler(context);
-        adapter.setFolders(databaseHandler.getFolders());
+        adapter.setFolders(getFileDatabase().folderDao().getFolders());
         getFileUrisFromIntent(getIntent());
         setTitle("Select folder for upload");
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                EnhancedDatabaseFolder folder = adapter.getItem(position);
+                RoomDatabaseFolder folder = adapter.getItem(position);
                 MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(context,R.style.MaterialAlertDialog_rounded);
                 String message = "Upload "+fileUris.size();
                 if(fileUris.size()>1)
@@ -75,7 +68,7 @@ public class FileSendActivity extends SecureActivity {
                 AlertDialog dialog = builder.setTitle("Upload").setMessage(message).setPositiveButton("Upload", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        EnhancedDatabaseFolder folder = adapter.getItem(position);
+                        RoomDatabaseFolder folder = adapter.getItem(position);
                         for(Uri uri: fileUris){
                             uploadFile(uri,folder);
                         }
@@ -113,7 +106,7 @@ public class FileSendActivity extends SecureActivity {
         }
     }
 
-    public boolean uploadFile(Uri uri, EnhancedDatabaseFolder folder){
+    public boolean uploadFile(Uri uri, RoomDatabaseFolder folder){
             try {
                 ContentResolver contentResolver = context.getContentResolver();
                 String fileName = getFileName(uri);
@@ -121,7 +114,7 @@ public class FileSendActivity extends SecureActivity {
                 EnhancedDatabaseFile uploadFile = new EnhancedDatabaseFile();
                 uploadFile.normalName = fileName;
                 uploadFile.encodedName = base64Name;
-                uploadFile.setFolderId(folder.getId());
+                uploadFile.setFolderId((int) folder.getId());
                 //MimeTypeMap map = MimeTypeMap.getSingleton();
                 String type = contentResolver.getType(uri);
                 if(type.startsWith("image")) {
@@ -134,15 +127,10 @@ public class FileSendActivity extends SecureActivity {
                     uploadFile.contentType = "VIDEO";
                 }
                     uploadFile.metadata.creationTime = LocalDateTime.now();
-                //uploadFile.setIsUploaded(false);
-                //DatabaseHelper helper = new DatabaseHelper(context);
-                //DatabaseHandler handler = new DatabaseHandler(context,helper.getWritableDatabase());
-                EnhancedDatabaseHandler databaseHandler = new EnhancedDatabaseHandler(context);
-                uploadFile = databaseHandler.insertFile(uploadFile,folder.getId());
-                //uploadFile = handler.insertFileForUpload(uploadFile,folder);
+                FileWithMetadata fileWithMetadata = new FileWithMetadata.Creator().loadFromLegacyDatabaseFile(uploadFile).build();
+                getFileDatabase().fileDao().insert(folder,fileWithMetadata);
                 InputStream in = getContentResolver().openInputStream(uri);
-                ViewerFileUtils.createFileOnDisk(context,uploadFile,in);
-                //uploadFile = (FileModel) ViewerFileUtils.createFileOnDisk(context,uploadFile,in);
+                ViewerFileUtils.createFileOnDisk(context,fileWithMetadata,in);
                 return true;
             } catch (Exception e) {
                 e.printStackTrace();

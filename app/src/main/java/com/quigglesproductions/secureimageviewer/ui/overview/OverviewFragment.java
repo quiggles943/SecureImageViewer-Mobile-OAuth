@@ -1,6 +1,5 @@
 package com.quigglesproductions.secureimageviewer.ui.overview;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,7 +11,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
-import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavDirections;
@@ -20,14 +18,7 @@ import androidx.navigation.Navigation;
 import androidx.transition.AutoTransition;
 import androidx.transition.TransitionManager;
 
-import com.google.gson.reflect.TypeToken;
 import com.quigglesproductions.secureimageviewer.R;
-import com.quigglesproductions.secureimageviewer.appauth.RequestServiceNotConfiguredException;
-import com.quigglesproductions.secureimageviewer.apprequest.AppRequestError;
-import com.quigglesproductions.secureimageviewer.apprequest.callbacks.ItemRetrievalCallback;
-import com.quigglesproductions.secureimageviewer.apprequest.requests.FileUpdateStatusRequest;
-import com.quigglesproductions.secureimageviewer.apprequest.requests.ServerStatusRequest;
-import com.quigglesproductions.secureimageviewer.database.enhanced.EnhancedDatabaseHandler;
 import com.quigglesproductions.secureimageviewer.databinding.ActivityOverviewBinding;
 import com.quigglesproductions.secureimageviewer.gson.ViewerGson;
 import com.quigglesproductions.secureimageviewer.managers.ApplicationPreferenceManager;
@@ -35,14 +26,13 @@ import com.quigglesproductions.secureimageviewer.managers.ViewerConnectivityMana
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateLog;
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateSendModel;
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedServerStatus;
-import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
-import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedDatabaseFolder;
+import com.quigglesproductions.secureimageviewer.room.databases.file.entity.RoomDatabaseFolder;
+import com.quigglesproductions.secureimageviewer.room.databases.file.relations.FileWithMetadata;
+import com.quigglesproductions.secureimageviewer.room.databases.system.enums.SystemParameter;
 import com.quigglesproductions.secureimageviewer.ui.SecureFragment;
-import com.quigglesproductions.secureimageviewer.ui.ui.login.LoginActivity;
 import com.quigglesproductions.secureimageviewer.utils.FileSyncUtils;
 import com.quigglesproductions.secureimageviewer.utils.ViewerFileUtils;
 
-import java.lang.reflect.Type;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -58,6 +48,7 @@ public class OverviewFragment extends SecureFragment {
     OverviewViewModel viewModel;
     DateTimeFormatter sameYearPattern = DateTimeFormatter.ofPattern("hh:mm a, EEEE dd MMMM");
     DateTimeFormatter previousYearPattern = DateTimeFormatter.ofPattern("hh:mm a, EEEE dd MMMM yyyy");
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -102,7 +93,7 @@ public class OverviewFragment extends SecureFragment {
         deviceFilesViewButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                NavDirections action = OverviewFragmentDirections.actionNavEnhancedMainMenuFragmentToNavEnhancedOfflineFolderListFragment("offline");
+                NavDirections action = OverviewFragmentDirections.actionNavEnhancedMainMenuFragmentToNavEnhancedOfflineFolderListFragment("offline-room");
                 Navigation.findNavController(binding.getRoot()).navigate(action);
             }
         });
@@ -244,11 +235,20 @@ public class OverviewFragment extends SecureFragment {
      */
     private void setupViewModelData(@NonNull OverviewViewModel viewModel){
         viewModel.getIsOnline().setValue(ViewerConnectivityManager.getInstance().isConnected());
-        EnhancedDatabaseHandler databaseHandler = new EnhancedDatabaseHandler(getContext());
-        viewModel.getFilesOnDevice().setValue(databaseHandler.getFileCount());
-        viewModel.getFoldersOnDevice().setValue(databaseHandler.getFolderCount());
-        viewModel.getLastUpdateTime().setValue(databaseHandler.getLastUpdateTime());
-        viewModel.getLastOnlineSyncTime().setValue(databaseHandler.getLastOnlineSyncTime());
+        getBackgroundThreadPoster().post(()->{
+            long filesOnDevice = (long) getFileDatabase().fileDao().getAll().size();
+            long foldersOnDevice = (long) getFileDatabase().folderDao().getAll().size();
+            LocalDateTime lastUpdate = getSystemDatabase().systemParameterDao().getParameterByKey(SystemParameter.LAST_UPDATE_TIME).getValueLocalDateTime();
+            LocalDateTime onlineSyncTime = getSystemDatabase().systemParameterDao().getParameterByKey(SystemParameter.LAST_ONLINE_SYNC_TIME).getValueLocalDateTime();
+            getUiThreadPoster().post(()->{
+                viewModel.getFilesOnDevice().setValue(filesOnDevice);
+                viewModel.getFoldersOnDevice().setValue(foldersOnDevice);
+                viewModel.getLastUpdateTime().setValue(lastUpdate);
+                viewModel.getLastOnlineSyncTime().setValue(onlineSyncTime);
+            });
+        });
+
+
         viewModel.getHasOnlineUpdates().setValue(false);
     }
 
@@ -288,34 +288,39 @@ public class OverviewFragment extends SecureFragment {
 
     private void retrieveSyncUpdates(boolean isOnline) {
         if(isOnline) {
-            EnhancedDatabaseHandler databaseHandler = new EnhancedDatabaseHandler(getContext());
             EnhancedFileUpdateSendModel sendModel = new EnhancedFileUpdateSendModel();
-            sendModel.folders = databaseHandler.getFolders().stream().map(EnhancedDatabaseFolder::getOnlineId).collect(Collectors.toList());
-            getRequestService().doGetFileUpdates(sendModel).enqueue(new Callback<List<EnhancedFileUpdateLog>>() {
-                @Override
-                public void onResponse(Call<List<EnhancedFileUpdateLog>> call, Response<List<EnhancedFileUpdateLog>> response) {
-                    if(response.isSuccessful()){
-                        List<EnhancedFileUpdateLog> updateLogs = response.body();
-                        ApplicationPreferenceManager.getInstance().setPreferenceString(ApplicationPreferenceManager.ManagedPreference.SYNC_VALUES, ViewerGson.getGson().toJson(updateLogs));
-                        if (updateLogs.size() > 0) {
-                            if (updateLogs.size() == 1)
-                                viewModel.getOnlineUpdateStatus().setValue("Has " + updateLogs.size() + " update");
-                            else
-                                viewModel.getOnlineUpdateStatus().setValue("Has " + updateLogs.size() + " updates");
+            getBackgroundThreadPoster().post(()->{
+                sendModel.folders = getFileDatabase().folderDao().getFolders().stream().map(RoomDatabaseFolder::getOnlineId).collect(Collectors.toList());
+                getRequestService().doGetFileUpdates(sendModel).enqueue(new Callback<List<EnhancedFileUpdateLog>>() {
+                    @Override
+                    public void onResponse(Call<List<EnhancedFileUpdateLog>> call, Response<List<EnhancedFileUpdateLog>> response) {
+                        if(response.isSuccessful()){
+                            List<EnhancedFileUpdateLog> updateLogs = response.body();
+                            ApplicationPreferenceManager.getInstance().setPreferenceString(ApplicationPreferenceManager.ManagedPreference.SYNC_VALUES, ViewerGson.getGson().toJson(updateLogs));
+                            getUiThreadPoster().post(()->{
+                                if (updateLogs.size() > 0) {
+                                    if (updateLogs.size() == 1)
+                                        viewModel.getOnlineUpdateStatus().setValue("Has " + updateLogs.size() + " update");
+                                    else
+                                        viewModel.getOnlineUpdateStatus().setValue("Has " + updateLogs.size() + " updates");
 
-                            viewModel.getHasOnlineUpdates().setValue(true);
-                        } else {
-                            viewModel.getOnlineUpdateStatus().setValue("No updates");
-                            viewModel.getHasOnlineUpdates().setValue(false);
+                                    viewModel.getHasOnlineUpdates().setValue(true);
+                                } else {
+                                    viewModel.getOnlineUpdateStatus().setValue("No updates");
+                                    viewModel.getHasOnlineUpdates().setValue(false);
+                                }
+                            });
+
                         }
                     }
-                }
 
-                @Override
-                public void onFailure(Call<List<EnhancedFileUpdateLog>> call, Throwable t) {
+                    @Override
+                    public void onFailure(Call<List<EnhancedFileUpdateLog>> call, Throwable t) {
 
-                }
+                    }
+                });
             });
+
             /*FileUpdateStatusRequest fileUpdateStatusRequest = new FileUpdateStatusRequest();
 
             try {
@@ -380,13 +385,12 @@ public class OverviewFragment extends SecureFragment {
     }
 
     private void syncFolders(){
-        EnhancedDatabaseHandler handler = new EnhancedDatabaseHandler(getContext());
 
         ArrayList<EnhancedFileUpdateLog> deletedLogs = FileSyncUtils.getUpdateLogs(getContext(), EnhancedFileUpdateLog.UpdateType.Deleted);
         for(EnhancedFileUpdateLog log : deletedLogs){
-            EnhancedDatabaseFile file = handler.getFileByOnlineId((int) log.getFileId());
-            if(file != null)
-                ViewerFileUtils.deleteFile(getContext(),file);
+            FileWithMetadata fileWithMetadata = getFileDatabase().fileDao().get(log.getFileId());
+            if(fileWithMetadata != null)
+                ViewerFileUtils.deleteFile(getFileDatabase(),fileWithMetadata);
         }
 
         ArrayList<EnhancedFileUpdateLog> modifiedLogs = FileSyncUtils.getUpdateLogs(getContext(), EnhancedFileUpdateLog.UpdateType.Modified);

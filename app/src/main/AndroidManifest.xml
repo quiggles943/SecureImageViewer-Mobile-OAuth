@@ -19,18 +19,6 @@
         android:theme="@style/Theme.SecureImageViewer" >
 
         <service android:name=".apprequest.services.AppAuthorizedService" />
-
-        <!--<activity
-            android:name=".ui.splash.NewSplashScreenActivity"
-            android:exported="true"
-            android:launchMode="singleTask"
-            android:theme="@style/SplashScreenTheme" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>-->
         <activity
             android:name=".ui.startup.EnhancedStartupScreen"
             android:exported="true"
@@ -48,9 +36,6 @@
         <activity android:name=".ui.EnhancedMainMenuActivity"
             android:theme="@style/Theme.SecureImageViewer.NoActionBar"/>
         <activity
-            android:name=".ui.onlinefolderview.OnlineFolderViewActivity"
-            android:launchMode="singleTask" />
-        <activity
             android:name=".ui.MainMenuActivity"
             android:label="@string/app_name"
             android:launchMode="singleTask" />
@@ -59,23 +44,6 @@
         <meta-data
             android:name="android.app.default_searchable"
             android:value=".ui.onlinesearchview.OnlineSearchViewActivity" />
-
-        <activity
-            android:name=".ui.onlinesearchview.OnlineSearchViewActivity"
-            android:exported="true"
-            android:label="@string/app_name"
-            android:launchMode="singleTop" >
-            <intent-filter>
-                <action android:name="android.intent.action.SEARCH" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-            </intent-filter>
-
-            <meta-data
-                android:name="android.app.searchable"
-                android:resource="@xml/searchable" />
-        </activity>
         <activity
             android:name=".ui.preferences.StorageSettingsActivity"
             android:label="Web Api Settings"
@@ -83,25 +51,12 @@
         </activity>
         <activity android:name=".barcodescanner.BarcodeCaptureActivity" />
         <activity
-            android:name=".ui.offlinefolderlist.FolderListActivity"
-            android:label="@string/app_name"
-            android:launchMode="singleTask" />
-        <activity
-            android:name=".ui.offlinefolderview.FolderViewActivity"
-            android:launchMode="singleTask" />
-        <activity
             android:name=".ui.enhancedfolderviewer.EnhancedFolderViewerActivity"
             android:launchMode="singleTask" />
-        <activity
-            android:name=".ui.enhancedfileviewer.FileViewActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
-            android:launchMode="singleTask"
-            android:theme="@style/FileViewerTheme" />
         <activity android:name=".ui.enhancedfileviewer.EnhancedFileViewActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
             android:launchMode="singleTask"
             android:theme="@style/FileViewerTheme" />
-        <activity android:name=".ui.onlinerecentfilelist.OnlineRecentFilesViewActivity" />
         <activity
             android:name=".ui.filesend.FileSendActivity"
             android:excludeFromRecents="true"

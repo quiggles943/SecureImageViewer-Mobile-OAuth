@@ -9,6 +9,7 @@ import com.quigglesproductions.secureimageviewer.appauth.RequestServiceNotConfig
 import com.quigglesproductions.secureimageviewer.authentication.AuthenticationManager;
 import com.quigglesproductions.secureimageviewer.authentication.TokenManager;
 import com.quigglesproductions.secureimageviewer.models.ItemBaseModel;
+import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.FileMetadata;
 import com.quigglesproductions.secureimageviewer.retrofit.RequestManager;
 
@@ -25,10 +26,10 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class RetrofitFileDataSource implements IFileDataSource,ISecureDataSource {
-    private ItemBaseModel file;
+    private IDisplayFile file;
     AuthenticationManager authenticationManager;
 
-    public RetrofitFileDataSource(ItemBaseModel file, AuthenticationManager authenticationManager) {
+    public RetrofitFileDataSource(IDisplayFile file, AuthenticationManager authenticationManager) {
         this.file = file;
         this.authenticationManager = authenticationManager;
     }

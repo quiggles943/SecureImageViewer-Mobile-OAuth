@@ -18,22 +18,23 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.signature.ObjectKey;
 import com.quigglesproductions.secureimageviewer.R;
-import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedDatabaseFolder;
-import com.quigglesproductions.secureimageviewer.models.folder.FolderModel;
+import com.quigglesproductions.secureimageviewer.models.enhanced.folder.IDatabaseFolder;
+import com.quigglesproductions.secureimageviewer.room.databases.file.entity.RoomDatabaseFolder;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class FolderListViewAdapter extends BaseAdapter {
-    private ArrayList<EnhancedDatabaseFolder> folders = new ArrayList<>();
+    private List<RoomDatabaseFolder> folders = new ArrayList<>();
     private Context context;
     public FolderListViewAdapter(Context context){
         this.context = context;
     }
 
-    public void addFolder(EnhancedDatabaseFolder folderModel){
+    public void addFolder(RoomDatabaseFolder folderModel){
         folders.add(folderModel);
     }
-    public void setFolders(ArrayList<EnhancedDatabaseFolder> folders){
+    public void setFolders(List<RoomDatabaseFolder> folders){
         this.folders = folders;
         notifyDataSetChanged();
     }
@@ -43,18 +44,18 @@ public class FolderListViewAdapter extends BaseAdapter {
     }
 
     @Override
-    public EnhancedDatabaseFolder getItem(int position) {
+    public RoomDatabaseFolder getItem(int position) {
         return folders.get(position);
     }
 
     @Override
     public long getItemId(int position) {
-        return folders.get(position).getId();
+        return 0;
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        EnhancedDatabaseFolder item = folders.get(position);
+        RoomDatabaseFolder item = folders.get(position);
         View gridView = convertView;
         if (gridView == null)
         {
@@ -64,23 +65,29 @@ public class FolderListViewAdapter extends BaseAdapter {
         }
         FolderViewModel model = new FolderViewModel(gridView);
         model.textView.setText(item.getName());
-        if(item.getThumbnailFile() != null && item.getThumbnailFile().exists()) {
-            Glide.with(context).addDefaultRequestListener(new RequestListener<Object>() {
-                @Override
-                public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Object> target, boolean isFirstResource) {
-                    Log.e("Image Load Fail", e.getMessage());
-                    e.logRootCauses("Image Load Fail");
-                    return false;
-                }
+        if(item instanceof IDatabaseFolder) {
+            IDatabaseFolder databaseFolder = (IDatabaseFolder) item;
+            if (databaseFolder.getThumbnailFile() != null && databaseFolder.getThumbnailFile().exists()) {
+                Glide.with(context).addDefaultRequestListener(new RequestListener<Object>() {
+                    @Override
+                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Object> target, boolean isFirstResource) {
+                        Log.e("Image Load Fail", e.getMessage());
+                        e.logRootCauses("Image Load Fail");
+                        return false;
+                    }
 
-                @Override
-                public boolean onResourceReady(Object resource, Object model, Target<Object> target, DataSource dataSource, boolean isFirstResource) {
-                    return false;
-                }
-            }).load(item.getThumbnailFile()).signature(new ObjectKey(item.getDownloadTime())).into(model.getImageView()).clearOnDetach();
+                    @Override
+                    public boolean onResourceReady(Object resource, Object model, Target<Object> target, DataSource dataSource, boolean isFirstResource) {
+                        return false;
+                    }
+                }).load(databaseFolder.getThumbnailFile()).signature(new ObjectKey(databaseFolder.getDownloadTime())).into(model.getImageView()).clearOnDetach();
+            } else
+                model.getImageView().setImageBitmap(null);
         }
         else
+        {
             model.getImageView().setImageBitmap(null);
+        }
         return gridView;
     }
 

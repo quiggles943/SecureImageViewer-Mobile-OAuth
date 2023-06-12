@@ -7,16 +7,13 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.preference.Preference;
-import androidx.preference.PreferenceFragmentCompat;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.quigglesproductions.secureimageviewer.R;
-import com.quigglesproductions.secureimageviewer.database.DatabaseHandler;
-import com.quigglesproductions.secureimageviewer.database.DatabaseHelper;
-import com.quigglesproductions.secureimageviewer.database.enhanced.EnhancedDatabaseHandler;
 import com.quigglesproductions.secureimageviewer.managers.FolderManager;
 import com.quigglesproductions.secureimageviewer.managers.NotificationManager;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
+import com.quigglesproductions.secureimageviewer.ui.SecurePreferenceFragmentCompat;
 
 import java.io.File;
 
@@ -51,20 +48,24 @@ public class StorageSettingsActivity  extends SecureActivity {
     }
 
     public void getStorageInfo(){
-        DatabaseHelper databaseHelper = new DatabaseHelper(context);
         //DatabaseHandler databaseHandler = new DatabaseHandler(context,databaseHelper.getWritableDatabase());
-        EnhancedDatabaseHandler databaseHandler = new EnhancedDatabaseHandler(context);
-        long storageUsedByte = getFolderSize(context.getFilesDir());
-        long storageUsedMb = storageUsedByte/1024/1024;
-        long folderCount = databaseHandler.getFolderCount();
-        long fileCount = databaseHandler.getFileCount();
-        fileCountString.setText(String.valueOf(fileCount));
-        folderCountString.setText(String.valueOf(folderCount));
-        storageUsedString.setText(String.valueOf(storageUsedMb)+"Mb");
+        getBackgroundThreadPoster().post(()->{
+            long storageUsedByte = getFolderSize(context.getFilesDir());
+            long storageUsedMb = storageUsedByte/1024/1024;
+            long folderCount = getFileDatabase().folderDao().getAll().size();
+            long fileCount = getFileDatabase().fileDao().getAll().size();
+            getUiThreadPoster().post(()->{
+                fileCountString.setText(String.valueOf(fileCount));
+                folderCountString.setText(String.valueOf(folderCount));
+                storageUsedString.setText(String.valueOf(storageUsedMb)+"Mb");
+            });
+
+        });
+
 
     }
 
-    public static class SettingsFragment extends PreferenceFragmentCompat {
+    public static class SettingsFragment extends SecurePreferenceFragmentCompat {
         StorageInformationUpdatedCallback callback;
         public SettingsFragment(StorageInformationUpdatedCallback callback){
             this.callback = callback;
@@ -76,12 +77,17 @@ public class StorageSettingsActivity  extends SecureActivity {
             resetPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    FolderManager.getInstance().removeAllFolders();
-                    EnhancedDatabaseHandler databaseHandler = new EnhancedDatabaseHandler(getContext());
+                    new Thread(()->{
+                        FolderManager.getInstance().removeAllFolders(getFileDatabase());
+                        getFileDatabase().clearAllTables();
+                        getRecordDatabase().clearAllTables();
+                        //getRecordDatabase().downloadRecordDao().archiveAll();
+                        NotificationManager.getInstance().showSnackbar("All folders removed", Snackbar.LENGTH_SHORT);
+                        if(callback != null)
+                            callback.informationUpdated();
+                    }).start();
                     //DatabaseHandler.getInstance().clearFiles();
-                    NotificationManager.getInstance().showSnackbar("All folders removed", Snackbar.LENGTH_SHORT);
-                    if(callback != null)
-                        callback.informationUpdated();
+
                     return true;
                 }
             });

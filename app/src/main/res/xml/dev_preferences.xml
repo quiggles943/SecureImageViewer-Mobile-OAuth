@@ -20,4 +20,14 @@
             android:title="Test Retrofit Request"
             android:persistent="false"/>
     </PreferenceCategory>
+    <PreferenceCategory android:title="Database">
+        <Preference
+            android:key="test_db_insert"
+            android:title="Test Database Insert"
+            android:persistent="false"/>
+        <Preference
+            android:key="test_db_retrieve"
+            android:title="Test Database Retrieve"
+            android:persistent="false"/>
+    </PreferenceCategory>
 </PreferenceScreen>

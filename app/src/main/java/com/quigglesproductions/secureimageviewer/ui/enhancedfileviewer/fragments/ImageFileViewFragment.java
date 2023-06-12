@@ -1,13 +1,11 @@
 package com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.fragments;
 
-import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -25,9 +23,8 @@ import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.signature.ObjectKey;
 import com.quigglesproductions.secureimageviewer.R;
 import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.IFileDataSource;
-import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.FileType;
-import com.quigglesproductions.secureimageviewer.ui.compoundcontrols.FileViewerNavigator;
+import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile;
 import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.EnhancedFileCollectionAdapter;
 import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.EnhancedFileViewFragment;
 import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.NewTouchImageView;
@@ -50,7 +47,7 @@ public class ImageFileViewFragment extends BaseFileViewFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         EnhancedFileViewFragment parentFragment = (EnhancedFileViewFragment) getParentFragment();
         zoomLevelChangeCallback = parentFragment.getZoomCallback();
-        EnhancedFile file = getFile();
+        IDisplayFile file = getFile();
 
 
         view.setOnClickListener(new View.OnClickListener() {
@@ -63,7 +60,7 @@ public class ImageFileViewFragment extends BaseFileViewFragment {
         super.onViewCreated(view, savedInstanceState);
     }
     @OptIn(markerClass = UnstableApi.class)
-    private void loadImage(View itemView, EnhancedFile item){
+    private void loadImage(View itemView, IDisplayFile item){
         NewTouchImageView imageView = (NewTouchImageView) itemView.findViewById(R.id.imageViewer);
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override

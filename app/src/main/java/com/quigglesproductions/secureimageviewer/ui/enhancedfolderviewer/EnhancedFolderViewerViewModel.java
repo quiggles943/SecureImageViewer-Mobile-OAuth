@@ -4,16 +4,15 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.SavedStateHandle;
 import androidx.lifecycle.ViewModel;
 
-import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
+import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedFolder;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class EnhancedFolderViewerViewModel extends ViewModel {
     private SavedStateHandle state;
     private MutableLiveData<EnhancedFolder> folder;
-    private MutableLiveData<ArrayList<EnhancedFile>> files;
+    private MutableLiveData<ArrayList<IDisplayFile>> files;
     public EnhancedFolderViewerViewModel(SavedStateHandle savedStateHandle){
         folder = new MutableLiveData<>();
         files = new MutableLiveData<>();
@@ -24,7 +23,7 @@ public class EnhancedFolderViewerViewModel extends ViewModel {
         return folder;
     }
 
-    public MutableLiveData<ArrayList<EnhancedFile>> getFiles() {
+    public MutableLiveData<ArrayList<IDisplayFile>> getFiles() {
         return files;
     }
 

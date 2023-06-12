@@ -10,8 +10,9 @@ import androidx.viewpager2.adapter.FragmentViewHolder;
 
 import com.quigglesproductions.secureimageviewer.gson.ViewerGson;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
-import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedOnlineFile;
+import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile;
+import com.quigglesproductions.secureimageviewer.room.databases.file.relations.FileWithMetadata;
 import com.quigglesproductions.secureimageviewer.ui.compoundcontrols.FileViewerNavigator;
 import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.fragments.BaseFileViewFragment;
 import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.fragments.ImageFileViewFragment;
@@ -20,8 +21,8 @@ import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.fragments
 import java.util.ArrayList;
 import java.util.List;
 
-public class EnhancedFileCollectionAdapter extends FragmentStateAdapter {
-    private ArrayList<EnhancedFile> files = new ArrayList<>();
+public class EnhancedFileCollectionAdapter<T extends IDisplayFile> extends FragmentStateAdapter {
+    private ArrayList<T> files = new ArrayList<>();
     private ZoomLevelChangeCallback zoomCallback;
     private FileViewerNavigator navigatorControls;
     public EnhancedFileCollectionAdapter(@NonNull Fragment fragment) {
@@ -32,9 +33,9 @@ public class EnhancedFileCollectionAdapter extends FragmentStateAdapter {
     @NonNull
     @Override
     public Fragment createFragment(int position) {
-        EnhancedFile file = files.get(position);
+        T file = files.get(position);
         Fragment fragment = null;
-        switch (file.metadata.fileType)
+        switch (file.getFileTypeString())
         {
             case "IMAGE":
                 fragment = new ImageFileViewFragment();
@@ -51,6 +52,8 @@ public class EnhancedFileCollectionAdapter extends FragmentStateAdapter {
             args.putString(BaseFileViewFragment.ARG_FILE_SOURCE_TYPE, BaseFileViewFragment.FileSourceType.DATABASE.toString());
         else if(file instanceof EnhancedOnlineFile)
             args.putString(BaseFileViewFragment.ARG_FILE_SOURCE_TYPE, BaseFileViewFragment.FileSourceType.ONLINE.toString());
+        else if(file instanceof FileWithMetadata)
+            args.putString(BaseFileViewFragment.ARG_FILE_SOURCE_TYPE, BaseFileViewFragment.FileSourceType.ROOM.toString());
         args.putInt(BaseFileViewFragment.ARG_FILE_ID,file.getOnlineId());
         args.putString(BaseFileViewFragment.ARG_FILE,json);
         fragment.setArguments(args);
@@ -62,13 +65,13 @@ public class EnhancedFileCollectionAdapter extends FragmentStateAdapter {
         return files.size();
     }
 
-    public void addFiles(ArrayList<EnhancedFile> fileModels){
+    public void addFiles(List<T> fileModels){
         files.clear();
         files.addAll(fileModels);
         notifyDataSetChanged();
     }
 
-    public EnhancedFile getItem(int position) {
+    public T getItem(int position) {
         return files.get(position);
     }
 

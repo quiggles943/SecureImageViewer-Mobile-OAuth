@@ -170,7 +170,7 @@ public class ViewPagerAdapter extends PagerAdapter {
         return files.get(position);
     }
 
-    public ArrayList<? extends Parcelable> getItems() {
+    public ArrayList<EnhancedFile> getItems() {
         return files;
     }
 

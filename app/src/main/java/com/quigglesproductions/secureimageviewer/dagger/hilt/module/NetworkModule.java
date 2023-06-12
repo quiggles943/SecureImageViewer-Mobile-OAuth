@@ -13,6 +13,7 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Singleton;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
@@ -22,6 +23,7 @@ import dagger.Provides;
 import dagger.hilt.InstallIn;
 import dagger.hilt.android.components.ActivityComponent;
 import dagger.hilt.android.qualifiers.ActivityContext;
+import dagger.hilt.android.qualifiers.ApplicationContext;
 import dagger.hilt.components.SingletonComponent;
 import okhttp3.Cache;
 import okhttp3.ConnectionPool;
@@ -30,14 +32,15 @@ import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 
 @Module
-@InstallIn(ActivityComponent.class)
+@InstallIn(SingletonComponent.class)
 public class NetworkModule {
 
 
 
     @RequestServiceClient
     @Provides
-    public static OkHttpClient provideRequestServiceHttpClient(@ActivityContext Context context, AuthenticationInterceptor authenticationInterceptor, Cache cache){
+    @Singleton
+    public static OkHttpClient provideRequestServiceHttpClient(@ApplicationContext Context context, AuthenticationInterceptor authenticationInterceptor, Cache cache){
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
         //AuthenticationInterceptor authInterceptor = new AuthenticationInterceptor(context);
         authenticationInterceptor.setContext(context);
@@ -53,7 +56,7 @@ public class NetworkModule {
                 .hostnameVerifier(((hostname, session) -> true))
                 .dispatcher(getDispatcher())
                 .connectionPool(getConnectionPool())
-                .cache(cache)
+                //.cache(cache)
                 .build();
         return client;
         }

@@ -4,7 +4,6 @@ import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleObserver;
@@ -15,12 +14,6 @@ import androidx.preference.PreferenceManager;
 import com.gu.toolargetool.TooLargeTool;
 import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
 import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
-import com.quigglesproductions.secureimageviewer.apprequest.configuration.RequestConfigurationException;
-import com.quigglesproductions.secureimageviewer.apprequest.configuration.RequestServiceConfiguration;
-import com.quigglesproductions.secureimageviewer.authentication.AuthenticationManager;
-import com.quigglesproductions.secureimageviewer.authentication.TokenManager;
-import com.quigglesproductions.secureimageviewer.database.DatabaseHandler;
-import com.quigglesproductions.secureimageviewer.gson.ViewerGson;
 import com.quigglesproductions.secureimageviewer.managers.ApplicationPreferenceManager;
 import com.quigglesproductions.secureimageviewer.managers.FolderManager;
 import com.quigglesproductions.secureimageviewer.managers.SecurityManager;
@@ -33,8 +26,6 @@ import org.acra.config.HttpSenderConfigurationBuilder;
 import org.acra.config.ToastConfigurationBuilder;
 import org.acra.data.StringFormat;
 import org.acra.sender.HttpSender;
-
-import java.util.Arrays;
 
 import dagger.hilt.android.HiltAndroidApp;
 
