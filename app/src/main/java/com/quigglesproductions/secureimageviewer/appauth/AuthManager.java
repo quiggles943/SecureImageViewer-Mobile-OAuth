@@ -17,6 +17,7 @@ import androidx.annotation.Nullable;
 import com.quigglesproductions.secureimageviewer.App;
 import com.quigglesproductions.secureimageviewer.Downloaders.UserInfoDownloader;
 import com.quigglesproductions.secureimageviewer.apprequest.requests.DeviceRegistrationRequest;
+import com.quigglesproductions.secureimageviewer.authentication.AuthenticationManager;
 import com.quigglesproductions.secureimageviewer.models.oauth.UserInfo;
 import com.quigglesproductions.secureimageviewer.registration.RegistrationId;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
@@ -556,6 +557,16 @@ public class AuthManager implements IAuthManager{
             return null;
         else
             return authState.getAccessToken();
+    }
+
+    @Override
+    public void retrieveValidAccessToken(AuthenticationManager.TokenRetrievalCallback callback) {
+        performActionWithFreshTokens(new AuthState.AuthStateAction() {
+            @Override
+            public void execute(@Nullable String accessToken, @Nullable String idToken, @Nullable AuthorizationException ex) {
+                callback.tokenRetrieved(accessToken,ex);
+            }
+        });
     }
 
     public interface UrlConnectionRetrievalCallback{

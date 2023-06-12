@@ -7,6 +7,7 @@ import com.bumptech.glide.load.model.LazyHeaders;
 import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
 import com.quigglesproductions.secureimageviewer.appauth.RequestServiceNotConfiguredException;
 import com.quigglesproductions.secureimageviewer.authentication.AuthenticationManager;
+import com.quigglesproductions.secureimageviewer.authentication.IAuthenticationLayer;
 import com.quigglesproductions.secureimageviewer.authentication.TokenManager;
 import com.quigglesproductions.secureimageviewer.models.ItemBaseModel;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile;
@@ -36,10 +37,9 @@ public class RetrofitFileDataSource implements IFileDataSource,ISecureDataSource
 
     @Override
     public URL getFileURL() throws MalformedURLException, RequestServiceNotConfiguredException {
-        /*String baseUrl = RequestManager.getInstance().getUrlManager().getFileUrlString();
-        String fileUri = baseUrl + file.getOnlineId() + "/content";
-        return new URL(fileUri);*/
-        return null;
+        String baseUrl = "https://quigleyserver.ddns.net:14500/api/v2/enhancedfile/";
+        String fileUri = baseUrl+file.getOnlineId()+"/content";
+        return new URL(fileUri);
     }
 
     private URL getFileURL(int id) throws MalformedURLException, RequestServiceNotConfiguredException {
@@ -167,7 +167,7 @@ public class RetrofitFileDataSource implements IFileDataSource,ISecureDataSource
     }
 
     @Override
-    public AuthManager getAuthorization() {
-        return AuthManager.getInstance();
+    public IAuthenticationLayer getAuthorization() {
+        return authenticationManager;
     }
 }

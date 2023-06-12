@@ -7,6 +7,7 @@ import com.bumptech.glide.load.model.LazyHeaders;
 import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
 import com.quigglesproductions.secureimageviewer.appauth.RequestServiceNotConfiguredException;
 import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
+import com.quigglesproductions.secureimageviewer.authentication.IAuthenticationLayer;
 import com.quigglesproductions.secureimageviewer.models.ItemBaseModel;
 import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.FileMetadata;
 
@@ -96,7 +97,7 @@ public class OnlineFileDataSource implements IFileDataSource,ISecureDataSource {
     }
 
     @Override
-    public AuthManager getAuthorization() {
+    public IAuthenticationLayer getAuthorization() {
         return AuthManager.getInstance();
     }
 }

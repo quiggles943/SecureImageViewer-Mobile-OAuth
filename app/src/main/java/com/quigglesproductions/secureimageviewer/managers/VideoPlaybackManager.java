@@ -15,6 +15,7 @@ import androidx.media3.exoplayer.source.DefaultMediaSourceFactory;
 
 import com.quigglesproductions.secureimageviewer.appauth.IAuthManager;
 import com.quigglesproductions.secureimageviewer.appauth.RequestServiceNotConfiguredException;
+import com.quigglesproductions.secureimageviewer.authentication.AuthenticationManager;
 import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.IFileDataSource;
 import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.ISecureDataSource;
 import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.LocalFileDataSource;
@@ -119,14 +120,14 @@ public class VideoPlaybackManager {
     public void  getVideoFromDataSource(IFileDataSource dataSource, boolean playWhenReady, VideoPlayerCallback callback) {
         try {
             URL fileUrl = dataSource.getFileURL();
-            File file = new File(String.valueOf(fileUrl));
+            //File file = new File(String.valueOf(fileUrl));
             //if(dataSource instanceof LocalFileDataSource && !file.exists())
             //    throw new FileNotFoundException("File not found");
             androidx.media3.common.MediaItem mediaItem = MediaItem.fromUri(fileUrl.toString());
             if(ISecureDataSource.class.isAssignableFrom(dataSource.getClass())){
-                ((ISecureDataSource)dataSource).getAuthorization().performActionWithFreshTokens(new AuthState.AuthStateAction() {
+                ((ISecureDataSource)dataSource).getAuthorization().retrieveValidAccessToken(new AuthenticationManager.TokenRetrievalCallback() {
                     @Override
-                    public void  execute(@Nullable String accessToken, @Nullable String idToken, @Nullable AuthorizationException ex) {
+                    public void tokenRetrieved(String accessToken, Exception exception) {
                         Map<String, String> headersMap = new HashMap<>();
                         headersMap.put("Authorization", "Bearer " + accessToken);
                         DataSource.Factory factory = new DefaultHttpDataSource.Factory().setDefaultRequestProperties(headersMap);
