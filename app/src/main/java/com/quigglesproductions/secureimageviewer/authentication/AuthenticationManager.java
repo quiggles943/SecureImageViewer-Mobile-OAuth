@@ -30,7 +30,7 @@ import retrofit2.Response;
 
 @Module
 @InstallIn(SingletonComponent.class)
-public class AuthenticationManager {
+public class AuthenticationManager implements IAuthenticationLayer{
     static final String ClientId = "10887ebe-29e9-45db-b739-56ef6919ea34";
     static final String ClientIdDev = "bf289a3f-aed6-4252-96b3-207e299c7357";
     static final String ClientSecret ="15e75e7d0f16490aa1a6a4c80a8c63cb";
