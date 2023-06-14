@@ -26,12 +26,19 @@ public class TokenManager {
     private static final String tokenPreferences = "com.secureimageviewer.preference.authentication.token";
     private static final String authenticationState = "com.secureimageviewer.preference.authentication.token.authstate";
     Context context;
+    public TokenManager(){
+
+    }
     @Inject
     public TokenManager(@ApplicationContext Context context){
         this.context = context;
     }
 
-    private SharedPreferences getTokenPref(){
+    void setContext(Context context){
+        this.context = context;
+    }
+
+    SharedPreferences getTokenPref(){
         SharedPreferences tokenPref = context.getSharedPreferences(tokenPreferences,Context.MODE_PRIVATE);
         return tokenPref;
     }
