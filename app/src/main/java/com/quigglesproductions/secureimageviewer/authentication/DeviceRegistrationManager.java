@@ -33,15 +33,20 @@ public class DeviceRegistrationManager {
     private RegistrationId registrationId;
     SharedPreferences registrationPref;
     Lazy<AuthenticationManager> authenticationManagerLazy;
+    private Settings.Secure secureSettings;
+
+    DeviceRegistrationManager(){
+
+    }
     @Inject
     public DeviceRegistrationManager(@ApplicationContext Context context, Lazy<AuthenticationManager> authenticationManagerLazy){
         this.context = context;
         this.authenticationManagerLazy = authenticationManagerLazy;
     }
 
-    private SharedPreferences getRegistrationPref(){
+    SharedPreferences getRegistrationPref(){
         if(registrationPref == null) {
-            registrationPref = context.getSharedPreferences("com.secureimageviewer.registration", Context.MODE_PRIVATE);
+            registrationPref = getContext().getSharedPreferences("com.secureimageviewer.registration", Context.MODE_PRIVATE);
         }
         return registrationPref;
     }
@@ -77,7 +82,11 @@ public class DeviceRegistrationManager {
         }
     }
 
-    private RegistrationId loadRegistrationId(){
+    Context getContext(){
+        return context;
+    }
+
+    RegistrationId loadRegistrationId(){
         String regIDJson = getRegistrationPref().getString("registrationId",null);
         RegistrationId currentRegId = RegistrationId.fromJsonString(regIDJson);
         registrationId = currentRegId;
@@ -144,14 +153,14 @@ public class DeviceRegistrationManager {
     }
 
     public String getDeviceId(){
-        String deviceId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+        String deviceId = Settings.Secure.getString(getContext().getContentResolver(), Settings.Secure.ANDROID_ID);
         if(BuildConfig.BUILD_TYPE.contentEquals("debug"))
             deviceId = deviceId+"-debug";
         return deviceId;
     }
 
     public String getDeviceName(){
-        String deviceName = Settings.Secure.getString(context.getContentResolver(), "bluetooth_name");
+        String deviceName = Settings.Secure.getString(getContext().getContentResolver(), "bluetooth_name");
         return deviceName;
     }
 

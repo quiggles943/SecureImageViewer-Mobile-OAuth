@@ -64,7 +64,7 @@ public class TokenManager {
     }
 
     public AuthenticationState refreshToken(TokenResponse tokenResponse) {
-        AuthenticationState authState = new AuthenticationState(tokenResponse);
+        AuthenticationState authState = new AuthenticationState.Builder().fromTokenResponse(tokenResponse).build();
         setAuthenticaionState(authState);
         return authState;
     }
