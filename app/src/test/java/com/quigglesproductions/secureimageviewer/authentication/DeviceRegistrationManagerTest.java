@@ -39,9 +39,6 @@ public class DeviceRegistrationManagerTest {
     SharedPreferences sharedPreferences;
     @Mock
     SharedPreferences.Editor sharedPreferencesEditor;
-    @Mock
-    Lazy<AuthenticationManager> authenticationManager;
-
     @Spy
     DeviceRegistrationManager registrationManager;
 

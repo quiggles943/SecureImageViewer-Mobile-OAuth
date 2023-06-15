@@ -46,7 +46,8 @@ public class AuthenticationState {
     }
 
     void setScopes(String scope){
-        scopes = scope.split(",");
+        if(scope != null && !scope.isEmpty())
+            scopes = scope.split(",");
     }
 
     void setClock(Clock clock){
