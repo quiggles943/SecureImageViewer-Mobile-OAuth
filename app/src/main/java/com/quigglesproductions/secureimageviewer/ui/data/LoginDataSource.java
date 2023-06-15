@@ -55,7 +55,7 @@ public class LoginDataSource {
                 Response<TokenResponse> response = apiInterface.doGetAuthToken(tokenRetrievalRequest.getPartMap()).execute();
                 if(response.isSuccessful()) {
                     TokenResponse tokenResponse = response.body();
-                    authenticationManager.updateAuthenticationState(new AuthenticationState(tokenResponse));
+                    authenticationManager.updateAuthenticationState(new AuthenticationState.Builder().fromTokenResponse(tokenResponse).build());
 
                     UserInfoResponse userInfoResponse = apiInterface.doGetUserInfo("Bearer "+authenticationManager.getTokenManager().getAccessToken()).execute().body();
                     LoggedInUser user = new LoggedInUser(userInfoResponse.UserId,userInfoResponse.EmailAddress, userInfoResponse.UserName);

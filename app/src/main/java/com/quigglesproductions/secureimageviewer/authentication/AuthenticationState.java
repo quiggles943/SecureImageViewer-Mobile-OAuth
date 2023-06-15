@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.quigglesproductions.secureimageviewer.authentication.pogo.TokenResponse;
 import com.quigglesproductions.secureimageviewer.gson.ViewerGson;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -11,30 +12,47 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 public class AuthenticationState {
-    private final String accessToken;
-    private final String refreshToken;
-    private final String[] scopes;
+    private String accessToken;
+    private String refreshToken;
+    private String[] scopes;
     private Long accessTokenExpiry;
     private Long refreshTokenExpiry;
     private LocalDateTime accessTokenExpiryDate;
     private LocalDateTime refreshTokenExpiryDate;
+    private transient Clock clock = Clock.systemDefaultZone();
 
-    public AuthenticationState(TokenResponse tokenResponse){
-        accessToken = tokenResponse.access_token;
-        refreshToken = tokenResponse.refresh_token;
-        scopes = tokenResponse.scope.split(",");
-        if(tokenResponse.expires_in != null) {
-            accessTokenExpiry = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(Long.decode(tokenResponse.expires_in));
-            accessTokenExpiryDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(accessTokenExpiry), ZoneId.systemDefault());
-        }
-        if(tokenResponse.refresh_expires_in != null) {
-            refreshTokenExpiry = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(Long.decode(tokenResponse.refresh_expires_in));
-            refreshTokenExpiryDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(refreshTokenExpiry), ZoneId.systemDefault());
-        }
-
+    AuthenticationState(){
 
     }
 
+    private void setAccessToken(String accessToken){
+        this.accessToken = accessToken;
+    }
+    private void setRefreshToken(String refreshToken){
+        this.refreshToken = refreshToken;
+    }
+
+    void setAccessTokenExpiry(String expires_in){
+        if(expires_in != null) {
+            accessTokenExpiry = clock.millis() + TimeUnit.SECONDS.toMillis(Long.decode(expires_in));
+            accessTokenExpiryDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(accessTokenExpiry), ZoneId.systemDefault());
+        }
+    }
+    void setRefreshTokenExpiry(String refresh_expires_in){
+        if(refresh_expires_in != null) {
+            refreshTokenExpiry = clock.millis() + TimeUnit.SECONDS.toMillis(Long.decode(refresh_expires_in));
+            refreshTokenExpiryDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(refreshTokenExpiry), ZoneId.systemDefault());
+        }
+    }
+
+    void setScopes(String scope){
+        if(scope != null && !scope.isEmpty())
+            scopes = scope.split(",");
+    }
+
+    void setClock(Clock clock){
+        this.clock = clock;
+    }
     public static AuthenticationState fromJson(String json) {
         Gson gson = ViewerGson.getGson();
         return gson.fromJson(json,AuthenticationState.class);
@@ -63,5 +81,30 @@ public class AuthenticationState {
     public String toJson(){
         Gson gson = ViewerGson.getGson();
         return gson.toJson(this);
+    }
+
+    public static class Builder{
+        private TokenResponse tokenResponse;
+        private Clock clock;
+        public AuthenticationState.Builder withClock(Clock clock){
+            this.clock = clock;
+            return this;
+        }
+        public AuthenticationState.Builder fromTokenResponse(TokenResponse tokenResponse){
+            this.tokenResponse = tokenResponse;
+            return this;
+        }
+        public AuthenticationState build(){
+            AuthenticationState authenticationState = new AuthenticationState();
+            if(clock != null)
+                authenticationState.setClock(clock);
+
+            authenticationState.setAccessToken(tokenResponse.access_token);
+            authenticationState.setRefreshToken(tokenResponse.refresh_token);
+            authenticationState.setAccessTokenExpiry(tokenResponse.expires_in);
+            authenticationState.setRefreshTokenExpiry(tokenResponse.refresh_expires_in);
+            authenticationState.setScopes(tokenResponse.scope);
+            return authenticationState;
+        }
     }
 }

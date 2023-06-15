@@ -77,16 +77,16 @@ public class AuthenticationManager implements IAuthenticationLayer{
     }
 
     public void updateAuthenticationState(AuthenticationState authenticationState) {
-        tokenManager.setAuthenticaionState(authenticationState);
+        getTokenManager().setAuthenticaionState(authenticationState);
     }
 
-    private String getClientId(){
+    String getClientId(){
         if(BuildConfig.BUILD_TYPE.contentEquals("debug"))
             return ClientIdDev;
         else
             return ClientId;
     }
-    private String getClientSecret(){
+    String getClientSecret(){
         if(BuildConfig.BUILD_TYPE.contentEquals("debug"))
             return ClientSecretDev;
         else
