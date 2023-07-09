@@ -26,6 +26,7 @@ public class BaseFileViewFragment extends SecureFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         if(getParentFragment() instanceof EnhancedFileViewFragment)
             registerViewerNavigator(((EnhancedFileViewFragment)getParentFragment()).getNavigator());
+        setRetainInstance(true);
         super.onViewCreated(view, savedInstanceState);
     }
 
