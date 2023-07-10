@@ -154,7 +154,7 @@ public class LoginFragment extends SecureFragment {
         });
         loggedInUser = SecurityManager.getInstance().getLoggedInUser();
 
-        if(loggedInUser != null){
+        if(loggedInUser != null && initialLogin){
             fingerPrintButton.setVisibility(View.VISIBLE);
         }
         else{
