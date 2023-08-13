@@ -25,7 +25,7 @@ import com.quigglesproductions.secureimageviewer.room.databases.file.entity.Room
         RoomDatabaseCategory.class,
         RoomDatabaseSubject.class,
         RoomFileCategoryCrossRef.class,
-        RoomFileSubjectCrossRef.class},version = 7)
+        RoomFileSubjectCrossRef.class},version = 8)
 @TypeConverters({Converters.class})
 public abstract class FileDatabase extends RoomDatabase {
     public abstract FolderDao folderDao();

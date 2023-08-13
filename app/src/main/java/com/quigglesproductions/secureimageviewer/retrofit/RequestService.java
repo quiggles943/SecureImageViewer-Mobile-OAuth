@@ -1,6 +1,7 @@
 package com.quigglesproductions.secureimageviewer.retrofit;
 
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateLog;
+import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateResponse;
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateSendModel;
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedServerStatus;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedOnlineFile;
@@ -52,6 +53,6 @@ public interface RequestService {
     @GET("/api/v2/enhancedfile/recents")
     Call<List<EnhancedOnlineFile>> doGetRecentFiles(@Query("offset")int offset, @Query("metadata") boolean containsMetadata,@Query("count") int count);
     @POST("/api/v2/enhancedfile/updates")
-    Call<List<EnhancedFileUpdateLog>> doGetFileUpdates(@Body EnhancedFileUpdateSendModel fileUpdateSendModel);
+    Call<List<EnhancedFileUpdateResponse>> doGetFileUpdates(@Body EnhancedFileUpdateSendModel fileUpdateSendModel);
 
 }

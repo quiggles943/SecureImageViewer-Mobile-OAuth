@@ -1,7 +1,6 @@
 package com.quigglesproductions.secureimageviewer.ui.data;
 
 import com.quigglesproductions.secureimageviewer.ui.data.model.LoggedInUser;
-import com.quigglesproductions.secureimageviewer.ui.ui.login.LoginViewModel;
 
 import javax.inject.Inject;
 

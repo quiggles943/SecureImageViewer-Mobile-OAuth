@@ -5,10 +5,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 
+import androidx.annotation.Nullable;
+
 import com.quigglesproductions.secureimageviewer.BuildConfig;
 import com.quigglesproductions.secureimageviewer.authentication.pogo.TokenRefreshRequest;
 import com.quigglesproductions.secureimageviewer.authentication.pogo.TokenResponse;
 import com.quigglesproductions.secureimageviewer.authentication.pogo.TokenRetrievalRequest;
+import com.quigglesproductions.secureimageviewer.authentication.pogo.internal.InternalTokenRequest;
+import com.quigglesproductions.secureimageviewer.authentication.pogo.internal.UserAuthorizationRequest;
+import com.quigglesproductions.secureimageviewer.authentication.pogo.internal.UserLocation;
 import com.quigglesproductions.secureimageviewer.authentication.retrofit.AuthRequestService;
 import com.quigglesproductions.secureimageviewer.models.DeviceStatus;
 import com.quigglesproductions.secureimageviewer.registration.DeviceRegistrationModel;
@@ -49,6 +54,15 @@ public class AuthenticationManager implements IAuthenticationLayer{
     public AuthenticationManager(@ApplicationContext Context context){
         this.rootContext = context;
         //tokenManager = new TokenManager(context);
+    }
+
+    public UserAuthorizationRequest generateUserAuthorizationRequest(@Nullable UserLocation userLocation){
+        UserAuthorizationRequest request = new UserAuthorizationRequest();
+        request.clientId = getClientId();
+        request.scope = "read, write";
+        request.audience = "quigleyserver.ddns.net";
+        request.location = userLocation;
+        return request;
     }
 
 
@@ -141,8 +155,28 @@ public class AuthenticationManager implements IAuthenticationLayer{
         return deviceRegistrationManager;
     }
 
+    public InternalTokenRequest generateInternalTokenRequest(TokenRequestType requestType) {
+        InternalTokenRequest tokenRequest = new InternalTokenRequest();
+        tokenRequest.clientId = getClientId();
+        switch (requestType){
+            case REFRESH_TOKEN:
+                tokenRequest.refreshToken = getTokenManager().getRefreshToken();
+                tokenRequest.grantType = "refresh_token";
+                break;
+            case CODE:
+                tokenRequest.grantType = "authorization_code";
+                break;
+        }
+        return tokenRequest;
+    }
+
     public interface TokenRetrievalCallback{
         void tokenRetrieved(String accessToken, Exception exception);
+    }
+
+    public enum TokenRequestType{
+        CODE,
+        REFRESH_TOKEN
     }
 
 }

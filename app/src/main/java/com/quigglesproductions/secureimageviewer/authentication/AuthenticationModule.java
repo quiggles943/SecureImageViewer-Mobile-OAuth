@@ -52,7 +52,7 @@ public class AuthenticationModule {
             interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
             OkHttpClient client = new OkHttpClient().newBuilder()
                     .addInterceptor(interceptor)
-                    .connectTimeout(20, TimeUnit.SECONDS)
+                    .connectTimeout(5, TimeUnit.SECONDS)
                     .writeTimeout(10, TimeUnit.SECONDS)
                     .readTimeout(10, TimeUnit.SECONDS)
                     .sslSocketFactory(getSSLContext().getSocketFactory())

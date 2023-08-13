@@ -1,7 +1,9 @@
 package com.quigglesproductions.secureimageviewer.ui.startup;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -9,24 +11,18 @@ import android.os.Bundle;
 import android.transition.Fade;
 import android.util.Log;
 import android.view.Window;
-import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.google.common.net.MediaType;
 import com.google.gson.Gson;
 import com.quigglesproductions.secureimageviewer.BuildConfig;
 import com.quigglesproductions.secureimageviewer.R;
-import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
-import com.quigglesproductions.secureimageviewer.managers.SecurityManager;
 import com.quigglesproductions.secureimageviewer.managers.ViewerConnectivityManager;
 import com.quigglesproductions.secureimageviewer.models.DeviceStatus;
 import com.quigglesproductions.secureimageviewer.models.error.RequestError;
@@ -34,9 +30,6 @@ import com.quigglesproductions.secureimageviewer.registration.RegistrationId;
 import com.quigglesproductions.secureimageviewer.retrofit.RequestErrorModel;
 import com.quigglesproductions.secureimageviewer.ui.EnhancedMainMenuActivity;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
-import com.quigglesproductions.secureimageviewer.ui.login.EnhancedLoginActivity;
-import com.quigglesproductions.secureimageviewer.ui.overview.OverviewViewModel;
-import com.quigglesproductions.secureimageviewer.ui.splash.NewSplashScreenActivity;
 import com.quigglesproductions.secureimageviewer.ui.ui.login.LoginActivity;
 
 import java.time.LocalDateTime;
@@ -51,6 +44,8 @@ public class EnhancedStartupScreen extends SecureActivity {
     private ProgressBar progressBar;
     private EnhancedStartupScreenViewModel viewModel;
     private Context context;
+
+    private ActivityResultLauncher<String> requestPermissionLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,7 +62,7 @@ public class EnhancedStartupScreen extends SecureActivity {
         progressBar.setIndeterminate(true);
 
         setupObservers();
-
+        setupLocationPermissionRequestCallback();
         validateConnection();
     }
 
@@ -98,7 +93,7 @@ public class EnhancedStartupScreen extends SecureActivity {
             @Override
             public void onChanged(Boolean aBoolean) {
                 if(aBoolean) {
-                    showBiometrics();
+                    initiateLogin();
                     viewModel.getStartupProgressState().setValue(StartupProgressState.COMPLETE);
                 }
                 else{
@@ -207,12 +202,22 @@ public class EnhancedStartupScreen extends SecureActivity {
         }
     }
 
-    private void showBiometrics(){
+    private void initiateLogin(){
+        if(ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+            progressToLoginScreen();
+        }
+        else{
+            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
+        }
+
+        //finish();
+    }
+
+    private void progressToLoginScreen(){
         Intent intent;
         intent = new Intent(context, LoginActivity.class);
         intent.putExtra("initialLogin",true);
         startActivityForResult(intent,1245);
-        //finish();
     }
 
 
@@ -263,6 +268,23 @@ public class EnhancedStartupScreen extends SecureActivity {
                 progressBar.setProgressTintMode(PorterDuff.Mode.MULTIPLY);
                 break;
         }*/
+    }
+
+    private void setupLocationPermissionRequestCallback(){
+        requestPermissionLauncher =
+                registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+                    if (isGranted) {
+                        // Permission is granted. Continue the action or workflow in your
+                        // app.
+                        progressToLoginScreen();
+                    } else {
+                        // Explain to the user that the feature is unavailable because the
+                        // feature requires a permission that the user has denied. At the
+                        // same time, respect the user's decision. Don't link to system
+                        // settings in an effort to convince the user to change their
+                        // decision.
+                    }
+                });
     }
 
     @Override

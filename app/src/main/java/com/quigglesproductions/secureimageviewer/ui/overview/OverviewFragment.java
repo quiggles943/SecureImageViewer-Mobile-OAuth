@@ -23,7 +23,9 @@ import com.quigglesproductions.secureimageviewer.databinding.ActivityOverviewBin
 import com.quigglesproductions.secureimageviewer.gson.ViewerGson;
 import com.quigglesproductions.secureimageviewer.managers.ApplicationPreferenceManager;
 import com.quigglesproductions.secureimageviewer.managers.ViewerConnectivityManager;
+import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateLog;
+import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateResponse;
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateSendModel;
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedServerStatus;
 import com.quigglesproductions.secureimageviewer.room.databases.file.entity.RoomDatabaseFolder;
@@ -290,35 +292,41 @@ public class OverviewFragment extends SecureFragment {
         if(isOnline) {
             EnhancedFileUpdateSendModel sendModel = new EnhancedFileUpdateSendModel();
             getBackgroundThreadPoster().post(()->{
-                sendModel.folders = getFileDatabase().folderDao().getFolders().stream().map(RoomDatabaseFolder::getOnlineId).collect(Collectors.toList());
-                getRequestService().doGetFileUpdates(sendModel).enqueue(new Callback<List<EnhancedFileUpdateLog>>() {
-                    @Override
-                    public void onResponse(Call<List<EnhancedFileUpdateLog>> call, Response<List<EnhancedFileUpdateLog>> response) {
-                        if(response.isSuccessful()){
-                            List<EnhancedFileUpdateLog> updateLogs = response.body();
-                            ApplicationPreferenceManager.getInstance().setPreferenceString(ApplicationPreferenceManager.ManagedPreference.SYNC_VALUES, ViewerGson.getGson().toJson(updateLogs));
-                            getUiThreadPoster().post(()->{
-                                if (updateLogs.size() > 0) {
-                                    if (updateLogs.size() == 1)
-                                        viewModel.getOnlineUpdateStatus().setValue("Has " + updateLogs.size() + " update");
-                                    else
-                                        viewModel.getOnlineUpdateStatus().setValue("Has " + updateLogs.size() + " updates");
+                List<RoomDatabaseFolder> folders = getFileDatabase().folderDao().getFolders();
+                for(RoomDatabaseFolder folder:folders){
+                    sendModel.folders.add(new EnhancedFileUpdateFolder(folder.getOnlineId(),folder.getLastUpdateTime()));
+                }
+                if(sendModel.folders != null && sendModel.folders.size()>0) {
+                    getRequestService().doGetFileUpdates(sendModel).enqueue(new Callback<List<EnhancedFileUpdateResponse>>() {
+                        @Override
+                        public void onResponse(Call<List<EnhancedFileUpdateResponse>> call, Response<List<EnhancedFileUpdateResponse>> response) {
+                            if (response.isSuccessful()) {
+                                List<EnhancedFileUpdateResponse> updateLogs = response.body();
+                                ApplicationPreferenceManager.getInstance().setPreferenceString(ApplicationPreferenceManager.ManagedPreference.SYNC_VALUES, ViewerGson.getGson().toJson(updateLogs));
+                                int foldersWithUpdates = getUpdateTotal(updateLogs);
+                                getUiThreadPoster().post(() -> {
+                                    if (foldersWithUpdates > 0) {
+                                        if (foldersWithUpdates == 1)
+                                            viewModel.getOnlineUpdateStatus().setValue("Has " + foldersWithUpdates + " folder update");
+                                        else
+                                            viewModel.getOnlineUpdateStatus().setValue("Has " + foldersWithUpdates + " folders with updates");
 
-                                    viewModel.getHasOnlineUpdates().setValue(true);
-                                } else {
-                                    viewModel.getOnlineUpdateStatus().setValue("No updates");
-                                    viewModel.getHasOnlineUpdates().setValue(false);
-                                }
-                            });
+                                        viewModel.getHasOnlineUpdates().setValue(true);
+                                    } else {
+                                        viewModel.getOnlineUpdateStatus().setValue("No updates");
+                                        viewModel.getHasOnlineUpdates().setValue(false);
+                                    }
+                                });
+
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<List<EnhancedFileUpdateResponse>> call, Throwable t) {
 
                         }
-                    }
-
-                    @Override
-                    public void onFailure(Call<List<EnhancedFileUpdateLog>> call, Throwable t) {
-
-                    }
-                });
+                    });
+                }
             });
 
             /*FileUpdateStatusRequest fileUpdateStatusRequest = new FileUpdateStatusRequest();
@@ -382,6 +390,15 @@ public class OverviewFragment extends SecureFragment {
                 binding.serverStatusArrowButton.setImageResource(R.drawable.ic_baseline_expand_more_24);
             }
         }
+    }
+
+    private int getUpdateTotal(List<EnhancedFileUpdateResponse> responses){
+        int count = 0;
+        for(EnhancedFileUpdateResponse response:responses){
+            if(response.hasUpdates())
+                count++;
+        }
+        return count;
     }
 
     private void syncFolders(){

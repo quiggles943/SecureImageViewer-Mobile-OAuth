@@ -6,6 +6,8 @@ import android.content.SharedPreferences;
 import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
 import com.quigglesproductions.secureimageviewer.authentication.pogo.TokenRefreshRequest;
 import com.quigglesproductions.secureimageviewer.authentication.pogo.TokenResponse;
+import com.quigglesproductions.secureimageviewer.authentication.pogo.internal.InternalAuthResponse;
+import com.quigglesproductions.secureimageviewer.authentication.pogo.internal.InternalAuthToken;
 import com.quigglesproductions.secureimageviewer.retrofit.RetrofitException;
 
 import java.time.LocalDateTime;
@@ -65,6 +67,12 @@ public class TokenManager {
 
     public AuthenticationState refreshToken(TokenResponse tokenResponse) {
         AuthenticationState authState = new AuthenticationState.Builder().fromTokenResponse(tokenResponse).build();
+        setAuthenticaionState(authState);
+        return authState;
+    }
+
+    public AuthenticationState refreshToken(InternalAuthToken authToken){
+        AuthenticationState authState = new AuthenticationState.Builder().fromInternalAuthToken(authToken).build();
         setAuthenticaionState(authState);
         return authState;
     }

@@ -214,6 +214,7 @@ public class DownloadManager {
 
                     //Room database
                     roomDatabaseFolder = new RoomDatabaseFolder.Creator().loadFromOnlineFolder((EnhancedOnlineFolder) folder).build();
+                    roomDatabaseFolder.lastUpdateTime = LocalDateTime.now();
                     long folderId = fileDatabase.folderDao().insert(roomDatabaseFolder);
                     roomDatabaseFolder.setUid(folderId);
                 }

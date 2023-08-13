@@ -7,6 +7,7 @@ import androidx.activity.result.ActivityResultLauncher;
 
 import com.quigglesproductions.secureimageviewer.dagger.hilt.module.DownloadManager;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
+import com.quigglesproductions.secureimageviewer.ui.internallogin.InternalLoginActivity;
 import com.quigglesproductions.secureimageviewer.ui.ui.login.LoginActivity;
 
 import org.jetbrains.annotations.NotNull;
@@ -50,7 +51,7 @@ public class RequestManager {
                     if(context instanceof SecureActivity) {
                         suspendedCall = call;
                         suspendedCallback = callback;
-                        Intent intent = new Intent(context, LoginActivity.class);
+                        Intent intent = new Intent(context, InternalLoginActivity.class);
                         ActivityResultLauncher<Intent> activityLauncher = ((SecureActivity) context).getActivityResultLauncher();
                         if (activityLauncher != null)
                             activityLauncher.launch(intent);
