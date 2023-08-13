@@ -56,6 +56,10 @@ public class RoomDatabaseFolder {
     @SerializedName("DefaultSubjectId")
     public int defaultOnlineSubjectId;
 
+    @ColumnInfo(name = "LastUpdateTime")
+    @SerializedName("LastUpdateTime")
+    public LocalDateTime lastUpdateTime;
+
     @ColumnInfo(name = "LastAccessTime")
     private LocalDateTime accessTime;
 
@@ -209,6 +213,13 @@ public class RoomDatabaseFolder {
 
     public long getId() {
         return uid;
+    }
+
+    public LocalDateTime getLastUpdateTime() {
+        if(lastUpdateTime == null)
+            return LocalDateTime.of(1900,1,1,0,0);
+        else
+            return lastUpdateTime;
     }
 
 

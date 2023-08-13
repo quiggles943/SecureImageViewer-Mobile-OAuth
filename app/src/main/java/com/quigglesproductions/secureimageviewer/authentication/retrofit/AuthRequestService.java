@@ -3,11 +3,16 @@ package com.quigglesproductions.secureimageviewer.authentication.retrofit;
 import com.quigglesproductions.secureimageviewer.authentication.pogo.TokenRefreshRequest;
 import com.quigglesproductions.secureimageviewer.authentication.pogo.TokenResponse;
 import com.quigglesproductions.secureimageviewer.authentication.pogo.UserInfoResponse;
+import com.quigglesproductions.secureimageviewer.authentication.pogo.internal.InternalAuthResponse;
+import com.quigglesproductions.secureimageviewer.authentication.pogo.internal.InternalTokenRequest;
+import com.quigglesproductions.secureimageviewer.authentication.pogo.internal.InternalTwoFactorRequest;
+import com.quigglesproductions.secureimageviewer.authentication.pogo.internal.UserAuthorizationRequest;
 import com.quigglesproductions.secureimageviewer.models.DeviceStatus;
 import com.quigglesproductions.secureimageviewer.registration.DeviceRegistrationModel;
 import com.quigglesproductions.secureimageviewer.registration.DeviceRegistrationResponseModel;
 
 import java.util.HashMap;
+import java.util.concurrent.Executor;
 
 import okhttp3.RequestBody;
 import retrofit2.Call;
@@ -34,4 +39,10 @@ public interface AuthRequestService {
 
     @GET()
     Call<DeviceStatus> doGetDeviceStatus(@Url String url,@Query("deviceId") String deviceId);
+    @POST("/internal/v1/oauth2/authorize")
+    Call<InternalAuthResponse> doAuthorizeUser(@Body UserAuthorizationRequest userAuthorizationRequest);
+    @POST("/internal/v1/oauth2/authenticate")
+    Call<InternalAuthResponse> doAuthenticateCode(@Body InternalTwoFactorRequest twoFactorRequest);
+    @POST("/internal/v1/oauth2/token")
+    Call<InternalAuthResponse> doRetrieveToken(@Body InternalTokenRequest tokenRequest);
 }

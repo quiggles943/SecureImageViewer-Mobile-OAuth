@@ -2,6 +2,7 @@ package com.quigglesproductions.secureimageviewer.authentication;
 
 import com.google.gson.Gson;
 import com.quigglesproductions.secureimageviewer.authentication.pogo.TokenResponse;
+import com.quigglesproductions.secureimageviewer.authentication.pogo.internal.InternalAuthToken;
 import com.quigglesproductions.secureimageviewer.gson.ViewerGson;
 
 import java.time.Clock;
@@ -92,6 +93,17 @@ public class AuthenticationState {
         }
         public AuthenticationState.Builder fromTokenResponse(TokenResponse tokenResponse){
             this.tokenResponse = tokenResponse;
+            return this;
+        }
+        public AuthenticationState.Builder fromInternalAuthToken(InternalAuthToken token){
+            TokenResponse response = new TokenResponse();
+            response.access_token = token.accessToken;
+            response.expires_in = token.expiresIn;
+            response.refresh_token = token.refreshToken;
+            response.refresh_expires_in = token.refreshExpiresIn;
+            response.scope = token.scope;
+            response.token_type = token.tokenType;
+            this.tokenResponse = response;
             return this;
         }
         public AuthenticationState build(){

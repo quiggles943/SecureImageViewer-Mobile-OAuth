@@ -9,6 +9,8 @@ import com.quigglesproductions.secureimageviewer.authentication.AuthenticationMa
 import com.quigglesproductions.secureimageviewer.authentication.TokenManager;
 import com.quigglesproductions.secureimageviewer.authentication.pogo.TokenRefreshRequest;
 import com.quigglesproductions.secureimageviewer.authentication.pogo.TokenResponse;
+import com.quigglesproductions.secureimageviewer.authentication.pogo.internal.InternalAuthResponse;
+import com.quigglesproductions.secureimageviewer.authentication.pogo.internal.InternalTokenRequest;
 import com.quigglesproductions.secureimageviewer.authentication.retrofit.AuthRequestService;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
 
@@ -55,11 +57,13 @@ public class AuthenticationInterceptor implements Interceptor {
         }
         else if(!tokenManager.isTokenValid() && tokenManager.isRefreshTokenValid()){
             //AuthenticationAPIInterface service = AuthenticationAPIClient.getClient().create(AuthenticationAPIInterface.class);
-            TokenRefreshRequest tokenRequest = authenticationManager.generateTokenRefreshRequest();
-            retrofit2.Response<TokenResponse> response = apiInterface.doRefreshToken(tokenRequest.getPartMap()).execute();
+            //TokenRefreshRequest tokenRequest = authenticationManager.generateTokenRefreshRequest();
+            InternalTokenRequest tokenRequest = authenticationManager.generateInternalTokenRequest(AuthenticationManager.TokenRequestType.REFRESH_TOKEN);
+
+            retrofit2.Response<InternalAuthResponse> response = apiInterface.doRetrieveToken(tokenRequest).execute();
             if(response.isSuccessful()) {
-                TokenResponse tokenResponse = response.body();
-                tokenManager.refreshToken(tokenResponse);
+                InternalAuthResponse tokenResponse = response.body();
+                tokenManager.refreshToken(tokenResponse.token);
             }
             else{
                 ready = false;
