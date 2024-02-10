@@ -25,7 +25,9 @@ import androidx.preference.PreferenceManager;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.gson.Gson;
+import com.quigglesproductions.secureimageviewer.App;
 import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
+import com.quigglesproductions.secureimageviewer.aurora.appauth.AuroraAuthenticationManager;
 import com.quigglesproductions.secureimageviewer.authentication.AuthenticationManager;
 import com.quigglesproductions.secureimageviewer.barcodescanner.BarcodeCaptureActivity;
 import com.quigglesproductions.secureimageviewer.dagger.hilt.module.DownloadManager;
@@ -37,6 +39,7 @@ import com.quigglesproductions.secureimageviewer.models.WebServerConfig;
 import com.quigglesproductions.secureimageviewer.retrofit.RequestManager;
 import com.quigglesproductions.secureimageviewer.room.databases.download.DownloadRecordDatabase;
 import com.quigglesproductions.secureimageviewer.room.databases.file.FileDatabase;
+import com.quigglesproductions.secureimageviewer.room.databases.modular.file.ModularFileDatabase;
 import com.quigglesproductions.secureimageviewer.room.databases.system.SystemDatabase;
 import com.quigglesproductions.secureimageviewer.ui.login.EnhancedLoginActivity;
 import com.quigglesproductions.secureimageviewer.ui.login.ReauthenticateActivity;
@@ -74,18 +77,23 @@ public class SecureActivity extends AppCompatActivity {
     @Inject
     Gson gson;
     @Inject
-    DownloadManager downloadManager;
+    public DownloadManager downloadManager;
     @Inject
     FileDatabase fileDatabase;
+    @Inject
+    ModularFileDatabase modularFileDatabase;
     @Inject
     DownloadRecordDatabase recordDatabase;
     @Inject
     SystemDatabase systemDatabase;
+    @Inject
+    AuroraAuthenticationManager auroraAuthenticationManager;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setupActivityResultLauncher();
         context = this;
+        ((App)getApplicationContext()).registerActivityContextForAuthentication(context);
         UiModeManager uiModeManager = (UiModeManager) context.getSystemService(Context.UI_MODE_SERVICE);
         float density = context.getResources().getDisplayMetrics().densityDpi;
         int modeType = uiModeManager.getCurrentModeType();
@@ -250,15 +258,15 @@ public class SecureActivity extends AppCompatActivity {
                 if(data != null) {
                     AuthorizationResponse resp = AuthorizationResponse.fromIntent(data);
                     AuthorizationException ex = AuthorizationException.fromIntent(data);
-                    AuthManager.getInstance().updateAuthState(context, resp, ex);
+                    auroraAuthenticationManager.updateAuthState(context, resp, ex);
                     if (resp != null) {
-                        AuthManager.getInstance().getToken(context, resp, ex, new AuthorizationService.TokenResponseCallback() {
+                        auroraAuthenticationManager.getToken(context, resp, ex, new AuthorizationService.TokenResponseCallback() {
                             @Override
                             public void onTokenRequestCompleted(@Nullable TokenResponse response, @Nullable AuthorizationException ex) {
                                 //AuthManager.getInstance().updateAuthState(context, response, ex);
                                 //AuthManager.getInstance().retrieveUserInfo(context);
-                                if (AuthManager.getInstance().hasDelayedAction()) {
-                                    AuthManager.getInstance().performActionWithFreshTokens(context, AuthManager.getInstance().getDelayedAction());
+                                if (auroraAuthenticationManager.hasDelayedAction()) {
+                                    auroraAuthenticationManager.performActionWithFreshTokens(context, auroraAuthenticationManager.getDelayedAction());
                                 }
                             }
                         });
@@ -323,8 +331,7 @@ public class SecureActivity extends AppCompatActivity {
                 new ActivityResultCallback<ActivityResult>() {
                     @Override
                     public void onActivityResult(ActivityResult result) {
-                        if(requestManager.hasSuspendedCall())
-                            requestManager.enqueueSuspendedCall();
+
                     }
                 }
         );
@@ -339,6 +346,10 @@ public class SecureActivity extends AppCompatActivity {
         return authenticationManager;
     }
 
+    public AuroraAuthenticationManager getAuroraAuthenticationManager(){
+        return auroraAuthenticationManager;
+    }
+
     public Gson getGson() {
         return gson;
     }
@@ -349,6 +360,10 @@ public class SecureActivity extends AppCompatActivity {
 
     public FileDatabase getFileDatabase() {
         return fileDatabase;
+    }
+
+    public ModularFileDatabase getModularFileDatabase() {
+        return modularFileDatabase;
     }
 
     public DownloadRecordDatabase getRecordDatabase() {

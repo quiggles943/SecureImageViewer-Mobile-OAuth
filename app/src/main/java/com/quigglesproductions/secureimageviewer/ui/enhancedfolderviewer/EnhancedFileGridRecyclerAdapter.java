@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -21,9 +20,7 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.quigglesproductions.secureimageviewer.R;
 import com.quigglesproductions.secureimageviewer.SortType;
-import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.IFileDataSource;
-import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
-import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
+import com.quigglesproductions.secureimageviewer.datasource.file.IFileDataSource;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile;
 
 import org.acra.ACRA;
@@ -32,8 +29,6 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-
-import kotlinx.coroutines.ObsoleteCoroutinesApi;
 
 public class EnhancedFileGridRecyclerAdapter<T extends IDisplayFile> extends RecyclerView.Adapter<EnhancedFileGridRecyclerAdapter.ViewHolder> {
     private ArrayList<T> files = new ArrayList<>();
@@ -143,7 +138,7 @@ public class EnhancedFileGridRecyclerAdapter<T extends IDisplayFile> extends Rec
         // Get element from your dataset at this position and replace the
         // contents of the view with that element
         try {
-            file.getDataSource().getFileThumbnailDataSource(new IFileDataSource.DataSourceCallback() {
+            file.getDataSource().getFileThumbnailDataSource(mContext,new IFileDataSource.DataSourceCallback() {
                 @Override
                 public void FileDataSourceRetrieved(Object dataSource, Exception exception) {
 

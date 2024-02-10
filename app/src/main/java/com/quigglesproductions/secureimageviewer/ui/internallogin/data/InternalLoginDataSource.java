@@ -96,7 +96,7 @@ public class InternalLoginDataSource {
                 uiThreadPoster.post(()->{
                     InternalAuthResponse errorResponse = new InternalAuthResponse();
                     errorResponse.authState = new InternalAuthState();
-                    errorResponse.authState.authState = STATE_ERROR;
+                    errorResponse.authState.authState = "ERROR";
                     errorResponse.error = new InternalAuthError();
                     errorResponse.error.message = ex.getClass().getCanonicalName();
                     errorResponse.error.detailedMessage = ex.getMessage();
@@ -143,7 +143,7 @@ public class InternalLoginDataSource {
                 uiThreadPoster.post(()->{
                     InternalAuthResponse errorResponse = new InternalAuthResponse();
                     errorResponse.authState = new InternalAuthState();
-                    errorResponse.authState.authState = STATE_ERROR;
+                    errorResponse.authState.authState = "ERROR";
                     errorResponse.error = new InternalAuthError();
                     errorResponse.error.message = ex.getClass().getCanonicalName();
                     errorResponse.error.detailedMessage = ex.getMessage();
@@ -196,7 +196,7 @@ public class InternalLoginDataSource {
                 uiThreadPoster.post(()->{
                     InternalAuthResponse errorResponse = new InternalAuthResponse();
                     errorResponse.authState = new InternalAuthState();
-                    errorResponse.authState.authState = STATE_ERROR;
+                    errorResponse.authState.authState = "ERROR";
                     errorResponse.error = new InternalAuthError();
                     errorResponse.error.message = ex.getClass().getCanonicalName();
                     errorResponse.error.detailedMessage = ex.getMessage();
@@ -272,7 +272,7 @@ public class InternalLoginDataSource {
                 uiThreadPoster.post(()->{
                     InternalAuthResponse errorResponse = new InternalAuthResponse();
                     errorResponse.authState = new InternalAuthState();
-                    errorResponse.authState.authState = STATE_ERROR;
+                    errorResponse.authState.authState = "ERROR";
                     errorResponse.error = new InternalAuthError();
                     errorResponse.error.message = ex.getClass().getCanonicalName();
                     errorResponse.error.detailedMessage = ex.getMessage();

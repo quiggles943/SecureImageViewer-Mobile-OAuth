@@ -78,8 +78,8 @@ public class StorageSettingsActivity  extends SecureActivity {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
                     new Thread(()->{
-                        FolderManager.getInstance().removeAllFolders(getFileDatabase());
-                        getFileDatabase().clearAllTables();
+                        FolderManager.getInstance().removeAllFolders(getModularFileDatabase());
+                        getModularFileDatabase().clearAllTables();
                         getRecordDatabase().clearAllTables();
                         //getRecordDatabase().downloadRecordDao().archiveAll();
                         NotificationManager.getInstance().showSnackbar("All folders removed", Snackbar.LENGTH_SHORT);

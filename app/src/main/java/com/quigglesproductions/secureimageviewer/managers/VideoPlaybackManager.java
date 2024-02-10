@@ -1,7 +1,6 @@
 package com.quigglesproductions.secureimageviewer.managers;
 
 import android.content.Context;
-import android.net.Uri;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.OptIn;
@@ -15,19 +14,13 @@ import androidx.media3.exoplayer.source.DefaultMediaSourceFactory;
 
 import com.quigglesproductions.secureimageviewer.appauth.IAuthManager;
 import com.quigglesproductions.secureimageviewer.appauth.RequestServiceNotConfiguredException;
-import com.quigglesproductions.secureimageviewer.authentication.AuthenticationManager;
-import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.IFileDataSource;
-import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.ISecureDataSource;
-import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.LocalFileDataSource;
+import com.quigglesproductions.secureimageviewer.datasource.file.IFileDataSource;
+import com.quigglesproductions.secureimageviewer.datasource.ISecureDataSource;
 
 import net.openid.appauth.AuthState;
 import net.openid.appauth.AuthorizationException;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -125,7 +118,23 @@ public class VideoPlaybackManager {
             //    throw new FileNotFoundException("File not found");
             androidx.media3.common.MediaItem mediaItem = MediaItem.fromUri(fileUrl.toString());
             if(ISecureDataSource.class.isAssignableFrom(dataSource.getClass())){
-                ((ISecureDataSource)dataSource).getAuthorization().retrieveValidAccessToken(new AuthenticationManager.TokenRetrievalCallback() {
+                ((ISecureDataSource)dataSource).getAuthorization().performActionWithFreshTokens(rootContext, new AuthState.AuthStateAction() {
+                    @Override
+                    public void execute(@Nullable String accessToken, @Nullable String idToken, @Nullable AuthorizationException ex) {
+                        Map<String, String> headersMap = new HashMap<>();
+                        headersMap.put("Authorization", "Bearer " + accessToken);
+                        DataSource.Factory factory = new DefaultHttpDataSource.Factory().setDefaultRequestProperties(headersMap);
+                        setExoPlayer(new ExoPlayer.Builder(rootContext).setMediaSourceFactory(new
+                                DefaultMediaSourceFactory((DataSource.Factory) factory)).setSeekBackIncrementMs(seekBackIntervalMs).setSeekForwardIncrementMs(seekForwardIntervalMs).build());
+                        player.setMediaItem(mediaItem);
+                        player.prepare();
+                        if(playWhenReady) {
+                            player.play();
+                        }
+                        callback.VideoPlayerRecieved(player,null);
+                    }
+                });
+                /*((ISecureDataSource)dataSource).getAuthorization().retrieveValidAccessToken(new AuthenticationManager.TokenRetrievalCallback() {
                     @Override
                     public void tokenRetrieved(String accessToken, Exception exception) {
                         Map<String, String> headersMap = new HashMap<>();
@@ -140,7 +149,7 @@ public class VideoPlaybackManager {
                         }
                         callback.VideoPlayerRecieved(player,null);
                     }
-                });
+                });*/
             }
             else{
                 setExoPlayer(new ExoPlayer.Builder(rootContext).build());

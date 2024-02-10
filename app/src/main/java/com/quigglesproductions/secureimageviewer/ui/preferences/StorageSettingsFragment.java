@@ -22,9 +22,9 @@ public class StorageSettingsFragment extends SecurePreferenceFragmentCompat {
         resetPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                FolderManager.getInstance().removeAllFolders(getFileDatabase());
+                FolderManager.getInstance().removeAllFolders(getModularFileDatabase());
                 new Thread(()->{
-                    getFileDatabase().clearAllTables();
+                    getModularFileDatabase().clearAllTables();
                 }).start();
 
                 //DatabaseHandler.getInstance().clearFiles();

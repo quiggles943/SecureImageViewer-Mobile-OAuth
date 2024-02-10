@@ -2,7 +2,7 @@ package com.quigglesproductions.secureimageviewer.models.enhanced.folder;
 
 import com.google.gson.annotations.SerializedName;
 import com.quigglesproductions.secureimageviewer.SortType;
-import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.IFolderDataSource;
+import com.quigglesproductions.secureimageviewer.datasource.folder.IFolderDataSource;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile;
 import com.quigglesproductions.secureimageviewer.ui.enhancedfolderviewer.FolderOrigin;
 
@@ -47,6 +47,10 @@ public class EnhancedFolder implements IDisplayFolder {
 
     public long getOnlineId() {
         return onlineId;
+    }
+
+    public int getOnlineThumbnailId() {
+        return onlineThumbnailId;
     }
 
 

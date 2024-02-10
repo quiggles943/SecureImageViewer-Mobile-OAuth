@@ -17,9 +17,8 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.quigglesproductions.secureimageviewer.R;
 import com.quigglesproductions.secureimageviewer.SortType;
-import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.IFileDataSource;
+import com.quigglesproductions.secureimageviewer.datasource.file.IFileDataSource;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
-import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile;
 
 import org.acra.ACRA;
@@ -102,7 +101,7 @@ public class FileGridAdapter extends BaseAdapter {
         }
         ImageView imageView = (ImageView) gridView.getTag();
         try {
-            item.getDataSource().getFileThumbnailDataSource(new IFileDataSource.DataSourceCallback() {
+            item.getDataSource().getFileThumbnailDataSource(mContext,new IFileDataSource.DataSourceCallback() {
                 @Override
                 public void FileDataSourceRetrieved(Object dataSource, Exception exception) {
 

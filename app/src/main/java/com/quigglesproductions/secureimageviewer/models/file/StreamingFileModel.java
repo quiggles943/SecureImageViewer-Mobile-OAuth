@@ -1,7 +1,7 @@
 package com.quigglesproductions.secureimageviewer.models.file;
 
-import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.IFileDataSource;
-import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.OnlineFileDataSource;
+import com.quigglesproductions.secureimageviewer.datasource.file.IFileDataSource;
+import com.quigglesproductions.secureimageviewer.datasource.file.OnlineFileDataSource;
 import com.quigglesproductions.secureimageviewer.models.ItemBaseModel;
 
 import java.io.File;

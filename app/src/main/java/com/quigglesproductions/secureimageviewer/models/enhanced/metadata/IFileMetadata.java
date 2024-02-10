@@ -28,7 +28,6 @@ public interface IFileMetadata {
 
     String getFileExtension();
     //void setFileExtension(String fileExtension);
-    String getContentType();
     //void setContentType(String contentType);
     String getFileType();
     //void setFileType(String fileType);
@@ -36,11 +35,15 @@ public interface IFileMetadata {
     //void setOnlineFileId(long fileId);
     IFileTag getArtist();
 
-    List<IFileTag> getCategories();
-    List<IFileTag> getSubjects();
     String getArtistName();
     long getFileId();
     //void setFileId(long fileId);
     LocalDateTime getDownloadTime();
+
+    int getPageNumber();
+
+    String getOrientation();
+
+    void setDownloadTime(LocalDateTime time);
     //void setDownloadTime(LocalDateTime dateTime);
 }

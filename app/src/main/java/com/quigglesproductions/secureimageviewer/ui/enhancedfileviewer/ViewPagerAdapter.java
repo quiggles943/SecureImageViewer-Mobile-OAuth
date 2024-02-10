@@ -1,7 +1,6 @@
 package com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer;
 
 import android.content.Context;
-import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,7 +18,7 @@ import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.quigglesproductions.secureimageviewer.R;
-import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.IFileDataSource;
+import com.quigglesproductions.secureimageviewer.datasource.file.IFileDataSource;
 import com.quigglesproductions.secureimageviewer.listeners.AdapterInstantiatedListener;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
 
@@ -112,7 +111,7 @@ public class ViewPagerAdapter extends PagerAdapter {
             IFileDataSource dataSource = item.getDataSource();
             if(dataSource == null)
                 return;
-            dataSource.getFullFileDataSource(new IFileDataSource.DataSourceCallback() {
+            dataSource.getFullFileDataSource(context,new IFileDataSource.DataSourceCallback() {
                 @Override
                 public void FileDataSourceRetrieved(Object dataSource, Exception exception) {
 

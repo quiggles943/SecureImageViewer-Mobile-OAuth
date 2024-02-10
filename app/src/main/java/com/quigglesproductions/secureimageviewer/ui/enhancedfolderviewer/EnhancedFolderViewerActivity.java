@@ -17,13 +17,12 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.google.android.material.snackbar.Snackbar;
 import com.quigglesproductions.secureimageviewer.R;
 import com.quigglesproductions.secureimageviewer.SortType;
 import com.quigglesproductions.secureimageviewer.managers.ApplicationPreferenceManager;
 import com.quigglesproductions.secureimageviewer.managers.FolderManager;
-import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.IFileDataSource;
-import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.IFolderDataSource;
+import com.quigglesproductions.secureimageviewer.datasource.file.IFileDataSource;
+import com.quigglesproductions.secureimageviewer.datasource.folder.IFolderDataSource;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedDatabaseFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedOnlineFolder;

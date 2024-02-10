@@ -35,6 +35,8 @@ import com.quigglesproductions.secureimageviewer.ui.IFileViewer;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
 import com.quigglesproductions.secureimageviewer.ui.SupportActionBarSetListener;
 import com.quigglesproductions.secureimageviewer.ui.compoundcontrols.FileViewerNavigator;
+import com.quigglesproductions.secureimageviewer.ui.enhancedfolderviewer.kotlin.EnhancedFolderViewerFragmentKt;
+import com.quigglesproductions.secureimageviewer.ui.enhancedfolderviewer.kotlin.EnhancedFolderViewerViewModelKt;
 
 import java.lang.reflect.Field;
 @OptIn(markerClass = UnstableApi.class)

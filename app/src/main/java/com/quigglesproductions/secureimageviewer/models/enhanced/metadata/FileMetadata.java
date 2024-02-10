@@ -146,7 +146,6 @@ public class FileMetadata implements IFileMetadata {
         this.fileExtension = fileExtension;
     }
 
-    @Override
     public String getContentType() {
         return contentType;
     }
@@ -182,13 +181,11 @@ public class FileMetadata implements IFileMetadata {
     }
 
 
-    @Override
     public List<IFileTag> getCategories() {
         return categories.stream().map(x-> (EnhancedFileTag)x).collect(Collectors.toList());
     }
 
 
-    @Override
     public List<IFileTag> getSubjects() {
         return subjects.stream().map(x-> (EnhancedFileTag)x).collect(Collectors.toList());
     }
@@ -211,6 +208,16 @@ public class FileMetadata implements IFileMetadata {
     @Override
     public LocalDateTime getDownloadTime() {
         return downloadTime;
+    }
+
+    @Override
+    public int getPageNumber() {
+        return 0;
+    }
+
+    @Override
+    public String getOrientation() {
+        return "";
     }
 
     //@Override

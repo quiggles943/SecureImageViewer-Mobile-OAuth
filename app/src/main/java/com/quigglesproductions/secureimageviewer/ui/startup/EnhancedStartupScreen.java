@@ -1,6 +1,8 @@
 package com.quigglesproductions.secureimageviewer.ui.startup;
 
 import android.Manifest;
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -45,7 +47,9 @@ public class EnhancedStartupScreen extends SecureActivity {
     private EnhancedStartupScreenViewModel viewModel;
     private Context context;
 
-    private ActivityResultLauncher<String> requestPermissionLauncher;
+    private ActivityResultLauncher<String> locationRequestPermissionLauncher;
+
+    private ActivityResultLauncher<String> accountRequestPermissionLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +64,7 @@ public class EnhancedStartupScreen extends SecureActivity {
         progressBar.setProgressTintList(ColorStateList.valueOf(Color.CYAN));
         progressBar.setProgressTintMode(PorterDuff.Mode.MULTIPLY);
         progressBar.setIndeterminate(true);
-
+        //setupAccountPermissionRequestCallback();
         setupObservers();
         setupLocationPermissionRequestCallback();
         validateConnection();
@@ -156,6 +160,10 @@ public class EnhancedStartupScreen extends SecureActivity {
                         RequestErrorModel errorModel = gson.fromJson(response.errorBody().charStream(), RequestErrorModel.class);
                         RequestError error = RequestError.getFromErrorCode(errorModel.errorType, errorModel.errorCode);
                         Log.e("Startup",error.name());
+                        if(error == RequestError.DeviceNotRegistered && BuildConfig.DEBUG){
+                            Log.w("Startup","Device authentication failed but was bypassed as device is in debug");
+                            viewModel.getDeviceAuthenticated().setValue(true);
+                        }
                     }
                     else{
                         Log.e("Startup","Server error");
@@ -207,7 +215,7 @@ public class EnhancedStartupScreen extends SecureActivity {
             progressToLoginScreen();
         }
         else{
-            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
+            locationRequestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
         }
 
         //finish();
@@ -271,7 +279,7 @@ public class EnhancedStartupScreen extends SecureActivity {
     }
 
     private void setupLocationPermissionRequestCallback(){
-        requestPermissionLauncher =
+        locationRequestPermissionLauncher =
                 registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
                     if (isGranted) {
                         // Permission is granted. Continue the action or workflow in your
@@ -285,6 +293,23 @@ public class EnhancedStartupScreen extends SecureActivity {
                         // decision.
                     }
                 });
+    }
+    private void setupAccountPermissionRequestCallback(){
+        accountRequestPermissionLauncher =
+                registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+                    if (isGranted) {
+                        // Permission is granted. Continue the action or workflow in your
+                        // app.
+                        //progressToLoginScreen();
+                    } else {
+                        // Explain to the user that the feature is unavailable because the
+                        // feature requires a permission that the user has denied. At the
+                        // same time, respect the user's decision. Don't link to system
+                        // settings in an effort to convince the user to change their
+                        // decision.
+                    }
+                });
+        accountRequestPermissionLauncher.launch(Manifest.permission.GET_ACCOUNTS);
     }
 
     @Override

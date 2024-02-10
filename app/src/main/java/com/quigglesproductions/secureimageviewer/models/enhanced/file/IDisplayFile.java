@@ -2,8 +2,7 @@ package com.quigglesproductions.secureimageviewer.models.enhanced.file;
 
 import androidx.annotation.NonNull;
 
-import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.IFileDataSource;
-import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.RetrofitFileDataSource;
+import com.quigglesproductions.secureimageviewer.datasource.file.IFileDataSource;
 import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.IFileMetadata;
 
 import java.time.LocalDateTime;

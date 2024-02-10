@@ -3,12 +3,11 @@ package com.quigglesproductions.secureimageviewer.room.databases.file.entity;
 import androidx.annotation.VisibleForTesting;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
-import androidx.room.Fts4;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 import com.google.gson.annotations.SerializedName;
-import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.IFileDataSource;
+import com.quigglesproductions.secureimageviewer.datasource.file.IFileDataSource;
 
 import java.io.File;
 import java.time.LocalDateTime;

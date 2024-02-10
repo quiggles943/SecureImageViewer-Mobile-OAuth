@@ -28,10 +28,13 @@ import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpd
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateResponse;
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateSendModel;
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedServerStatus;
+import com.quigglesproductions.secureimageviewer.models.modular.ModularServerStatus;
 import com.quigglesproductions.secureimageviewer.room.databases.file.entity.RoomDatabaseFolder;
 import com.quigglesproductions.secureimageviewer.room.databases.file.relations.FileWithMetadata;
+import com.quigglesproductions.secureimageviewer.room.databases.modular.file.entity.RoomModularFolder;
 import com.quigglesproductions.secureimageviewer.room.databases.system.enums.SystemParameter;
 import com.quigglesproductions.secureimageviewer.ui.SecureFragment;
+import com.quigglesproductions.secureimageviewer.ui.enhancedfolderlist.EnhancedFolderListFragment;
 import com.quigglesproductions.secureimageviewer.utils.FileSyncUtils;
 import com.quigglesproductions.secureimageviewer.utils.ViewerFileUtils;
 
@@ -95,14 +98,14 @@ public class OverviewFragment extends SecureFragment {
         deviceFilesViewButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                NavDirections action = OverviewFragmentDirections.actionNavEnhancedMainMenuFragmentToNavEnhancedOfflineFolderListFragment("offline-room");
+                NavDirections action = OverviewFragmentDirections.actionNavEnhancedMainMenuFragmentToNavEnhancedOfflineFolderListFragment(EnhancedFolderListFragment.STATE_MODULAR);
                 Navigation.findNavController(binding.getRoot()).navigate(action);
             }
         });
         onlineFilesViewButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                NavDirections action = OverviewFragmentDirections.actionEnhancedMainMenuFragmentToEnhancedFolderListFragment("online");
+                NavDirections action = OverviewFragmentDirections.actionEnhancedMainMenuFragmentToEnhancedFolderListFragment(EnhancedFolderListFragment.STATE_ONLINE);
                 Navigation.findNavController(binding.getRoot()).navigate(action);
             }
         });
@@ -115,18 +118,18 @@ public class OverviewFragment extends SecureFragment {
         setupViewModelData(viewModel);
         expandDeviceStatusView(true);
         if(Boolean.TRUE.equals(viewModel.getIsOnline().getValue())) {
-            getRequestService().doGetServerStatus().enqueue(new Callback<EnhancedServerStatus>() {
+            getRequestService().doGetServerStatus().enqueue(new Callback<ModularServerStatus>() {
                 @Override
-                public void onResponse(Call<EnhancedServerStatus> call, Response<EnhancedServerStatus> response) {
+                public void onResponse(Call<ModularServerStatus> call, Response<ModularServerStatus> response) {
                     if (response.isSuccessful()) {
-                        EnhancedServerStatus status = response.body();
+                        ModularServerStatus status = response.body();
                         viewModel.getFilesOnServer().setValue(status.getFileCount());
                         viewModel.getFoldersOnServer().setValue(status.getFolderCount());
                     }
                 }
 
                 @Override
-                public void onFailure(Call<EnhancedServerStatus> call, Throwable t) {
+                public void onFailure(Call<ModularServerStatus> call, Throwable t) {
 
                 }
             });
@@ -238,16 +241,31 @@ public class OverviewFragment extends SecureFragment {
     private void setupViewModelData(@NonNull OverviewViewModel viewModel){
         viewModel.getIsOnline().setValue(ViewerConnectivityManager.getInstance().isConnected());
         getBackgroundThreadPoster().post(()->{
-            long filesOnDevice = (long) getFileDatabase().fileDao().getAll().size();
-            long foldersOnDevice = (long) getFileDatabase().folderDao().getAll().size();
-            LocalDateTime lastUpdate = getSystemDatabase().systemParameterDao().getParameterByKey(SystemParameter.LAST_UPDATE_TIME).getValueLocalDateTime();
-            LocalDateTime onlineSyncTime = getSystemDatabase().systemParameterDao().getParameterByKey(SystemParameter.LAST_ONLINE_SYNC_TIME).getValueLocalDateTime();
-            getUiThreadPoster().post(()->{
-                viewModel.getFilesOnDevice().setValue(filesOnDevice);
-                viewModel.getFoldersOnDevice().setValue(foldersOnDevice);
-                viewModel.getLastUpdateTime().setValue(lastUpdate);
-                viewModel.getLastOnlineSyncTime().setValue(onlineSyncTime);
-            });
+            long filesOnDevice = 0,foldersOnDevice = 0;
+            LocalDateTime lastUpdate = null,onlineSyncTime = null;
+            try {
+                filesOnDevice = (long) getModularFileDatabase().fileDao().getAll().size();
+                foldersOnDevice = (long) getModularFileDatabase().folderDao().getAll().size();
+
+                lastUpdate = getSystemDatabase().systemParameterDao().getParameterByKey(SystemParameter.LAST_UPDATE_TIME).getValueLocalDateTime();
+                onlineSyncTime = getSystemDatabase().systemParameterDao().getParameterByKey(SystemParameter.LAST_ONLINE_SYNC_TIME).getValueLocalDateTime();
+
+            }
+            catch (IllegalStateException exception){
+
+            }
+            finally {
+                long finalFilesOnDevice = filesOnDevice;
+                long finalFoldersOnDevice = foldersOnDevice;
+                LocalDateTime finalLastUpdate = lastUpdate;
+                LocalDateTime finalOnlineSyncTime = onlineSyncTime;
+                getUiThreadPoster().post(() -> {
+                    viewModel.getFilesOnDevice().setValue(finalFilesOnDevice);
+                    viewModel.getFoldersOnDevice().setValue(finalFoldersOnDevice);
+                    viewModel.getLastUpdateTime().setValue(finalLastUpdate);
+                    viewModel.getLastOnlineSyncTime().setValue(finalOnlineSyncTime);
+                });
+            }
         });
 
 
@@ -292,8 +310,8 @@ public class OverviewFragment extends SecureFragment {
         if(isOnline) {
             EnhancedFileUpdateSendModel sendModel = new EnhancedFileUpdateSendModel();
             getBackgroundThreadPoster().post(()->{
-                List<RoomDatabaseFolder> folders = getFileDatabase().folderDao().getFolders();
-                for(RoomDatabaseFolder folder:folders){
+                List<RoomModularFolder> folders = getModularFileDatabase().folderDao().getFolders();
+                for(RoomModularFolder folder:folders){
                     sendModel.folders.add(new EnhancedFileUpdateFolder(folder.getOnlineId(),folder.getLastUpdateTime()));
                 }
                 if(sendModel.folders != null && sendModel.folders.size()>0) {
@@ -403,20 +421,20 @@ public class OverviewFragment extends SecureFragment {
 
     private void syncFolders(){
 
-        ArrayList<EnhancedFileUpdateLog> deletedLogs = FileSyncUtils.getUpdateLogs(getContext(), EnhancedFileUpdateLog.UpdateType.Deleted);
-        for(EnhancedFileUpdateLog log : deletedLogs){
-            FileWithMetadata fileWithMetadata = getFileDatabase().fileDao().get(log.getFileId());
+        ArrayList<EnhancedFileUpdateResponse> deletedLogs = FileSyncUtils.getUpdateLogs(getContext(), EnhancedFileUpdateLog.UpdateType.Deleted);
+        for(EnhancedFileUpdateResponse log : deletedLogs){
+            /*FileWithMetadata fileWithMetadata = getFileDatabase().fileDao().get(log.getFileId());
             if(fileWithMetadata != null)
-                ViewerFileUtils.deleteFile(getFileDatabase(),fileWithMetadata);
+                ViewerFileUtils.deleteFile(getFileDatabase(),fileWithMetadata);*/
         }
 
-        ArrayList<EnhancedFileUpdateLog> modifiedLogs = FileSyncUtils.getUpdateLogs(getContext(), EnhancedFileUpdateLog.UpdateType.Modified);
-        for(EnhancedFileUpdateLog log : modifiedLogs){
+        ArrayList<EnhancedFileUpdateResponse> modifiedLogs = FileSyncUtils.getUpdateLogs(getContext(), EnhancedFileUpdateLog.UpdateType.Modified);
+        for(EnhancedFileUpdateResponse log : modifiedLogs){
 
         }
 
-        ArrayList<EnhancedFileUpdateLog> createdLogs = FileSyncUtils.getUpdateLogs(getContext(), EnhancedFileUpdateLog.UpdateType.Created);
-        for(EnhancedFileUpdateLog log : createdLogs){
+        ArrayList<EnhancedFileUpdateResponse> createdLogs = FileSyncUtils.getUpdateLogs(getContext(), EnhancedFileUpdateLog.UpdateType.Created);
+        for(EnhancedFileUpdateResponse log : createdLogs){
 
         }
 

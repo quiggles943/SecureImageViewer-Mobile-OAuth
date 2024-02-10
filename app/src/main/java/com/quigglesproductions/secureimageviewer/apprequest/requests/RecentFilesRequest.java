@@ -8,7 +8,7 @@ import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
 import com.quigglesproductions.secureimageviewer.appauth.RequestServiceNotConfiguredException;
 import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
 import com.quigglesproductions.secureimageviewer.apprequest.callbacks.ItemListRetrievalCallback;
-import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.OnlineFileDataSource;
+import com.quigglesproductions.secureimageviewer.datasource.file.OnlineFileDataSource;
 import com.quigglesproductions.secureimageviewer.gson.ViewerGson;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedOnlineFile;
 import com.quigglesproductions.secureimageviewer.utils.StreamUtils;

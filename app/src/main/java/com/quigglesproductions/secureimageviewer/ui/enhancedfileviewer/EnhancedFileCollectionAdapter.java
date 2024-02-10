@@ -12,11 +12,15 @@ import com.quigglesproductions.secureimageviewer.gson.ViewerGson;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedOnlineFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile;
+import com.quigglesproductions.secureimageviewer.models.modular.file.ModularOnlineFile;
 import com.quigglesproductions.secureimageviewer.room.databases.file.relations.FileWithMetadata;
+import com.quigglesproductions.secureimageviewer.room.databases.modular.file.entity.relations.RoomEmbeddedFile;
 import com.quigglesproductions.secureimageviewer.ui.compoundcontrols.FileViewerNavigator;
 import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.fragments.BaseFileViewFragment;
 import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.fragments.ImageFileViewFragment;
 import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.fragments.VideoFileViewFragment;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,10 +54,14 @@ public class EnhancedFileCollectionAdapter<T extends IDisplayFile> extends Fragm
         String json = ViewerGson.getGson().toJson(file);
         if(file instanceof EnhancedDatabaseFile)
             args.putString(BaseFileViewFragment.ARG_FILE_SOURCE_TYPE, BaseFileViewFragment.FileSourceType.DATABASE.toString());
-        else if(file instanceof EnhancedOnlineFile)
+        else if(file instanceof EnhancedOnlineFile || file instanceof ModularOnlineFile)
             args.putString(BaseFileViewFragment.ARG_FILE_SOURCE_TYPE, BaseFileViewFragment.FileSourceType.ONLINE.toString());
         else if(file instanceof FileWithMetadata)
             args.putString(BaseFileViewFragment.ARG_FILE_SOURCE_TYPE, BaseFileViewFragment.FileSourceType.ROOM.toString());
+        else if (file instanceof RoomEmbeddedFile)
+            args.putString(BaseFileViewFragment.ARG_FILE_SOURCE_TYPE,BaseFileViewFragment.FileSourceType.MODULAR.toString());
+        else if (file instanceof com.quigglesproductions.secureimageviewer.room.databases.paging.file.entity.relations.RoomEmbeddedFile)
+            args.putString(BaseFileViewFragment.ARG_FILE_SOURCE_TYPE,BaseFileViewFragment.FileSourceType.PAGING.toString());
         args.putInt(BaseFileViewFragment.ARG_FILE_ID,file.getOnlineId());
         args.putString(BaseFileViewFragment.ARG_FILE,json);
         fragment.setArguments(args);
@@ -91,6 +99,11 @@ public class EnhancedFileCollectionAdapter<T extends IDisplayFile> extends Fragm
                 zoomCallback.zoomLevelChanged(isZoomed);
             }
         };
+    }
+
+    @NotNull
+    public Integer getPosition(IDisplayFile selectedFile) {
+        return files.indexOf(selectedFile);
     }
 
     public interface ZoomLevelChangeCallback{

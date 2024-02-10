@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.quigglesproductions.secureimageviewer.room.databases.download.DownloadRecordDatabase;
 import com.quigglesproductions.secureimageviewer.room.databases.file.FileDatabase;
+import com.quigglesproductions.secureimageviewer.room.databases.modular.file.ModularFileDatabase;
 
 import dagger.Module;
 import dagger.Provides;
@@ -16,7 +17,7 @@ import dagger.hilt.components.SingletonComponent;
 public class DownloadModule {
 
     @Provides
-    public static DownloadManager providesDownloadManager(@ApplicationContext Context context, FileDatabase fileDatabase, DownloadRecordDatabase recordDatabase){
+    public static DownloadManager providesDownloadManager(@ApplicationContext Context context, ModularFileDatabase fileDatabase, DownloadRecordDatabase recordDatabase){
         DownloadManager downloadManager = new DownloadManager(context,recordDatabase);
         downloadManager.setFileDatabase(fileDatabase);
 

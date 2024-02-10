@@ -20,9 +20,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelKt;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavDirections;
 import androidx.navigation.Navigation;
+import androidx.paging.Pager;
+import androidx.paging.PagingConfig;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -36,15 +39,16 @@ import com.quigglesproductions.secureimageviewer.databinding.FragmentFolderViewB
 import com.quigglesproductions.secureimageviewer.managers.ApplicationPreferenceManager;
 import com.quigglesproductions.secureimageviewer.managers.FolderManager;
 import com.quigglesproductions.secureimageviewer.managers.NotificationManager;
-import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.IFileDataSource;
-import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.IFolderDataSource;
+import com.quigglesproductions.secureimageviewer.datasource.file.IFileDataSource;
+import com.quigglesproductions.secureimageviewer.datasource.folder.IFolderDataSource;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedOnlineFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.IDisplayFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.IFileMetadata;
 import com.quigglesproductions.secureimageviewer.room.databases.file.relations.FileWithMetadata;
-import com.quigglesproductions.secureimageviewer.room.databases.file.relations.FolderWithFiles;
+import com.quigglesproductions.secureimageviewer.room.databases.modular.file.entity.relations.RoomEmbeddedFile;
+import com.quigglesproductions.secureimageviewer.room.databases.modular.file.entity.relations.RoomEmbeddedFolder;
 import com.quigglesproductions.secureimageviewer.ui.EnhancedMainMenuActivity;
 import com.quigglesproductions.secureimageviewer.ui.EnhancedMainMenuViewModel;
 import com.quigglesproductions.secureimageviewer.ui.SecureFragment;
@@ -61,7 +65,7 @@ public class EnhancedFolderViewerFragment extends SecureFragment {
     private static final int CONTEXTMENU_SET_THUMBNAIL = 1;
     private static final int CONTEXTMENU_UPLOAD = 2;
 
-    private static final int LIST_UPDATE_TRIGGER_THRESHOLD = 33;
+    private static final int LIST_UPDATE_TRIGGER_THRESHOLD = 75;
     EnhancedFileGridRecyclerAdapter enhancedAdapter;
     //GridView gridview;
     FragmentFolderViewBinding binding;
@@ -84,7 +88,7 @@ public class EnhancedFolderViewerFragment extends SecureFragment {
         viewModel = new ViewModelProvider(this).get(EnhancedFolderViewerViewModel.class);
         EnhancedMainMenuViewModel mainMenuViewModel = new ViewModelProvider(this).get(EnhancedMainMenuViewModel.class);
         //gridview = binding.fileGridview;
-        recyclerView = binding.fileShimmerRecyclerView;
+        //recyclerView = binding.fileShimmerRecyclerView;
         enhancedAdapter = new EnhancedFileGridRecyclerAdapter(getContext());
         enhancedAdapter.setStateRestorationPolicy(RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY);
         int columnCount = getResources().getInteger(R.integer.column_count_filelist);
@@ -94,6 +98,7 @@ public class EnhancedFolderViewerFragment extends SecureFragment {
         recyclerView.showShimmerAdapter();
         selectedFolder = FolderManager.getInstance().getCurrentFolder();
         restoreInstanceState(savedInstanceState);
+
         /*gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
@@ -153,43 +158,44 @@ public class EnhancedFolderViewerFragment extends SecureFragment {
             default:
                 startingSortType = SortType.NAME_ASC;
         }
-        /*recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 //int test = layoutManager.findLastCompletelyVisibleItemPosition();
                 //int test2 = layoutManager.findLastVisibleItemPosition();
                 int total = enhancedAdapter.getItemCount();
                 //int test3 = total - (columnCount % total);
-                if(layoutManager.findLastCompletelyVisibleItemPosition() >total-LIST_UPDATE_TRIGGER_THRESHOLD &&layoutManager.findLastCompletelyVisibleItemPosition() <=total-1){
-                    if(scrollBottomReached == false) {
-                        scrollBottomReached = true;
-                        if(selectedFolder.getDataSource().moreItemsAvailable()){
-                            try {
-                                selectedFolder.getDataSource().getFilesFromDataSource(getContext(),new IFolderDataSource.FolderDataSourceCallback() {
-                                    @Override
-                                    public void FolderFilesRetrieved(List<EnhancedFile> files, Exception exception) {
-                                        enhancedAdapter.addFiles(files);
-                                        scrollBottomReached = false;
-                                    }
-                                },startingSortType);
-                            } catch (MalformedURLException e) {
-                                throw new RuntimeException(e);
-                            }
-                        }
-                        else
+                if(total>0) {
+                    if (layoutManager.findLastCompletelyVisibleItemPosition() > total - LIST_UPDATE_TRIGGER_THRESHOLD && layoutManager.findLastCompletelyVisibleItemPosition() <= total - 1) {
+                        if (scrollBottomReached == false) {
                             scrollBottomReached = true;
+                            if (selectedFolder.getDataSource().moreItemsAvailable()) {
+                                try {
+                                    selectedFolder.getDataSource().getFilesFromDataSource(getContext(), new IFolderDataSource.FolderDataSourceCallback() {
+                                        @Override
+                                        public void FolderFilesRetrieved(List<IDisplayFile> files, Exception exception) {
+                                            enhancedAdapter.addFiles(files);
+                                            scrollBottomReached = false;
+                                        }
+                                    }, startingSortType);
+                                } catch (MalformedURLException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            } else
+                                scrollBottomReached = true;
+                        }
                     }
                 }
             }
 
-            /*@Override
+            @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
                 if(!recyclerView.canScrollVertically(1)){
 
                 }
-            }*//*
-        });*/
+            }
+        });
 
 
         return root;
@@ -263,25 +269,13 @@ public class EnhancedFolderViewerFragment extends SecureFragment {
                 IDisplayFile file = enhancedAdapter.get(item.getItemId());
                 if(file instanceof FileWithMetadata) {
                     backgroundThreadPoster.post(()->{
-                        getFileDatabase().folderDao().setThumbnail((FolderWithFiles)selectedFolder,(FileWithMetadata) file);
+                        getModularFileDatabase().folderDao().setThumbnail((RoomEmbeddedFolder) selectedFolder,(RoomEmbeddedFile) file);
                     });
 
                 }
                 break;
             case CONTEXTMENU_UPLOAD:
-                /*AuthManager.getInstance().performActionWithFreshTokens(context, new AuthState.AuthStateAction() {
-                    @Override
-                    public void execute(@Nullable String accessToken, @Nullable String idToken, @Nullable AuthorizationException ex) {
-                        RequestManager.getInstance().getRequestService().uploadFile(accessToken, adapter.getItem(item.getItemId()), new RequestManager.RequestResultCallback<EnhancedDatabaseFile, Exception>() {
-                            @Override
-                            public void RequestResultRetrieved(EnhancedDatabaseFile result, Exception exception) {
-                                result.getIsUploaded();
-                            }
-                        });
-                    }
-                });*/
 
-                break;
         }
         return true;
     }

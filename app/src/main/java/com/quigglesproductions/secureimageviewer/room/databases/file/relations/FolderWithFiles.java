@@ -4,8 +4,8 @@ import androidx.room.Embedded;
 import androidx.room.Relation;
 
 import com.quigglesproductions.secureimageviewer.SortType;
-import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.IFolderDataSource;
-import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.RoomFolderDataSource;
+import com.quigglesproductions.secureimageviewer.datasource.folder.IFolderDataSource;
+import com.quigglesproductions.secureimageviewer.datasource.folder.RoomFolderDataSource;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.IDatabaseFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.IDisplayFolder;

@@ -9,8 +9,7 @@ import com.quigglesproductions.secureimageviewer.appauth.RequestServiceNotConfig
 import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
 import com.quigglesproductions.secureimageviewer.apprequest.callbacks.ItemListRetrievalCallback;
 import com.quigglesproductions.secureimageviewer.gson.ViewerGson;
-import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.OnlineFolderDataSource;
-import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedFolder;
+import com.quigglesproductions.secureimageviewer.datasource.folder.OnlineFolderDataSource;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedOnlineFolder;
 import com.quigglesproductions.secureimageviewer.utils.StreamUtils;
 import com.techyourchance.threadposter.BackgroundThreadPoster;

@@ -4,20 +4,16 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
-import com.quigglesproductions.secureimageviewer.authentication.AuthenticationManager;
-import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.RetrofitFileDataSource;
-import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.RetrofitFolderDataSource;
-import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedOnlineFile;
+import com.quigglesproductions.secureimageviewer.aurora.appauth.AuroraAuthenticationManager;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedOnlineFolder;
-import com.quigglesproductions.secureimageviewer.retrofit.RequestManager;
 
 import java.lang.reflect.Type;
 
 import dagger.Lazy;
 
 public class EnhancedOnlineFolderDeserializer  implements JsonDeserializer<EnhancedOnlineFolder> {
-    Lazy<AuthenticationManager> authenticationManagerLazy;
-    public EnhancedOnlineFolderDeserializer(Lazy<AuthenticationManager> authenticationManagerLazy){
+    Lazy<AuroraAuthenticationManager> authenticationManagerLazy;
+    public EnhancedOnlineFolderDeserializer(Lazy<AuroraAuthenticationManager> authenticationManagerLazy){
         this.authenticationManagerLazy = authenticationManagerLazy;
     }
 

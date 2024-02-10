@@ -70,10 +70,9 @@ public class FileMetadataWithEntities implements IFileMetadata {
         return metadata.fileExtension;
     }
 
-    @Override
-    public String getContentType() {
-        return metadata.contentType;
-    }
+    //public String getContentType() {
+    //    return metadata.contentType;
+    //}
 
     @Override
     public String getFileType() {
@@ -90,12 +89,10 @@ public class FileMetadataWithEntities implements IFileMetadata {
         return (IFileTag) artist;
     }
 
-    @Override
     public List<IFileTag> getCategories() {
         return categories.stream().map(x->(IFileTag)x).collect(Collectors.toList());
     }
 
-    @Override
     public List<IFileTag> getSubjects() {
         return subjects.stream().map(x->(IFileTag)x).collect(Collectors.toList());
     }
@@ -114,5 +111,20 @@ public class FileMetadataWithEntities implements IFileMetadata {
     @Override
     public LocalDateTime getDownloadTime() {
         return metadata.downloadTime;
+    }
+
+    @Override
+    public int getPageNumber() {
+        return 0;
+    }
+
+    @Override
+    public String getOrientation() {
+        return "";
+    }
+
+    @Override
+    public void setDownloadTime(LocalDateTime time) {
+        metadata.setDownloadTime(time);
     }
 }

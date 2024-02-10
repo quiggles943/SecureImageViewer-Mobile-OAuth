@@ -55,14 +55,17 @@ public class AuthenticationModule {
                     .connectTimeout(5, TimeUnit.SECONDS)
                     .writeTimeout(10, TimeUnit.SECONDS)
                     .readTimeout(10, TimeUnit.SECONDS)
-                    .sslSocketFactory(getSSLContext().getSocketFactory())
+                    //.sslSocketFactory(getSSLContext().getSocketFactory())
                     .hostnameVerifier(((hostname, session) -> true))
                     .build();
             return client;
         }
-        catch(NoSuchAlgorithmException | KeyManagementException ex){
+        catch (Exception e){
             return null;
         }
+        /*catch(NoSuchAlgorithmException | KeyManagementException ex){
+            return null;
+        }*/
     }
     /*@Singleton
     @Provides

@@ -32,6 +32,7 @@ import com.quigglesproductions.secureimageviewer.databinding.ActivityMainNavigat
 import com.quigglesproductions.secureimageviewer.managers.SecurityManager;
 import com.quigglesproductions.secureimageviewer.managers.ViewerConnectivityManager;
 import com.quigglesproductions.secureimageviewer.ui.data.model.LoggedInUser;
+import com.quigglesproductions.secureimageviewer.ui.enhancedfolderlist.EnhancedFolderListFragment;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -75,13 +76,13 @@ public class EnhancedMainMenuActivity extends SecureActivity{
         NavDestination onlineFolderListDestination = navController.getGraph().findNode(R.id.nav_enhancedFolderListFragment);
         onlineFolderListDestination.addArgument("state", new NavArgument.Builder()
                 .setType(NavType.StringType)
-                .setDefaultValue("online")
+                .setDefaultValue(EnhancedFolderListFragment.STATE_ONLINE)
                 .build());
         NavDestination offlineFolderListDestination = navController.getGraph().findNode(R.id.nav_enhancedOfflineFolderListFragment);
         offlineFolderListDestination.addArgument("state", new NavArgument.Builder()
                 .setType(NavType.StringType)
                 //.setDefaultValue("offline")
-                .setDefaultValue("offline-room")
+                .setDefaultValue(EnhancedFolderListFragment.STATE_MODULAR)
                 .build());
         getViewModel().getIsOnline().setValue(ViewerConnectivityManager.getInstance().isConnected());
         getViewModel().getAppBarTitle().observe(this, new Observer<String>() {

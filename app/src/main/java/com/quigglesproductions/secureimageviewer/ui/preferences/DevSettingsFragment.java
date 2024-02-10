@@ -156,7 +156,6 @@ public class DevSettingsFragment  extends SecurePreferenceFragmentCompat {
         RoomFileMetadata dummyFile1Metadata = new RoomFileMetadata();
         dummyFile1Metadata.downloadTime = LocalDateTime.now();
         dummyFile1Metadata.creationTime = LocalDateTime.now().minusHours(1);
-        dummyFile1Metadata.contentType = "IMAGE";
         dummyFile1Metadata.fileType = "IMAGE";
         dummyFile1Metadata.hasAnimatedThumbnail = false;
         dummyFile1Metadata.width = 854;
@@ -176,7 +175,6 @@ public class DevSettingsFragment  extends SecurePreferenceFragmentCompat {
         RoomFileMetadata dummyFile2Metadata = new RoomFileMetadata();
         dummyFile2Metadata.downloadTime = LocalDateTime.now();
         dummyFile2Metadata.creationTime = LocalDateTime.now().minusHours(1);
-        dummyFile2Metadata.contentType = "IMAGE";
         dummyFile2Metadata.fileType = "IMAGE";
         dummyFile2Metadata.hasAnimatedThumbnail = false;
         dummyFile2Metadata.width = 546;
@@ -203,7 +201,6 @@ public class DevSettingsFragment  extends SecurePreferenceFragmentCompat {
         RoomFileMetadata dummyFile3Metadata = new RoomFileMetadata();
         dummyFile3Metadata.downloadTime = LocalDateTime.now();
         dummyFile3Metadata.creationTime = LocalDateTime.now().minusHours(1);
-        dummyFile3Metadata.contentType = "VIDEO";
         dummyFile3Metadata.fileType = "VIDEO";
         dummyFile3Metadata.hasAnimatedThumbnail = false;
         dummyFile3Metadata.width = 1146;
@@ -223,7 +220,6 @@ public class DevSettingsFragment  extends SecurePreferenceFragmentCompat {
         RoomFileMetadata dummyFile4Metadata = new RoomFileMetadata();
         dummyFile4Metadata.downloadTime = LocalDateTime.now();
         dummyFile4Metadata.creationTime = LocalDateTime.now().minusHours(1);
-        dummyFile4Metadata.contentType = "VIDEO";
         dummyFile4Metadata.fileType = "VIDEO";
         dummyFile4Metadata.hasAnimatedThumbnail = false;
         dummyFile4Metadata.width = 1146;

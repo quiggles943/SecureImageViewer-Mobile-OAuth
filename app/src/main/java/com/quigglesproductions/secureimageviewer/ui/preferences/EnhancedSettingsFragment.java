@@ -14,7 +14,6 @@ import androidx.preference.PreferenceFragmentCompat;
 
 import com.quigglesproductions.secureimageviewer.BuildConfig;
 import com.quigglesproductions.secureimageviewer.R;
-import com.quigglesproductions.secureimageviewer.ui.enhancedfolderviewer.EnhancedFolderViewerFragmentDirections;
 
 public class EnhancedSettingsFragment extends PreferenceFragmentCompat {
     @Override

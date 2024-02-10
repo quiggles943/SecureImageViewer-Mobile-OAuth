@@ -1,10 +1,7 @@
 package com.quigglesproductions.secureimageviewer.models.enhanced.folder;
 
-import android.content.Context;
-
 import com.quigglesproductions.secureimageviewer.SortType;
-import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.OnlineFolderDataSource;
-import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
+import com.quigglesproductions.secureimageviewer.datasource.folder.OnlineFolderDataSource;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedOnlineFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile;
@@ -13,7 +10,6 @@ import com.quigglesproductions.secureimageviewer.ui.enhancedfolderviewer.FolderO
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class EnhancedOnlineFolder extends EnhancedFolder implements IRemoteFolder{
 

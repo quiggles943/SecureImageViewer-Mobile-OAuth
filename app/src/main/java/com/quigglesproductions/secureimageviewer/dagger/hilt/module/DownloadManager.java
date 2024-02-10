@@ -7,6 +7,11 @@ import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedOn
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDatabaseFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedOnlineFolder;
+import com.quigglesproductions.secureimageviewer.models.enhanced.folder.IRemoteFolder;
+import com.quigglesproductions.secureimageviewer.models.modular.file.ModularFile;
+import com.quigglesproductions.secureimageviewer.models.modular.file.ModularOnlineFile;
+import com.quigglesproductions.secureimageviewer.models.modular.folder.ModularOnlineFolder;
+import com.quigglesproductions.secureimageviewer.retrofit.ModularRequestService;
 import com.quigglesproductions.secureimageviewer.retrofit.RequestManager;
 import com.quigglesproductions.secureimageviewer.retrofit.RequestService;
 import com.quigglesproductions.secureimageviewer.retrofit.RetrofitException;
@@ -15,6 +20,9 @@ import com.quigglesproductions.secureimageviewer.room.databases.download.entity.
 import com.quigglesproductions.secureimageviewer.room.databases.download.entity.FolderDownloadRecord;
 import com.quigglesproductions.secureimageviewer.room.databases.file.FileDatabase;
 import com.quigglesproductions.secureimageviewer.room.databases.file.entity.RoomDatabaseFolder;
+import com.quigglesproductions.secureimageviewer.room.databases.modular.file.ModularFileDatabase;
+import com.quigglesproductions.secureimageviewer.room.databases.modular.file.entity.RoomModularFolder;
+import com.quigglesproductions.secureimageviewer.room.databases.modular.file.entity.relations.RoomEmbeddedFile;
 import com.quigglesproductions.secureimageviewer.room.exceptions.DatabaseInsertionException;
 import com.quigglesproductions.secureimageviewer.room.databases.file.relations.FileWithMetadata;
 import com.quigglesproductions.secureimageviewer.utils.ViewerFileUtils;
@@ -42,10 +50,10 @@ import retrofit2.Response;
 @InstallIn(SingletonComponent.class)
 public class DownloadManager {
     Context context;
-    FileDatabase fileDatabase;
+    ModularFileDatabase fileDatabase;
     DownloadRecordDatabase recordDatabase;
-    Map<EnhancedFolder, FolderDownload> activeDownloadCalls = new HashMap<>();
-    Map<EnhancedFolder, FolderDownload> completedDownloadCalls = new HashMap<>();
+    Map<IRemoteFolder, FolderDownload> activeDownloadCalls = new HashMap<>();
+    Map<IRemoteFolder, FolderDownload> completedDownloadCalls = new HashMap<>();
     private FolderDownloadCallback callback;
     private final BackgroundThreadPoster backgroundThreadPoster = new BackgroundThreadPoster();
     private final UiThreadPoster uiThreadPoster = new UiThreadPoster();
@@ -60,13 +68,13 @@ public class DownloadManager {
         this.callback = callback;
     }
 
-    public void addToDownloadQueue(RequestService requestService, EnhancedOnlineFolder folder, EnhancedFile... files) throws RetrofitException {
+    public void addToDownloadQueue(ModularRequestService requestService, IRemoteFolder folder, ModularFile... files) throws RetrofitException {
         //backgroundThreadPoster.post(() ->{
             FolderDownload download = activeDownloadCalls.get(folder);
             if(download == null)
                 download = new FolderDownload(folder,recordDatabase);
-            for(EnhancedFile file: files){
-                download.addToDownload((EnhancedOnlineFile) file,requestService.doGetFileContent(file.onlineId));
+            for(ModularFile file: files){
+                download.addToDownload((ModularOnlineFile) file,requestService.doGetFileContent(file.onlineId));
             }
             activeDownloadCalls.put(folder,download);
         //});
@@ -82,7 +90,7 @@ public class DownloadManager {
             download = new FolderDownload(folder);
         download.addToDownload(file,downloadCall);
     }*/
-    public void downloadFolder(EnhancedFolder folder, RequestManager requestManager) throws RetrofitException {
+    public void downloadFolder(IRemoteFolder folder, RequestManager requestManager) throws RetrofitException {
         FolderDownload folderDownload = activeDownloadCalls.get(folder);
         if(folderDownload == null)
             throw new RetrofitException(new FileNotFoundException());
@@ -128,12 +136,12 @@ public class DownloadManager {
         return (ArrayList<FolderDownload>) activeDownloadCalls.values().stream().collect(Collectors.toList());
     }
 
-    public void setFileDatabase(FileDatabase fileDatabase) {
+    public void setFileDatabase(ModularFileDatabase fileDatabase) {
         this.fileDatabase = fileDatabase;
     }
 
     public class FolderDownload {
-        EnhancedOnlineFolder folder;
+        IRemoteFolder folder;
         //Map<EnhancedDatabaseFile,Call> downloadMap = new HashMap<>();
         List<FileDownload> fileDownloads = new ArrayList<>();
         private FolderDownloadCallback downloadCallback;
@@ -142,7 +150,7 @@ public class DownloadManager {
         private FileDatabase database;
         private DownloadRecordDatabase recordDatabase;
         private FolderDownloadRecord downloadRecord;
-        public FolderDownload(EnhancedOnlineFolder folder,DownloadRecordDatabase recordDatabase){
+        public FolderDownload(IRemoteFolder folder,DownloadRecordDatabase recordDatabase){
             this.folder = folder;
             this.recordDatabase = recordDatabase;
         }
@@ -153,7 +161,7 @@ public class DownloadManager {
         public String getFolderName(){
             return folder.getName();
         }
-        public void addToDownload(EnhancedOnlineFile file, Call<ResponseBody> contentCall){
+        public void addToDownload(ModularOnlineFile file, Call<ResponseBody> contentCall){
             FileDownload fileDownload = new FileDownload(file,contentCall);
             fileDownloads.add(fileDownload);
             //downloadMap.put(file,contentCall);
@@ -206,21 +214,21 @@ public class DownloadManager {
                 //EnhancedDatabaseFolder databaseFolder;
 
 
-                RoomDatabaseFolder roomDatabaseFolder;
-                if(folder instanceof EnhancedOnlineFolder) {
+                RoomModularFolder roomDatabaseFolder;
+                if(folder instanceof ModularOnlineFolder) {
                     //Existing database
                     //int id = databaseHandler.insertOrUpdateFolder(folder);
                     //databaseFolder = databaseHandler.getFolderByOnlineId((int) folder.getOnlineId());
 
                     //Room database
-                    roomDatabaseFolder = new RoomDatabaseFolder.Creator().loadFromOnlineFolder((EnhancedOnlineFolder) folder).build();
+                    roomDatabaseFolder = new RoomModularFolder.Creator().loadFromOnlineFolder((ModularOnlineFolder) folder).build();
                     roomDatabaseFolder.lastUpdateTime = LocalDateTime.now();
                     long folderId = fileDatabase.folderDao().insert(roomDatabaseFolder);
                     roomDatabaseFolder.setUid(folderId);
                 }
                 else{
                     //databaseFolder = (EnhancedDatabaseFolder) folder;
-                    roomDatabaseFolder = new RoomDatabaseFolder.Creator().loadFromOnlineFolder((EnhancedOnlineFolder) folder).build();
+                    roomDatabaseFolder = new RoomModularFolder.Creator().loadFromOnlineFolder((ModularOnlineFolder) folder).build();
 
                 }
                 downloadRecord = new FolderDownloadRecord();
@@ -269,25 +277,25 @@ public class DownloadManager {
     }
 
     public class FileDownload {
-        EnhancedFile file;
+        ModularFile file;
         Call<ResponseBody> downloadCall;
         boolean isComplete;
         FileDownload fileDownload;
-        RoomDatabaseFolder roomDatabaseFolder;
-        FileWithMetadata fileWithMetadata;
+        RoomModularFolder roomDatabaseFolder;
+        RoomEmbeddedFile fileWithMetadata;
         FileDownloadRecord downloadRecord;
         DownloadRecordDatabase recordDatabase;
 
-        public FileDownload(EnhancedFile databaseFile, Call<ResponseBody> contentCall){
+        public FileDownload(ModularFile databaseFile, Call<ResponseBody> contentCall){
             this.file = databaseFile;
             this.downloadCall = contentCall;
             this.fileDownload = this;
         }
 
 
-        public void startDownload(RoomDatabaseFolder folder,RequestManager requestManager,FileDownloadCallback callback) {
+        public void startDownload(RoomModularFolder folder,RequestManager requestManager,FileDownloadCallback callback) {
             this.roomDatabaseFolder = folder;
-            FileWithMetadata databaseFile = insertToDatabase((EnhancedOnlineFile) file);
+            RoomEmbeddedFile databaseFile = insertToDatabase((ModularOnlineFile) file);
 
             downloadFileContent(requestManager,databaseFile,downloadCall,callback);
             /*requestManager.enqueue(metadataCall, new Callback<EnhancedOnlineFile>() {
@@ -309,8 +317,8 @@ public class DownloadManager {
                 }
             });*/
         }
-        public FileWithMetadata insertToDatabase(EnhancedOnlineFile file){
-            fileWithMetadata = new FileWithMetadata.Creator().loadFromOnlineFile(file).build();
+        public RoomEmbeddedFile insertToDatabase(ModularOnlineFile file){
+            fileWithMetadata = new RoomEmbeddedFile.Creator().loadFromOnlineFile(file).build();
             try {
                 long fileId = fileDatabase.fileDao().insert(roomDatabaseFolder, fileWithMetadata);
                 fileWithMetadata.file.setUid(fileId);
@@ -321,7 +329,7 @@ public class DownloadManager {
             return fileWithMetadata;
             //return databaseHandler.insertFile(file,databaseFolder.getId());
         }
-        public void downloadFileContent(RequestManager requestManager,FileWithMetadata databaseFile,Call<ResponseBody> call,FileDownloadCallback callback){
+        public void downloadFileContent(RequestManager requestManager,RoomEmbeddedFile databaseFile,Call<ResponseBody> call,FileDownloadCallback callback){
             backgroundThreadPoster.post(()->{
                 requestManager.enqueue(call, new Callback<ResponseBody>() {
                     @Override
@@ -330,7 +338,9 @@ public class DownloadManager {
                             backgroundThreadPoster.post(()-> {
                                 ResponseBody body = response.body();
                                 IDatabaseFile displayFile = ViewerFileUtils.createFileOnDisk(context, databaseFile, body.byteStream());
+                                fileWithMetadata.setDownloadTime(LocalDateTime.now());
                                 fileDatabase.fileDao().update(fileWithMetadata.file);
+                                fileDatabase.fileDao().update(fileWithMetadata.metadata.metadata);
                                 //downloadRecord.endTime = LocalDateTime.now();
                                 //downloadRecord.wasSuccessful = true;
                                 //recordDatabase.downloadRecordDao().update(downloadRecord);

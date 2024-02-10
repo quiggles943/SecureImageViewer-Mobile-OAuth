@@ -4,9 +4,9 @@ import com.google.gson.annotations.SerializedName;
 
 public class InternalAuthState {
     @SerializedName("Stage")
-    public int authStage;
+    public String authStage;
     @SerializedName("State")
-    public int authState;
+    public String authState;
     @SerializedName("Code")
     public String code;
 }

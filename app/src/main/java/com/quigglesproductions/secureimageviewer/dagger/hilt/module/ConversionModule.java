@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.quigglesproductions.secureimageviewer.aurora.appauth.AuroraAuthenticationManager;
 import com.quigglesproductions.secureimageviewer.authentication.AuthenticationManager;
 import com.quigglesproductions.secureimageviewer.gson.DateDeserializer;
 import com.quigglesproductions.secureimageviewer.gson.EnhancedDatabaseFolderDeserializer;
@@ -34,7 +35,7 @@ public class ConversionModule {
     @NonNull
     @Singleton
     @Provides
-    public static Gson provideGson(Lazy<AuthenticationManager> authenticationManagerLazy){
+    public static Gson provideGson(Lazy<AuroraAuthenticationManager> authenticationManagerLazy){
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(Date.class,new DateDeserializer());
         gsonBuilder.registerTypeAdapter(LocalDateTime.class,new LocalDateTimeDeserializer());

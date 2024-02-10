@@ -7,8 +7,8 @@ import androidx.room.Relation;
 
 import com.quigglesproductions.secureimageviewer.models.ItemBaseModel;
 import com.quigglesproductions.secureimageviewer.models.enhanced.IFileTag;
-import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.IFileDataSource;
-import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.RoomFileDataSource;
+import com.quigglesproductions.secureimageviewer.datasource.file.IFileDataSource;
+import com.quigglesproductions.secureimageviewer.datasource.file.RoomFileDataSource;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedOnlineFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.FileType;
@@ -22,8 +22,6 @@ import com.quigglesproductions.secureimageviewer.room.databases.file.entity.Room
 
 import java.io.File;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 public class FileWithMetadata implements ItemBaseModel, IDatabaseFile {
     @Embedded
@@ -220,14 +218,14 @@ public class FileWithMetadata implements ItemBaseModel, IDatabaseFile {
             roomFileMetadata.hasAnimatedThumbnail = fileMetadata.hasAnimatedThumbnail();
             roomFileMetadata.creationTime = fileMetadata.getCreationTime();
             roomFileMetadata.isEncrypted = fileMetadata.getIsEncrypted();
-            roomFileMetadata.onlineArtistId = fileMetadata.getOnlineArtistId();
+            //roomFileMetadata.onlineArtistId = fileMetadata.getOnlineArtistId();
             roomFileMetadata.fileExtension = fileMetadata.getFileExtension();
-            roomFileMetadata.contentType = fileMetadata.getContentType();
+            //roomFileMetadata.contentType = fileMetadata.getContentType();
             roomFileMetadata.fileType = fileMetadata.getFileType();
             roomFileMetadata.onlineFileId = fileMetadata.getOnlineFileId();
             metadataWithEntities.metadata = roomFileMetadata;
 
-            if(fileMetadata.getArtist() != null)
+            /*if(fileMetadata.getArtist() != null)
                 metadataWithEntities.artist = generateArtistFromFileTag(fileMetadata.getArtist());
 
             if(fileMetadata.getSubjects() != null && fileMetadata.getSubjects().size()>0){
@@ -245,7 +243,7 @@ public class FileWithMetadata implements ItemBaseModel, IDatabaseFile {
                     categoryList.add(category);
                 }
                 metadataWithEntities.categories = categoryList;
-            }
+            }*/
 
             return metadataWithEntities;
         }

@@ -6,12 +6,15 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.quigglesproductions.secureimageviewer.datasource.file.RetrofitFileDataSource;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
-import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedOnlineFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile;
+import com.quigglesproductions.secureimageviewer.models.modular.file.ModularOnlineFile;
 import com.quigglesproductions.secureimageviewer.room.databases.file.relations.FileWithMetadata;
+import com.quigglesproductions.secureimageviewer.room.databases.modular.file.entity.relations.RoomEmbeddedFile;
 import com.quigglesproductions.secureimageviewer.ui.SecureFragment;
 import com.quigglesproductions.secureimageviewer.ui.compoundcontrols.FileViewerNavigator;
+import com.quigglesproductions.secureimageviewer.ui.data.Result;
 import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.EnhancedFileViewFragment;
 
 import java.util.Locale;
@@ -19,6 +22,7 @@ import java.util.Locale;
 public class BaseFileViewFragment extends SecureFragment {
     public static final String ARG_FILE_ID = "fileid";
     public static final String ARG_FILE = "file";
+    public static final String ARG_FILE_POSITION = "position";
     public static final String ARG_FILE_SOURCE_TYPE = "sourceType";
     private FileViewerNavigator viewerNavigator;
 
@@ -42,13 +46,20 @@ public class BaseFileViewFragment extends SecureFragment {
         IDisplayFile file;
         switch (sourceType){
             case ONLINE:
-                file = (IDisplayFile) getGson().fromJson(args.getString(ARG_FILE), EnhancedOnlineFile.class);
+                file = getGson().fromJson(args.getString(ARG_FILE), ModularOnlineFile.class);
+                file.setDataSource(new RetrofitFileDataSource(file,requiresAuroraAuthenticationManager()));
                 break;
             case DATABASE:
-                file = (IDisplayFile) getGson().fromJson(args.getString(ARG_FILE), EnhancedDatabaseFile.class);
+                file = getGson().fromJson(args.getString(ARG_FILE), EnhancedDatabaseFile.class);
                 break;
             case ROOM:
-                file = (IDisplayFile) getGson().fromJson(args.getString(ARG_FILE), FileWithMetadata.class);
+                file = getGson().fromJson(args.getString(ARG_FILE), FileWithMetadata.class);
+                break;
+            case MODULAR:
+                file = getGson().fromJson(args.getString(ARG_FILE), RoomEmbeddedFile.class);
+                break;
+            case PAGING:
+                file = getGson().fromJson(args.getString(ARG_FILE), com.quigglesproductions.secureimageviewer.room.databases.paging.file.entity.relations.RoomEmbeddedFile.class);
                 break;
             default:
                 file = null;
@@ -61,13 +72,17 @@ public class BaseFileViewFragment extends SecureFragment {
         UNKNOWN,
         DATABASE,
         ROOM,
+        MODULAR,
+        PAGING,
         ONLINE;
 
         public static FileSourceType getFromKey(String key){
             FileSourceType result = UNKNOWN;
-            for(FileSourceType type : FileSourceType.values()){
-                if(type.toString().contentEquals(key.toUpperCase(Locale.ROOT)))
-                    return type;
+            if(key != null) {
+                for (FileSourceType type : FileSourceType.values()) {
+                    if (type.toString().contentEquals(key.toUpperCase(Locale.ROOT)))
+                        return type;
+                }
             }
             return UNKNOWN;
         }

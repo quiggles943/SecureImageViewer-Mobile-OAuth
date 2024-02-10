@@ -9,6 +9,9 @@ import com.quigglesproductions.secureimageviewer.models.file.FileModel;
 import com.quigglesproductions.secureimageviewer.room.databases.file.FileDatabase;
 import com.quigglesproductions.secureimageviewer.room.databases.file.relations.FileWithMetadata;
 import com.quigglesproductions.secureimageviewer.room.databases.file.relations.FolderWithFiles;
+import com.quigglesproductions.secureimageviewer.room.databases.modular.file.ModularFileDatabase;
+import com.quigglesproductions.secureimageviewer.room.databases.modular.file.entity.relations.RoomEmbeddedFile;
+import com.quigglesproductions.secureimageviewer.room.databases.modular.file.entity.relations.RoomEmbeddedFolder;
 import com.quigglesproductions.secureimageviewer.utils.ViewerFileUtils;
 
 import java.io.File;
@@ -41,13 +44,13 @@ public class FolderManager {
         return this.currentFolder;
     }
 
-    public void removeLocalFolder(FileDatabase fileDatabase,FolderWithFiles folder) {
+    public void removeLocalFolder(ModularFileDatabase fileDatabase, RoomEmbeddedFolder folder) {
         new Thread(()->{
             File folderFile = folder.folder.getFolderFile();
             //ArrayList<EnhancedDatabaseFile> files = handler.getFilesInFolder(folder);
             //EnhancedDatabaseFile[] files = handler.getFilesInFolder(folder).stream().toArray(EnhancedDatabaseFile[]::new);
 
-            ViewerFileUtils.deleteFile(fileDatabase,folder.files.stream().toArray(FileWithMetadata[]::new));
+            ViewerFileUtils.deleteFile(fileDatabase,folder.files.stream().toArray(RoomEmbeddedFile[]::new));
         /*for(EnhancedDatabaseFile file: files){
             handler.deleteFile(file);
             file.getThumbnailFile().delete();
@@ -71,10 +74,10 @@ public class FolderManager {
         fileOrDirectory.delete();
     }
 
-    public boolean removeAllFolders(FileDatabase fileDatabase) {
-        List<FolderWithFiles> foldersWithFiles = fileDatabase.folderDao().getAll();
+    public boolean removeAllFolders(ModularFileDatabase fileDatabase) {
+        List<RoomEmbeddedFolder> foldersWithFiles = fileDatabase.folderDao().getAll();
         new Thread(()->{
-            for(FolderWithFiles folder : foldersWithFiles){
+            for(RoomEmbeddedFolder folder : foldersWithFiles){
                 removeLocalFolder(fileDatabase,folder);
             }
             clearPictureFolder();

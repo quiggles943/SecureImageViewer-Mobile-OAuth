@@ -17,17 +17,19 @@ import androidx.media3.common.util.UnstableApi;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.DecodeFormat;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.signature.ObjectKey;
 import com.quigglesproductions.secureimageviewer.R;
-import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.IFileDataSource;
+import com.quigglesproductions.secureimageviewer.datasource.file.IFileDataSource;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.FileType;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile;
 import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.EnhancedFileCollectionAdapter;
 import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.EnhancedFileViewFragment;
 import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.NewTouchImageView;
+import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.kotlin.EnhancedFileViewFragmentKt;
 
 public class ImageFileViewFragment extends BaseFileViewFragment {
     TextView fileName;
@@ -108,7 +110,7 @@ public class ImageFileViewFragment extends BaseFileViewFragment {
                 decodeFormat = DecodeFormat.PREFER_RGB_565;
             if(dataSource == null)
                 return;
-            dataSource.getFullFileDataSource(new IFileDataSource.DataSourceCallback() {
+            dataSource.getFullFileDataSource(getContext(),new IFileDataSource.DataSourceCallback() {
                 @Override
                 public void FileDataSourceRetrieved(Object dataSource, Exception exception) {
 
@@ -133,7 +135,17 @@ public class ImageFileViewFragment extends BaseFileViewFragment {
                         public boolean onResourceReady(Object resource, Object model, Target<Object> target, DataSource dataSource, boolean isFirstResource) {
                             return false;
                         }
-                    }).load(fileDataSource).format(decodeFormat).thumbnail(Glide.with(getContext()).load(fileThumbnailDataSource).signature(new ObjectKey(item.getMetadata().getCreationTime())).dontTransform()).dontTransform().format(decodeFormat).into(imageView);
+                    }).load(fileDataSource)
+                        .format(decodeFormat)
+                        .thumbnail(Glide.with(getContext())
+                                .load(fileThumbnailDataSource)
+                                        .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
+                                        .signature(new ObjectKey(item.getMetadata().getCreationTime()))
+                                //.signature(new ObjectKey(item.getMetadata().getCreationTime()))
+                                .dontTransform())
+                        .dontTransform()
+                        .format(decodeFormat)
+                        .into(imageView);
                 }
             });
 

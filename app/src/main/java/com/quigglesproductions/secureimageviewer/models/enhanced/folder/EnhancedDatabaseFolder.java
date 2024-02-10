@@ -3,8 +3,6 @@ package com.quigglesproductions.secureimageviewer.models.enhanced.folder;
 import android.content.Context;
 
 import com.quigglesproductions.secureimageviewer.SortType;
-import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.LocalFolderDataSource;
-import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.OnlineFolderDataSource;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile;

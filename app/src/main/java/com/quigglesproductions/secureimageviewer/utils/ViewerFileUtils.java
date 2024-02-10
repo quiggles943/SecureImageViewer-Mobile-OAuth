@@ -7,6 +7,8 @@ import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDatabaseF
 import com.quigglesproductions.secureimageviewer.models.file.FileModel;
 import com.quigglesproductions.secureimageviewer.room.databases.file.FileDatabase;
 import com.quigglesproductions.secureimageviewer.room.databases.file.relations.FileWithMetadata;
+import com.quigglesproductions.secureimageviewer.room.databases.modular.file.ModularFileDatabase;
+import com.quigglesproductions.secureimageviewer.room.databases.modular.file.entity.relations.RoomEmbeddedFile;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -66,10 +68,10 @@ public class ViewerFileUtils {
         return new File(context.getFilesDir() + File.separator + ".Pictures" + File.separator + file.getFolderId() + File.separator + file.getId());
     }
 
-    public static boolean deleteFile(FileDatabase database, @NotNull FileWithMetadata... files){
+    public static boolean deleteFile(ModularFileDatabase database, @NotNull RoomEmbeddedFile... files){
         if(files == null || files.length == 0)
             return false;
-        for(FileWithMetadata file:files) {
+        for(RoomEmbeddedFile file:files) {
             boolean thumbnailDeleted = true;
             boolean fileDeleted = true;
             if(file.getThumbnailFile() != null)

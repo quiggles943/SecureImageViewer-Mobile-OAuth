@@ -21,7 +21,7 @@ import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.quigglesproductions.secureimageviewer.R;
-import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.IFolderDataSource;
+import com.quigglesproductions.secureimageviewer.datasource.folder.IFolderDataSource;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedDatabaseFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedFolder;
 import com.quigglesproductions.secureimageviewer.volley.VolleySingleton;
@@ -190,7 +190,7 @@ public class EnhancedFolderGridAdapter extends BaseAdapter
         ViewHolder holder = (ViewHolder) itemView.getTag();
         holder.text.setText(folder.getName()+" ");
         try {
-            folder.getDataSource().getThumbnailFromDataSource(new IFolderDataSource.FolderDataSourceCallback() {
+            folder.getDataSource().getThumbnailFromDataSource(mContext,new IFolderDataSource.FolderDataSourceCallback() {
                 @Override
                 public void FolderThumbnailRetrieved(Object thumbnailDataSource, Exception exception) {
                     Glide.with(mContext).addDefaultRequestListener(new RequestListener<Object>() {

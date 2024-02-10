@@ -6,6 +6,7 @@ import androidx.preference.PreferenceFragmentCompat;
 
 import com.quigglesproductions.secureimageviewer.room.databases.download.DownloadRecordDatabase;
 import com.quigglesproductions.secureimageviewer.room.databases.file.FileDatabase;
+import com.quigglesproductions.secureimageviewer.room.databases.modular.file.ModularFileDatabase;
 
 public class SecurePreferenceFragmentCompat extends PreferenceFragmentCompat {
     @Override
@@ -22,6 +23,9 @@ public class SecurePreferenceFragmentCompat extends PreferenceFragmentCompat {
             throw new IllegalStateException("Fragment " + this + " not attached to an activity.");
         }
         return activity;
+    }
+    public ModularFileDatabase getModularFileDatabase(){
+        return requiresSecureActivity().getModularFileDatabase();
     }
     public FileDatabase getFileDatabase(){
         return requiresSecureActivity().getFileDatabase();

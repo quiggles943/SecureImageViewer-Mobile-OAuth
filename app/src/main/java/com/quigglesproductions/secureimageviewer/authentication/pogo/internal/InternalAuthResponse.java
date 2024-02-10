@@ -19,7 +19,7 @@ public class InternalAuthResponse {
 
     public AuthenticationState getAuthenticationState(){
         if(authState != null)
-            return AuthenticationState.values()[authState.authState];
+            return AuthenticationState.valueOf(authState.authState);
         else
             return AuthenticationState.ERROR;
     }

@@ -43,9 +43,9 @@ public class RoomFileMetadata {
     @ColumnInfo(name = "FileExtension")
     @SerializedName("FileExtension")
     public String fileExtension;
-    @ColumnInfo(name = "ContentType")
+    /*@ColumnInfo(name = "ContentType")
     @SerializedName("ContentType")
-    public String contentType;
+    public String contentType;*/
     @ColumnInfo(name = "FileType")
     @SerializedName("FileType")
     public String fileType;
@@ -79,5 +79,8 @@ public class RoomFileMetadata {
             return LocalDateTime.MIN;
         else
             return creationTime;
+    }
+    public void setDownloadTime(LocalDateTime time) {
+        downloadTime = time;
     }
 }

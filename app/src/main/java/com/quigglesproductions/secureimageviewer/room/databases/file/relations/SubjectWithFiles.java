@@ -8,23 +8,17 @@ import androidx.room.Junction;
 import androidx.room.Relation;
 
 import com.quigglesproductions.secureimageviewer.SortType;
-import com.quigglesproductions.secureimageviewer.appauth.RequestServiceNotConfiguredException;
-import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.IFolderDataSource;
-import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.RoomFolderDataSource;
+import com.quigglesproductions.secureimageviewer.datasource.folder.IFolderDataSource;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.IDatabaseFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.IDisplayFolder;
-import com.quigglesproductions.secureimageviewer.room.databases.file.entity.RoomDatabaseCategory;
 import com.quigglesproductions.secureimageviewer.room.databases.file.entity.RoomDatabaseFile;
-import com.quigglesproductions.secureimageviewer.room.databases.file.entity.RoomDatabaseFolder;
 import com.quigglesproductions.secureimageviewer.room.databases.file.entity.RoomDatabaseSubject;
-import com.quigglesproductions.secureimageviewer.room.databases.file.entity.RoomFileCategoryCrossRef;
 import com.quigglesproductions.secureimageviewer.room.databases.file.entity.RoomFileSubjectCrossRef;
 import com.quigglesproductions.secureimageviewer.ui.enhancedfolderviewer.FolderOrigin;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -60,7 +54,7 @@ public class SubjectWithFiles implements IDisplayFolder, IDatabaseFolder {
                 }
 
                 @Override
-                public void getThumbnailFromDataSource(FolderDataSourceCallback callback) {
+                public void getThumbnailFromDataSource(Context context,FolderDataSourceCallback callback) {
                     if(thumbnailFile == null && files.size()>0)
                         callback.FolderThumbnailRetrieved(files.get(0).getThumbnailFile(),null);
                     else

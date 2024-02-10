@@ -1,10 +1,8 @@
 package com.quigglesproductions.secureimageviewer.models.enhanced.file;
 
-import android.os.Parcel;
-
 import androidx.annotation.VisibleForTesting;
 
-import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.LocalFileDataSource;
+import com.quigglesproductions.secureimageviewer.datasource.file.LocalFileDataSource;
 
 import java.io.File;
 import java.time.LocalDateTime;

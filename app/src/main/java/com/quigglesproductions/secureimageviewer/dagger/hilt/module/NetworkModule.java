@@ -8,6 +8,7 @@ import com.quigglesproductions.secureimageviewer.dagger.hilt.annotations.AuthSer
 import com.quigglesproductions.secureimageviewer.dagger.hilt.annotations.RequestServiceClient;
 import com.quigglesproductions.secureimageviewer.retrofit.AuthenticationInterceptor;
 import com.quigglesproductions.secureimageviewer.retrofit.Authenticator;
+import com.quigglesproductions.secureimageviewer.retrofit.CacheInterceptor;
 
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -35,11 +36,23 @@ import okhttp3.logging.HttpLoggingInterceptor;
 @InstallIn(SingletonComponent.class)
 public class NetworkModule {
 
+    final static TrustManager[] trustAllCerts = new TrustManager[] {
+            new X509TrustManager() {
+                @Override
+                public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) {}
 
+                @Override
+                public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) {}
+
+                @Override
+                public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                    return new java.security.cert.X509Certificate[]{};
+                }
+            }
+    };
 
     @RequestServiceClient
     @Provides
-    @Singleton
     public static OkHttpClient provideRequestServiceHttpClient(@ApplicationContext Context context, AuthenticationInterceptor authenticationInterceptor, Cache cache){
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
         //AuthenticationInterceptor authInterceptor = new AuthenticationInterceptor(context);
@@ -52,7 +65,8 @@ public class NetworkModule {
                 .connectTimeout(20, TimeUnit.SECONDS)
                 .writeTimeout(10, TimeUnit.SECONDS)
                 .readTimeout(10, TimeUnit.SECONDS)
-                .sslSocketFactory(getSSLContext().getSocketFactory())
+                .sslSocketFactory(getSSLContext().getSocketFactory(),(X509TrustManager) trustAllCerts[0])
+                .cache(cache)
                 .hostnameVerifier(((hostname, session) -> true))
                 .dispatcher(getDispatcher())
                 .connectionPool(getConnectionPool())
@@ -67,20 +81,7 @@ public class NetworkModule {
 
 
     private static SSLContext getSSLContext() throws NoSuchAlgorithmException, KeyManagementException {
-        final TrustManager[] trustAllCerts = new TrustManager[] {
-                new X509TrustManager() {
-                    @Override
-                    public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) {}
 
-                    @Override
-                    public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) {}
-
-                    @Override
-                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                        return new java.security.cert.X509Certificate[]{};
-                    }
-                }
-        };
         final SSLContext sslContext = SSLContext.getInstance("SSL");
         sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
         return sslContext;

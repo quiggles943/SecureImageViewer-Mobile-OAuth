@@ -43,7 +43,7 @@
             app:argType="string"/>
         <action
             android:id="@+id/action_enhancedFolderListFragment_to_enhancedFolderViewerFragment"
-            app:destination="@id/nav_enhancedFolderViewerFragment"
+            app:destination="@id/nav_enhancedFolderViewerFragmentKt"
             app:enterAnim="@anim/slide_in_horizontal"
             app:exitAnim="@anim/fade_out"
             app:popEnterAnim="@anim/fade_in"
@@ -57,12 +57,24 @@
             app:popExitAnim="@anim/slide_out_horizontal" />
     </fragment>
     <fragment
+        android:id="@+id/nav_enhancedFolderViewerFragmentKt"
+        android:name="com.quigglesproductions.secureimageviewer.ui.enhancedfolderviewer.kotlin.EnhancedFolderViewerFragmentKt"
+        tools:layout="@layout/fragment_folder_view">
+        <action
+            android:id="@+id/action_enhancedFolderViewerFragmentKt_to_enhancedFileViewFragment"
+            app:destination="@id/nav_enhancedFileViewFragmentKt"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in"
+            app:popExitAnim="@anim/fade_out" />
+    </fragment>
+    <fragment
         android:id="@+id/nav_enhancedFolderViewerFragment"
         android:name="com.quigglesproductions.secureimageviewer.ui.enhancedfolderviewer.EnhancedFolderViewerFragment"
         tools:layout="@layout/fragment_folder_view">
         <action
             android:id="@+id/action_enhancedFolderViewerFragment_to_enhancedFileViewFragment"
-            app:destination="@id/nav_enhancedFileViewFragment"
+            app:destination="@id/nav_enhancedFileViewFragmentKt"
             app:enterAnim="@anim/fade_in"
             app:exitAnim="@anim/fade_out"
             app:popEnterAnim="@anim/fade_in"
@@ -73,6 +85,16 @@
         android:name="com.quigglesproductions.secureimageviewer.ui.downloadviewer.DownloadViewerFragment"
         android:label="Download Viewer"
         tools:layout="@layout/fragment_download_viewer"/>
+    <fragment
+        android:id="@+id/nav_enhancedFileViewFragmentKt"
+        android:name="com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.kotlin.EnhancedFileViewFragmentKt"
+        android:label="EnhancedFileViewFragment"
+        tools:layout="@layout/fragment_file_pager">
+        <argument
+            android:name="startPosition"
+            app:argType="integer"/>
+    </fragment>
+
     <fragment
         android:id="@+id/nav_enhancedFileViewFragment"
         android:name="com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.EnhancedFileViewFragment"
@@ -93,7 +115,7 @@
             app:argType="string"/>
         <action
             android:id="@+id/action_enhancedFolderListFragment_to_enhancedFolderViewerFragment"
-            app:destination="@id/nav_enhancedFolderViewerFragment"
+            app:destination="@id/nav_enhancedFolderViewerFragmentKt"
             app:enterAnim="@anim/slide_in_horizontal"
             app:exitAnim="@anim/fade_out"
             app:popEnterAnim="@anim/fade_in"
