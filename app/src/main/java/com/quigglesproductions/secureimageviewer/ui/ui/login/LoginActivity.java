@@ -49,11 +49,6 @@ public class LoginActivity extends SecureActivity {
                             BiometricAuthenticationException exception = (BiometricAuthenticationException) data.getSerializableExtra(SecurityManager.ERROR_RESULT);
                             //infoTextView.setText(exception.getErrorMessage()+" (Error: "+exception.getErrorCode()+")");
                         }
-                        /*progressBar.setIndeterminate(false);
-                        progressBar.setMax(1);
-                        progressBar.setProgress(1);
-                        progressBar.setProgressTintList(ColorStateList.valueOf(Color.RED));
-                        progressBar.setProgressTintMode(PorterDuff.Mode.MULTIPLY);*/
                         super.onActivityResult(requestCode, resultCode, data);
                 }
                 break;

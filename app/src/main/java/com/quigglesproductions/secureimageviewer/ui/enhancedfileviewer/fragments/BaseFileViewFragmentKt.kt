@@ -1,4 +1,4 @@
-package com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.fragments.kotlin
+package com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.fragments
 
 import android.os.Bundle
 import android.view.View
@@ -6,7 +6,7 @@ import androidx.fragment.app.activityViewModels
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile
 import com.quigglesproductions.secureimageviewer.ui.SecureFragment
 import com.quigglesproductions.secureimageviewer.ui.compoundcontrols.FileViewerNavigator
-import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.EnhancedFileViewFragment
+import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.EnhancedFileViewFragmentKt
 import com.quigglesproductions.secureimageviewer.ui.enhancedfolderviewer.kotlin.EnhancedFolderViewerViewModelKt
 
 open class BaseFileViewFragmentKt : SecureFragment() {
@@ -15,7 +15,7 @@ open class BaseFileViewFragmentKt : SecureFragment() {
         private set
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        if (parentFragment is EnhancedFileViewFragment) registerViewerNavigator((parentFragment as EnhancedFileViewFragment?)!!.navigator)
+        if (parentFragment is EnhancedFileViewFragmentKt) registerViewerNavigator((parentFragment as EnhancedFileViewFragmentKt?)!!.navigator)
         retainInstance = true
         super.onViewCreated(view, savedInstanceState)
     }

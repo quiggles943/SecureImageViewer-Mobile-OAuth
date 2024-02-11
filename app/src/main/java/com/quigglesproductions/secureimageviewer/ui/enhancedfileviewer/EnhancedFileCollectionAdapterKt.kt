@@ -1,4 +1,4 @@
-package com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.kotlin
+package com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -7,11 +7,9 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.adapter.FragmentViewHolder
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile
 import com.quigglesproductions.secureimageviewer.ui.compoundcontrols.FileViewerNavigator
-import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.EnhancedFileCollectionAdapter
-import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.fragments.ImageFileViewFragment
-import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.fragments.kotlin.BaseFileViewFragmentKt
-import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.fragments.kotlin.ImageFileViewFragmentKt
-import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.fragments.kotlin.VideoFileViewFragmentKt
+import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.fragments.BaseFileViewFragmentKt
+import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.fragments.ImageFileViewFragmentKt
+import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.fragments.VideoFileViewFragmentKt
 
 class EnhancedFileCollectionAdapterKt<T : IDisplayFile?>(fragment: Fragment) :
     FragmentStateAdapter(fragment) {
@@ -24,7 +22,7 @@ class EnhancedFileCollectionAdapterKt<T : IDisplayFile?>(fragment: Fragment) :
         var fragment: Fragment = when (file!!.fileTypeString) {
             "IMAGE" -> ImageFileViewFragmentKt()
             "VIDEO" -> VideoFileViewFragmentKt()
-            else -> ImageFileViewFragment()
+            else -> ImageFileViewFragmentKt()
         }
         val args = Bundle()
         args.putInt(BaseFileViewFragmentKt.ARG_FILE_POSITION,position)
@@ -47,7 +45,7 @@ class EnhancedFileCollectionAdapterKt<T : IDisplayFile?>(fragment: Fragment) :
         return files[position]
     }
 
-    fun setFileZoomLevelCallback(callback: EnhancedFileCollectionAdapterKt.ZoomLevelChangeCallback) {
+    fun setFileZoomLevelCallback(callback: ZoomLevelChangeCallback) {
         zoomCallback = callback
     }
 

@@ -43,7 +43,6 @@ import com.quigglesproductions.secureimageviewer.room.databases.modular.file.Mod
 import com.quigglesproductions.secureimageviewer.room.databases.system.SystemDatabase;
 import com.quigglesproductions.secureimageviewer.ui.login.EnhancedLoginActivity;
 import com.quigglesproductions.secureimageviewer.ui.login.ReauthenticateActivity;
-import com.quigglesproductions.secureimageviewer.ui.splash.NewSplashScreenActivity;
 import com.quigglesproductions.secureimageviewer.ui.startup.EnhancedStartupScreen;
 import com.quigglesproductions.secureimageviewer.ui.ui.login.LoginActivity;
 import com.techyourchance.threadposter.BackgroundThreadPoster;
@@ -145,7 +144,7 @@ public class SecureActivity extends AppCompatActivity {
             }
         });
         if(!SecurityManager.getInstance().isUserAuthenticated()){
-            if(!ReauthenticateActivity.class.isInstance(this) && !NewSplashScreenActivity.class.isInstance(this) && !EnhancedLoginActivity.class.isInstance(this)&& !EnhancedStartupScreen.class.isInstance(this) && !LoginActivity.class.isInstance(this)){
+            if(!(this instanceof ReauthenticateActivity) && !(this instanceof EnhancedLoginActivity) && !(this instanceof EnhancedStartupScreen) && !(this instanceof LoginActivity)){
                 authenticateUser();
             }
         }
@@ -178,7 +177,7 @@ public class SecureActivity extends AppCompatActivity {
             }
         });
         if(!SecurityManager.getInstance().isUserAuthenticated()){
-            if(!ReauthenticateActivity.class.isInstance(this) && !NewSplashScreenActivity.class.isInstance(this) && !EnhancedLoginActivity.class.isInstance(this)&& !EnhancedStartupScreen.class.isInstance(this) && !LoginActivity.class.isInstance(this)){
+            if(!(this instanceof ReauthenticateActivity) && !(this instanceof EnhancedLoginActivity) && !(this instanceof EnhancedStartupScreen) && !(this instanceof LoginActivity)){
                 authenticateUser();
             }
         }

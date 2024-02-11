@@ -65,6 +65,9 @@ public class RoomPagingFolder {
     @ColumnInfo(name = "LastAccessTime")
     private LocalDateTime accessTime;
 
+    @ColumnInfo(name = "RetrievedDate")
+    public LocalDateTime retrievedDate;
+
     @Ignore
     private File thumbnailFile;
 

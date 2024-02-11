@@ -8,6 +8,7 @@ import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.FileMe
 import com.quigglesproductions.secureimageviewer.models.modular.ModularServerStatus
 import com.quigglesproductions.secureimageviewer.models.modular.file.ModularOnlineFile
 import com.quigglesproductions.secureimageviewer.models.modular.folder.ModularOnlineFolder
+import com.quigglesproductions.secureimageviewer.retrofit.annotations.AuthenticationRequired
 import com.skydoves.retrofit.adapters.paging.NetworkPagingSource
 import com.skydoves.retrofit.adapters.paging.annotations.PagingKey
 import com.skydoves.retrofit.adapters.paging.annotations.PagingKeyConfig
@@ -32,12 +33,15 @@ interface ModularRequestService {
     fun doGetServerAvailable(): Call<ResponseBody?>?
 
     //Folder Requests
+    @AuthenticationRequired
     @GET("/api/v2/folder")
     fun doGetFolderList(): Call<List<ModularOnlineFolder?>?>?
 
+    @AuthenticationRequired
     @GET("/api/v2/folder/{id}")
     fun doGetFolder(@Path("id") id: Int): Call<ModularOnlineFolder?>?
 
+    @AuthenticationRequired
     @GET("/api/v2/folder/{id}/files")
     fun doGetFolderFiles(
         @Path("id") id: Int,
@@ -45,6 +49,7 @@ interface ModularRequestService {
         @Query("sort_type") sortType: String?
     ): Call<List<ModularOnlineFile?>?>?
 
+    @AuthenticationRequired
     @GET("/api/v2/folder/{id}/files/paginated")
     fun doGetFolderPaginatedFiles(
         @Path("id") id: Int,
@@ -54,6 +59,7 @@ interface ModularRequestService {
         @Query("sort_type") sortType: String?
     ): Call<List<ModularOnlineFile?>?>?
 
+    @AuthenticationRequired
     @GET("/api/v2/folder/{id}/files/paginated")
     @PagingKeyConfig(keySize = 1, mapper = ModularOnlineFileMapper::class)
     suspend fun getFolderPaginatedFiles(
@@ -63,25 +69,31 @@ interface ModularRequestService {
         @Query("sort_type") sortType: String = SortType.NAME_ASC.name
     ): NetworkPagingSource<List<ModularOnlineFile>,ModularOnlineFile>
 
+    @AuthenticationRequired
     @GET("/api/v2/folder/{id}/thumbnail")
     fun doGetFolderThumbnail(@Path("id") id: Int): Call<ModularOnlineFolder?>?
 
     //File Requests
+    @AuthenticationRequired
     @GET("/api/v2/file/{id}")
     fun doGetFile(
         @Path("id") id: Int,
         @Query("metadata") containsMetadata: Boolean
     ): Call<ModularOnlineFile?>?
 
+    @AuthenticationRequired
     @GET("/api/v2/file/{id}/metadata")
     fun doGetFileMetadata(@Path("id") id: Int): Call<FileMetadata?>?
 
+    @AuthenticationRequired
     @GET("/api/v2/file/{id}/content")
     fun doGetFileContent(@Path("id") id: Int): Call<ResponseBody?>?
 
+    @AuthenticationRequired
     @GET("/api/v2/file/{id}/thumbnail")
     fun doGetFileThumbnail(@Path("id") id: Int): Call<ModularOnlineFile?>?
 
+    @AuthenticationRequired
     @GET("/api/v2/file/recents")
     fun doGetRecentFiles(
         @Query("offset") offset: Int,
@@ -89,6 +101,11 @@ interface ModularRequestService {
         @Query("count") count: Int
     ): Call<List<ModularOnlineFile?>?>?
 
+    @AuthenticationRequired
     @POST("/api/v2/file/updates")
     fun doGetFileUpdates(@Body fileUpdateSendModel: EnhancedFileUpdateSendModel?): Call<List<EnhancedFileUpdateResponse?>?>?
+
+    @AuthenticationRequired
+    @GET("/api/v2/folder/paginated")
+    fun doGetFoldersPaginated(page: Int, pageSize: Int): Call<List<ModularOnlineFolder>>
 }

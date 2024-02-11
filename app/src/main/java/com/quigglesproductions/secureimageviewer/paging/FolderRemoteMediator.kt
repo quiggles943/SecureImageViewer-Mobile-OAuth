@@ -5,12 +5,12 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
-import com.quigglesproductions.secureimageviewer.SortType
 import com.quigglesproductions.secureimageviewer.aurora.appauth.AuroraAuthenticationManager
 import com.quigglesproductions.secureimageviewer.retrofit.ModularRequestService
 import com.quigglesproductions.secureimageviewer.retrofit.RetrofitException
 import com.quigglesproductions.secureimageviewer.room.databases.paging.file.PagingFileDatabase
 import com.quigglesproductions.secureimageviewer.room.databases.paging.file.entity.RemoteKey
+import com.quigglesproductions.secureimageviewer.room.databases.paging.file.entity.RoomPagingFolder
 import com.quigglesproductions.secureimageviewer.room.databases.paging.file.entity.relations.RoomEmbeddedFile
 import retrofit2.HttpException
 import retrofit2.awaitResponse
@@ -20,19 +20,17 @@ import java.time.ZoneOffset
 import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalPagingApi::class)
-class FileRemoteMediator(
+class FolderRemoteMediator(
     private val database: PagingFileDatabase,
-    private val networkService: ModularRequestService,
-    private val folderId: Int
-) : RemoteMediator<Int, RoomEmbeddedFile>() {
+    private val networkService: ModularRequestService
+) : RemoteMediator<Int, RoomPagingFolder>() {
     val folderDao = database.folderDao()
-    val fileDao = database.fileDao()
     val remoteKeyDao = database.PagingRemoteKeyDao()
     var pageNumber: Int = 1
 
     override suspend fun initialize(): InitializeAction {
-        val cacheTimeout = TimeUnit.MILLISECONDS.convert(15, TimeUnit.MINUTES)
-        val updatedDate: LocalDateTime? = fileDao!!.lastUpdated(folderId)
+        val cacheTimeout = TimeUnit.MILLISECONDS.convert(30, TimeUnit.MINUTES)
+        val updatedDate: LocalDateTime? = folderDao!!.lastUpdated()
         var updatedMillis: Long = 0
         if(updatedDate != null)
             updatedMillis = updatedDate.toInstant(ZoneOffset.UTC).toEpochMilli()
@@ -51,7 +49,7 @@ class FileRemoteMediator(
 
     override suspend fun load(
         loadType: LoadType,
-        state: PagingState<Int, RoomEmbeddedFile>
+        state: PagingState<Int, RoomPagingFolder>
     ): MediatorResult {
         return try {
             val loadKey: Int = when (loadType){
@@ -60,7 +58,7 @@ class FileRemoteMediator(
                     return MediatorResult.Success(endOfPaginationReached = true)
                 LoadType.APPEND -> {
                     val remoteKey = database.withTransaction {
-                        remoteKeyDao!!.remoteKeyByIdentifier("$folderId Files")
+                        remoteKeyDao!!.remoteKeyByIdentifier("Folder List")
                     }
                     if(remoteKey == null || remoteKey.nextKey == null){
                         return MediatorResult.Success(endOfPaginationReached = true)
@@ -69,28 +67,28 @@ class FileRemoteMediator(
                 }
             }
             val pageSize = state.config.pageSize
-            val response = networkService.doGetFolderPaginatedFiles(folderId,loadKey,pageSize,true,SortType.NAME_ASC.name)!!.awaitResponse()
+            val response = networkService.doGetFoldersPaginated(loadKey,pageSize)!!.awaitResponse()
             if(response.isSuccessful) {
                 database.withTransaction {
                     if (loadType == LoadType.REFRESH) {
-                        remoteKeyDao!!.deleteByIdentifier("$folderId Files")
-                        fileDao!!.deleteAllInFolder(folderId)
+                        remoteKeyDao!!.deleteByIdentifier("Folder List")
+                        folderDao!!.deleteAll()
                     }
                     if (pageSize > response.body()!!.size)
                         remoteKeyDao!!.insertOrReplace(
-                            RemoteKey("$folderId Files", null)
+                            RemoteKey("Folder List", null)
                         )
                     else
                         remoteKeyDao!!.insertOrReplace(
-                            RemoteKey("$folderId Files", loadKey + 1)
+                            RemoteKey("Folder List", loadKey + 1)
                         )
-                    val files = ArrayList<RoomEmbeddedFile>()
-                    for (file in response.body()!!) {
-                        val databaseFile =
-                            RoomEmbeddedFile.Creator().loadFromOnlineFile(file).build()
-                        files.add(databaseFile)
+                    val folders = ArrayList<RoomPagingFolder>()
+                    for (folder in response.body()!!) {
+                        val databaseFolder =
+                            RoomPagingFolder.Creator().loadFromOnlineFolder(folder).build()
+                        folders.add(databaseFolder)
                     }
-                    fileDao!!.insertAll(folderId, files)
+                    folderDao!!.insertAll(folders)
                 }
                 pageNumber++
                 MediatorResult.Success(endOfPaginationReached = pageSize > response.body()!!.size)

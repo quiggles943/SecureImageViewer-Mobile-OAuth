@@ -1,5 +1,6 @@
 package com.quigglesproductions.secureimageviewer.room.databases.paging.file.dao
 
+import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
@@ -9,6 +10,7 @@ import androidx.room.Update
 import com.quigglesproductions.secureimageviewer.room.databases.paging.file.entity.RoomPagingFolder
 import com.quigglesproductions.secureimageviewer.room.databases.paging.file.entity.relations.RoomEmbeddedFile
 import com.quigglesproductions.secureimageviewer.room.databases.paging.file.entity.relations.RoomEmbeddedFolder
+import java.time.LocalDateTime
 
 @Dao
 abstract class PagingFolderDao {
@@ -65,7 +67,7 @@ abstract class PagingFolderDao {
     @Update
     abstract fun _update(folder: RoomPagingFolder)
     @Insert
-    abstract fun insertAll(vararg folders: RoomPagingFolder)
+    abstract fun insertAll(folders: ArrayList<RoomPagingFolder>)
     @Delete
     abstract fun delete(folder: RoomPagingFolder)
 
@@ -77,4 +79,13 @@ abstract class PagingFolderDao {
         confirmedFolder.folder.onlineThumbnailId = file.onlineId
         _update(confirmedFolder.folder)
     }
+    @Query("SELECT RetrievedDate FROM Folders ORDER BY RetrievedDate DESC LIMIT 1 ")
+    abstract fun lastUpdated(): LocalDateTime?
+
+    @Query("DELETE FROM Folders")
+    abstract fun deleteAll()
+
+    @Transaction
+    @Query("SELECT * FROM Folders")
+    abstract fun folderPagingSource(): PagingSource<Int, RoomPagingFolder>
 }

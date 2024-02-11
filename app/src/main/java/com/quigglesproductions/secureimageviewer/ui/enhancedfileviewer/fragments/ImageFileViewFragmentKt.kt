@@ -1,4 +1,4 @@
-package com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.fragments.kotlin
+package com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.fragments
 
 import android.os.Bundle
 import android.util.Log
@@ -20,9 +20,9 @@ import com.bumptech.glide.signature.ObjectKey
 import com.quigglesproductions.secureimageviewer.R
 import com.quigglesproductions.secureimageviewer.datasource.file.IFileDataSource.DataSourceCallback
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile
-import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.kotlin.EnhancedFileCollectionAdapterKt.ZoomLevelChangeCallback
+import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.EnhancedFileCollectionAdapterKt.ZoomLevelChangeCallback
 import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.NewTouchImageView
-import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.kotlin.EnhancedFileViewFragmentKt
+import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.EnhancedFileViewFragmentKt
 
 class ImageFileViewFragmentKt : BaseFileViewFragmentKt() {
     var fileName: TextView? = null

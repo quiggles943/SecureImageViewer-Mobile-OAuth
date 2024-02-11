@@ -21,7 +21,7 @@ import com.quigglesproductions.secureimageviewer.room.databases.paging.file.enti
 
 @Database(
     entities = [RoomPagingFolder::class, RoomPagingFile::class, RoomPagingMetadata::class, RoomPagingArtist::class, RoomPagingCategory::class, RoomPagingSubject::class, RoomPagingFileCategoryCrossRef::class, RoomPagingFileSubjectCrossRef::class, RemoteKey::class],
-    version = 3
+    version = 4
 )
 @TypeConverters(Converters::class)
 abstract class PagingFileDatabase : RoomDatabase() {

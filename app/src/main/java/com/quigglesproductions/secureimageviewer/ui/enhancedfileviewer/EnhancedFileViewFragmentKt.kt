@@ -1,4 +1,4 @@
-package com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.kotlin
+package com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer
 
 import android.os.Bundle
 import android.view.ContextThemeWrapper
@@ -65,7 +65,9 @@ class EnhancedFileViewFragmentKt() : Fragment(), IFileViewer {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         viewPager = view.findViewById(R.id.fragment_view_pager)
         if (!hasStartPosition)
-            startPos = EnhancedFileViewFragmentKtArgs.fromBundle(requireArguments()).startPosition
+            startPos = EnhancedFileViewFragmentKtArgs.fromBundle(
+                requireArguments()
+            ).startPosition
         setupNavigationControls(view)
         selectedFile = folderViewModel.selectedFile.value
         collectionAdapter = EnhancedFileCollectionAdapterKt<IDisplayFile>(this)

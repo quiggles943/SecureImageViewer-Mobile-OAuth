@@ -23,11 +23,8 @@ import com.quigglesproductions.secureimageviewer.R
 import com.quigglesproductions.secureimageviewer.aurora.appauth.AuroraAuthenticationManager
 import com.quigglesproductions.secureimageviewer.datasource.file.IFileDataSource.DataSourceCallback
 import com.quigglesproductions.secureimageviewer.datasource.file.RetrofitFileDataSource
-import com.quigglesproductions.secureimageviewer.glide.CustomGlideModule
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile
-import com.quigglesproductions.secureimageviewer.models.enhanced.folder.IDisplayFolder
 import com.quigglesproductions.secureimageviewer.room.databases.paging.file.entity.relations.RoomEmbeddedFile
-import com.quigglesproductions.secureimageviewer.ui.enhancedfolderviewer.EnhancedFileGridRecyclerAdapter.EnhancedRecyclerViewOnClickListener
 import dagger.hilt.android.qualifiers.ActivityContext
 import org.acra.ACRA.errorReporter
 import java.net.MalformedURLException

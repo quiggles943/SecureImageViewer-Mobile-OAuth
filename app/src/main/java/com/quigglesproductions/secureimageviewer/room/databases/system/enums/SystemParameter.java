@@ -1,7 +1,5 @@
 package com.quigglesproductions.secureimageviewer.room.databases.system.enums;
 
-import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.fragments.BaseFileViewFragment;
-
 import java.util.Locale;
 
 public enum SystemParameter {

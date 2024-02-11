@@ -16,6 +16,7 @@ import com.quigglesproductions.secureimageviewer.authentication.pogo.TokenRespon
 import com.quigglesproductions.secureimageviewer.authentication.pogo.internal.InternalAuthResponse;
 import com.quigglesproductions.secureimageviewer.authentication.pogo.internal.InternalTokenRequest;
 import com.quigglesproductions.secureimageviewer.authentication.retrofit.AuthRequestService;
+import com.quigglesproductions.secureimageviewer.retrofit.annotations.AuthenticationRequired;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
 
 import net.openid.appauth.AuthState;
@@ -27,9 +28,11 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import dagger.hilt.android.qualifiers.ActivityContext;
+import okhttp3.Call;
 import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
+import retrofit2.Invocation;
 
 public class AuthenticationInterceptor implements Interceptor {
 
@@ -48,40 +51,18 @@ public class AuthenticationInterceptor implements Interceptor {
         //boolean ready = true;
         String freshAccessToken = auroraAuthenticationManager.getFreshAccessToken(context);
         Request request = chain.request();
-        Request authenticatedRequest = request.newBuilder().header("Authorization", "Bearer " + freshAccessToken).build();
-        return chain.proceed(authenticatedRequest);
-        /*TokenManager tokenManager = authenticationManager.getTokenManager();
-        if(!tokenManager.isTokenValid() && !tokenManager.isRefreshTokenValid()){
-            ready = false;
-            if(context instanceof SecureActivity){
-
-            }
-        }
-        else if(!tokenManager.isTokenValid() && tokenManager.isRefreshTokenValid()){
-            InternalTokenRequest tokenRequest = authenticationManager.generateInternalTokenRequest(AuthenticationManager.TokenRequestType.REFRESH_TOKEN);
-
-            retrofit2.Response<InternalAuthResponse> response = apiInterface.doRetrieveToken(tokenRequest).execute();
-            if(response.isSuccessful()) {
-                InternalAuthResponse tokenResponse = response.body();
-                tokenManager.refreshToken(tokenResponse.token);
-                Log.i("Token-Refresh","Token refreshed successfully");
-            }
-            else{
-                Log.e("Token-Refresh",response.errorBody().string());
-                ready = false;
-            }
-        }
-        if(ready) {
-            String accessToken = tokenManager.getAccessToken();
-            Request request = chain.request();
-            if (accessToken == null)
-                return chain.proceed(request);
-
-            Request authenticatedRequest = request.newBuilder().header("Authorization", "Bearer " + accessToken).build();
+        Invocation invocation = request.tag(Invocation.class);
+        boolean requiresAuthentication = false;
+        if(invocation == null)
+            requiresAuthentication = true;
+        else if(request.tag(Invocation.class) != null && request.tag(Invocation.class).method().getAnnotation(AuthenticationRequired.class) != null)
+            requiresAuthentication = true;
+        if(requiresAuthentication){
+            Request authenticatedRequest = request.newBuilder().header("Authorization", "Bearer " + freshAccessToken).build();
             return chain.proceed(authenticatedRequest);
         }
         else
-            return chain.proceed(chain.request());*/
+            return chain.proceed(request);
     }
 
     public void setContext(Context context) {
