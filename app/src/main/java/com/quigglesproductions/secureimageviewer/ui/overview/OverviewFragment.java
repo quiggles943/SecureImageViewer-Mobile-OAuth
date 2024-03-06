@@ -27,22 +27,17 @@ import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpd
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateLog;
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateResponse;
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateSendModel;
-import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedServerStatus;
 import com.quigglesproductions.secureimageviewer.models.modular.ModularServerStatus;
-import com.quigglesproductions.secureimageviewer.room.databases.file.entity.RoomDatabaseFolder;
-import com.quigglesproductions.secureimageviewer.room.databases.file.relations.FileWithMetadata;
-import com.quigglesproductions.secureimageviewer.room.databases.modular.file.entity.RoomModularFolder;
 import com.quigglesproductions.secureimageviewer.room.databases.system.enums.SystemParameter;
+import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedFolder;
 import com.quigglesproductions.secureimageviewer.ui.SecureFragment;
-import com.quigglesproductions.secureimageviewer.ui.enhancedfolderlist.EnhancedFolderListFragment;
+import com.quigglesproductions.secureimageviewer.ui.enhancedfolderlist.FolderListType;
 import com.quigglesproductions.secureimageviewer.utils.FileSyncUtils;
-import com.quigglesproductions.secureimageviewer.utils.ViewerFileUtils;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -98,14 +93,14 @@ public class OverviewFragment extends SecureFragment {
         deviceFilesViewButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                NavDirections action = OverviewFragmentDirections.actionNavEnhancedMainMenuFragmentToNavEnhancedOfflineFolderListFragment(EnhancedFolderListFragment.STATE_MODULAR);
+                NavDirections action = OverviewFragmentDirections.actionNavEnhancedMainMenuFragmentToNavEnhancedOfflineFolderListFragment(FolderListType.DOWNLOADED.name());
                 Navigation.findNavController(binding.getRoot()).navigate(action);
             }
         });
         onlineFilesViewButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                NavDirections action = OverviewFragmentDirections.actionEnhancedMainMenuFragmentToEnhancedFolderListFragment(EnhancedFolderListFragment.STATE_ONLINE);
+                NavDirections action = OverviewFragmentDirections.actionEnhancedMainMenuFragmentToEnhancedFolderListFragment(FolderListType.ONLINE.name());
                 Navigation.findNavController(binding.getRoot()).navigate(action);
             }
         });
@@ -244,8 +239,8 @@ public class OverviewFragment extends SecureFragment {
             long filesOnDevice = 0,foldersOnDevice = 0;
             LocalDateTime lastUpdate = null,onlineSyncTime = null;
             try {
-                filesOnDevice = (long) getModularFileDatabase().fileDao().getAll().size();
-                foldersOnDevice = (long) getModularFileDatabase().folderDao().getAll().size();
+                filesOnDevice = (long) getDownloadFileDatabase().fileDao().getFileCount();
+                foldersOnDevice = (long) getDownloadFileDatabase().folderDao().getFolderCount();
 
                 lastUpdate = getSystemDatabase().systemParameterDao().getParameterByKey(SystemParameter.LAST_UPDATE_TIME).getValueLocalDateTime();
                 onlineSyncTime = getSystemDatabase().systemParameterDao().getParameterByKey(SystemParameter.LAST_ONLINE_SYNC_TIME).getValueLocalDateTime();
@@ -310,8 +305,8 @@ public class OverviewFragment extends SecureFragment {
         if(isOnline) {
             EnhancedFileUpdateSendModel sendModel = new EnhancedFileUpdateSendModel();
             getBackgroundThreadPoster().post(()->{
-                List<RoomModularFolder> folders = getModularFileDatabase().folderDao().getFolders();
-                for(RoomModularFolder folder:folders){
+                List<RoomUnifiedFolder> folders = getDownloadFileDatabase().folderDao().getFolders();
+                for(RoomUnifiedFolder folder:folders){
                     sendModel.folders.add(new EnhancedFileUpdateFolder(folder.getOnlineId(),folder.getLastUpdateTime()));
                 }
                 if(sendModel.folders != null && sendModel.folders.size()>0) {

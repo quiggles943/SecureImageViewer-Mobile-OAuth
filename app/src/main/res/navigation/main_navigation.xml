@@ -58,10 +58,10 @@
     </fragment>
     <fragment
         android:id="@+id/nav_enhancedFolderViewerFragmentKt"
-        android:name="com.quigglesproductions.secureimageviewer.ui.enhancedfolderviewer.kotlin.EnhancedFolderViewerFragmentKt"
+        android:name="com.quigglesproductions.secureimageviewer.ui.enhancedfolderviewer.EnhancedFolderViewerFragment"
         tools:layout="@layout/fragment_folder_view">
         <action
-            android:id="@+id/action_enhancedFolderViewerFragmentKt_to_enhancedFileViewFragment"
+            android:id="@+id/action_enhancedFolderViewerFragment_to_enhancedFileViewFragment"
             app:destination="@id/nav_enhancedFileViewFragmentKt"
             app:enterAnim="@anim/fade_in"
             app:exitAnim="@anim/fade_out"
@@ -110,17 +110,11 @@
             android:id="@+id/action_nav_settingsFragment_to_aboutSettingsFragment"
             app:destination="@id/aboutSettingsFragment" />
         <action
-            android:id="@+id/action_nav_settingsFragment_to_databaseSettingsFragment"
-            app:destination="@id/databaseSettingsFragment" />
-        <action
             android:id="@+id/action_nav_settingsFragment_to_devSettingsFragment"
             app:destination="@id/devSettingsFragment" />
         <action
             android:id="@+id/action_nav_settingsFragment_to_displaySettingsFragment"
             app:destination="@id/displaySettingsFragment" />
-        <action
-            android:id="@+id/action_nav_settingsFragment_to_networkSettingsFragment"
-            app:destination="@id/networkSettingsFragment" />
         <action
             android:id="@+id/action_nav_settingsFragment_to_securitySettingsFragment"
             app:destination="@id/securitySettingsFragment" />
@@ -130,10 +124,6 @@
         android:name="com.quigglesproductions.secureimageviewer.ui.preferences.AboutSettingsFragment"
         android:label="About" />
     <fragment
-        android:id="@+id/databaseSettingsFragment"
-        android:name="com.quigglesproductions.secureimageviewer.ui.preferences.DatabaseSettingsFragment"
-        android:label="Database" />
-    <fragment
         android:id="@+id/devSettingsFragment"
         android:name="com.quigglesproductions.secureimageviewer.ui.preferences.DevSettingsFragment"
         android:label="Dev" />
@@ -142,51 +132,9 @@
         android:name="com.quigglesproductions.secureimageviewer.ui.preferences.DisplaySettingsFragment"
         android:label="Display" />
     <fragment
-        android:id="@+id/networkSettingsFragment"
-        android:name="com.quigglesproductions.secureimageviewer.ui.preferences.NetworkSettingsFragment"
-        android:label="Network">
-        <action
-            android:id="@+id/action_networkSettingsFragment_to_ssoSettingsFragment"
-            app:destination="@id/ssoSettingsFragment" />
-        <action
-            android:id="@+id/action_networkSettingsFragment_to_webSettingsFragment"
-            app:destination="@id/webSettingsFragment" />
-    </fragment>
-    <fragment
         android:id="@+id/securitySettingsFragment"
         android:name="com.quigglesproductions.secureimageviewer.ui.preferences.SecuritySettingsFragment"
         android:label="Security" />
-    <fragment
-        android:id="@+id/ssoSettingsFragment"
-        android:name="com.quigglesproductions.secureimageviewer.ui.preferences.SsoSettingsFragment"
-        android:label="Single Sign-on" >
-        <action
-            android:id="@+id/action_ssoSettingsFragment_to_ssoInfoFragment"
-            app:destination="@id/ssoInfoFragment" />
-        <action
-            android:id="@+id/action_ssoSettingsFragment_to_ssoTokenFragment"
-            app:destination="@id/ssoTokenFragment" />
-    </fragment>
-    <fragment
-        android:id="@+id/webSettingsFragment"
-        android:name="com.quigglesproductions.secureimageviewer.ui.preferences.WebSettingsFragment"
-        android:label="WebSettingsFragment" >
-        <action
-            android:id="@+id/action_webSettingsFragment_to_webEndpointsFragment"
-            app:destination="@id/webEndpointsFragment" />
-    </fragment>
-    <fragment
-        android:id="@+id/ssoInfoFragment"
-        android:name="com.quigglesproductions.secureimageviewer.ui.preferences.SsoInfoFragment"
-        android:label="SsoInfoFragment" />
-    <fragment
-        android:id="@+id/ssoTokenFragment"
-        android:name="com.quigglesproductions.secureimageviewer.ui.preferences.SsoTokenFragment"
-        android:label="SsoTokenFragment" />
-    <fragment
-        android:id="@+id/webEndpointsFragment"
-        android:name="com.quigglesproductions.secureimageviewer.ui.preferences.WebEndpointsFragment"
-        android:label="WebEndpointsFragment" />
     <fragment
         android:id="@+id/downloadViewerFragment"
         android:name="com.quigglesproductions.secureimageviewer.ui.downloadviewer.DownloadViewerFragment"

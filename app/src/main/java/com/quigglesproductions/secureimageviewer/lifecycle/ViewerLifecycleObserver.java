@@ -1,23 +1,16 @@
 package com.quigglesproductions.secureimageviewer.lifecycle;
 
-import android.net.Uri;
-
-import androidx.activity.result.ActivityResultCallback;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.ActivityResultRegistry;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.DefaultLifecycleObserver;
-import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
-import androidx.lifecycle.OnLifecycleEvent;
 
-import com.quigglesproductions.secureimageviewer.managers.SecurityManager;
+import com.quigglesproductions.secureimageviewer.aurora.authentication.appauth.AuroraAuthenticationManager;
 
 public class ViewerLifecycleObserver implements DefaultLifecycleObserver {
 
-    public ViewerLifecycleObserver(){
-
+    private AuroraAuthenticationManager authenticationManager;
+    public ViewerLifecycleObserver(AuroraAuthenticationManager authenticationManager){
+        this.authenticationManager = authenticationManager;
     }
     public void onCreate(@NonNull LifecycleOwner owner) {
 
@@ -26,8 +19,8 @@ public class ViewerLifecycleObserver implements DefaultLifecycleObserver {
     @Override
     public void onStop(@NonNull LifecycleOwner owner) {
         DefaultLifecycleObserver.super.onStop(owner);
-        if(SecurityManager.getInstance().getLoginModel() != null)
-            SecurityManager.getInstance().getLoginModel().setAuthenticated(false);
+        if(authenticationManager.getUser() != null)
+            authenticationManager.getUser().authenticated = false;
     }
 
     @Override

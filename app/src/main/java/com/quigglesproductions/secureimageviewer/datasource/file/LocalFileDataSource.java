@@ -25,6 +25,11 @@ public class LocalFileDataSource implements IFileDataSource {
     }
 
     @Override
+    public FileSourceType getFileSourceType() {
+        return FileSourceType.LOCAL;
+    }
+
+    @Override
     public void getFileDataSource(DataSourceCallback callback) throws MalformedURLException {
         if(file.getImageFile() != null)
             callback.FileDataSourceRetrieved(file.getImageFile(),null);

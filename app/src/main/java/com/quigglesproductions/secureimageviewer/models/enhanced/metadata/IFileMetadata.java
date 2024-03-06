@@ -1,11 +1,8 @@
 package com.quigglesproductions.secureimageviewer.models.enhanced.metadata;
 
-import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileTag;
 import com.quigglesproductions.secureimageviewer.models.enhanced.IFileTag;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 public interface IFileMetadata {
     int getWidth();

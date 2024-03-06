@@ -41,7 +41,7 @@ public class DownloadViewerFragment extends SecureFragment {
         binding.fragmentDownloadViewerRecyclerView.setLayoutManager(layoutManager);
         DownloadViewerRecyclerAdapter adapter = new DownloadViewerRecyclerAdapter(getContext());
         binding.fragmentDownloadViewerRecyclerView.setAdapter(adapter);
-        LiveData<List<FolderDownloadRecord>> folderDownloads = getRecordDatabase().downloadRecordDao().getAllFoldersLive();
+        LiveData<List<FolderDownloadRecord>> folderDownloads = getRecordDatabase().downloadRecordDao().allFoldersLive();
         folderDownloads.observe(getViewLifecycleOwner(), new Observer<List<FolderDownloadRecord>>() {
             @Override
             public void onChanged(List<FolderDownloadRecord> folderDownloadPackages) {

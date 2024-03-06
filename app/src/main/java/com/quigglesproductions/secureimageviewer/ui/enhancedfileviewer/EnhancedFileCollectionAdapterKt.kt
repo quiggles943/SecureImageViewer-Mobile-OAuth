@@ -1,28 +1,35 @@
 package com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer
 
 import android.os.Bundle
+import androidx.annotation.OptIn
 import androidx.fragment.app.Fragment
+import androidx.media3.common.util.UnstableApi
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.adapter.FragmentViewHolder
+import com.quigglesproductions.secureimageviewer.aurora.authentication.appauth.AuroraAuthenticationManager
+import com.quigglesproductions.secureimageviewer.managers.VideoPlaybackManager
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile
 import com.quigglesproductions.secureimageviewer.ui.compoundcontrols.FileViewerNavigator
 import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.fragments.BaseFileViewFragmentKt
 import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.fragments.ImageFileViewFragmentKt
 import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.fragments.VideoFileViewFragmentKt
 
-class EnhancedFileCollectionAdapterKt<T : IDisplayFile?>(fragment: Fragment) :
+class EnhancedFileCollectionAdapterKt<T : IDisplayFile?>(fragment: Fragment,
+    val videoPlaybackManager: VideoPlaybackManager,
+    val viewModel: EnhancedFileViewerViewModelKt) :
     FragmentStateAdapter(fragment) {
     private val files = ArrayList<T>()
     private var zoomCallback: ZoomLevelChangeCallback? = null
+    @UnstableApi
     private var navigatorControls: FileViewerNavigator? = null
 
     override fun createFragment(position: Int): Fragment {
         val file = files[position]
         var fragment: Fragment = when (file!!.fileTypeString) {
-            "IMAGE" -> ImageFileViewFragmentKt()
-            "VIDEO" -> VideoFileViewFragmentKt()
-            else -> ImageFileViewFragmentKt()
+            "IMAGE" -> ImageFileViewFragmentKt(viewModel)
+            "VIDEO" -> VideoFileViewFragmentKt(videoPlaybackManager,viewModel)
+            else -> ImageFileViewFragmentKt(viewModel)
         }
         val args = Bundle()
         args.putInt(BaseFileViewFragmentKt.ARG_FILE_POSITION,position)
@@ -49,6 +56,7 @@ class EnhancedFileCollectionAdapterKt<T : IDisplayFile?>(fragment: Fragment) :
         zoomCallback = callback
     }
 
+    @OptIn(UnstableApi::class)
     fun setFileNavigator(fileNavigator: FileViewerNavigator?) {
         navigatorControls = fileNavigator
     }

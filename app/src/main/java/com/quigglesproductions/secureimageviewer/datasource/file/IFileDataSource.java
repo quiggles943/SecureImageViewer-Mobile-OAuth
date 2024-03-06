@@ -4,8 +4,6 @@ import android.content.Context;
 
 import androidx.annotation.Nullable;
 
-import com.quigglesproductions.secureimageviewer.appauth.RequestServiceNotConfiguredException;
-import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.FileMetadata;
 import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.IFileMetadata;
 import com.quigglesproductions.secureimageviewer.retrofit.RequestManager;
 
@@ -14,7 +12,8 @@ import java.net.URL;
 
 public interface IFileDataSource {
 
-    URL getFileURL() throws MalformedURLException, RequestServiceNotConfiguredException;
+    URL getFileURL() throws MalformedURLException;
+    FileSourceType getFileSourceType();
 
     void getFileDataSource(DataSourceCallback callback) throws MalformedURLException;
     void getFileThumbnailDataSource(Context context, DataSourceCallback callback) throws MalformedURLException;
@@ -30,5 +29,9 @@ public interface IFileDataSource {
 
     interface DataSourceFileMetadataCallback{
         void FileMetadataRetrieved(IFileMetadata metadata, Exception exception);
+    }
+    enum FileSourceType{
+        LOCAL,
+        ONLINE
     }
 }

@@ -3,12 +3,10 @@ package com.quigglesproductions.secureimageviewer.gson;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import com.quigglesproductions.secureimageviewer.models.ItemBaseModel;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 public class ViewerGson {
     private static Gson singleton;

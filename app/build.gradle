@@ -13,7 +13,6 @@ apply plugin: 'kotlin-kapt'
 
 android {
     compileSdkVersion 34
-    buildToolsVersion "30.0.3"
 
     lintOptions{
         baseline file("lint-baseline.xml")
@@ -59,12 +58,14 @@ android {
     namespace 'com.quigglesproductions.secureimageviewer'
     buildFeatures {
         viewBinding true
+        buildConfig true
     }
 }
 def mediaVersion = "1.2.1"
 def acraVersion = '5.9.7'
 def paging_version = "3.2.1"
 def roomVersion = "2.6.1"
+def work_version = "2.9.0"
 
 dependencies {
     implementation 'androidx.lifecycle:lifecycle-process:2.7.0'
@@ -75,9 +76,9 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.7.0'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0'
-    implementation 'androidx.navigation:navigation-fragment:2.7.6'
-    implementation 'androidx.navigation:navigation-ui:2.7.6'
-    implementation 'androidx.preference:preference:1.2.1'
+    implementation 'androidx.navigation:navigation-fragment-ktx:2.7.7'
+    implementation 'androidx.navigation:navigation-ui-ktx:2.7.7'
+    implementation 'androidx.preference:preference-ktx:1.2.1'
     implementation 'net.openid:appauth:0.11.1'
     implementation 'com.android.volley:volley:1.2.1'
     implementation 'com.google.code.gson:gson:2.10'
@@ -108,7 +109,10 @@ dependencies {
     //Hilt
     implementation 'com.google.dagger:hilt-android:2.50'
     kapt 'com.google.dagger:hilt-compiler:2.50'
+    kapt "com.google.dagger:hilt-android-compiler:2.50"
+    kapt "androidx.hilt:hilt-compiler:1.2.0"
     implementation 'androidx.hilt:hilt-navigation-fragment:1.1.0'
+    implementation("androidx.hilt:hilt-work:1.0.0")
 
     implementation('com.github.bumptech.glide:okhttp3-integration:4.16.0'){
         exclude group: 'glide-parent'
@@ -149,9 +153,15 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
     //Paging 3
-    implementation "androidx.paging:paging-runtime:$paging_version"
+    implementation "androidx.paging:paging-runtime-ktx:$paging_version"
     implementation "androidx.paging:paging-rxjava3:$paging_version"
     implementation "androidx.paging:paging-guava:$paging_version"
+
+    //Work
+    implementation "androidx.work:work-runtime:$work_version"
+    implementation "androidx.work:work-runtime-ktx:$work_version"
+    implementation "androidx.work:work-multiprocess:$work_version"
+    androidTestImplementation("androidx.work:work-testing:$work_version")
 
     implementation "com.github.skydoves:retrofit-adapters-paging:1.0.9"
 }

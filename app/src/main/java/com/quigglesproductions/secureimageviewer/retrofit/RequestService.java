@@ -1,14 +1,11 @@
 package com.quigglesproductions.secureimageviewer.retrofit;
 
-import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateLog;
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateResponse;
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateSendModel;
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedServerStatus;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedOnlineFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedOnlineFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.FileMetadata;
-import com.quigglesproductions.secureimageviewer.registration.DeviceRegistrationModel;
-import com.quigglesproductions.secureimageviewer.registration.DeviceRegistrationResponseModel;
 
 import java.util.List;
 
@@ -16,7 +13,6 @@ import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
-import retrofit2.http.Header;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
 import retrofit2.http.Query;

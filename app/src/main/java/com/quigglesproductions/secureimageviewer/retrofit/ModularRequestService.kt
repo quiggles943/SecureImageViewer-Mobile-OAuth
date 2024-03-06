@@ -1,6 +1,10 @@
 package com.quigglesproductions.secureimageviewer.retrofit
 
+import android.devicelock.DeviceId
 import com.quigglesproductions.secureimageviewer.SortType
+import com.quigglesproductions.secureimageviewer.aurora.authentication.device.DeviceRegistration
+import com.quigglesproductions.secureimageviewer.aurora.authentication.device.DeviceRegistrationRequest
+import com.quigglesproductions.secureimageviewer.aurora.authentication.device.DeviceStatus
 import com.quigglesproductions.secureimageviewer.dagger.hilt.mapper.ModularOnlineFileMapper
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateResponse
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateSendModel
@@ -20,6 +24,7 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
+import retrofit2.http.Streaming
 
 interface ModularRequestService {
     //Server Status Requests
@@ -35,7 +40,7 @@ interface ModularRequestService {
     //Folder Requests
     @AuthenticationRequired
     @GET("/api/v2/folder")
-    fun doGetFolderList(): Call<List<ModularOnlineFolder?>?>?
+    fun doGetFolderList(): Call<List<ModularOnlineFolder>>
 
     @AuthenticationRequired
     @GET("/api/v2/folder/{id}")
@@ -47,7 +52,7 @@ interface ModularRequestService {
         @Path("id") id: Int,
         @Query("metadata") includeMetadata: Boolean,
         @Query("sort_type") sortType: String?
-    ): Call<List<ModularOnlineFile?>?>?
+    ): Call<List<ModularOnlineFile>>
 
     @AuthenticationRequired
     @GET("/api/v2/folder/{id}/files/paginated")
@@ -86,8 +91,9 @@ interface ModularRequestService {
     fun doGetFileMetadata(@Path("id") id: Int): Call<FileMetadata?>?
 
     @AuthenticationRequired
+    @Streaming
     @GET("/api/v2/file/{id}/content")
-    fun doGetFileContent(@Path("id") id: Int): Call<ResponseBody?>?
+    fun doGetFileContent(@Path("id") id: Int): Call<ResponseBody>
 
     @AuthenticationRequired
     @GET("/api/v2/file/{id}/thumbnail")
@@ -107,5 +113,7 @@ interface ModularRequestService {
 
     @AuthenticationRequired
     @GET("/api/v2/folder/paginated")
-    fun doGetFoldersPaginated(page: Int, pageSize: Int): Call<List<ModularOnlineFolder>>
+    fun doGetFoldersPaginated(
+        @Query("page")page: Int,
+        @Query("pageSize")pageSize: Int): Call<List<ModularOnlineFolder>>
 }

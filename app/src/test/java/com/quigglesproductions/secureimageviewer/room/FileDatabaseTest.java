@@ -1,6 +1,5 @@
 package com.quigglesproductions.secureimageviewer.room;
 
-import static org.junit.Assert.assertThat;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import android.content.Context;

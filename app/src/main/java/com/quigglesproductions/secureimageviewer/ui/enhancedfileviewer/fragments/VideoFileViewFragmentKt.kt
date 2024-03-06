@@ -11,14 +11,20 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import com.quigglesproductions.secureimageviewer.R
+import com.quigglesproductions.secureimageviewer.aurora.authentication.appauth.AuroraAuthenticationManager
 import com.quigglesproductions.secureimageviewer.managers.VideoPlaybackManager
 import com.quigglesproductions.secureimageviewer.managers.VideoPlaybackManager.VideoPlayerCallback
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile
+import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.EnhancedFileViewerViewModelKt
+import javax.inject.Inject
 
-class VideoFileViewFragmentKt : BaseFileViewFragmentKt() {
+class VideoFileViewFragmentKt(playbackManager: VideoPlaybackManager,
+                              val viewModel: EnhancedFileViewerViewModelKt
+    ) : BaseFileViewFragmentKt() {
     var videoView: PlayerView? = null
     private var mPlayer: ExoPlayer? = null
     private var isPlaying = false
+    var playbackManager: VideoPlaybackManager = playbackManager
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -30,15 +36,6 @@ class VideoFileViewFragmentKt : BaseFileViewFragmentKt() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         videoView = view.findViewById(R.id.videoView)
-        /*videoView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (getNavigator().isFullyVisible())
-                    getNavigator().hide();
-                else
-                    getNavigator().show();
-            }
-        });*/
         val file = file
         loadVideo(view, file, savedInstanceState)
         super.onViewCreated(view, savedInstanceState)
@@ -71,7 +68,7 @@ class VideoFileViewFragmentKt : BaseFileViewFragmentKt() {
     private fun loadVideo(itemView: View?, item: IDisplayFile?, savedInstanceState: Bundle?) {
         try {
             if (itemView != null && mPlayer == null) {
-                VideoPlaybackManager.getInstance().getVideoFromDataSource(
+                playbackManager.getVideoFromDataSource(
                     item!!.dataSource,
                     PLAY_ON_LOAD,
                     VideoPlayerCallback { player, exception ->
@@ -121,13 +118,22 @@ class VideoFileViewFragmentKt : BaseFileViewFragmentKt() {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         if (mPlayer != null) {
+            viewModel.videoPosition.value = Math.max(0, mPlayer!!.currentPosition)
             outState.putLong(PLAYER_CURRENT_POS_KEY, Math.max(0, mPlayer!!.currentPosition))
-            if (mPlayer!!.playbackState == Player.STATE_READY && mPlayer!!.playWhenReady) outState.putBoolean(
-                PLAYER_IS_READY_KEY, true
-            ) else outState.putBoolean(PLAYER_IS_READY_KEY, false)
+            if (mPlayer!!.playbackState == Player.STATE_READY && mPlayer!!.playWhenReady) {
+                outState.putBoolean(
+                    PLAYER_IS_READY_KEY, true
+                )
+                viewModel.videoPlayback.value = true
+            }else {
+                outState.putBoolean(PLAYER_IS_READY_KEY, false)
+                viewModel.videoPlayback.value = false
+            }
         } else {
             outState.putLong(PLAYER_CURRENT_POS_KEY, 0)
+            viewModel.videoPosition.value = 0
             outState.putBoolean(PLAYER_IS_READY_KEY, false)
+            viewModel.videoPlayback.value = false
         }
     }
 
@@ -135,6 +141,9 @@ class VideoFileViewFragmentKt : BaseFileViewFragmentKt() {
         if (inState == null) return false
         mPlayer!!.playWhenReady = inState.getBoolean(PLAYER_IS_READY_KEY)
         mPlayer!!.seekTo(inState.getLong(PLAYER_CURRENT_POS_KEY))
+
+        mPlayer!!.playWhenReady = viewModel.videoPlayback.value!!
+        mPlayer!!.seekTo(viewModel.videoPosition.value!!)
         return true
     }
 

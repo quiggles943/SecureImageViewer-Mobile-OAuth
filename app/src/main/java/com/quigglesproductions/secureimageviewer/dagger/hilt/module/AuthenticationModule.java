@@ -5,8 +5,12 @@ import android.net.Uri;
 
 import androidx.annotation.NonNull;
 
-import com.quigglesproductions.secureimageviewer.aurora.appauth.AuroraAuthenticationManager;
+import com.quigglesproductions.secureimageviewer.aurora.authentication.appauth.AuroraAuthenticationManager;
 import com.quigglesproductions.secureimageviewer.dagger.hilt.annotations.AuthServiceClient;
+import com.quigglesproductions.secureimageviewer.dagger.hilt.annotations.RequestServiceClient;
+import com.quigglesproductions.secureimageviewer.retrofit.DeviceRegistrationRequestService;
+import com.quigglesproductions.secureimageviewer.retrofit.ModularRequestService;
+import com.quigglesproductions.secureimageviewer.room.databases.system.SystemDatabase;
 
 
 import net.openid.appauth.AppAuthConfiguration;
@@ -25,7 +29,6 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
 import dagger.hilt.InstallIn;
@@ -40,7 +43,7 @@ public class AuthenticationModule {
     @NonNull
     @Singleton
     @Provides
-    public static AuroraAuthenticationManager provideAuroraAuthenticationModule(@ApplicationContext Context context,@AuthServiceClient OkHttpClient client){
+    public static AuroraAuthenticationManager provideAuroraAuthenticationModule(@ApplicationContext Context context, DeviceRegistrationRequestService requestService, SystemDatabase systemDatabase){
         AuthorizationServiceConfiguration serviceConfiguration = new AuthorizationServiceConfiguration(
                 Uri.parse("https://quigleyid.ddns.net/v2/oauth/authorize"),
                 Uri.parse("https://quigleyid.ddns.net/v2/oauth/token")
@@ -76,8 +79,10 @@ public class AuthenticationModule {
                 Uri.parse("https://192.168.0.17/v2/oauth/token")
         );*/
         AuroraAuthenticationManager.Builder builder = new AuroraAuthenticationManager.Builder();
+        builder.withRequestService(requestService);
         builder.withServiceConfiguration(serviceConfiguration);
         builder.withAuthConfiguration(configuration);
+        builder.withSystemDatabase(systemDatabase);
         return builder.build(context);
     }
 

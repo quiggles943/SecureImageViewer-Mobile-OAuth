@@ -1,5 +1,6 @@
 package com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.fragments
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -23,12 +24,10 @@ import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFi
 import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.EnhancedFileCollectionAdapterKt.ZoomLevelChangeCallback
 import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.NewTouchImageView
 import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.EnhancedFileViewFragmentKt
+import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.EnhancedFileViewerViewModelKt
 
-class ImageFileViewFragmentKt : BaseFileViewFragmentKt() {
-    var fileName: TextView? = null
-    var topLayout: LinearLayout? = null
-    var imagePagerControls: LinearLayout? = null
-    var zoomLevelChangeCallback: ZoomLevelChangeCallback? = null
+class ImageFileViewFragmentKt(val viewModel: EnhancedFileViewerViewModelKt) : BaseFileViewFragmentKt() {
+    private var zoomLevelChangeCallback: ZoomLevelChangeCallback? = null
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -46,6 +45,7 @@ class ImageFileViewFragmentKt : BaseFileViewFragmentKt() {
         super.onViewCreated(view, savedInstanceState)
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @OptIn(UnstableApi::class)
     private fun loadImage(itemView: View, item: IDisplayFile?) {
         val imageView = itemView.findViewById<View>(R.id.imageViewer) as NewTouchImageView
@@ -54,7 +54,7 @@ class ImageFileViewFragmentKt : BaseFileViewFragmentKt() {
             if (viewerNavigator!!.isFullyVisible) viewerNavigator!!.hide() else viewerNavigator!!.show()
         })
         imageView.maxZoom = 3.2.toFloat()
-        imageView.setOnTouchListener { v, event ->
+        imageView.setOnTouchListener { _, _ ->
             if (zoomLevelChangeCallback != null) {
                 if (imageView.currentZoom == imageView.minZoom) zoomLevelChangeCallback!!.zoomLevelChanged(
                     false
@@ -62,23 +62,10 @@ class ImageFileViewFragmentKt : BaseFileViewFragmentKt() {
             }
             false
         }
-        /*imageView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if(zoomLevelChangeCallback != null) {
-                    if (imageView.getCurrentZoom() == imageView.getMinZoom())
-                        zoomLevelChangeCallback.zoomLevelChanged(false);
-                    else
-                        zoomLevelChangeCallback.zoomLevelChanged(true);
-                }
-                return false;
-            }
-        });*/try {
+        try {
             val dataSource = item!!.dataSource
             val fileType = item.fileType
-            val decodeFormat: DecodeFormat
-            decodeFormat =
-                if (fileType.hasTransparency()) DecodeFormat.PREFER_ARGB_8888 else DecodeFormat.PREFER_RGB_565
+            val decodeFormat: DecodeFormat = if (fileType.hasTransparency()) DecodeFormat.PREFER_ARGB_8888 else DecodeFormat.PREFER_RGB_565
             if (dataSource == null) return
             dataSource.getFullFileDataSource(context, object : DataSourceCallback {
                 override fun FileDataSourceRetrieved(dataSource: Any, exception: Exception) {}
@@ -132,41 +119,5 @@ class ImageFileViewFragmentKt : BaseFileViewFragmentKt() {
             Log.e("Error", exc.message!!)
         }
 
-        //imageView.setImageBitmap(BitmapFactory.decodeFile(item.getImageFile().getAbsolutePath()));
-        //imageView.setImageBitmap(BitmapFactory.decodeFile(itemFolder.getItemAtPosition(position).getImageFile().getAbsolutePath()));
-        //Glide.with(context).load(itemFolder.getItemAtPosition(position).getImageFile()).asBitmap().into(imageView);
-
-        // Adding the View
-    } /*private void setupControls(View view){
-        View.OnClickListener prevFileClick = new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //TODO Update view to show previous file
-            }
-        };
-        View.OnClickListener nextFileClick = new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //TODO Update view to show next file
-            }
-        };
-        fileName = view.findViewById(R.id.file_name);
-        topLayout = view.findViewById(R.id.topLinearLayout);
-        //bottomLayout = view.findViewById(R.id.imageviewer_pager_layout);
-        //fileViewerNavigatorImage = view.findViewById(R.id.fileviewer_navigator);
-        imagePagerControls = view.findViewById(R.id.image_pager_controls);
-        //setupImageNavigatorControls();
-
-
-        ImageButton backButton = topLayout.findViewById(R.id.backButton);
-        backButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                getActivity().onBackPressed();
-            }
-        });
-        //imageCountText = findViewById(R.id.imagecount);
-        //imageTotalText = findViewById(R.id.imagetotal);
-
-    }*/
+    }
 }

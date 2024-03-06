@@ -4,18 +4,15 @@ import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.ActivityResultRegistry;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatDelegate;
-import androidx.lifecycle.Lifecycle;
-import androidx.lifecycle.LifecycleObserver;
-import androidx.lifecycle.OnLifecycleEvent;
+import androidx.hilt.work.HiltWorkerFactory;
 import androidx.lifecycle.ProcessLifecycleOwner;
 import androidx.preference.PreferenceManager;
+import androidx.work.Configuration;
 
 import com.gu.toolargetool.TooLargeTool;
-import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
-import com.quigglesproductions.secureimageviewer.apprequest.RequestManager;
+import com.quigglesproductions.secureimageviewer.aurora.authentication.appauth.AuroraAuthenticationManager;
 import com.quigglesproductions.secureimageviewer.lifecycle.ViewerLifecycleObserver;
 import com.quigglesproductions.secureimageviewer.managers.ApplicationPreferenceManager;
 import com.quigglesproductions.secureimageviewer.managers.FolderManager;
@@ -36,11 +33,14 @@ import javax.inject.Inject;
 import dagger.hilt.android.HiltAndroidApp;
 
 @HiltAndroidApp
-public class App extends Application {
+public class App extends Application implements Configuration.Provider {
     private ViewerLifecycleObserver viewerLifecycleObserver;
     Context context;
     Context authenticationActivityContext;
-
+    @Inject
+    AuroraAuthenticationManager authenticationManager;
+    @Inject
+    HiltWorkerFactory workerFactory;
     @Inject
     ModularRequestService requestService;
 
@@ -48,7 +48,7 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
         context = this;
-        viewerLifecycleObserver = new ViewerLifecycleObserver();
+        viewerLifecycleObserver = new ViewerLifecycleObserver(authenticationManager);
         ProcessLifecycleOwner.get().getLifecycle().addObserver(viewerLifecycleObserver);
         TooLargeTool.startLogging(this);
         initializeSingletons();
@@ -101,13 +101,10 @@ public class App extends Application {
 
     private void initializeSingletons() {
         // Initialize Singletons.
-        AuthManager.getInstance().ConfigureAuthManager(context.getApplicationContext());
-        FolderManager.getInstance().setRootContext(context.getApplicationContext());
-        RequestManager.getInstance().setRootContext(context.getApplicationContext());
+        FolderManager.Companion.getInstance().setRootContext(context.getApplicationContext());
         //DatabaseHandler.getInstance().setRootContext(context.getApplicationContext());
         SecurityManager.getInstance().setRootContext(context.getApplicationContext());
         ApplicationPreferenceManager.getInstance().setContext(context.getApplicationContext());
-        VideoPlaybackManager.getInstance().setContext(context.getApplicationContext());
         //AuthenticationManager.setSingleton(context.getApplicationContext());
     }
 
@@ -125,6 +122,14 @@ public class App extends Application {
 
     public ModularRequestService getRequestService(){
         return requestService;
+    }
+
+    @NonNull
+    @Override
+    public Configuration getWorkManagerConfiguration() {
+        return new Configuration.Builder()
+                .setWorkerFactory(workerFactory)
+                .build();
     }
 
     /*@OnLifecycleEvent(Lifecycle.Event.ON_STOP)

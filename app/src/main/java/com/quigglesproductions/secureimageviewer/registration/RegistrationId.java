@@ -1,6 +1,5 @@
 package com.quigglesproductions.secureimageviewer.registration;
 
-import com.google.gson.Gson;
 import com.quigglesproductions.secureimageviewer.gson.ViewerGson;
 
 import java.time.LocalDateTime;

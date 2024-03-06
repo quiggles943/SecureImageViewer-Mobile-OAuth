@@ -2,15 +2,18 @@ package com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.fragment
 
 import android.os.Bundle
 import android.view.View
+import androidx.annotation.OptIn
 import androidx.fragment.app.activityViewModels
+import androidx.media3.common.util.UnstableApi
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile
 import com.quigglesproductions.secureimageviewer.ui.SecureFragment
 import com.quigglesproductions.secureimageviewer.ui.compoundcontrols.FileViewerNavigator
 import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.EnhancedFileViewFragmentKt
-import com.quigglesproductions.secureimageviewer.ui.enhancedfolderviewer.kotlin.EnhancedFolderViewerViewModelKt
+import com.quigglesproductions.secureimageviewer.ui.enhancedfolderviewer.EnhancedFolderViewerViewModelKt
 
 open class BaseFileViewFragmentKt : SecureFragment() {
     private val folderViewModel by activityViewModels<EnhancedFolderViewerViewModelKt>()
+    @UnstableApi
     var viewerNavigator: FileViewerNavigator? = null
         private set
 
@@ -20,6 +23,7 @@ open class BaseFileViewFragmentKt : SecureFragment() {
         super.onViewCreated(view, savedInstanceState)
     }
 
+    @OptIn(UnstableApi::class)
     fun registerViewerNavigator(navigator: FileViewerNavigator?) {
         viewerNavigator = navigator
     }

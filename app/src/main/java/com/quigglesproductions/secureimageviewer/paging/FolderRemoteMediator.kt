@@ -5,13 +5,14 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
-import com.quigglesproductions.secureimageviewer.aurora.appauth.AuroraAuthenticationManager
+import com.quigglesproductions.secureimageviewer.aurora.authentication.appauth.AuroraAuthenticationManager
+import com.quigglesproductions.secureimageviewer.dagger.hilt.annotations.CachingDatabase
+import com.quigglesproductions.secureimageviewer.datasource.folder.IFolderDataSource
 import com.quigglesproductions.secureimageviewer.retrofit.ModularRequestService
 import com.quigglesproductions.secureimageviewer.retrofit.RetrofitException
-import com.quigglesproductions.secureimageviewer.room.databases.paging.file.PagingFileDatabase
-import com.quigglesproductions.secureimageviewer.room.databases.paging.file.entity.RemoteKey
-import com.quigglesproductions.secureimageviewer.room.databases.paging.file.entity.RoomPagingFolder
-import com.quigglesproductions.secureimageviewer.room.databases.paging.file.entity.relations.RoomEmbeddedFile
+import com.quigglesproductions.secureimageviewer.room.databases.unified.UnifiedFileDatabase
+import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RemoteKey
+import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedFolder
 import retrofit2.HttpException
 import retrofit2.awaitResponse
 import java.io.IOException
@@ -21,11 +22,11 @@ import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalPagingApi::class)
 class FolderRemoteMediator(
-    private val database: PagingFileDatabase,
+    @CachingDatabase private val database: UnifiedFileDatabase,
     private val networkService: ModularRequestService
-) : RemoteMediator<Int, RoomPagingFolder>() {
+) : RemoteMediator<Int, RoomUnifiedFolder>() {
     val folderDao = database.folderDao()
-    val remoteKeyDao = database.PagingRemoteKeyDao()
+    val remoteKeyDao = database.UnifiedRemoteKeyDao()
     var pageNumber: Int = 1
 
     override suspend fun initialize(): InitializeAction {
@@ -49,7 +50,7 @@ class FolderRemoteMediator(
 
     override suspend fun load(
         loadType: LoadType,
-        state: PagingState<Int, RoomPagingFolder>
+        state: PagingState<Int, RoomUnifiedFolder>
     ): MediatorResult {
         return try {
             val loadKey: Int = when (loadType){
@@ -82,10 +83,11 @@ class FolderRemoteMediator(
                         remoteKeyDao!!.insertOrReplace(
                             RemoteKey("Folder List", loadKey + 1)
                         )
-                    val folders = ArrayList<RoomPagingFolder>()
+                    val folders = ArrayList<RoomUnifiedFolder>()
                     for (folder in response.body()!!) {
                         val databaseFolder =
-                            RoomPagingFolder.Creator().loadFromOnlineFolder(folder).build()
+                            RoomUnifiedFolder.Creator().loadFromOnlineFolder(folder).build()
+                        databaseFolder.sourceType = IFolderDataSource.FolderSourceType.ONLINE
                         folders.add(databaseFolder)
                     }
                     folderDao!!.insertAll(folders)

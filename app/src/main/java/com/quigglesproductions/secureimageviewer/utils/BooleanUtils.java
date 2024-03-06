@@ -28,4 +28,11 @@ public class BooleanUtils {
                 return false;
         }
     }
+
+    public static String getStringFromBool(boolean bool){
+        if(bool)
+            return "True";
+        else
+            return "False";
+    }
 }

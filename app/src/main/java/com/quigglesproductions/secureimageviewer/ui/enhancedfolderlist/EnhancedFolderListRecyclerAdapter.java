@@ -171,8 +171,8 @@ public class EnhancedFolderListRecyclerAdapter<T extends IDisplayFolder> extends
         // Get element from your dataset at this position and replace the
         // contents of the view with that element
         T folder = folders.get(position);
-        try {
-            folder.getDataSource().getThumbnailFromDataSource(mContext,new IFolderDataSource.FolderDataSourceCallback() {
+        /*try {
+            folder.getDataSource().getThumbnailFromDataSource(mContext,null,new IFolderDataSource.FolderDataSourceCallback() {
                 @SuppressLint("ResourceType")
                 @Override
                 public void FolderThumbnailRetrieved(Object thumbnailDataSource, Exception exception) {
@@ -193,7 +193,7 @@ public class EnhancedFolderListRecyclerAdapter<T extends IDisplayFolder> extends
             });
         }catch (MalformedURLException ex){
             ex.printStackTrace();
-        }
+        }*/
         if(getIsSelected(position))
             viewHolder.getImageView().setColorFilter(ContextCompat.getColor(mContext, R.color.selected), PorterDuff.Mode.SRC_ATOP);
         else

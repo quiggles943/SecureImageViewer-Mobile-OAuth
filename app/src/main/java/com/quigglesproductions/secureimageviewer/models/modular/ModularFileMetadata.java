@@ -1,18 +1,10 @@
 package com.quigglesproductions.secureimageviewer.models.modular;
 
 import com.google.gson.annotations.SerializedName;
-import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedArtist;
-import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedCategory;
-import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileTag;
-import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedSubject;
 import com.quigglesproductions.secureimageviewer.models.enhanced.IFileTag;
 import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.IFileMetadata;
-import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.UserMetadata;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class ModularFileMetadata implements IFileMetadata {
 

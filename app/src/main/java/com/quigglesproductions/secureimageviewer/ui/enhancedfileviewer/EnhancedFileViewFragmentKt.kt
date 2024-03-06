@@ -22,28 +22,34 @@ import androidx.viewpager2.widget.ViewPager2
 import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
 import com.quigglesproductions.secureimageviewer.R
 import com.quigglesproductions.secureimageviewer.managers.FolderManager
+import com.quigglesproductions.secureimageviewer.managers.VideoPlaybackManager
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile
 import com.quigglesproductions.secureimageviewer.ui.EnhancedMainMenuActivity
 import com.quigglesproductions.secureimageviewer.ui.IFileViewer
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity
 import com.quigglesproductions.secureimageviewer.ui.compoundcontrols.FileViewerNavigator
-import com.quigglesproductions.secureimageviewer.ui.enhancedfolderviewer.kotlin.EnhancedFolderViewerViewModelKt
+import com.quigglesproductions.secureimageviewer.ui.enhancedfolderviewer.EnhancedFolderViewerViewModelKt
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
-class EnhancedFileViewFragmentKt() : Fragment(), IFileViewer {
+class EnhancedFileViewFragmentKt : Fragment(), IFileViewer {
     private var startPos = 0
     private lateinit var viewPager: ViewPager2
     lateinit var topLayout: LinearLayout
     private lateinit var backButton: ImageButton
     lateinit var fileName: TextView
+    @UnstableApi
     lateinit var fileNavigator: FileViewerNavigator
     var selectedFile: IDisplayFile? = null
     private var currentPagerSlopMultiplier = 0
     private var hasStartPosition: Boolean = false
-    private val viewModel: EnhancedFileViewerViewModelKt by viewModels()
+    private val viewModel: EnhancedFileViewerViewModelKt by activityViewModels<EnhancedFileViewerViewModelKt>()
     private val folderViewModel by activityViewModels<EnhancedFolderViewerViewModelKt>()
     private lateinit var collectionAdapter: EnhancedFileCollectionAdapterKt<IDisplayFile>
+
+    @Inject
+    lateinit var videoPlaybackManager: VideoPlaybackManager
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -70,9 +76,9 @@ class EnhancedFileViewFragmentKt() : Fragment(), IFileViewer {
             ).startPosition
         setupNavigationControls(view)
         selectedFile = folderViewModel.selectedFile.value
-        collectionAdapter = EnhancedFileCollectionAdapterKt<IDisplayFile>(this)
+        collectionAdapter = EnhancedFileCollectionAdapterKt<IDisplayFile>(this,videoPlaybackManager,viewModel)
         collectionAdapter.setFileNavigator(fileNavigator)
-        val selectedFolder = FolderManager.getInstance().currentFolder
+        val selectedFolder = FolderManager.instance.currentFolder
         collectionAdapter.addFiles(folderViewModel.files.value)
         viewPager.adapter = collectionAdapter
         super.onViewCreated(view, savedInstanceState)
@@ -82,13 +88,16 @@ class EnhancedFileViewFragmentKt() : Fragment(), IFileViewer {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
                 //selectedFile = collectionAdapter!!.getItem(position)
-                fileName!!.text = selectedFile!!.getName()
-                fileNavigator!!.setFilePosition(position + 1)
-                topLayout!!.invalidate()
+                val selectedFile = folderViewModel.files.value?.get(position)
+                fileName.text = selectedFile?.name
+                folderViewModel.selectedFile.value = selectedFile
+                //fileName!!.text = selectedFile!!.getName()
+                fileNavigator.setFilePosition(position + 1)
+                topLayout.invalidate()
             }
         })
         viewPager.setCurrentItem(collectionAdapter.getPosition(selectedFile), false)
-        fileName!!.text = selectedFile!!.getName()
+        fileName.text = selectedFile!!.getName()
         viewPager.setNestedScrollingEnabled(true)
         collectionAdapter.setFileZoomLevelCallback(EnhancedFileCollectionAdapterKt.ZoomLevelChangeCallback { isZoomed ->
             if (isZoomed) setViewPagerSlop(11) else setViewPagerSlop(1)
@@ -124,8 +133,8 @@ class EnhancedFileViewFragmentKt() : Fragment(), IFileViewer {
         fileNavigator = view.findViewById(R.id.fileviewer_navigator)
         backButton.setOnClickListener(View.OnClickListener { requireActivity().onBackPressed() })
         fileNavigator.setNextButtonOnClickListener(View.OnClickListener {
-            viewPager!!.setCurrentItem(
-                viewPager!!.currentItem + 1,
+            viewPager.setCurrentItem(
+                viewPager.currentItem + 1,
                 true
             )
         })
@@ -163,6 +172,7 @@ class EnhancedFileViewFragmentKt() : Fragment(), IFileViewer {
         requireActivity().window.clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
     }
 
+    @OptIn(UnstableApi::class)
     override fun getNavigator(): FileViewerNavigator {
         return fileNavigator!!
     }

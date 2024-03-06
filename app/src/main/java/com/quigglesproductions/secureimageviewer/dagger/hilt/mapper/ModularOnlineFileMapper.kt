@@ -1,6 +1,5 @@
 package com.quigglesproductions.secureimageviewer.dagger.hilt.mapper
 
-import com.quigglesproductions.secureimageviewer.datasource.file.RetrofitFileDataSource
 import com.quigglesproductions.secureimageviewer.models.modular.file.ModularOnlineFile
 import com.skydoves.retrofit.adapters.paging.PagingMapper
 

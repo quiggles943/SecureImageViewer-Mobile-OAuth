@@ -6,12 +6,13 @@ import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
 import com.quigglesproductions.secureimageviewer.SortType
-import com.quigglesproductions.secureimageviewer.aurora.appauth.AuroraAuthenticationManager
+import com.quigglesproductions.secureimageviewer.dagger.hilt.annotations.CachingDatabase
 import com.quigglesproductions.secureimageviewer.retrofit.ModularRequestService
 import com.quigglesproductions.secureimageviewer.retrofit.RetrofitException
-import com.quigglesproductions.secureimageviewer.room.databases.paging.file.PagingFileDatabase
-import com.quigglesproductions.secureimageviewer.room.databases.paging.file.entity.RemoteKey
-import com.quigglesproductions.secureimageviewer.room.databases.paging.file.entity.relations.RoomEmbeddedFile
+import com.quigglesproductions.secureimageviewer.room.databases.unified.UnifiedFileDatabase
+import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RemoteKey
+import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.relations.RoomUnifiedEmbeddedFile
+import com.quigglesproductions.secureimageviewer.room.enums.FileSortType
 import retrofit2.HttpException
 import retrofit2.awaitResponse
 import java.io.IOException
@@ -21,13 +22,14 @@ import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalPagingApi::class)
 class FileRemoteMediator(
-    private val database: PagingFileDatabase,
+    @CachingDatabase private val database: UnifiedFileDatabase,
     private val networkService: ModularRequestService,
-    private val folderId: Int
-) : RemoteMediator<Int, RoomEmbeddedFile>() {
+    private val folderId: Int,
+    private val sortType: FileSortType
+) : RemoteMediator<Int, RoomUnifiedEmbeddedFile>() {
     val folderDao = database.folderDao()
     val fileDao = database.fileDao()
-    val remoteKeyDao = database.PagingRemoteKeyDao()
+    val remoteKeyDao = database.UnifiedRemoteKeyDao()
     var pageNumber: Int = 1
 
     override suspend fun initialize(): InitializeAction {
@@ -51,7 +53,7 @@ class FileRemoteMediator(
 
     override suspend fun load(
         loadType: LoadType,
-        state: PagingState<Int, RoomEmbeddedFile>
+        state: PagingState<Int, RoomUnifiedEmbeddedFile>
     ): MediatorResult {
         return try {
             val loadKey: Int = when (loadType){
@@ -69,12 +71,12 @@ class FileRemoteMediator(
                 }
             }
             val pageSize = state.config.pageSize
-            val response = networkService.doGetFolderPaginatedFiles(folderId,loadKey,pageSize,true,SortType.NAME_ASC.name)!!.awaitResponse()
+            val response = networkService.doGetFolderPaginatedFiles(folderId,loadKey,pageSize,true,sortType.desc)!!.awaitResponse()
             if(response.isSuccessful) {
                 database.withTransaction {
                     if (loadType == LoadType.REFRESH) {
                         remoteKeyDao!!.deleteByIdentifier("$folderId Files")
-                        fileDao!!.deleteAllInFolder(folderId)
+                        fileDao!!.deleteAllCachedInFolder(folderId)
                     }
                     if (pageSize > response.body()!!.size)
                         remoteKeyDao!!.insertOrReplace(
@@ -84,13 +86,15 @@ class FileRemoteMediator(
                         remoteKeyDao!!.insertOrReplace(
                             RemoteKey("$folderId Files", loadKey + 1)
                         )
-                    val files = ArrayList<RoomEmbeddedFile>()
+                    val filesToInsert = ArrayList<RoomUnifiedEmbeddedFile>()
                     for (file in response.body()!!) {
-                        val databaseFile =
-                            RoomEmbeddedFile.Creator().loadFromOnlineFile(file).build()
-                        files.add(databaseFile)
+                        if(!fileDao!!.exists(file!!.onlineId)) {
+                            val databaseFile =
+                                RoomUnifiedEmbeddedFile.Creator().loadFromOnlineFile(file).build()
+                            filesToInsert.add(databaseFile)
+                        }
                     }
-                    fileDao!!.insertAll(folderId, files)
+                    fileDao!!.insertAll(folderId, filesToInsert)
                 }
                 pageNumber++
                 MediatorResult.Success(endOfPaginationReached = pageSize > response.body()!!.size)

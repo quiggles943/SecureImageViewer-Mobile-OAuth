@@ -4,7 +4,7 @@ import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFi
 
 import java.util.List;
 
-public interface IRemoteFolder {
+public interface IRemoteFolder extends IDisplayFolder {
     long getOnlineId();
 
     void clearItems();

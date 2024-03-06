@@ -1,4 +1,4 @@
 package com.quigglesproductions.secureimageviewer.models.enhanced.folder;
 
-public interface ILocalFolder {
+public interface ILocalFolder extends IDisplayFolder {
 }

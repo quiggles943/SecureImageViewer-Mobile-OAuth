@@ -6,10 +6,8 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.navigation.NavDirections;
-import androidx.navigation.Navigation;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceCategory;
-import androidx.preference.PreferenceFragment;
 import androidx.preference.PreferenceFragmentCompat;
 
 import com.quigglesproductions.secureimageviewer.BuildConfig;
@@ -20,23 +18,7 @@ public class EnhancedSettingsFragment extends PreferenceFragmentCompat {
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.root_preferences, rootKey);
         androidx.preference.Preference networkPreference  = getPreferenceManager().findPreference("network_settings");
-        networkPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                NavDirections action = EnhancedSettingsFragmentDirections.actionNavSettingsFragmentToNetworkSettingsFragment();
-                findNavController(getView()).navigate(action);
-                return true;
-            }
-        });
-        androidx.preference.Preference databasePreference  = getPreferenceManager().findPreference("database_settings");
-        databasePreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                NavDirections action = EnhancedSettingsFragmentDirections.actionNavSettingsFragmentToDatabaseSettingsFragment();
-                findNavController(getView()).navigate(action);
-                return true;
-            }
-        });
+
         androidx.preference.Preference displayPreference  = getPreferenceManager().findPreference("display_settings");
         displayPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override

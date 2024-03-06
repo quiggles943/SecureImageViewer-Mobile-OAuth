@@ -7,11 +7,6 @@ import com.quigglesproductions.secureimageviewer.models.file.FileModel;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.HashMap;
 import java.util.Map;
 
 public class FileContentUploadRequest extends FileUploadRequest{

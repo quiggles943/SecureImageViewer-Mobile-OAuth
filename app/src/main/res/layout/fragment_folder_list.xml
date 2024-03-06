@@ -1,31 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/folderList_swipe_container"
     tools:context=".ui.enhancedfolderlist.EnhancedFolderListFragment">
     <!--<androidx.recyclerview.widget.RecyclerView
         android:id="@+id/fragment_folder_recyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
          />-->
-    <com.mikelau.views.shimmer.ShimmerRecyclerViewX
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/folder_shimmer_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:shimmer_demo_child_count="4"
-        app:shimmer_demo_grid_child_count="2"
-        app:shimmer_demo_layout="@layout/layout_foldergrid_shimmer"
-        app:shimmer_demo_layout_manager_type="grid"
-        app:shimmer_demo_angle="20"
         />
     <TextView
         android:id="@+id/fragment_folder_list_text"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="No folders available"
         android:visibility="invisible"
         android:layout_gravity="center_horizontal|center_vertical"/>
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

@@ -2,6 +2,7 @@ package com.quigglesproductions.secureimageviewer.room;
 
 import androidx.room.TypeConverter;
 
+import com.quigglesproductions.secureimageviewer.datasource.folder.IFolderDataSource;
 import com.quigglesproductions.secureimageviewer.room.databases.system.enums.SystemParameter;
 
 import java.time.LocalDateTime;
@@ -37,5 +38,18 @@ public class Converters {
     @TypeConverter
     public static String fromSystemParameter(SystemParameter systemParameter){
         return systemParameter.name();
+    }
+
+    @TypeConverter
+    public static IFolderDataSource.FolderSourceType toFolderSourceType(String value){
+        if(value != null)
+            return IFolderDataSource.FolderSourceType.valueOf(value);
+        else
+            return IFolderDataSource.FolderSourceType.ONLINE;
+    }
+
+    @TypeConverter
+    public static String fromFolderSourceType(IFolderDataSource.FolderSourceType folderSourceType){
+        return folderSourceType.name();
     }
 }

@@ -3,7 +3,6 @@ package com.quigglesproductions.secureimageviewer.ui.overview;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class OverviewViewModel extends ViewModel {

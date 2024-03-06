@@ -26,11 +26,11 @@ import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.gson.Gson;
 import com.quigglesproductions.secureimageviewer.App;
-import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
-import com.quigglesproductions.secureimageviewer.aurora.appauth.AuroraAuthenticationManager;
-import com.quigglesproductions.secureimageviewer.authentication.AuthenticationManager;
+import com.quigglesproductions.secureimageviewer.aurora.authentication.appauth.AuroraAuthenticationManager;
 import com.quigglesproductions.secureimageviewer.barcodescanner.BarcodeCaptureActivity;
+import com.quigglesproductions.secureimageviewer.dagger.hilt.annotations.DownloadDatabase;
 import com.quigglesproductions.secureimageviewer.dagger.hilt.module.DownloadManager;
+import com.quigglesproductions.secureimageviewer.downloader.PagedFolderDownloader;
 import com.quigglesproductions.secureimageviewer.managers.NotificationManager;
 import com.quigglesproductions.secureimageviewer.managers.SecurityManager;
 import com.quigglesproductions.secureimageviewer.managers.ViewerConnectivityManager;
@@ -38,13 +38,11 @@ import com.quigglesproductions.secureimageviewer.models.LoginModel;
 import com.quigglesproductions.secureimageviewer.models.WebServerConfig;
 import com.quigglesproductions.secureimageviewer.retrofit.RequestManager;
 import com.quigglesproductions.secureimageviewer.room.databases.download.DownloadRecordDatabase;
-import com.quigglesproductions.secureimageviewer.room.databases.file.FileDatabase;
-import com.quigglesproductions.secureimageviewer.room.databases.modular.file.ModularFileDatabase;
 import com.quigglesproductions.secureimageviewer.room.databases.system.SystemDatabase;
-import com.quigglesproductions.secureimageviewer.ui.login.EnhancedLoginActivity;
+import com.quigglesproductions.secureimageviewer.room.databases.unified.UnifiedFileDatabase;
 import com.quigglesproductions.secureimageviewer.ui.login.ReauthenticateActivity;
+import com.quigglesproductions.secureimageviewer.ui.login.aurora.AuroraLoginActivity;
 import com.quigglesproductions.secureimageviewer.ui.startup.EnhancedStartupScreen;
-import com.quigglesproductions.secureimageviewer.ui.ui.login.LoginActivity;
 import com.techyourchance.threadposter.BackgroundThreadPoster;
 import com.techyourchance.threadposter.UiThreadPoster;
 
@@ -61,41 +59,33 @@ import dagger.hilt.android.AndroidEntryPoint;
 public class SecureActivity extends AppCompatActivity {
     Context context;
     public static final int RC_BARCODE_CAPTURE = 9001;
-    public static final int PICKFILE_RESULT_CODE = 546;
-    public static final int BIOMETRIC_ENROLLMENT = 7844;
-    public static final int INTENT_AUTHENTICATE = 5;
 
-    public static final boolean NEW_LOGIN_METHOD= false;
     private ActivityResultLauncher<Intent> activityResultLauncher;
     final BackgroundThreadPoster backgroundThreadPoster = new BackgroundThreadPoster();
     final UiThreadPoster uiThreadPoster = new UiThreadPoster();
     @Inject
     RequestManager requestManager;
     @Inject
-    AuthenticationManager authenticationManager;
-    @Inject
     Gson gson;
     @Inject
     public DownloadManager downloadManager;
     @Inject
-    FileDatabase fileDatabase;
-    @Inject
-    ModularFileDatabase modularFileDatabase;
+    @DownloadDatabase
+    UnifiedFileDatabase downloadFileDatabase;
     @Inject
     DownloadRecordDatabase recordDatabase;
     @Inject
     SystemDatabase systemDatabase;
     @Inject
     AuroraAuthenticationManager auroraAuthenticationManager;
+    @Inject
+    PagedFolderDownloader pagedFolderDownloader;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setupActivityResultLauncher();
         context = this;
         ((App)getApplicationContext()).registerActivityContextForAuthentication(context);
-        UiModeManager uiModeManager = (UiModeManager) context.getSystemService(Context.UI_MODE_SERVICE);
-        float density = context.getResources().getDisplayMetrics().densityDpi;
-        int modeType = uiModeManager.getCurrentModeType();
         Configuration config = getResources().getConfiguration();
         try {
             Class configClass = config.getClass();
@@ -143,14 +133,11 @@ public class SecureActivity extends AppCompatActivity {
                 showToast(context,text,duration);
             }
         });
-        if(!SecurityManager.getInstance().isUserAuthenticated()){
-            if(!(this instanceof ReauthenticateActivity) && !(this instanceof EnhancedLoginActivity) && !(this instanceof EnhancedStartupScreen) && !(this instanceof LoginActivity)){
+        if(!auroraAuthenticationManager.isUserAuthenticated()){
+            if(!(this instanceof ReauthenticateActivity) && !(this instanceof EnhancedStartupScreen) && !(this instanceof AuroraLoginActivity)){
                 authenticateUser();
             }
         }
-        //preferences=PreferenceManager.getDefaultSharedPreferences(this);
-        //isLoggedIn =preferences.getBoolean("loggedIn",false);
-        //ProcessLifecycleOwner.get().getLifecycle().addObserver(this);
     }
     @Override
     protected void onResume() {
@@ -176,8 +163,8 @@ public class SecureActivity extends AppCompatActivity {
                 showToast(context,text,duration);
             }
         });
-        if(!SecurityManager.getInstance().isUserAuthenticated()){
-            if(!(this instanceof ReauthenticateActivity) && !(this instanceof EnhancedLoginActivity) && !(this instanceof EnhancedStartupScreen) && !(this instanceof LoginActivity)){
+        if(!auroraAuthenticationManager.isUserAuthenticated()){
+            if(!(this instanceof ReauthenticateActivity) && !(this instanceof EnhancedStartupScreen) && !(this instanceof AuroraLoginActivity)){
                 authenticateUser();
             }
         }
@@ -186,17 +173,6 @@ public class SecureActivity extends AppCompatActivity {
         if(desktopAllowed){
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_SECURE);
         }
-        else
-        {
-            //getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
-        }
-        //SharedPreferences preferences= PreferenceManager.getDefaultSharedPreferences(this);
-        //boolean isLoggedIn =preferences.getBoolean("loggedIn",false);
-        /*if(!isLoggedIn) {
-            Intent intent = new Intent(this, SecureLoginActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
-            startActivity(intent);
-        }*/
         super.onResume();
     }
 
@@ -253,11 +229,11 @@ public class SecureActivity extends AppCompatActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode){
-            case AuthManager.AUTH_RESULT_CODE:
+            case AuroraAuthenticationManager.AUTH_REQUEST_CODE:
                 if(data != null) {
                     AuthorizationResponse resp = AuthorizationResponse.fromIntent(data);
                     AuthorizationException ex = AuthorizationException.fromIntent(data);
-                    auroraAuthenticationManager.updateAuthState(context, resp, ex);
+                    auroraAuthenticationManager.updateAuthState(resp, ex);
                     if (resp != null) {
                         auroraAuthenticationManager.getToken(context, resp, ex, new AuthorizationService.TokenResponseCallback() {
                             @Override
@@ -280,11 +256,6 @@ public class SecureActivity extends AppCompatActivity {
                     WebServerConfig config = gson.fromJson(scanResult, WebServerConfig.class);
                     Log.d("QR Code", scanResult);
                     Toast.makeText(getBaseContext(), "QR code scanned", Toast.LENGTH_SHORT).show();
-                }
-                break;
-            case AuthenticationManager.AUTHENTICATION_RESPONSE:
-                if(data != null){
-
                 }
                 break;
             case SecurityManager.LOGIN:
@@ -341,10 +312,6 @@ public class SecureActivity extends AppCompatActivity {
         return requestManager;
     }
 
-    public AuthenticationManager getAuthenticationManager() {
-        return authenticationManager;
-    }
-
     public AuroraAuthenticationManager getAuroraAuthenticationManager(){
         return auroraAuthenticationManager;
     }
@@ -357,12 +324,9 @@ public class SecureActivity extends AppCompatActivity {
         return downloadManager;
     }
 
-    public FileDatabase getFileDatabase() {
-        return fileDatabase;
-    }
 
-    public ModularFileDatabase getModularFileDatabase() {
-        return modularFileDatabase;
+    public UnifiedFileDatabase getDownloadFileDatabase() {
+        return downloadFileDatabase;
     }
 
     public DownloadRecordDatabase getRecordDatabase() {
@@ -371,5 +335,9 @@ public class SecureActivity extends AppCompatActivity {
 
     public SystemDatabase getSystemDatabase() {
         return systemDatabase;
+    }
+
+    public PagedFolderDownloader getPagedFolderDownloader(){
+        return pagedFolderDownloader;
     }
 }

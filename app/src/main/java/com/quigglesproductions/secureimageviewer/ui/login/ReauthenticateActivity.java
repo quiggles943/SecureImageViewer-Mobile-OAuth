@@ -1,9 +1,7 @@
 package com.quigglesproductions.secureimageviewer.ui.login;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.view.View;
@@ -13,7 +11,6 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 
 import com.quigglesproductions.secureimageviewer.R;
-import com.quigglesproductions.secureimageviewer.managers.SecurityManager;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
 
 public class ReauthenticateActivity extends SecureActivity {
@@ -35,7 +32,7 @@ public class ReauthenticateActivity extends SecureActivity {
         infoTextView.setText("Re-authenticate to continue");
         Intent passthroughIntent = getIntent().getParcelableExtra(EXTRA_PASSTHROUGH_INTENT);
         //SecurityManager.getInstance().setupBiometrics(this,passthroughIntent);
-        SecurityManager.getInstance().setupBiometrics(this,passthroughIntent);
+        getAuroraAuthenticationManager().biometricAuthenticator.setupBiometrics(this,passthroughIntent);
 
     }
 

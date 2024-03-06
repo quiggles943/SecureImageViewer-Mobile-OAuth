@@ -1,7 +1,7 @@
 package com.quigglesproductions.secureimageviewer.dagger.hilt.module;
 
 import com.google.gson.Gson;
-import com.quigglesproductions.secureimageviewer.authentication.AuthenticationManager;
+import com.quigglesproductions.secureimageviewer.aurora.authentication.appauth.AuroraAuthenticationManager;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedOnlineFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedDatabaseFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedOnlineFolder;
@@ -61,7 +61,7 @@ public class ConversionModuleTest {
             "  }\n" +
             "}";
     @Mock
-    Lazy<AuthenticationManager> authenticationManager;
+    Lazy<AuroraAuthenticationManager> authenticationManager;
     @Test
     public void provideGsonTest(){
         Gson testGson = ConversionModule.provideGson(authenticationManager);

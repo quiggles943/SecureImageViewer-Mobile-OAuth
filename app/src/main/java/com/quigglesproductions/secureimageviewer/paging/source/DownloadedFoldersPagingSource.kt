@@ -4,28 +4,30 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import com.quigglesproductions.secureimageviewer.SortType
-import com.quigglesproductions.secureimageviewer.models.modular.file.ModularOnlineFile
-import com.quigglesproductions.secureimageviewer.room.databases.paging.file.PagingFileDatabase
-import com.quigglesproductions.secureimageviewer.room.databases.paging.file.entity.RoomPagingFolder
-import retrofit2.awaitResponse
+import com.quigglesproductions.secureimageviewer.room.databases.unified.UnifiedFileDatabase
+import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedFolder
 
 class DownloadedFoldersPagingSource (
-    private var database: PagingFileDatabase,
-    var folderId : Int
-) : PagingSource<Int, RoomPagingFolder>() {
+    private var database: UnifiedFileDatabase
+) : PagingSource<Int, RoomUnifiedFolder>() {
     val folderDao = database.folderDao()
     @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     override suspend fun load(
         params: LoadParams<Int>
-    ): LoadResult<Int, RoomPagingFolder> {
-        val nextPageNumber = params.key ?: 1
+    ): LoadResult<Int, RoomUnifiedFolder> {
+        val pageNumber = params.key ?: 0
+        val offset = pageNumber * params.loadSize
         return try{
-            val folders = folderDao!!.folders
+            val folders = folderDao!!.getFolders(offset,params.loadSize)
+            var nextPageNumber: Int?
+            if(folders.isEmpty() || folders.size < params.loadSize)
+                nextPageNumber = null
+            else
+                nextPageNumber = pageNumber+1
             return LoadResult.Page(
                 data = folders,
                 prevKey = null,
-                nextKey = nextPageNumber+1
+                nextKey = nextPageNumber
             )
         }
         catch (exception : Exception){
@@ -33,7 +35,7 @@ class DownloadedFoldersPagingSource (
         }
     }
 
-    override fun getRefreshKey(state: PagingState<Int, RoomPagingFolder>): Int? {
+    override fun getRefreshKey(state: PagingState<Int, RoomUnifiedFolder>): Int? {
         // Try to find the page key of the closest page to anchorPosition from
         // either the prevKey or the nextKey; you need to handle nullability
         // here.

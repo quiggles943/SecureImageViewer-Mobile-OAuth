@@ -4,11 +4,11 @@ import android.content.Context;
 
 import androidx.room.Room;
 
+import com.quigglesproductions.secureimageviewer.dagger.hilt.annotations.CachingDatabase;
+import com.quigglesproductions.secureimageviewer.dagger.hilt.annotations.DownloadDatabase;
 import com.quigglesproductions.secureimageviewer.room.databases.download.DownloadRecordDatabase;
-import com.quigglesproductions.secureimageviewer.room.databases.file.FileDatabase;
-import com.quigglesproductions.secureimageviewer.room.databases.modular.file.ModularFileDatabase;
-import com.quigglesproductions.secureimageviewer.room.databases.paging.file.PagingFileDatabase;
 import com.quigglesproductions.secureimageviewer.room.databases.system.SystemDatabase;
+import com.quigglesproductions.secureimageviewer.room.databases.unified.UnifiedFileDatabase;
 
 import javax.inject.Singleton;
 
@@ -23,27 +23,20 @@ import dagger.hilt.components.SingletonComponent;
 public class DatabaseModule {
 
     @Provides
+    @DownloadDatabase
     @Singleton
-    public static FileDatabase provideFileDatabase(@ApplicationContext Context context){
-        FileDatabase fileDatabase = Room.databaseBuilder(context,FileDatabase.class,"File Database")
-                                        .fallbackToDestructiveMigration()
-                                        .build();
-        return fileDatabase;
-    }
-
-    @Provides
-    @Singleton
-    public static ModularFileDatabase provideModularFileDatabase(@ApplicationContext Context context){
-        ModularFileDatabase fileDatabase = Room.databaseBuilder(context,ModularFileDatabase.class,"Modular File Database")
+    public static UnifiedFileDatabase provideDownloadFileDatabase(@ApplicationContext Context context){
+        UnifiedFileDatabase fileDatabase = Room.databaseBuilder(context,UnifiedFileDatabase.class,"Download File Database")
                 .fallbackToDestructiveMigration()
                 .build();
         return fileDatabase;
     }
 
     @Provides
+    @CachingDatabase
     @Singleton
-    public static PagingFileDatabase providePagingFileDatabase(@ApplicationContext Context context){
-        PagingFileDatabase fileDatabase = Room.databaseBuilder(context,PagingFileDatabase.class,"Paging File Database")
+    public static UnifiedFileDatabase provideCachingFileDatabase(@ApplicationContext Context context){
+        UnifiedFileDatabase fileDatabase = Room.databaseBuilder(context,UnifiedFileDatabase.class,"Paging File Database")
                 .fallbackToDestructiveMigration()
                 .build();
         return fileDatabase;

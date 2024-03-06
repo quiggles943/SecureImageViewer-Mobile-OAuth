@@ -2,22 +2,17 @@ package com.quigglesproductions.secureimageviewer.datasource.file;
 
 import android.content.Context;
 
-import androidx.annotation.Nullable;
-
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.LazyHeaders;
-import com.quigglesproductions.secureimageviewer.appauth.RequestServiceNotConfiguredException;
-import com.quigglesproductions.secureimageviewer.aurora.appauth.AuroraAuthenticationManager;
+import com.quigglesproductions.secureimageviewer.aurora.authentication.appauth.AuroraAuthenticationManager;
 import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.FileMetadata;
 import com.quigglesproductions.secureimageviewer.retrofit.RequestManager;
-import com.quigglesproductions.secureimageviewer.room.databases.paging.file.entity.relations.RoomEmbeddedFile;
-
-import net.openid.appauth.AuthState;
-import net.openid.appauth.AuthorizationException;
+import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.relations.RoomUnifiedEmbeddedFile;
 
 import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 
 import retrofit2.Call;
@@ -25,25 +20,42 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class RoomPagingFileDataSource implements IFileDataSource {
-    private transient RoomEmbeddedFile file;
-    AuroraAuthenticationManager authenticationManager;
+    private transient RoomUnifiedEmbeddedFile file;
 
-    public RoomPagingFileDataSource(RoomEmbeddedFile file) {
+    public RoomPagingFileDataSource(RoomUnifiedEmbeddedFile file) {
         this.file = file;
-        this.authenticationManager = authenticationManager;
     }
-    public RoomPagingFileDataSource(RoomEmbeddedFile file,AuroraAuthenticationManager authenticationManager) {
+    public RoomPagingFileDataSource(RoomUnifiedEmbeddedFile file,AuroraAuthenticationManager authenticationManager) {
         this.file = file;
-        this.authenticationManager = authenticationManager;
     }
 
     @Override
     public URL getFileURL() throws MalformedURLException {
-        URI uri = file.getImageFile().toURI();
+        URI uri;
+        if(file.getFilePath()!= null){
+            uri = file.getImageFile().toURI();
+        }
+        else {
+            try {
+                String baseUrl = "https://quigleyserver.ddns.net:14500/api/v2/file/";
+                uri = new URI(baseUrl + file.getOnlineId()+"/content");
+            }
+            catch(URISyntaxException exception){
+                return null;
+            }
+        }
         return uri.toURL();
     }
 
-    private URL getFileURL(int id) throws MalformedURLException, RequestServiceNotConfiguredException {
+    @Override
+    public FileSourceType getFileSourceType() {
+        if(file.getFilePath()!= null)
+            return FileSourceType.LOCAL;
+        else
+            return FileSourceType.ONLINE;
+    }
+
+    private URL getFileURL(int id) throws MalformedURLException {
         String baseUrl = "https://quigleyserver.ddns.net:14500/api/v2/file/";
         String fileUri = baseUrl + id;
         return new URL(fileUri);
@@ -60,11 +72,15 @@ public class RoomPagingFileDataSource implements IFileDataSource {
     @Override
     public void getFileThumbnailDataSource(Context context, DataSourceCallback callback) throws MalformedURLException {
         try {
-            GlideUrl glideThumbnailUrl = new GlideUrl(getFileURL(file.file.getOnlineId()) + "/thumbnail", new LazyHeaders.Builder()
-                    //.addHeader("Authorization", "Bearer " + accessToken)
-                    .build());
-            callback.FileThumbnailDataSourceRetrieved(glideThumbnailUrl, null);
-        } catch (MalformedURLException | RequestServiceNotConfiguredException e) {
+            if(file.getThumbnailPath() != null)
+                callback.FileThumbnailDataSourceRetrieved(file.getThumbnailFile(), null);
+            else {
+                GlideUrl glideThumbnailUrl = new GlideUrl(getFileURL(file.file.getOnlineId()) + "/thumbnail", new LazyHeaders.Builder()
+                        //.addHeader("Authorization", "Bearer " + accessToken)
+                        .build());
+                callback.FileThumbnailDataSourceRetrieved(glideThumbnailUrl, null);
+            }
+        } catch (MalformedURLException e) {
             e.printStackTrace();
             callback.FileThumbnailDataSourceRetrieved(null, e);
         }
@@ -73,14 +89,19 @@ public class RoomPagingFileDataSource implements IFileDataSource {
     @Override
     public void getFullFileDataSource(Context context, DataSourceCallback callback) throws MalformedURLException {
         try {
-            GlideUrl glideUrl = new GlideUrl(getFileURL(file.getOnlineId()) + "/content", new LazyHeaders.Builder()
-                    //.addHeader("Authorization", "Bearer " + accessToken)
-                    .build());
-            GlideUrl glideThumbnailUrl = new GlideUrl(getFileURL(file.getOnlineId()) + "/thumbnail", new LazyHeaders.Builder()
-                    //.addHeader("Authorization", "Bearer " + accessToken)
-                    .build());
-            callback.FileRetrievalDataSourceRetrieved(glideUrl, glideThumbnailUrl, null);
-        } catch (MalformedURLException | RequestServiceNotConfiguredException e) {
+            if(file.getFilePath()!= null){
+                callback.FileRetrievalDataSourceRetrieved(file.getImageFile(),file.getThumbnailFile(),null);
+            }
+            else {
+                GlideUrl glideUrl = new GlideUrl(getFileURL(file.getOnlineId()) + "/content", new LazyHeaders.Builder()
+                        //.addHeader("Authorization", "Bearer " + accessToken)
+                        .build());
+                GlideUrl glideThumbnailUrl = new GlideUrl(getFileURL(file.getOnlineId()) + "/thumbnail", new LazyHeaders.Builder()
+                        //.addHeader("Authorization", "Bearer " + accessToken)
+                        .build());
+                callback.FileRetrievalDataSourceRetrieved(glideUrl, glideThumbnailUrl, null);
+            }
+        } catch (MalformedURLException e) {
             e.printStackTrace();
             callback.FileRetrievalDataSourceRetrieved(null, null, e);
         }
@@ -88,19 +109,27 @@ public class RoomPagingFileDataSource implements IFileDataSource {
 
     @Override
     public void getFileMetadata(RequestManager requestManager,DataSourceFileMetadataCallback callback) {
-        requestManager.enqueue(requestManager.getRequestService().doGetFileMetadata(file.getOnlineId()), new Callback<FileMetadata>() {
-            @Override
-            public void onResponse(Call<FileMetadata> call, Response<FileMetadata> response) {
-                if(response.isSuccessful())
-                    callback.FileMetadataRetrieved(response.body(),null);
-                else
-                    callback.FileMetadataRetrieved(null,new Exception("Unable to retrieve metadata"));
+        switch (getFileSourceType()){
+            case LOCAL -> {
+                callback.FileMetadataRetrieved(file.metadata,null);
             }
+            case ONLINE -> {
+                requestManager.enqueue(requestManager.getRequestService().doGetFileMetadata(file.getOnlineId()), new Callback<FileMetadata>() {
+                    @Override
+                    public void onResponse(Call<FileMetadata> call, Response<FileMetadata> response) {
+                        if(response.isSuccessful())
+                            callback.FileMetadataRetrieved(response.body(),null);
+                        else
+                            callback.FileMetadataRetrieved(null,new Exception("Unable to retrieve metadata"));
+                    }
 
-            @Override
-            public void onFailure(Call<FileMetadata> call, Throwable t) {
-                callback.FileMetadataRetrieved(null,(Exception) t);
+                    @Override
+                    public void onFailure(Call<FileMetadata> call, Throwable t) {
+                        callback.FileMetadataRetrieved(null,(Exception) t);
+                    }
+                });
             }
-        });
+        }
+
     }
 }
