@@ -35,14 +35,23 @@ object ViewerFileUtils {
         var count: Int
         //BufferedOutputStream output = new BufferedOutputStream(new FileOutputStream(file));
         val out: OutputStream = FileOutputStream(file)
-        val dataParse = ByteArray(1024)
+        out.use { output ->
+            val buffer = ByteArray(4*1024)
+            var read: Int
+            while (input.read(buffer).also { read = it } != -1) {
+                output.write(buffer, 0, read)
+            }
+            output.flush()
+        }
+        /*val dataParse = ByteArray(1024)
         var total: Long = 0
         while (input.read(dataParse).also { count = it } > 0) {
             total += count.toLong()
             out.write(dataParse, 0, count)
         }
         input.close()
-        out.close()
+        out.close()*/
+        input.close()
         //fileToInsert.setImageFile(file);
         //ImageUtils.createThumbnail(context, fileToInsert);
     }

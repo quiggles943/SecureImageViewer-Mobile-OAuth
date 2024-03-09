@@ -1,19 +1,21 @@
 package com.quigglesproductions.secureimageviewer.downloader
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
+import android.graphics.Color
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
+import androidx.core.app.NotificationCompat
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
-import androidx.work.ListenableWorker
-import androidx.work.Worker
+import androidx.work.WorkManager
 import androidx.work.WorkerParameters
-import androidx.work.impl.model.Dependency
 import androidx.work.workDataOf
-import com.google.android.material.snackbar.Snackbar
+import com.quigglesproductions.secureimageviewer.R
 import com.quigglesproductions.secureimageviewer.SortType
 import com.quigglesproductions.secureimageviewer.dagger.hilt.annotations.DownloadDatabase
-import com.quigglesproductions.secureimageviewer.managers.NotificationManager
-import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDatabaseFile
 import com.quigglesproductions.secureimageviewer.models.modular.file.ModularOnlineFile
 import com.quigglesproductions.secureimageviewer.retrofit.DownloadService
 import com.quigglesproductions.secureimageviewer.room.databases.unified.UnifiedFileDatabase
@@ -24,7 +26,6 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import okhttp3.ResponseBody
 import retrofit2.awaitResponse
-import java.io.IOException
 import java.time.LocalDateTime
 import javax.inject.Inject
 
@@ -42,9 +43,10 @@ class FolderDownloadWorker @AssistedInject constructor (
     lateinit var database: UnifiedFileDatabase
     @Inject
     lateinit var downloadService: DownloadService
-    val Total = "Total"
-    val Progress = "Progress"
-    val State = "State"
+
+    private val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+    private var notificationBuilder = NotificationCompat.Builder(applicationContext, "Download_Channel")
 
     override suspend fun doWork(): Result {
         val folderId = inputData.getLong("folderId",0)
@@ -58,9 +60,10 @@ class FolderDownloadWorker @AssistedInject constructor (
         var pageCount = 1
         var hasMoreFiles = true
         val databaseList = ArrayList<RoomUnifiedEmbeddedFile>()
-        var progress = workDataOf(State to DownloadState.RETRIEVING_DATA.title)
+        var progress = workDataOf(State to DownloadState.RETRIEVING_DATA.name)
         var completedSuccessfully = 0
         var hadError = 0
+        notificationManager.notify(embeddedFolder.id.toInt(),buildNotificationWithProgress(0,"Downloading folder "+folder.normalName))
         setProgress(progress)
         while(hasMoreFiles){
             val retrievedFiles = retrievePagedFiles(folder = folder, page = pageCount)
@@ -70,7 +73,7 @@ class FolderDownloadWorker @AssistedInject constructor (
             else
                 pageCount++
         }
-        val total = workDataOf(Total to databaseList.size, Progress to 0,State to DownloadState.DOWNLOADING.title)
+        val total = workDataOf(Total to databaseList.size, Progress to 0,State to DownloadState.DOWNLOADING.name)
         setProgress(total)
         for((count, file: RoomUnifiedEmbeddedFile) in databaseList.withIndex()){
             val downloadSuccess = downloadFileContent(folder, file)
@@ -79,11 +82,21 @@ class FolderDownloadWorker @AssistedInject constructor (
             }
             else
                 completedSuccessfully++
-            val update = workDataOf(Total to databaseList.size, Progress to count+1,State to DownloadState.DOWNLOADING.title)
+            val progressCount = count+1
+            val update = workDataOf(Total to databaseList.size, Progress to progressCount,State to DownloadState.DOWNLOADING.name,
+                ErrorCount to hadError)
             setProgress(update)
+            val percentage = calculatePercentage(progressCount,databaseList.size)
+            notificationManager.notify(embeddedFolder.id.toInt(),buildNotificationWithProgress(percentage,"Downloading folder "+folder.normalName))
+            Log.d("PagedFolderDownloader","Folder ${folder.normalName} - $progressCount/${databaseList.size} downloaded")
         }
-        Log.i("PagedFolderDownloader", "Folder "+folder.normalName+" downloaded")
-        val update = workDataOf(Total to databaseList.size, Progress to databaseList.size,State to DownloadState.COMPLETE.title)
+        Log.i("PagedFolderDownloader","Folder ${folder.normalName} - ${databaseList.size} downloaded ($completedSuccessfully successful, $hadError unsuccessful)")
+        Log.i("PagedFolderDownloader", "Folder ${folder.normalName} - Download complete")
+
+        val update = workDataOf(Total to databaseList.size, Progress to databaseList.size,State to DownloadState.COMPLETE.name, ErrorCount to hadError,
+            FolderName to folder.normalName)
+        //setProgress(update)
+        notificationManager.notify(embeddedFolder.id.toInt(),buildNotificationWithMessage("Download of folder "+folder.normalName+" complete "))
         return Result.success(update)
     }
 
@@ -142,10 +155,78 @@ class FolderDownloadWorker @AssistedInject constructor (
         }
     }
 
-    enum class DownloadState(val title:String){
-        RETRIEVING_DATA("Retrieving Data"),
-        DOWNLOADING("Downloading"),
-        COMPLETE("Complete")
+    private fun buildNotificationWithMessage(message: String): android.app.Notification {
+        val title = "Folder Download"
+        val cancel = "Cancel"
+        // This PendingIntent can be used to cancel the worker
+        val intent = WorkManager.getInstance(applicationContext)
+            .createCancelPendingIntent(getId())
 
+        // Create a Notification channel if necessary
+        createChannel()
+
+        return notificationBuilder
+            .setContentTitle(title)
+            .setTicker(title)
+            .setContentText(message)
+            .setSmallIcon(R.drawable.ic_icon)
+            .setColor(Color.WHITE)
+            .setProgress(0,0,false)
+            .setVisibility(NotificationCompat.VISIBILITY_SECRET)
+            .setOngoing(true)
+            .setOnlyAlertOnce(true)
+            .build()
+    }
+
+    private fun buildNotificationWithProgress(
+        downloadProgress: Int,
+        progress: String
+    ): android.app.Notification {
+        val id = "Download_Channel"
+        val title = "Folder Download"
+        val cancel = "Cancel"
+        // This PendingIntent can be used to cancel the worker
+        val intent = WorkManager.getInstance(applicationContext)
+            .createCancelPendingIntent(getId())
+
+        // Create a Notification channel if necessary
+        createChannel()
+
+        return notificationBuilder
+            .setContentTitle(title)
+            .setTicker(title)
+            .setContentText(progress)
+            .setSmallIcon(R.drawable.ic_icon)
+            .setColor(Color.WHITE)
+            .setVisibility(NotificationCompat.VISIBILITY_SECRET)
+            .setOngoing(true)
+            .setOnlyAlertOnce(true)
+            .setProgress(100, downloadProgress, false)
+            .build()
+        //return ForegroundInfo(notificationId, notification)
+    }
+
+    private fun calculatePercentage(count: Int,total: Int):Int{
+        val fraction: Double = count.toDouble()/total
+        val percentage = fraction*100
+        return percentage.toInt()
+    }
+    private fun createChannel() {
+        // Create a Notification channel
+        val name = "Downloads"
+        val descriptionText = "Shows download status notifications"
+        val importance = NotificationManager.IMPORTANCE_DEFAULT
+        val mChannel = NotificationChannel("Download_Channel", name, importance)
+        mChannel.description = descriptionText
+        // Register the channel with the system. You can't change the importance
+        // or other notification behaviors after this.
+        notificationManager.createNotificationChannel(mChannel)
+    }
+    companion object{
+        const val FolderName = "FolderName"
+        const val Total = "Total"
+        const val Progress = "Progress"
+        const val ErrorCount = "ErrorCount"
+        const val State = "State"
     }
 }

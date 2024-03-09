@@ -1,7 +1,9 @@
 package com.quigglesproductions.secureimageviewer.downloader
 
-private sealed class DownloadState {
-    data class Downloading(val progress: Int) : DownloadState()
-    object Finished : DownloadState()
-    data class Failed(val error: Throwable? = null) : DownloadState()
+enum class DownloadState(val title:String){
+    UNKNOWN("Unknown"),
+    RETRIEVING_DATA("Retrieving Data"),
+    DOWNLOADING("Downloading"),
+    COMPLETE("Complete")
+
 }

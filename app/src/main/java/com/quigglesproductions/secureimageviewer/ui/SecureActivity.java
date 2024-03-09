@@ -30,6 +30,7 @@ import com.quigglesproductions.secureimageviewer.aurora.authentication.appauth.A
 import com.quigglesproductions.secureimageviewer.barcodescanner.BarcodeCaptureActivity;
 import com.quigglesproductions.secureimageviewer.dagger.hilt.annotations.DownloadDatabase;
 import com.quigglesproductions.secureimageviewer.dagger.hilt.module.DownloadManager;
+import com.quigglesproductions.secureimageviewer.downloader.FolderDownloaderMediator;
 import com.quigglesproductions.secureimageviewer.downloader.PagedFolderDownloader;
 import com.quigglesproductions.secureimageviewer.managers.NotificationManager;
 import com.quigglesproductions.secureimageviewer.managers.SecurityManager;
@@ -80,6 +81,9 @@ public class SecureActivity extends AppCompatActivity {
     AuroraAuthenticationManager auroraAuthenticationManager;
     @Inject
     PagedFolderDownloader pagedFolderDownloader;
+
+    @Inject
+    FolderDownloaderMediator folderDownloaderMediator;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -339,5 +343,9 @@ public class SecureActivity extends AppCompatActivity {
 
     public PagedFolderDownloader getPagedFolderDownloader(){
         return pagedFolderDownloader;
+    }
+
+    public FolderDownloaderMediator getFolderDownloaderMediator() {
+        return folderDownloaderMediator;
     }
 }

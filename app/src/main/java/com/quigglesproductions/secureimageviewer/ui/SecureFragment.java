@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment;
 import com.google.gson.Gson;
 import com.quigglesproductions.secureimageviewer.aurora.authentication.appauth.AuroraAuthenticationManager;
 import com.quigglesproductions.secureimageviewer.dagger.hilt.module.DownloadManager;
+import com.quigglesproductions.secureimageviewer.downloader.FolderDownloaderMediator;
 import com.quigglesproductions.secureimageviewer.downloader.PagedFolderDownloader;
 import com.quigglesproductions.secureimageviewer.retrofit.ModularRequestService;
 import com.quigglesproductions.secureimageviewer.retrofit.RequestManager;
@@ -65,5 +66,9 @@ public class SecureFragment extends Fragment {
 
     public PagedFolderDownloader getPagedFolderDownloaded() throws IllegalStateException {
         return requiresSecureActivity().getPagedFolderDownloader();
+    }
+
+    public FolderDownloaderMediator getFolderDownloaderMediator() throws IllegalStateException{
+        return requiresSecureActivity().getFolderDownloaderMediator();
     }
 }

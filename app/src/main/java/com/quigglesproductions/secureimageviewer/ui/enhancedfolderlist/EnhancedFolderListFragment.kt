@@ -314,20 +314,8 @@ class EnhancedFolderListFragment() : SecureFragment() {
                                 .setInputData(inputData)
                                 .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
                                 .build()
-                        WorkManager.getInstance(requireContext()).enqueueUniqueWork(folder.normalName+" Downloader",ExistingWorkPolicy.REPLACE,downloadWorkRequest)
-                        WorkManager.getInstance(requireContext())
-                            .getWorkInfoByIdLiveData(downloadWorkRequest.id)
-                            .observe(viewLifecycleOwner, Observer { workInfo: WorkInfo?->
-                                if(workInfo != null){
-                                    val progress = workInfo.progress
-                                    val value = progress.getInt("Progress",0)
-                                    val total = progress.getInt("Total",0)
-                                    if(total>0) {
-                                        var percentage = (value / total) * 100
-
-                                    }
-                                }
-                            })
+                        folderDownloaderMediator.enqueueFolderDownload(folder,downloadWorkRequest)
+                        //WorkManager.getInstance(requireContext()).enqueueUniqueWork(folder.normalName+" Downloader",ExistingWorkPolicy.REPLACE,downloadWorkRequest)
                     }
                 }
                 NotificationManager.getInstance().showSnackbar(

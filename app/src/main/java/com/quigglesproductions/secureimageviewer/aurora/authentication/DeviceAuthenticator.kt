@@ -81,11 +81,7 @@ class DeviceAuthenticator(
                 return false
             }
         }
-        /*if (deviceRegistrationInfo == null) {
-            return deviceRegistrationCheckFailed(authenticationManager.deviceAuthenticator.lastResponse)
-        }
-        else*/
-            return false
+        return false
     }
 
     private fun deviceRegistrationCheckFailed(response: Response<DeviceRegistration>?):Boolean {
