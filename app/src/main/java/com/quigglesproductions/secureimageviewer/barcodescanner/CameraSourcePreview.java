@@ -3,7 +3,6 @@ package com.quigglesproductions.secureimageviewer.barcodescanner;
 import android.Manifest;
 import android.content.Context;
 import android.content.res.Configuration;
-
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceHolder;

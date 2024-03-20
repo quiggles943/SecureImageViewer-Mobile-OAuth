@@ -18,12 +18,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
-import com.quigglesproductions.secureimageviewer.BuildConfig
 import com.quigglesproductions.secureimageviewer.R
-import com.quigglesproductions.secureimageviewer.aurora.authentication.device.DeviceRegistration
 import com.quigglesproductions.secureimageviewer.managers.ViewerConnectivityManager
-import com.quigglesproductions.secureimageviewer.models.error.RequestError
-import com.quigglesproductions.secureimageviewer.retrofit.RequestErrorModel
 import com.quigglesproductions.secureimageviewer.ui.EnhancedMainMenuActivity
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity
 import com.quigglesproductions.secureimageviewer.ui.login.aurora.AuroraLoginActivity
@@ -32,7 +28,6 @@ import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.time.LocalDateTime
 
 class EnhancedStartupScreen : SecureActivity() {
     private lateinit var infoTextView: TextView

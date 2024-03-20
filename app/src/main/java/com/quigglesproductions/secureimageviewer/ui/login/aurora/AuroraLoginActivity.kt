@@ -10,7 +10,6 @@ import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.lifecycle.Observer
-import androidx.lifecycle.lifecycleScope
 import com.quigglesproductions.secureimageviewer.aurora.authentication.AuroraUser
 import com.quigglesproductions.secureimageviewer.aurora.authentication.appauth.AuroraAuthenticationManager
 import com.quigglesproductions.secureimageviewer.databinding.ActivityAuroraLoginBinding

@@ -75,9 +75,10 @@ public class RoomUnifiedFile {
     public LocalDateTime retrievedDate;
     @ColumnInfo(name = "DownloadedDate")
     public LocalDateTime downloadedDate;
-
     @ColumnInfo(name = "IsDownloaded")
     public boolean isDownloaded;
+    @ColumnInfo(name = "isFavourite")
+    public boolean isFavourite;
 
     @Ignore
     private File imageFile;

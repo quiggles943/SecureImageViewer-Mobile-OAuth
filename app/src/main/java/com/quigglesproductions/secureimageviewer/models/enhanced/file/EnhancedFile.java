@@ -3,11 +3,11 @@ package com.quigglesproductions.secureimageviewer.models.enhanced.file;
 import androidx.annotation.NonNull;
 
 import com.google.gson.annotations.SerializedName;
+import com.quigglesproductions.secureimageviewer.datasource.file.IFileDataSource;
+import com.quigglesproductions.secureimageviewer.models.ItemBaseModel;
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedArtist;
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedCategory;
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedSubject;
-import com.quigglesproductions.secureimageviewer.datasource.file.IFileDataSource;
-import com.quigglesproductions.secureimageviewer.models.ItemBaseModel;
 import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.FileMetadata;
 
 import java.time.LocalDateTime;

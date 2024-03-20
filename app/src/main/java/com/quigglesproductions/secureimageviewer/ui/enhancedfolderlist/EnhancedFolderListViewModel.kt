@@ -20,12 +20,26 @@ class EnhancedFolderListViewModel @Inject constructor(
     val folders: MutableLiveData<List<IDisplayFolder>> = MutableLiveData()
     val position: MutableLiveData<Int> = MutableLiveData()
     val folderListType: MutableLiveData<FolderListType> = MutableLiveData()
-
+    var pagedFolders: Flow<PagingData<RoomUnifiedFolder>>? = null
+    private var pagedListType: FolderListType? = null
+    val selectedFolder: MutableLiveData<RoomUnifiedFolder> = MutableLiveData()
     init {
+    }
+
+    fun createPagedSource(){
+        if(folderListType.value != pagedListType) {
+            pagedListType = folderListType.value
+            if(pagedListType != null)
+                pagedFolders = folderMediatorRepository.getFolders(pagedListType!!).cachedIn(viewModelScope)
+        }
     }
 
     fun getFolders(listType: FolderListType): Flow<PagingData<RoomUnifiedFolder>> {
         return folderMediatorRepository.getFolders(listType).cachedIn(viewModelScope)
+    }
+
+    fun invalidatePagedData() {
+        folderMediatorRepository.invalidateData(folderListType.value)
     }
 
 }

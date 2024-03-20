@@ -23,7 +23,6 @@ import com.techyourchance.threadposter.UiThreadPoster
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import okhttp3.ResponseBody
 import retrofit2.Call

@@ -17,17 +17,18 @@ import com.quigglesproductions.secureimageviewer.room.enums.FileSortType
 import com.quigglesproductions.secureimageviewer.ui.enhancedfolderlist.FolderListType
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
+
 class FolderFilesMediatorRepository @Inject constructor(requestService: ModularRequestService,
                                                         @CachingDatabase pagingDatabase: UnifiedFileDatabase,
                                                         @DownloadDatabase downloadedDatabase: UnifiedFileDatabase
-){
-    private val onlineFolderFilesDataSource : OnlineFolderFilesDataSource
+): IFolderFileRepository {
+    private val onlineFolderFilesDataSource: OnlineFolderFilesDataSource
     private val modularRequestService: ModularRequestService
     private val pagingDatabase: UnifiedFileDatabase
     private val downloadedDatabase: UnifiedFileDatabase
+    private lateinit var folder: RoomUnifiedFolder
+
     init {
         onlineFolderFilesDataSource = OnlineFolderFilesDataSource(requestService)
         modularRequestService = requestService
@@ -35,31 +36,39 @@ class FolderFilesMediatorRepository @Inject constructor(requestService: ModularR
         this.downloadedDatabase = downloadedDatabase
     }
 
+    override fun setFolder(folder: RoomUnifiedFolder) {
+        this.folder = folder
+    }
+
     @OptIn(ExperimentalPagingApi::class)
-    fun getFiles(
+    override fun getFiles(
         folderListType: FolderListType,
-        folder: RoomUnifiedFolder,
         sortType: FileSortType
     ): Flow<PagingData<RoomUnifiedEmbeddedFile>> {
         val fileDao = pagingDatabase.fileDao()
-        when(folderListType){
-            FolderListType.ONLINE ->return Pager(
+        when (folderListType) {
+            FolderListType.ONLINE -> return Pager(
                 config = PagingConfig(pageSize = 50),
-                remoteMediator = FileRemoteMediator(folderId = folder.onlineId, networkService = modularRequestService, database = pagingDatabase, sortType = sortType)
-            ){
-                fileDao!!.folderPagingSourceSorted(folder.onlineId,sortType.getDatabaseSort())
+                remoteMediator = FileRemoteMediator(
+                    folderId = folder.onlineId,
+                    networkService = modularRequestService,
+                    database = pagingDatabase,
+                    sortType = sortType
+                )
+            ) {
+                fileDao.getFilesPaging(folder.onlineId, sortType)
             }.flow
-            FolderListType.DOWNLOADED ->return Pager(
+
+            FolderListType.DOWNLOADED -> return Pager(
                 config = PagingConfig(
                     pageSize = 25,
                     enablePlaceholders = true,
 
                     ),
                 pagingSourceFactory = {
-                    DownloadedFilesPagingSource(downloadedDatabase,folder.uid,sortType)
+                    DownloadedFilesPagingSource(downloadedDatabase, folder.uid, sortType)
                 }
             ).flow
         }
-
     }
 }

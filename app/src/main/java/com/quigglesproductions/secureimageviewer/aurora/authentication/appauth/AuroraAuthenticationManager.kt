@@ -11,7 +11,6 @@ import com.quigglesproductions.secureimageviewer.aurora.authentication.AuroraUse
 import com.quigglesproductions.secureimageviewer.aurora.authentication.BiometricAuthenticator
 import com.quigglesproductions.secureimageviewer.aurora.authentication.DeviceAuthenticator
 import com.quigglesproductions.secureimageviewer.retrofit.DeviceRegistrationRequestService
-import com.quigglesproductions.secureimageviewer.retrofit.ModularRequestService
 import com.quigglesproductions.secureimageviewer.room.databases.system.SystemDatabase
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity
 import com.quigglesproductions.secureimageviewer.ui.login.aurora.AuroraLoginActivity

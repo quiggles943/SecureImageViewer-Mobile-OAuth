@@ -2,30 +2,12 @@ package com.quigglesproductions.secureimageviewer.paging.source
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.paging.ListenableFuturePagingSource
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
-import androidx.paging.PagingData
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import com.google.common.base.Function
-import com.google.common.util.concurrent.Futures
-import com.google.common.util.concurrent.ListenableFuture
 import com.quigglesproductions.secureimageviewer.SortType
-import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile
 import com.quigglesproductions.secureimageviewer.models.modular.file.ModularOnlineFile
-import com.quigglesproductions.secureimageviewer.models.modular.folder.ModularOnlineFolder
 import com.quigglesproductions.secureimageviewer.retrofit.ModularRequestService
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.runBlocking
-import retrofit2.Callback
-import retrofit2.Response
 import retrofit2.awaitResponse
-import java.io.IOException
-import java.util.concurrent.Executor
-import java.util.stream.Collectors
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 class OnlineFolderFilePagingSource (
     private var requestService: ModularRequestService,

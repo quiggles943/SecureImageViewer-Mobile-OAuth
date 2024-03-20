@@ -1,6 +1,5 @@
 package com.quigglesproductions.secureimageviewer.retrofit
 
-import com.quigglesproductions.secureimageviewer.models.modular.ModularServerStatus
 import com.quigglesproductions.secureimageviewer.retrofit.annotations.AuthenticationRequired
 import okhttp3.ResponseBody
 import retrofit2.Call

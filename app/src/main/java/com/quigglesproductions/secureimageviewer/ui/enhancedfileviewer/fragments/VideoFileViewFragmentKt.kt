@@ -11,15 +11,13 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import com.quigglesproductions.secureimageviewer.R
-import com.quigglesproductions.secureimageviewer.aurora.authentication.appauth.AuroraAuthenticationManager
 import com.quigglesproductions.secureimageviewer.managers.VideoPlaybackManager
 import com.quigglesproductions.secureimageviewer.managers.VideoPlaybackManager.VideoPlayerCallback
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile
-import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.EnhancedFileViewerViewModelKt
-import javax.inject.Inject
+import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.EnhancedFileViewerViewModel
 
 class VideoFileViewFragmentKt(playbackManager: VideoPlaybackManager,
-                              val viewModel: EnhancedFileViewerViewModelKt
+                              val viewModel: EnhancedFileViewerViewModel
     ) : BaseFileViewFragmentKt() {
     var videoView: PlayerView? = null
     private var mPlayer: ExoPlayer? = null

@@ -6,9 +6,8 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
-import android.widget.TextView
 import androidx.annotation.OptIn
+import androidx.fragment.app.activityViewModels
 import androidx.media3.common.util.UnstableApi
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
@@ -20,14 +19,15 @@ import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.signature.ObjectKey
 import com.quigglesproductions.secureimageviewer.R
 import com.quigglesproductions.secureimageviewer.datasource.file.IFileDataSource.DataSourceCallback
-import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile
+import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.relations.RoomUnifiedEmbeddedFile
 import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.EnhancedFileCollectionAdapterKt.ZoomLevelChangeCallback
+import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.EnhancedFileViewFragment
+import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.EnhancedFileViewerViewModel
 import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.NewTouchImageView
-import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.EnhancedFileViewFragmentKt
-import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.EnhancedFileViewerViewModelKt
 
-class ImageFileViewFragmentKt(val viewModel: EnhancedFileViewerViewModelKt) : BaseFileViewFragmentKt() {
+class ImageFileViewFragmentKt() : BaseFileViewFragmentKt() {
     private var zoomLevelChangeCallback: ZoomLevelChangeCallback? = null
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -37,7 +37,7 @@ class ImageFileViewFragmentKt(val viewModel: EnhancedFileViewerViewModelKt) : Ba
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val parentFragment = parentFragment as EnhancedFileViewFragmentKt?
+        val parentFragment = parentFragment as EnhancedFileViewFragment?
         zoomLevelChangeCallback = parentFragment!!.zoomCallback
         val file = file
         view.setOnClickListener { }
@@ -47,7 +47,7 @@ class ImageFileViewFragmentKt(val viewModel: EnhancedFileViewerViewModelKt) : Ba
 
     @SuppressLint("ClickableViewAccessibility")
     @OptIn(UnstableApi::class)
-    private fun loadImage(itemView: View, item: IDisplayFile?) {
+    private fun loadImage(itemView: View, item: RoomUnifiedEmbeddedFile) {
         val imageView = itemView.findViewById<View>(R.id.imageViewer) as NewTouchImageView
         imageView.setOnClickListener(View.OnClickListener {
             if (viewerNavigator == null) return@OnClickListener
@@ -63,7 +63,7 @@ class ImageFileViewFragmentKt(val viewModel: EnhancedFileViewerViewModelKt) : Ba
             false
         }
         try {
-            val dataSource = item!!.dataSource
+            val dataSource = item.dataSource
             val fileType = item.fileType
             val decodeFormat: DecodeFormat = if (fileType.hasTransparency()) DecodeFormat.PREFER_ARGB_8888 else DecodeFormat.PREFER_RGB_565
             if (dataSource == null) return

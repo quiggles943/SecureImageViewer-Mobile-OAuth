@@ -21,7 +21,7 @@ class DownloadedFilesPagingSource(
         val pageNumber = params.key ?: 0
         val offset = pageNumber * params.loadSize
         return try{
-            val files = fileDao!!.getFiles(folderId,offset,params.loadSize,sortType.getDatabaseSort())
+            val files = fileDao.getFiles(folderId,offset,params.loadSize,sortType)
             val nextPageNumber: Int?
             if(files.isEmpty() || files.size < params.loadSize)
                 nextPageNumber = null

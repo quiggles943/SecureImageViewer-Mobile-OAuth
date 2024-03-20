@@ -5,7 +5,6 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
-import com.quigglesproductions.secureimageviewer.aurora.authentication.appauth.AuroraAuthenticationManager
 import com.quigglesproductions.secureimageviewer.dagger.hilt.annotations.CachingDatabase
 import com.quigglesproductions.secureimageviewer.datasource.folder.IFolderDataSource
 import com.quigglesproductions.secureimageviewer.retrofit.ModularRequestService
@@ -59,7 +58,7 @@ class FolderRemoteMediator(
                     return MediatorResult.Success(endOfPaginationReached = true)
                 LoadType.APPEND -> {
                     val remoteKey = database.withTransaction {
-                        remoteKeyDao!!.remoteKeyByIdentifier("Folder List")
+                        remoteKeyDao.remoteKeyByIdentifier("Folder List")
                     }
                     if(remoteKey == null || remoteKey.nextKey == null){
                         return MediatorResult.Success(endOfPaginationReached = true)
@@ -72,15 +71,15 @@ class FolderRemoteMediator(
             if(response.isSuccessful) {
                 database.withTransaction {
                     if (loadType == LoadType.REFRESH) {
-                        remoteKeyDao!!.deleteByIdentifier("Folder List")
-                        folderDao!!.deleteAll()
+                        remoteKeyDao.deleteByIdentifier("Folder List")
+                        folderDao.deleteAll()
                     }
                     if (pageSize > response.body()!!.size)
-                        remoteKeyDao!!.insertOrReplace(
+                        remoteKeyDao.insertOrReplace(
                             RemoteKey("Folder List", null)
                         )
                     else
-                        remoteKeyDao!!.insertOrReplace(
+                        remoteKeyDao.insertOrReplace(
                             RemoteKey("Folder List", loadKey + 1)
                         )
                     val folders = ArrayList<RoomUnifiedFolder>()
@@ -88,9 +87,10 @@ class FolderRemoteMediator(
                         val databaseFolder =
                             RoomUnifiedFolder.Creator().loadFromOnlineFolder(folder).build()
                         databaseFolder.sourceType = IFolderDataSource.FolderSourceType.ONLINE
+                        databaseFolder.isAvailable = true
                         folders.add(databaseFolder)
                     }
-                    folderDao!!.insertAll(folders)
+                    folderDao.insertAll(folders)
                 }
                 pageNumber++
                 MediatorResult.Success(endOfPaginationReached = pageSize > response.body()!!.size)

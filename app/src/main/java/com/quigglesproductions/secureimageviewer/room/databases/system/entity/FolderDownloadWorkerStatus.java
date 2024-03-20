@@ -7,7 +7,6 @@ import androidx.work.WorkInfo;
 
 import com.quigglesproductions.secureimageviewer.downloader.DownloadState;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity(tableName = "FolderDownloadWorkerStatus")

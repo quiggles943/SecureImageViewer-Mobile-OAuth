@@ -32,7 +32,6 @@ import com.google.android.gms.vision.barcode.BarcodeDetector;
 import com.google.android.material.snackbar.Snackbar;
 import com.quigglesproductions.secureimageviewer.R;
 
-
 import java.io.IOException;
 
 /**

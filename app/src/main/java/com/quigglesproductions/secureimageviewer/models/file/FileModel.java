@@ -18,8 +18,8 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class FileModel implements ItemBaseModel, Parcelable {
     private int ID;

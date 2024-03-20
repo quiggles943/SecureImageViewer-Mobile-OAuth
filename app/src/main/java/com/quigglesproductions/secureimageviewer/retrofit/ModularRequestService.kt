@@ -1,10 +1,6 @@
 package com.quigglesproductions.secureimageviewer.retrofit
 
-import android.devicelock.DeviceId
 import com.quigglesproductions.secureimageviewer.SortType
-import com.quigglesproductions.secureimageviewer.aurora.authentication.device.DeviceRegistration
-import com.quigglesproductions.secureimageviewer.aurora.authentication.device.DeviceRegistrationRequest
-import com.quigglesproductions.secureimageviewer.aurora.authentication.device.DeviceStatus
 import com.quigglesproductions.secureimageviewer.dagger.hilt.mapper.ModularOnlineFileMapper
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateResponse
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateSendModel
@@ -18,7 +14,6 @@ import com.skydoves.retrofit.adapters.paging.annotations.PagingKey
 import com.skydoves.retrofit.adapters.paging.annotations.PagingKeyConfig
 import okhttp3.ResponseBody
 import retrofit2.Call
-import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST

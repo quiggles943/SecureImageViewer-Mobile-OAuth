@@ -7,7 +7,6 @@ import androidx.media3.common.util.UnstableApi
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.adapter.FragmentViewHolder
-import com.quigglesproductions.secureimageviewer.aurora.authentication.appauth.AuroraAuthenticationManager
 import com.quigglesproductions.secureimageviewer.managers.VideoPlaybackManager
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile
 import com.quigglesproductions.secureimageviewer.ui.compoundcontrols.FileViewerNavigator
@@ -16,9 +15,9 @@ import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.fragments
 import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.fragments.VideoFileViewFragmentKt
 
 class EnhancedFileCollectionAdapterKt<T : IDisplayFile?>(fragment: Fragment,
-    val videoPlaybackManager: VideoPlaybackManager,
-    val viewModel: EnhancedFileViewerViewModelKt) :
-    FragmentStateAdapter(fragment) {
+        private val videoPlaybackManager: VideoPlaybackManager,
+         val viewModel: EnhancedFileViewerViewModel) :
+        FragmentStateAdapter(fragment) {
     private val files = ArrayList<T>()
     private var zoomCallback: ZoomLevelChangeCallback? = null
     @UnstableApi
@@ -27,9 +26,9 @@ class EnhancedFileCollectionAdapterKt<T : IDisplayFile?>(fragment: Fragment,
     override fun createFragment(position: Int): Fragment {
         val file = files[position]
         var fragment: Fragment = when (file!!.fileTypeString) {
-            "IMAGE" -> ImageFileViewFragmentKt(viewModel)
+            "IMAGE" -> ImageFileViewFragmentKt()
             "VIDEO" -> VideoFileViewFragmentKt(videoPlaybackManager,viewModel)
-            else -> ImageFileViewFragmentKt(viewModel)
+            else -> ImageFileViewFragmentKt()
         }
         val args = Bundle()
         args.putInt(BaseFileViewFragmentKt.ARG_FILE_POSITION,position)
@@ -45,7 +44,7 @@ class EnhancedFileCollectionAdapterKt<T : IDisplayFile?>(fragment: Fragment,
     fun addFiles(fileModels: List<T>?) {
         files.clear()
         files.addAll(fileModels!!)
-        notifyDataSetChanged()
+        notifyItemRangeInserted(0,fileModels.size)
     }
 
     fun getItem(position: Int): T {

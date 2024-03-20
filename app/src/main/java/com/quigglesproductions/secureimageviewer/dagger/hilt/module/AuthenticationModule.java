@@ -6,12 +6,8 @@ import android.net.Uri;
 import androidx.annotation.NonNull;
 
 import com.quigglesproductions.secureimageviewer.aurora.authentication.appauth.AuroraAuthenticationManager;
-import com.quigglesproductions.secureimageviewer.dagger.hilt.annotations.AuthServiceClient;
-import com.quigglesproductions.secureimageviewer.dagger.hilt.annotations.RequestServiceClient;
 import com.quigglesproductions.secureimageviewer.retrofit.DeviceRegistrationRequestService;
-import com.quigglesproductions.secureimageviewer.retrofit.ModularRequestService;
 import com.quigglesproductions.secureimageviewer.room.databases.system.SystemDatabase;
-
 
 import net.openid.appauth.AppAuthConfiguration;
 import net.openid.appauth.AuthorizationServiceConfiguration;
@@ -34,7 +30,6 @@ import dagger.Provides;
 import dagger.hilt.InstallIn;
 import dagger.hilt.android.qualifiers.ApplicationContext;
 import dagger.hilt.components.SingletonComponent;
-import okhttp3.OkHttpClient;
 
 @Module
 @InstallIn(SingletonComponent.class)

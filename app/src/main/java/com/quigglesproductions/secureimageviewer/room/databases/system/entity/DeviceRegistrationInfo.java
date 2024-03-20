@@ -4,10 +4,7 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-import com.google.gson.annotations.SerializedName;
 import com.quigglesproductions.secureimageviewer.aurora.authentication.device.DeviceRegistration;
-import com.quigglesproductions.secureimageviewer.aurora.authentication.device.DeviceStatus;
-import com.quigglesproductions.secureimageviewer.room.databases.system.enums.SystemParameter;
 
 import java.time.LocalDateTime;
 

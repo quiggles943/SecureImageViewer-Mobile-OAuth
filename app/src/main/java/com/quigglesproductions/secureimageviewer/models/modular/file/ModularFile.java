@@ -3,8 +3,8 @@ package com.quigglesproductions.secureimageviewer.models.modular.file;
 import androidx.annotation.NonNull;
 
 import com.google.gson.annotations.SerializedName;
-import com.quigglesproductions.secureimageviewer.models.ItemBaseModel;
 import com.quigglesproductions.secureimageviewer.datasource.file.IFileDataSource;
+import com.quigglesproductions.secureimageviewer.models.ItemBaseModel;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.FileType;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile;
 import com.quigglesproductions.secureimageviewer.models.modular.ModularArtist;

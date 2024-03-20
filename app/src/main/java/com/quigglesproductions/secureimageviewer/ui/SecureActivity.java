@@ -1,7 +1,6 @@
 package com.quigglesproductions.secureimageviewer.ui;
 
 import android.app.Activity;
-import android.app.UiModeManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -20,6 +19,9 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.preference.PreferenceManager;
 
 import com.google.android.gms.vision.barcode.Barcode;
@@ -28,6 +30,7 @@ import com.google.gson.Gson;
 import com.quigglesproductions.secureimageviewer.App;
 import com.quigglesproductions.secureimageviewer.aurora.authentication.appauth.AuroraAuthenticationManager;
 import com.quigglesproductions.secureimageviewer.barcodescanner.BarcodeCaptureActivity;
+import com.quigglesproductions.secureimageviewer.dagger.hilt.annotations.CachingDatabase;
 import com.quigglesproductions.secureimageviewer.dagger.hilt.annotations.DownloadDatabase;
 import com.quigglesproductions.secureimageviewer.dagger.hilt.module.DownloadManager;
 import com.quigglesproductions.secureimageviewer.downloader.FolderDownloaderMediator;
@@ -70,6 +73,10 @@ public class SecureActivity extends AppCompatActivity {
     Gson gson;
     @Inject
     public DownloadManager downloadManager;
+
+    @Inject
+    @CachingDatabase
+    UnifiedFileDatabase cachingDatabase;
     @Inject
     @DownloadDatabase
     UnifiedFileDatabase downloadFileDatabase;
@@ -328,6 +335,9 @@ public class SecureActivity extends AppCompatActivity {
         return downloadManager;
     }
 
+    public UnifiedFileDatabase getCachingDatabase() {
+        return cachingDatabase;
+    }
 
     public UnifiedFileDatabase getDownloadFileDatabase() {
         return downloadFileDatabase;
@@ -347,5 +357,30 @@ public class SecureActivity extends AppCompatActivity {
 
     public FolderDownloaderMediator getFolderDownloaderMediator() {
         return folderDownloaderMediator;
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+    }
+
+    public void hideSystemUI(){
+        WindowInsetsControllerCompat insetController = WindowCompat.getInsetsController(getWindow(),getWindow().getDecorView());
+        insetController.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+        insetController.hide(WindowInsetsCompat.Type.statusBars() | WindowInsetsCompat.Type.navigationBars());
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        if(getSupportActionBar() != null)
+            getSupportActionBar().hide();
+
+    }
+
+    public void showSystemUI() {
+        WindowInsetsControllerCompat insetController = WindowCompat.getInsetsController(getWindow(),getWindow().getDecorView());
+        insetController.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_DEFAULT);
+        insetController.show(WindowInsetsCompat.Type.statusBars() | WindowInsetsCompat.Type.navigationBars());
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        if(getSupportActionBar() != null)
+            getSupportActionBar().show();
+
     }
 }

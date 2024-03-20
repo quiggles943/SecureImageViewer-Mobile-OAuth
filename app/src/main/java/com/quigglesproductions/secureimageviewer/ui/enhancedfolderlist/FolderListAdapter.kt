@@ -1,6 +1,5 @@
 package com.quigglesproductions.secureimageviewer.ui.enhancedfolderlist
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.PorterDuff
 import android.view.LayoutInflater
@@ -13,20 +12,13 @@ import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.DataSource
-import com.bumptech.glide.load.engine.GlideException
-import com.bumptech.glide.request.RequestListener
-import com.bumptech.glide.request.target.Target
 import com.quigglesproductions.secureimageviewer.R
 import com.quigglesproductions.secureimageviewer.dagger.hilt.annotations.DownloadDatabase
-import com.quigglesproductions.secureimageviewer.datasource.folder.IFolderDataSource.FolderDataSourceCallback
 import com.quigglesproductions.secureimageviewer.recycler.RecyclerViewSelectionMode
 import com.quigglesproductions.secureimageviewer.room.databases.unified.UnifiedFileDatabase
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedFolder
 import dagger.hilt.android.qualifiers.ActivityContext
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import java.net.MalformedURLException
 import javax.inject.Inject
 
@@ -50,20 +42,14 @@ class FolderListAdapter @Inject constructor(@ActivityContext context: Context,@D
             }
             Glide.with(viewHolder.itemView.context)
                 .load(dataSource).error(R.drawable.ic_broken_image)
-                .fitCenter().into(viewHolder.imageView)
+                .fitCenter().into(viewHolder.getImageView())
 
         } catch (ex: MalformedURLException) {
             ex.printStackTrace()
         }
-        if (getIsSelected(position)) viewHolder.imageView.setColorFilter(
-            ContextCompat.getColor(
-                mContext!!, R.color.selected
-            ), PorterDuff.Mode.SRC_ATOP
-        ) else viewHolder.imageView.colorFilter = null
-        if (folder!!.hasUpdates()) {
-            viewHolder.syncView.setVisibility(View.VISIBLE)
-        } else viewHolder.syncView.setVisibility(View.GONE)
-        viewHolder.folderNameView.text = folder!!.name
+        viewHolder.setSelected(mContext,getIsSelected(position))
+        viewHolder.setSyncIconVisible(folder!!.hasUpdates())
+        viewHolder.setFolderName(folder.name)
         viewHolder.itemView.setOnClickListener {
             if (onClickListener != null) onClickListener.onClick(
                 viewHolder.adapterPosition
@@ -73,6 +59,7 @@ class FolderListAdapter @Inject constructor(@ActivityContext context: Context,@D
             if (onClickListener != null) onClickListener.onLongClick(viewHolder.adapterPosition)
             true
         }
+        viewHolder.setEnabled(mContext,folder.isAvailable)
     }
 
     fun setMultiselect(isMultiselect: Boolean){
@@ -145,34 +132,83 @@ class FolderListAdapter @Inject constructor(@ActivityContext context: Context,@D
 
 
 class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-    val imageView: ImageView
-    val folderNameView: TextView
-    val syncView: ImageView
+    private val imageView: ImageView
+    private val folderNameView: TextView
+    private val syncView: ImageView
 
     init {
+        itemView.setAllowClickWhenDisabled(false)
         imageView = view.findViewById<View>(R.id.grid_item_image) as ImageView
         folderNameView = view.findViewById(R.id.grid_item_label)
         syncView = view.findViewById(R.id.sync_icon)
+    }
+
+    fun getImageView(): ImageView{
+        return imageView
+    }
+    fun setSelected(mContext: Context, isEnabled: Boolean){
+        if(isEnabled) {
+            imageView.setColorFilter(
+                ContextCompat.getColor(
+                    mContext, R.color.selected
+                ), PorterDuff.Mode.SRC_ATOP
+            )
+        }
+        else
+            imageView.colorFilter = null
+    }
+    fun setSyncIconVisible(value: Boolean){
+        if (value)
+            syncView.setVisibility(View.VISIBLE)
+        else
+            syncView.setVisibility(View.GONE)
+
+    }
+    fun setEnabled(mContext: Context, value: Boolean){
+        if(value)
+            enableView()
+        else
+            disableView(mContext)
+    }
+    private fun enableView(){
+        itemView.isEnabled = true
+    }
+    private fun disableView(mContext: Context){
+        itemView.isEnabled = false
+
+        imageView.setColorFilter(
+            ContextCompat.getColor(
+                mContext, R.color.progressBar_overlay_background
+            ), PorterDuff.Mode.SRC_ATOP
+        )
+    }
+
+    fun setFolderName(name: String?) {
+        folderNameView.text = name
     }
 }
 
 
 class FolderDiffCallBack : DiffUtil.ItemCallback<RoomUnifiedFolder>() {
     override fun areItemsTheSame(oldItem: RoomUnifiedFolder, newItem: RoomUnifiedFolder): Boolean {
-        return oldItem.onlineId == newItem.onlineId
+        var isSame = true
+        if(oldItem.onlineId != newItem.onlineId)
+            isSame = false
+        return isSame
     }
 
     override fun areContentsTheSame(oldItem: RoomUnifiedFolder, newItem: RoomUnifiedFolder): Boolean {
-        return oldItem.onlineId == newItem.onlineId
+        var isSame = true
+        if(oldItem.isAvailable != newItem.isAvailable)
+            isSame = false
+        return isSame
     }
 }
-
 
 interface FolderListOnClickListener {
     fun onClick(position: Int)
     fun onLongClick(position: Int)
 }
-
 
 interface SelectionChangedListener {
     fun selectionModeChanged(selectionMode: RecyclerViewSelectionMode?)

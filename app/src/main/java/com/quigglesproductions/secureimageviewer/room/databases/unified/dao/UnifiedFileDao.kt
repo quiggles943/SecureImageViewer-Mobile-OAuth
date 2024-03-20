@@ -7,10 +7,13 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.RawQuery
 import androidx.room.Transaction
 import androidx.room.Update
+import androidx.sqlite.db.SupportSQLiteQuery
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.*
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.relations.*
+import com.quigglesproductions.secureimageviewer.room.enums.FileSortType
 import com.quigglesproductions.secureimageviewer.room.exceptions.DatabaseInsertionException
 import com.quigglesproductions.secureimageviewer.room.exceptions.NotInDatabaseException
 import java.time.LocalDateTime
@@ -29,6 +32,10 @@ public abstract class UnifiedFileDao {
     @Transaction
     @Query("SELECT * FROM Files WHERE FileId IN (:fileIds)")
     abstract suspend fun loadAllByIds(fileIds: IntArray): List<RoomUnifiedEmbeddedFile>
+
+    @Transaction
+    @Query("SELECT * FROM Files WHERE isFavourite = 1")
+    abstract suspend fun loadAllFavouritedFiles(): List<RoomUnifiedEmbeddedFile>
 
     /**
      * Retrieves all the files which are part of the folder identifed by the provided folder id
@@ -311,6 +318,26 @@ public abstract class UnifiedFileDao {
     @Transaction
     @Query("SELECT * FROM files WHERE FolderId = :folderId ORDER BY :sortColumn")
     abstract fun folderPagingSourceSorted(folderId: Int,sortColumn: String): PagingSource<Int, RoomUnifiedEmbeddedFile>
+    fun getFilesPaging(folderId: Int,sortType: FileSortType): PagingSource<Int, RoomUnifiedEmbeddedFile>{
+        return when(sortType){
+            FileSortType.NAME_ASC -> getPagingFilesByNameAsc(folderId)
+            FileSortType.NAME_DESC -> getPagingFilesByNameDesc(folderId)
+            FileSortType.NEWEST_FIRST -> getPagingFilesNewestFirst(folderId)
+            FileSortType.OLDEST_FIRST -> getPagingFilesOldestFirst(folderId)
+        }
+    }
+    @Transaction
+    @Query("SELECT * FROM files WHERE FolderId = :folderId ORDER BY CreatedDate DESC ")
+    abstract fun getPagingFilesNewestFirst(folderId: Int): PagingSource<Int, RoomUnifiedEmbeddedFile>
+    @Transaction
+    @Query("SELECT * FROM Files WHERE FolderId = :folderId ORDER BY CreatedDate ASC")
+    abstract fun getPagingFilesOldestFirst(folderId: Int): PagingSource<Int, RoomUnifiedEmbeddedFile>
+    @Transaction
+    @Query("SELECT * FROM Files WHERE FolderId = :folderId ORDER BY NormalName ASC")
+    abstract fun getPagingFilesByNameAsc(folderId: Int): PagingSource<Int, RoomUnifiedEmbeddedFile>
+    @Transaction
+    @Query("SELECT * FROM Files WHERE FolderId = :folderId ORDER BY NormalName DESC")
+    abstract fun getPagingFilesByNameDesc(folderId: Int): PagingSource<Int, RoomUnifiedEmbeddedFile>
     @Query("SELECT RetrievedDate FROM files WHERE FolderId = :folderId ORDER BY RetrievedDate DESC LIMIT 1 ")
     abstract suspend fun lastUpdated(folderId: Int): LocalDateTime
     @Query("SELECT EXISTS(SELECT * FROM files WHERE OnlineId = :onlineId)")
@@ -318,8 +345,45 @@ public abstract class UnifiedFileDao {
 
     @Query("SELECT COUNT(*) FROM Files")
     abstract fun getFileCount(): Int
-    @Query("SELECT * FROM Files WHERE FolderId = :folderId ORDER BY :sortType LIMIT :loadSize OFFSET :offset ")
-    abstract suspend fun getFiles(folderId: Long, offset: Int, loadSize: Int,sortType:String): List<RoomUnifiedEmbeddedFile>
+    /*@Query("SELECT * FROM Files WHERE FolderId = :folderId ORDER BY :sortType LIMIT :loadSize OFFSET :offset ")
+    abstract suspend fun getFiles(folderId: Long, offset: Int, loadSize: Int,sortType:String): List<RoomUnifiedEmbeddedFile>*/
+
+    suspend fun getFiles(folderId: Long, offset: Int, loadSize: Int,sortType:FileSortType): List<RoomUnifiedEmbeddedFile>{
+        return when(sortType){
+            FileSortType.NAME_ASC -> getFilesByNameAsc(folderId,offset,loadSize)
+            FileSortType.NAME_DESC -> getFilesByNameDesc(folderId,offset,loadSize)
+            FileSortType.NEWEST_FIRST -> getFilesNewestFirst(folderId,offset,loadSize)
+            FileSortType.OLDEST_FIRST -> getFilesOldestFirst(folderId,offset,loadSize)
+        }
+    }
+    @Query("SELECT * FROM Files WHERE FolderId = :folderId ORDER BY CreatedDate DESC LIMIT :loadSize OFFSET :offset ")
+    abstract suspend fun getFilesNewestFirst(folderId: Long, offset: Int, loadSize: Int): List<RoomUnifiedEmbeddedFile>
+    @Query("SELECT * FROM Files WHERE FolderId = :folderId ORDER BY CreatedDate ASC LIMIT :loadSize OFFSET :offset ")
+    abstract suspend fun getFilesOldestFirst(folderId: Long, offset: Int, loadSize: Int): List<RoomUnifiedEmbeddedFile>
+    @Query("SELECT * FROM Files WHERE FolderId = :folderId ORDER BY NormalName ASC LIMIT :loadSize OFFSET :offset ")
+    abstract suspend fun getFilesByNameAsc(folderId: Long, offset: Int, loadSize: Int): List<RoomUnifiedEmbeddedFile>
+    @Query("SELECT * FROM Files WHERE FolderId = :folderId ORDER BY NormalName DESC LIMIT :loadSize OFFSET :offset ")
+    abstract suspend fun getFilesByNameDesc(folderId: Long, offset: Int, loadSize: Int): List<RoomUnifiedEmbeddedFile>
+
+    suspend fun getFavouriteFiles(offset: Int, loadSize: Int,sortType:FileSortType): List<RoomUnifiedEmbeddedFile>{
+        return when(sortType){
+            FileSortType.NAME_ASC -> getFavouriteFilesByNameAsc(offset,loadSize)
+            FileSortType.NAME_DESC -> getFavouriteFilesByNameDesc(offset,loadSize)
+            FileSortType.NEWEST_FIRST -> getFavouriteFilesNewestFirst(offset,loadSize)
+            FileSortType.OLDEST_FIRST -> getFavouriteFilesOldestFirst(offset,loadSize)
+        }
+    }
+
+    @Query("SELECT * FROM Files WHERE isFavourite = 1 ORDER BY CreatedDate DESC LIMIT :loadSize OFFSET :offset ")
+    abstract suspend fun getFavouriteFilesNewestFirst(offset: Int, loadSize: Int): List<RoomUnifiedEmbeddedFile>
+    @Query("SELECT * FROM Files WHERE isFavourite = 1 ORDER BY CreatedDate ASC LIMIT :loadSize OFFSET :offset ")
+    abstract suspend fun getFavouriteFilesOldestFirst(offset: Int, loadSize: Int): List<RoomUnifiedEmbeddedFile>
+    @Query("SELECT * FROM Files WHERE isFavourite = 1 ORDER BY NormalName ASC LIMIT :loadSize OFFSET :offset ")
+    abstract suspend fun getFavouriteFilesByNameAsc(offset: Int, loadSize: Int): List<RoomUnifiedEmbeddedFile>
+    @Query("SELECT * FROM Files WHERE isFavourite = 1 ORDER BY NormalName DESC LIMIT :loadSize OFFSET :offset ")
+    abstract suspend fun getFavouriteFilesByNameDesc(offset: Int, loadSize: Int): List<RoomUnifiedEmbeddedFile>
+    @RawQuery
+    abstract suspend fun getFilesViaQuery(query: SupportSQLiteQuery): List<RoomUnifiedEmbeddedFile>
     @Transaction
     @Query("SELECT * FROM Files WHERE OnlineId = :onlineId LIMIT 1")
     abstract suspend fun getByOnlineId(onlineId: Int): RoomUnifiedEmbeddedFile?

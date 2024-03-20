@@ -14,7 +14,13 @@ import com.quigglesproductions.secureimageviewer.models.enhanced.file.FileType;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDatabaseFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.IFileMetadata;
 import com.quigglesproductions.secureimageviewer.models.modular.file.ModularOnlineFile;
-import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.*;
+import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedArtist;
+import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedCategory;
+import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedFile;
+import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedFileCategoryCrossRef;
+import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedFileSubjectCrossRef;
+import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedMetadata;
+import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedSubject;
 
 import java.io.File;
 import java.time.LocalDateTime;

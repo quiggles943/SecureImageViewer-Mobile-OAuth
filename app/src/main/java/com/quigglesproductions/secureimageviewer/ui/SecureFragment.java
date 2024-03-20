@@ -54,6 +54,10 @@ public class SecureFragment extends Fragment {
     public DownloadManager getDownloadManager() throws IllegalStateException {
         return requiresSecureActivity().getDownloadManager();
     }
+
+    public UnifiedFileDatabase getCachingDatabase() throws IllegalStateException {
+        return requiresSecureActivity().getCachingDatabase();
+    }
     public UnifiedFileDatabase getDownloadFileDatabase() throws IllegalStateException {
         return requiresSecureActivity().getDownloadFileDatabase();
     }

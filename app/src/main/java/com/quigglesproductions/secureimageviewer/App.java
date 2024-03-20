@@ -17,7 +17,6 @@ import com.quigglesproductions.secureimageviewer.lifecycle.ViewerLifecycleObserv
 import com.quigglesproductions.secureimageviewer.managers.ApplicationPreferenceManager;
 import com.quigglesproductions.secureimageviewer.managers.FolderManager;
 import com.quigglesproductions.secureimageviewer.managers.SecurityManager;
-import com.quigglesproductions.secureimageviewer.managers.VideoPlaybackManager;
 import com.quigglesproductions.secureimageviewer.retrofit.ModularRequestService;
 
 import org.acra.ACRA;

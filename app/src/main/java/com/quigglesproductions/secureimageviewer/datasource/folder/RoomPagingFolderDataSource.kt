@@ -9,7 +9,6 @@ import com.quigglesproductions.secureimageviewer.datasource.folder.IFolderDataSo
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile
 import com.quigglesproductions.secureimageviewer.room.databases.unified.UnifiedFileDatabase
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedFolder
-import com.quigglesproductions.secureimageviewer.room.exceptions.DatabaseInsertionException
 import java.net.MalformedURLException
 import java.net.URL
 

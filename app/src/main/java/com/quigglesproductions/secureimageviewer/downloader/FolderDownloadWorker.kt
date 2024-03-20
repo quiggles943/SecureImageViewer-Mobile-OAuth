@@ -4,9 +4,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.graphics.Color
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
@@ -96,6 +94,8 @@ class FolderDownloadWorker @AssistedInject constructor (
         val update = workDataOf(Total to databaseList.size, Progress to databaseList.size,State to DownloadState.COMPLETE.name, ErrorCount to hadError,
             FolderName to folder.normalName)
         //setProgress(update)
+        embeddedFolder.folder.isAvailable = true
+        database.folderDao().update(embeddedFolder.folder)
         notificationManager.notify(embeddedFolder.id.toInt(),buildNotificationWithMessage("Download of folder "+folder.normalName+" complete "))
         return Result.success(update)
     }

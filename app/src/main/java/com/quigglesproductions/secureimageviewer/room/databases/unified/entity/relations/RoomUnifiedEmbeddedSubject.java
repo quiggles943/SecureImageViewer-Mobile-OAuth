@@ -1,7 +1,5 @@
 package com.quigglesproductions.secureimageviewer.room.databases.unified.entity.relations;
 
-import android.content.Context;
-
 import androidx.room.Embedded;
 import androidx.room.Ignore;
 import androidx.room.Junction;
@@ -12,15 +10,12 @@ import com.quigglesproductions.secureimageviewer.datasource.folder.IFolderDataSo
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.IDatabaseFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.IDisplayFolder;
-import com.quigglesproductions.secureimageviewer.room.databases.unified.UnifiedFileDatabase;
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedFile;
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedFileSubjectCrossRef;
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedSubject;
 import com.quigglesproductions.secureimageviewer.ui.enhancedfolderviewer.FolderOrigin;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;

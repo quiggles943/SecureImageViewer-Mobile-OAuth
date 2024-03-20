@@ -1,13 +1,10 @@
 package com.quigglesproductions.secureimageviewer.paging.datasource
 
-import androidx.lifecycle.LiveData
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import androidx.paging.liveData
 import androidx.paging.map
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile
-import com.quigglesproductions.secureimageviewer.models.modular.file.ModularOnlineFile
 import com.quigglesproductions.secureimageviewer.paging.source.OnlineFolderFilePagingSource
 import com.quigglesproductions.secureimageviewer.retrofit.ModularRequestService
 import kotlinx.coroutines.flow.Flow

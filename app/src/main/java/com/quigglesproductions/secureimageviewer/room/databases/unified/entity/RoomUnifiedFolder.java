@@ -77,6 +77,12 @@ public class RoomUnifiedFolder implements IDisplayFolder, IRemoteFolder {
     @ColumnInfo(name = "SourceType")
     public IFolderDataSource.FolderSourceType sourceType;
 
+    @ColumnInfo(name = "IsAvailable")
+    public Boolean isAvailable;
+
+    @ColumnInfo(name = "DownloadSuccessful")
+    public Boolean downloadSuccessful;
+
     @Ignore
     private File thumbnailFile;
 

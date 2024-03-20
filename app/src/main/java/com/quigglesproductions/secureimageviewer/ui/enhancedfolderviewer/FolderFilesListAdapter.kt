@@ -20,7 +20,6 @@ import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.quigglesproductions.secureimageviewer.R
-import com.quigglesproductions.secureimageviewer.aurora.authentication.appauth.AuroraAuthenticationManager
 import com.quigglesproductions.secureimageviewer.datasource.file.IFileDataSource.DataSourceCallback
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.relations.RoomUnifiedEmbeddedFile
@@ -29,11 +28,10 @@ import org.acra.ACRA.errorReporter
 import java.net.MalformedURLException
 import javax.inject.Inject
 
-class FolderFilesListAdapter @Inject constructor(@ActivityContext context: Context?, authenticationManager: AuroraAuthenticationManager) : PagingDataAdapter<RoomUnifiedEmbeddedFile, ViewHolder>(
+class FolderFilesListAdapter @Inject constructor(@ActivityContext context: Context?) : PagingDataAdapter<RoomUnifiedEmbeddedFile, ViewHolder>(
     FileDiffCallBack()
 ) {
     var mContext : Context? = context
-    var authenticationManager : AuroraAuthenticationManager = authenticationManager
     private lateinit var onClickListener: FolderFilesListOnClickListener
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
         val file: IDisplayFile? = getItem(position)

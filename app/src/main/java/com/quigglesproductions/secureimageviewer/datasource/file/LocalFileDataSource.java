@@ -2,7 +2,6 @@ package com.quigglesproductions.secureimageviewer.datasource.file;
 
 import android.content.Context;
 
-import com.quigglesproductions.secureimageviewer.datasource.file.IFileDataSource;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedDatabaseFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.FileMetadata;
 import com.quigglesproductions.secureimageviewer.retrofit.RequestManager;

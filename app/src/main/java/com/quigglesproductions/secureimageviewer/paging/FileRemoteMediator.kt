@@ -5,7 +5,6 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
-import com.quigglesproductions.secureimageviewer.SortType
 import com.quigglesproductions.secureimageviewer.dagger.hilt.annotations.CachingDatabase
 import com.quigglesproductions.secureimageviewer.retrofit.ModularRequestService
 import com.quigglesproductions.secureimageviewer.retrofit.RetrofitException
@@ -34,10 +33,8 @@ class FileRemoteMediator(
 
     override suspend fun initialize(): InitializeAction {
         val cacheTimeout = TimeUnit.MILLISECONDS.convert(15, TimeUnit.MINUTES)
-        val updatedDate: LocalDateTime? = fileDao!!.lastUpdated(folderId)
-        var updatedMillis: Long = 0
-        if(updatedDate != null)
-            updatedMillis = updatedDate.toInstant(ZoneOffset.UTC).toEpochMilli()
+        val updatedDate: LocalDateTime = fileDao.lastUpdated(folderId)
+        val updatedMillis = updatedDate.toInstant(ZoneOffset.UTC).toEpochMilli()
         return if (System.currentTimeMillis() - updatedMillis  <= cacheTimeout)
         {
             // Cached data is up-to-date, so there is no need to re-fetch
@@ -62,7 +59,7 @@ class FileRemoteMediator(
                     return MediatorResult.Success(endOfPaginationReached = true)
                 LoadType.APPEND -> {
                     val remoteKey = database.withTransaction {
-                        remoteKeyDao!!.remoteKeyByIdentifier("$folderId Files")
+                        remoteKeyDao.remoteKeyByIdentifier("$folderId Files")
                     }
                     if(remoteKey == null || remoteKey.nextKey == null){
                         return MediatorResult.Success(endOfPaginationReached = true)
@@ -75,26 +72,26 @@ class FileRemoteMediator(
             if(response.isSuccessful) {
                 database.withTransaction {
                     if (loadType == LoadType.REFRESH) {
-                        remoteKeyDao!!.deleteByIdentifier("$folderId Files")
-                        fileDao!!.deleteAllCachedInFolder(folderId)
+                        remoteKeyDao.deleteByIdentifier("$folderId Files")
+                        fileDao.deleteAllCachedInFolder(folderId)
                     }
                     if (pageSize > response.body()!!.size)
-                        remoteKeyDao!!.insertOrReplace(
+                        remoteKeyDao.insertOrReplace(
                             RemoteKey("$folderId Files", null)
                         )
                     else
-                        remoteKeyDao!!.insertOrReplace(
+                        remoteKeyDao.insertOrReplace(
                             RemoteKey("$folderId Files", loadKey + 1)
                         )
                     val filesToInsert = ArrayList<RoomUnifiedEmbeddedFile>()
                     for (file in response.body()!!) {
-                        if(!fileDao!!.exists(file!!.onlineId)) {
+                        if(!fileDao.exists(file!!.onlineId)) {
                             val databaseFile =
                                 RoomUnifiedEmbeddedFile.Creator().loadFromOnlineFile(file).build()
                             filesToInsert.add(databaseFile)
                         }
                     }
-                    fileDao!!.insertAll(folderId, filesToInsert)
+                    fileDao.insertAll(folderId, filesToInsert)
                 }
                 pageNumber++
                 MediatorResult.Success(endOfPaginationReached = pageSize > response.body()!!.size)

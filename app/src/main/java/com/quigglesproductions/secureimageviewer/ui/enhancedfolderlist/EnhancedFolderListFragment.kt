@@ -15,55 +15,34 @@ import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavDirections
 import androidx.navigation.Navigation.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.work.Data
-import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequest
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
-import androidx.work.WorkInfo
-import androidx.work.WorkManager
-import androidx.work.WorkRequest
 import com.google.android.material.snackbar.Snackbar
-import com.google.gson.reflect.TypeToken
-import com.mikelau.views.shimmer.ShimmerRecyclerViewX
 import com.quigglesproductions.secureimageviewer.R
-import com.quigglesproductions.secureimageviewer.dagger.hilt.module.DownloadManager.FolderDownloadCallback
 import com.quigglesproductions.secureimageviewer.databinding.FragmentFolderListBinding
 import com.quigglesproductions.secureimageviewer.downloader.FolderDownloadWorker
-import com.quigglesproductions.secureimageviewer.downloader.PagedFolderDownloader
 import com.quigglesproductions.secureimageviewer.enums.FileGroupBy
 import com.quigglesproductions.secureimageviewer.managers.ApplicationPreferenceManager
 import com.quigglesproductions.secureimageviewer.managers.FolderManager
 import com.quigglesproductions.secureimageviewer.managers.NotificationManager
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.IDisplayFolder
-import com.quigglesproductions.secureimageviewer.models.modular.file.ModularFile
-import com.quigglesproductions.secureimageviewer.models.modular.file.ModularOnlineFile
+import com.quigglesproductions.secureimageviewer.observable.IFolderDownloadObserver
 import com.quigglesproductions.secureimageviewer.recycler.RecyclerViewSelectionMode
-import com.quigglesproductions.secureimageviewer.retrofit.RetrofitException
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedFolder
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.relations.RoomUnifiedEmbeddedFolder
 import com.quigglesproductions.secureimageviewer.ui.EnhancedMainMenuActivity
 import com.quigglesproductions.secureimageviewer.ui.SecureFragment
-import com.quigglesproductions.secureimageviewer.ui.enhancedfolderviewer.FolderFilesListAdapter
-import com.techyourchance.threadposter.BackgroundThreadPoster
-import com.techyourchance.threadposter.UiThreadPoster
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.collectLatest
+import com.quigglesproductions.secureimageviewer.utils.ObjectUtils
 import kotlinx.coroutines.launch
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import java.lang.reflect.Type
-import java.util.function.Consumer
-import java.util.function.Function
-import java.util.stream.Collectors
 import javax.inject.Inject
 
 class EnhancedFolderListFragment() : SecureFragment() {
@@ -71,12 +50,14 @@ class EnhancedFolderListFragment() : SecureFragment() {
     private var myMenu: Menu? = null
     private var state: String? = null
     private lateinit var recyclerView: RecyclerView
-    private val backgroundThreadPoster = BackgroundThreadPoster()
-    private val uiThreadPoster = UiThreadPoster()
     private val viewModel by activityViewModels<EnhancedFolderListViewModel>()
     private lateinit var swipeLayout: SwipeRefreshLayout
     @Inject
     lateinit var adapter: FolderListAdapter
+    lateinit var root:View
+
+    private lateinit var downloadObserver: IFolderDownloadObserver
+    private val args : EnhancedFolderListFragmentArgs by navArgs()
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
     }
@@ -88,10 +69,8 @@ class EnhancedFolderListFragment() : SecureFragment() {
     ): View? {
         setHasOptionsMenu(true)
         binding = FragmentFolderListBinding.inflate(inflater, container, false)
-        val root: View = binding!!.root
-        state = EnhancedFolderListFragmentArgs.fromBundle(
-            requireArguments()
-        ).state
+        root = binding!!.root
+        state = args.state
         viewModel.folderListType.value = FolderListType.valueOf(state!!)
         recyclerView = binding!!.folderShimmerRecyclerView
         swipeLayout = binding!!.folderListSwipeContainer
@@ -109,6 +88,9 @@ class EnhancedFolderListFragment() : SecureFragment() {
                 Snackbar.LENGTH_SHORT
             )
         }
+        downloadObserver = IFolderDownloadObserver { folder ->
+            viewModel.invalidatePagedData()
+        }
         return root
     }
 
@@ -120,11 +102,13 @@ class EnhancedFolderListFragment() : SecureFragment() {
     private fun collectUiState() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.folderListType.value?.let {
-                viewModel.getFolders(it).collect { files ->
+                viewModel.createPagedSource()
+                viewModel.pagedFolders!!.collect{ files ->
                     adapter.submitData(viewLifecycleOwner.lifecycle,files)
                 }
             }
         }
+        folderDownloaderMediator.add(downloadObserver)
     }
 
     private fun setupRecyclerView() {
@@ -146,6 +130,7 @@ class EnhancedFolderListFragment() : SecureFragment() {
                             setTitle("Online Viewer")
                         } else {
                             myMenu!!.findItem(R.id.offline_folder_delete).setVisible(false)
+                            myMenu!!.findItem(R.id.offline_folder_favourites).setVisible(true)
                             setTitle("Local Folders")
                         }
                         val ta = context!!.theme.obtainStyledAttributes(R.styleable.AppCompatTheme)
@@ -160,8 +145,10 @@ class EnhancedFolderListFragment() : SecureFragment() {
                             myMenu!!.findItem(R.id.online_folder_download_selection)
                                 .setVisible(true)
                             myMenu!!.findItem(R.id.online_folder_download_viewer).setVisible(false)
+
                         } else {
                             myMenu!!.findItem(R.id.offline_folder_delete).setVisible(true)
+                            myMenu!!.findItem(R.id.offline_folder_favourites).setVisible(false)
                         }
                         setActionBarColor(R.color.selected)
                     }
@@ -189,8 +176,9 @@ class EnhancedFolderListFragment() : SecureFragment() {
                 } else {
                     val value = adapter.peek(position)
                     val action =
-                        EnhancedFolderListFragmentDirections.actionEnhancedFolderListFragmentToEnhancedFolderViewerFragment()
-                    FolderManager.instance.currentFolder = value!! as IDisplayFolder
+                        EnhancedFolderListFragmentDirections.actionEnhancedFolderListFragmentToEnhancedFolderFileViewerFragment()
+                    viewModel.selectedFolder.value = value
+                    FolderManager.instance.currentFolder = value!!
                     findNavController(binding!!.root).navigate(action)
                 }
             }
@@ -274,7 +262,7 @@ class EnhancedFolderListFragment() : SecureFragment() {
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         when (viewModel.folderListType.value){
-            FolderListType.ONLINE -> inflater.inflate(R.menu.menu_item_download_selection, menu)
+            FolderListType.ONLINE -> inflater.inflate(R.menu.menu_online_folder, menu)
             FolderListType.DOWNLOADED -> inflater.inflate(
             R.menu.menu_offline_folder,
             menu
@@ -287,6 +275,10 @@ class EnhancedFolderListFragment() : SecureFragment() {
     @SuppressLint("NonConstantResourceId")
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
+            R.id.online_folder_recent_files ->{
+                val action = EnhancedFolderListFragmentDirections.actionEnhancedFolderListFragmentToEnhancedRecentFileViewerFragment()
+                findNavController(binding!!.root).navigate(action)
+            }
             /*R.id.online_folder_recent_files -> {
                 val recentsFolder = EnhancedRecentsFolder()
                 recentsFolder.dataSource = RetrofitRecentFilesDataSource(
@@ -304,18 +296,17 @@ class EnhancedFolderListFragment() : SecureFragment() {
                 val onlineFolders = adapter.getSelectedFolders()
                 for (folder: RoomUnifiedFolder in onlineFolders) {
 
-
                     viewLifecycleOwner.lifecycleScope.launch {
-                        val folderId = downloadFileDatabase.folderDao()!!.insert(folder)
-                        //pagedFolderDownloaded.downloadFolder(folder)
-                        val inputData = Data.Builder().putLong("folderId",folderId).build()
+                        val downloadFolder = ObjectUtils.createDeepCopy(folder)
+                        downloadFolder.isAvailable = false
+                        val folderId = downloadFileDatabase.folderDao().insert(downloadFolder)
+                        val inputData = Data.Builder().putLong("folderId", folderId).build()
                         val downloadWorkRequest: OneTimeWorkRequest =
                             OneTimeWorkRequestBuilder<FolderDownloadWorker>()
                                 .setInputData(inputData)
                                 .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
                                 .build()
-                        folderDownloaderMediator.enqueueFolderDownload(folder,downloadWorkRequest)
-                        //WorkManager.getInstance(requireContext()).enqueueUniqueWork(folder.normalName+" Downloader",ExistingWorkPolicy.REPLACE,downloadWorkRequest)
+                        folderDownloaderMediator.enqueueFolderDownload(folder, downloadWorkRequest)
                     }
                 }
                 NotificationManager.getInstance().showSnackbar(
@@ -346,6 +337,7 @@ class EnhancedFolderListFragment() : SecureFragment() {
                 showSortDialog()
                 return false
             }
+            R.id.offline_folder_favourites -> navigateToFavourites()
 
             else -> return false
         }
@@ -574,12 +566,19 @@ class EnhancedFolderListFragment() : SecureFragment() {
         alert.show()
     }
 
+    private fun navigateToFavourites() {
+        val action: NavDirections = EnhancedFolderListFragmentDirections.actionEnhancedFolderListFragmentToEnhancedFavouritesViewerFragment()
+        findNavController(root).navigate(action)
+        //findNavController(root).navigate(R.id.action_enhancedFolderListFragment_to_enhancedFavouritesViewerFragment)
+    }
+
     override fun onCreateContextMenu(menu: ContextMenu, v: View, menuInfo: ContextMenuInfo?) {
         super.onCreateContextMenu(menu, v, menuInfo)
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
+        folderDownloaderMediator.remove(downloadObserver)
         binding = null
     }
 

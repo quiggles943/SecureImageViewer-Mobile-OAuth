@@ -1,16 +1,19 @@
 package com.quigglesproductions.secureimageviewer.downloader
 
 import android.content.Context
-import androidx.lifecycle.Observer
 import androidx.work.Data
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.google.android.material.snackbar.Snackbar
+import com.quigglesproductions.secureimageviewer.dagger.hilt.annotations.DownloadDatabase
 import com.quigglesproductions.secureimageviewer.managers.NotificationManager
+import com.quigglesproductions.secureimageviewer.observable.IFolderDownloadObserver
+import com.quigglesproductions.secureimageviewer.observable.IObservableFolderManager
 import com.quigglesproductions.secureimageviewer.room.databases.system.SystemDatabase
 import com.quigglesproductions.secureimageviewer.room.databases.system.entity.FolderDownloadWorkerStatus
+import com.quigglesproductions.secureimageviewer.room.databases.unified.UnifiedFileDatabase
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedFolder
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -22,8 +25,12 @@ import javax.inject.Inject
 
 @Module
 @InstallIn(SingletonComponent::class)
-class FolderDownloaderMediator @Inject constructor(@ApplicationContext val appContext: Context,val systemDatabase: SystemDatabase) {
+class FolderDownloaderMediator @Inject constructor(@ApplicationContext val appContext: Context,val systemDatabase: SystemDatabase): IObservableFolderManager {
+    override val observers: ArrayList<IFolderDownloadObserver> = ArrayList()
 
+    @Inject
+    @DownloadDatabase
+    lateinit var downloadedDatabase: UnifiedFileDatabase
     fun enqueueFolderDownload(folder: RoomUnifiedFolder,workRequest: OneTimeWorkRequest){
         val requestId = workRequest.id
         val groupName = "Folder downloader"
@@ -80,9 +87,13 @@ class FolderDownloaderMediator @Inject constructor(@ApplicationContext val appCo
                         systemDatabase.folderDownloadWorkerStatusDao().update(status)
 
                         when(workInfo.state){
-                            WorkInfo.State.SUCCEEDED -> NotificationManager.getInstance().showSnackbar(status.folderName+" downloaded",Snackbar.LENGTH_SHORT)
-                            WorkInfo.State.FAILED -> NotificationManager.getInstance().showSnackbar(status.folderName+" failed to download successfully",Snackbar.LENGTH_SHORT)
-                            WorkInfo.State.CANCELLED -> NotificationManager.getInstance().showSnackbar(status.folderName+" download cancelled",Snackbar.LENGTH_SHORT)
+                            WorkInfo.State.SUCCEEDED -> {
+                                NotificationManager.getInstance().showSnackbar(status.folderName+" downloaded",Snackbar.LENGTH_SHORT)
+                                val folder = downloadedDatabase.folderDao().loadFolderById(status.folderId)
+                                folderDownloaded(folder.folder)
+                            }
+                            WorkInfo.State.FAILED -> {NotificationManager.getInstance().showSnackbar(status.folderName+" failed to download successfully",Snackbar.LENGTH_SHORT)}
+                            WorkInfo.State.CANCELLED -> {NotificationManager.getInstance().showSnackbar(status.folderName+" download cancelled",Snackbar.LENGTH_SHORT)}
                             else -> {}
                         }
 

@@ -20,7 +20,9 @@
             android:id="@+id/nav_settingsFragment"
             android:icon="@drawable/ic_baseline_settings_24"
             android:title="@string/settings_title" />
-        <item android:title="User">
+        <item
+            android:id="@+id/nav_userOptions"
+            android:title="@string/menu_user_title">
             <menu>
                 <item
                     android:id="@+id/nav_logout"

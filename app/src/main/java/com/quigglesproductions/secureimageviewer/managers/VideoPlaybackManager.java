@@ -5,7 +5,6 @@ import android.content.Context;
 import androidx.annotation.Nullable;
 import androidx.annotation.OptIn;
 import androidx.media3.common.MediaItem;
-import androidx.media3.common.Player;
 import androidx.media3.common.util.UnstableApi;
 import androidx.media3.datasource.DataSource;
 import androidx.media3.datasource.DefaultHttpDataSource;
@@ -16,7 +15,6 @@ import androidx.media3.exoplayer.source.ProgressiveMediaSource;
 
 import com.quigglesproductions.secureimageviewer.aurora.authentication.appauth.AuroraAuthenticationManager;
 import com.quigglesproductions.secureimageviewer.datasource.file.IFileDataSource;
-import com.quigglesproductions.secureimageviewer.datasource.ISecureDataSource;
 
 import net.openid.appauth.AuthState;
 import net.openid.appauth.AuthorizationException;

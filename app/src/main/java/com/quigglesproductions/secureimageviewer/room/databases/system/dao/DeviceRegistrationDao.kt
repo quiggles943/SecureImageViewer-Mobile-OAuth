@@ -6,7 +6,6 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import com.quigglesproductions.secureimageviewer.room.databases.system.entity.DeviceRegistrationInfo
-import com.quigglesproductions.secureimageviewer.room.exceptions.EntityAlreadyExistsException
 
 @Dao
 abstract class DeviceRegistrationDao {
