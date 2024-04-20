@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 public class RoomUnifiedMetadata implements IFileMetadata {
     @PrimaryKey
     @ColumnInfo(name = "FileId")
-    public long uid;
+    public Long uid;
     @ColumnInfo(name = "OnlineFileId")
     @SerializedName("FileId")
     public long onlineFileId;

@@ -12,6 +12,7 @@ import com.quigglesproductions.secureimageviewer.models.ItemBaseModel;
 import com.quigglesproductions.secureimageviewer.models.enhanced.IFileTag;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.FileType;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDatabaseFile;
+import com.quigglesproductions.secureimageviewer.models.enhanced.folder.IDisplayFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.IFileMetadata;
 import com.quigglesproductions.secureimageviewer.models.modular.file.ModularOnlineFile;
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedArtist;
@@ -69,7 +70,7 @@ public class RoomUnifiedEmbeddedFile implements ItemBaseModel, IDatabaseFile {
             String categoryString = "";
             if(categories != null && categories.size()>0) {
                 for (RoomUnifiedCategory category : categories) {
-                    categoryString = categoryString + category.name + ", ";
+                    categoryString = categoryString + category.getName() + ", ";
                 }
                 if (categories.size() > 0)
                     categoryString = categoryString.substring(0, categoryString.length() - 2);
@@ -86,7 +87,7 @@ public class RoomUnifiedEmbeddedFile implements ItemBaseModel, IDatabaseFile {
             String subjectString = "";
             if(subjects != null && subjects.size()>0) {
                 for (RoomUnifiedSubject subject : subjects) {
-                    subjectString = subjectString + subject.name + ", ";
+                    subjectString = subjectString + subject.normalName + ", ";
                 }
                 if (subjects.size() > 0)
                     subjectString = subjectString.substring(0, subjectString.length() - 2);
@@ -150,7 +151,7 @@ public class RoomUnifiedEmbeddedFile implements ItemBaseModel, IDatabaseFile {
     }
 
     @Override
-    public long getId() {
+    public Long getId() {
         return file.getUid();
     }
 
@@ -212,6 +213,7 @@ public class RoomUnifiedEmbeddedFile implements ItemBaseModel, IDatabaseFile {
     public static class Creator{
         //FileWithMetadata file = new FileWithMetadata();
         RoomUnifiedFile databaseFile;
+        String folderName;
         RoomUnifiedEmbeddedMetadata metadata;
         RoomUnifiedArtist artist;
         List<RoomUnifiedCategory> categories;
@@ -226,7 +228,14 @@ public class RoomUnifiedEmbeddedFile implements ItemBaseModel, IDatabaseFile {
             return this;
         }
 
+        public Creator withFolder(IDisplayFolder folder){
+            folderName = folder.getName();
+            return this;
+        }
+
         public RoomUnifiedEmbeddedFile build(){
+            if(folderName != null)
+                databaseFile.cachedFolderName = folderName;
             RoomUnifiedEmbeddedFile fileWithMetadata = new RoomUnifiedEmbeddedFile();
             fileWithMetadata.file = databaseFile;
             fileWithMetadata.metadata = metadata;

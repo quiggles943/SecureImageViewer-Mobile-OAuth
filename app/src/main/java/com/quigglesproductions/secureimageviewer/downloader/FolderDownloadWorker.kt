@@ -117,7 +117,7 @@ class FolderDownloadWorker @AssistedInject constructor (
                 if (onlineFile == null)
                     continue
                 val databaseFile =
-                    RoomUnifiedEmbeddedFile.Creator().loadFromOnlineFile(onlineFile).build()
+                    RoomUnifiedEmbeddedFile.Creator().loadFromOnlineFile(onlineFile).withFolder(folder).build()
                 databaseFile.file.isDownloaded = false
                 databaseList.add(databaseFile)
             }

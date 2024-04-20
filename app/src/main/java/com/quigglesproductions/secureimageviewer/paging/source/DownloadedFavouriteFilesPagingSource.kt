@@ -21,11 +21,10 @@ class DownloadedFavouriteFilesPagingSource(
         val offset = pageNumber * params.loadSize
         return try{
             val files = fileDao.getFavouriteFiles(offset,params.loadSize,sortType)
-            val nextPageNumber: Int?
-            if(files.isEmpty() || files.size < params.loadSize)
-                nextPageNumber = null
+            val nextPageNumber: Int? = if(files.isEmpty() || files.size < params.loadSize)
+                null
             else
-                nextPageNumber = pageNumber+1
+                pageNumber+1
             LoadResult.Page(
                 data = files,
                 prevKey = null,

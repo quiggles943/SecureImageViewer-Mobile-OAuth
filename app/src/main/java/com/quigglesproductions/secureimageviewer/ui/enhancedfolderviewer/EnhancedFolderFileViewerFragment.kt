@@ -8,15 +8,16 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
 import android.widget.TextView
-import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.NavDirections
 import androidx.navigation.Navigation
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.quigglesproductions.secureimageviewer.R
 import com.quigglesproductions.secureimageviewer.managers.ApplicationPreferenceManager
 import com.quigglesproductions.secureimageviewer.paging.repository.FolderFilesMediatorRepository
-import com.quigglesproductions.secureimageviewer.room.enums.FileSortType
+import com.quigglesproductions.secureimageviewer.ui.adapter.filelist.EnhancedFolderFilesListOnClickListener
+import com.quigglesproductions.secureimageviewer.ui.adapter.itemmodel.folderfileviewer.FolderFileViewerModel
 import com.quigglesproductions.secureimageviewer.ui.enhancedfolderlist.EnhancedFolderListViewModel
 
 class EnhancedFolderFileViewerFragment: BaseFolderViewerFragment() {
@@ -25,11 +26,12 @@ class EnhancedFolderFileViewerFragment: BaseFolderViewerFragment() {
     //private lateinit var root: View
 
     override fun onContextItemSelected(item: MenuItem): Boolean {
-        val selectedFile = adapter.peek(item.itemId)
+        val selectedFile = (adapter.peek(item.itemId) as FolderFileViewerModel.FileModel).file
         when (item.groupId) {
             CONTEXTMENU_INFO -> {
                 val bottomSheetDialog = BottomSheetDialog(requireContext())
                 bottomSheetDialog.setContentView(R.layout.bottomdialog_fileinfo)
+                bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
                 val itemNameText = bottomSheetDialog.findViewById<TextView>(R.id.item_name)
                 val folderNameText = bottomSheetDialog.findViewById<TextView>(R.id.folder_name)
                 val artistNameText = bottomSheetDialog.findViewById<TextView>(R.id.artist_name)
@@ -37,7 +39,7 @@ class EnhancedFolderFileViewerFragment: BaseFolderViewerFragment() {
                 val subjectsText = bottomSheetDialog.findViewById<TextView>(R.id.subjects)
                 selectedFile!!.dataSource.getFileMetadata(requiresRequestManager()) { metadata, exception -> //selectedFile.metadata = metadata;
                     itemNameText!!.text = selectedFile.name
-                    folderNameText!!.text = folderListViewModel.selectedFolder.value!!.name
+                    folderNameText!!.text = if(selectedFile.file.cachedFolderName != null) selectedFile.file.cachedFolderName else folderListViewModel.selectedFolder.value!!.name
                     artistNameText!!.text = selectedFile.artistName
                     catagoriesText!!.text = selectedFile.catagoryListString
                     subjectsText!!.text = selectedFile.subjectListString
@@ -70,12 +72,13 @@ class EnhancedFolderFileViewerFragment: BaseFolderViewerFragment() {
         setTitle(folderListViewModel.selectedFolder.value!!.name)
         folderViewModel.fileSortType.value = ApplicationPreferenceManager.getInstance().folderSortType
         folderViewModel.folderFilesRepository = FolderFilesMediatorRepository(requestService,cachingDatabase,downloadFileDatabase)
+        (folderViewModel.folderFilesRepository as FolderFilesMediatorRepository).setFolder(folderViewModel.folder.value!!)
         setUiState()
 
-        setFileClickListener(object: FolderFilesListOnClickListener {
+        setFileClickListener(object: EnhancedFolderFilesListOnClickListener {
             override fun onClick(position: Int) {
-                folderViewModel.selectedFile.value = adapter.peek(position)
-                folderViewModel.files.value = adapter.snapshot().items
+                folderViewModel.selectedFile.value = (adapter.peek(position) as FolderFileViewerModel.FileModel).file
+                folderViewModel.files.value = adapter.snapshot().items.filter{it is FolderFileViewerModel.FileModel}.map { (it as FolderFileViewerModel.FileModel).file }
                 val action: NavDirections =
                     EnhancedFolderFileViewerFragmentDirections.actionEnhancedFolderFileViewerFragmentToEnhancedFileViewFragment(
                         position
@@ -117,7 +120,7 @@ class EnhancedFolderFileViewerFragment: BaseFolderViewerFragment() {
 
 
 
-    private fun showSortDialog() {
+    /*private fun showSortDialog() {
         val items = arrayOf<CharSequence>("Name A-Z", "Name Z-A", "Newest First", "Oldest First")
         val builder = AlertDialog.Builder(
             requireContext()
@@ -148,5 +151,5 @@ class EnhancedFolderFileViewerFragment: BaseFolderViewerFragment() {
         val alert = builder.create()
         //display dialog box
         alert.show()
-    }
+    }*/
 }

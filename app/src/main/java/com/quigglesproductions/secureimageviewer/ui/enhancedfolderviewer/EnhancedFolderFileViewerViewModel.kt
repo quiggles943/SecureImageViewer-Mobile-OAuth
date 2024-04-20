@@ -10,6 +10,7 @@ import com.quigglesproductions.secureimageviewer.paging.repository.FolderFilesMe
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedFolder
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.relations.RoomUnifiedEmbeddedFile
 import com.quigglesproductions.secureimageviewer.room.enums.FileSortType
+import com.quigglesproductions.secureimageviewer.ui.adapter.itemmodel.folderfileviewer.FolderFileViewerModel
 import com.quigglesproductions.secureimageviewer.ui.enhancedfolderlist.FolderListType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
@@ -24,7 +25,7 @@ class EnhancedFolderFileViewerViewModel @Inject constructor(
     val selectedFile : MutableLiveData<RoomUnifiedEmbeddedFile> = MutableLiveData()
     val folderListType: MutableLiveData<FolderListType> = MutableLiveData()
     val fileSortType: MutableLiveData<FileSortType> = MutableLiveData(FileSortType.NAME_ASC)
-    var pagedFiles: Flow<PagingData<RoomUnifiedEmbeddedFile>>? = null
+    var pagedFiles: Flow<PagingData<FolderFileViewerModel>>? = null
     private var pagedFolder:RoomUnifiedFolder? = null
 
 

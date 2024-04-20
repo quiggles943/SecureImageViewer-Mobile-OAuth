@@ -136,7 +136,7 @@ public class ImageUtils {
             //if(file.exists())
             //    file.delete();
             file.createNewFile();
-            int size = dpToPx(150,context);
+            int size = dpToPx(300,context);
             Size size1 = new Size(size,size);
             Bitmap thumbnail;
             if(item.getContentType().contentEquals("VIDEO"))

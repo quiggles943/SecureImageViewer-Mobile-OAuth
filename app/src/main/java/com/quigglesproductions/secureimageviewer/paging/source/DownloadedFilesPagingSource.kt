@@ -4,6 +4,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
+import com.quigglesproductions.secureimageviewer.enums.FileGroupBy
 import com.quigglesproductions.secureimageviewer.room.databases.unified.UnifiedFileDatabase
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.relations.RoomUnifiedEmbeddedFile
 import com.quigglesproductions.secureimageviewer.room.enums.FileSortType
@@ -11,9 +12,12 @@ import com.quigglesproductions.secureimageviewer.room.enums.FileSortType
 class DownloadedFilesPagingSource(
     private var database: UnifiedFileDatabase,
     private val folderId: Long,
-    val sortType: FileSortType
+    val sortType: FileSortType,
+    val fileGroupingType: FileGroupBy
 ) : PagingSource<Int, RoomUnifiedEmbeddedFile>() {
     val fileDao = database.fileDao()
+    val categoryDao = database.categoryDao()
+    val subjectDao = database.subjectDao()
     @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     override suspend fun load(
         params: LoadParams<Int>
@@ -21,7 +25,13 @@ class DownloadedFilesPagingSource(
         val pageNumber = params.key ?: 0
         val offset = pageNumber * params.loadSize
         return try{
-            val files = fileDao.getFiles(folderId,offset,params.loadSize,sortType)
+            val files = when(fileGroupingType){
+                FileGroupBy.FOLDERS ->fileDao.getFiles(folderId,offset,params.loadSize,sortType)
+                FileGroupBy.CATEGORIES -> categoryDao.getFilesWithCategory(folderId,offset,params.loadSize,sortType)
+                FileGroupBy.SUBJECTS -> subjectDao.getFilesWithSubject(folderId,offset,params.loadSize,sortType)
+                FileGroupBy.UNKNOWN -> emptyList()
+            }
+            //val files = fileDao.getFiles(folderId,offset,params.loadSize,sortType)
             val nextPageNumber: Int?
             if(files.isEmpty() || files.size < params.loadSize)
                 nextPageNumber = null

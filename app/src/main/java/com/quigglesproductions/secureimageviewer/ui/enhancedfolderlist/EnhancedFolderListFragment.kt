@@ -72,6 +72,12 @@ class EnhancedFolderListFragment() : SecureFragment() {
         root = binding!!.root
         state = args.state
         viewModel.folderListType.value = FolderListType.valueOf(state!!)
+
+        if(viewModel.folderListType.value == FolderListType.DOWNLOADED) {
+            viewModel.fileGrouping.value = ApplicationPreferenceManager.getInstance().getFileGroupBy(FileGroupBy.FOLDERS)
+            setTitle("Local " + viewModel.fileGrouping.value!!.displayName)
+        }
+
         recyclerView = binding!!.folderShimmerRecyclerView
         swipeLayout = binding!!.folderListSwipeContainer
         setupRecyclerView()
@@ -88,23 +94,39 @@ class EnhancedFolderListFragment() : SecureFragment() {
                 Snackbar.LENGTH_SHORT
             )
         }
-        downloadObserver = IFolderDownloadObserver { folder ->
-            viewModel.invalidatePagedData()
+        downloadObserver = object: IFolderDownloadObserver {
+            override fun folderDownloaded(folder: RoomUnifiedFolder) {
+                viewModel.invalidatePagedData()
+            }
+
+            override fun downloadStatusUpdated(folder: RoomUnifiedFolder, count: Int, total: Int) {
+
+            }
+
         }
         return root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         collectUiState()
     }
 
     private fun collectUiState() {
-        viewLifecycleOwner.lifecycleScope.launch {
+        /*viewLifecycleOwner.lifecycleScope.launch {
             viewModel.folderListType.value?.let {
-                viewModel.createPagedSource()
+                viewModel.createPagedSource(viewModel.fileGrouping.value!!)
                 viewModel.pagedFolders!!.collect{ files ->
                     adapter.submitData(viewLifecycleOwner.lifecycle,files)
+                }
+            }
+        }*/
+        viewModel.fileGrouping.observe(viewLifecycleOwner){
+            viewLifecycleOwner.lifecycleScope.launch {
+                viewModel.createPagedSource(it)
+                viewModel.pagedFolders!!.collect { files ->
+                    adapter.submitData(viewLifecycleOwner.lifecycle, files)
                 }
             }
         }
@@ -114,7 +136,7 @@ class EnhancedFolderListFragment() : SecureFragment() {
     private fun setupRecyclerView() {
         val columnCount = resources.getInteger(R.integer.column_count_folderlist)
         val layoutManager = GridLayoutManager(context, columnCount)
-        recyclerView!!.layoutManager = layoutManager
+        recyclerView.layoutManager = layoutManager
         adapter = FolderListAdapter(requireContext(),downloadFileDatabase)
         adapter.setOnSelectionModeChangeListener(object :
             SelectionChangedListener {
@@ -131,7 +153,7 @@ class EnhancedFolderListFragment() : SecureFragment() {
                         } else {
                             myMenu!!.findItem(R.id.offline_folder_delete).setVisible(false)
                             myMenu!!.findItem(R.id.offline_folder_favourites).setVisible(true)
-                            setTitle("Local Folders")
+                            setTitle("Local "+viewModel.fileGrouping.value!!.displayName)
                         }
                         val ta = context!!.theme.obtainStyledAttributes(R.styleable.AppCompatTheme)
                         @SuppressLint("ResourceAsColor") val primaryColor =
@@ -178,7 +200,7 @@ class EnhancedFolderListFragment() : SecureFragment() {
                     val action =
                         EnhancedFolderListFragmentDirections.actionEnhancedFolderListFragmentToEnhancedFolderFileViewerFragment()
                     viewModel.selectedFolder.value = value
-                    FolderManager.instance.currentFolder = value!!
+                    //FolderManager.instance.currentFolder = value!!
                     findNavController(binding!!.root).navigate(action)
                 }
             }
@@ -293,27 +315,32 @@ class EnhancedFolderListFragment() : SecureFragment() {
             }*/
 
             R.id.online_folder_download_selection -> {
-                val onlineFolders = adapter.getSelectedFolders()
-                for (folder: RoomUnifiedFolder in onlineFolders) {
+                if(ApplicationPreferenceManager.getInstance().getFileGroupBy(FileGroupBy.FOLDERS) == FileGroupBy.FOLDERS) {
+                    val onlineFolders = adapter.getSelectedFolders() as List<RoomUnifiedFolder>
+                    for (folder: RoomUnifiedFolder in onlineFolders) {
 
-                    viewLifecycleOwner.lifecycleScope.launch {
-                        val downloadFolder = ObjectUtils.createDeepCopy(folder)
-                        downloadFolder.isAvailable = false
-                        val folderId = downloadFileDatabase.folderDao().insert(downloadFolder)
-                        val inputData = Data.Builder().putLong("folderId", folderId).build()
-                        val downloadWorkRequest: OneTimeWorkRequest =
-                            OneTimeWorkRequestBuilder<FolderDownloadWorker>()
-                                .setInputData(inputData)
-                                .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-                                .build()
-                        folderDownloaderMediator.enqueueFolderDownload(folder, downloadWorkRequest)
+                        viewLifecycleOwner.lifecycleScope.launch {
+                            val downloadFolder = ObjectUtils.createDeepCopy(folder)
+                            downloadFolder.isAvailable = false
+                            val folderId = downloadFileDatabase.folderDao().insert(downloadFolder)
+                            val inputData = Data.Builder().putLong("folderId", folderId).build()
+                            val downloadWorkRequest: OneTimeWorkRequest =
+                                OneTimeWorkRequestBuilder<FolderDownloadWorker>()
+                                    .setInputData(inputData)
+                                    .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+                                    .build()
+                            folderDownloaderMediator.enqueueFolderDownload(
+                                folder,
+                                downloadWorkRequest
+                            )
+                        }
                     }
+                    NotificationManager.getInstance().showSnackbar(
+                        "Downloading " + adapter.getSelectedCount() + " folders",
+                        Snackbar.LENGTH_SHORT
+                    )
+                    adapter.setMultiselect(false)
                 }
-                NotificationManager.getInstance().showSnackbar(
-                    "Downloading " + adapter.getSelectedCount() + " folders",
-                    Snackbar.LENGTH_SHORT
-                )
-                adapter.setMultiselect(false)
             }
 
             R.id.online_folder_download_viewer -> findNavController(binding!!.root).navigate(R.id.action_nav_enhancedFolderListFragment_to_downloadViewerFragment)
@@ -345,20 +372,26 @@ class EnhancedFolderListFragment() : SecureFragment() {
     }
 
     private fun deleteSelectedFolders(){
-        val selectedFolders = adapter.getSelectedFolders()
-        val folderManager = FolderManager.instance
-        lifecycleScope.launch {
-            for(folder: RoomUnifiedFolder in selectedFolders) {
-                val databaseFolder : RoomUnifiedEmbeddedFolder = downloadFileDatabase.folderDao()!!.loadFolderById(folder.uid)
-                folderManager.removeLocalFolder(fileDatabase = downloadFileDatabase, folder = databaseFolder)
-                adapter.refresh()
+        if(ApplicationPreferenceManager.getInstance().getFileGroupBy(FileGroupBy.FOLDERS) == FileGroupBy.FOLDERS) {
+            val selectedFolders = adapter.getSelectedFolders() as List<RoomUnifiedFolder>
+            val folderManager = FolderManager.instance
+            lifecycleScope.launch {
+                for (folder: RoomUnifiedFolder in selectedFolders) {
+                    val databaseFolder: RoomUnifiedEmbeddedFolder =
+                        downloadFileDatabase.folderDao()!!.loadFolderById(folder.uid!!)
+                    folderManager.removeLocalFolder(
+                        fileDatabase = downloadFileDatabase,
+                        folder = databaseFolder
+                    )
+                    adapter.refresh()
+                }
             }
+            NotificationManager.getInstance().showSnackbar(
+                "" + selectedFolders.size + " Folder(s) deleted",
+                Snackbar.LENGTH_SHORT
+            )
+            adapter.setMultiselect(false)
         }
-        NotificationManager.getInstance().showSnackbar(
-            ""+selectedFolders.size + " Folder(s) deleted",
-            Snackbar.LENGTH_SHORT
-        )
-        adapter.setMultiselect(false)
     }
 
     private fun updateListViewVisibility(folders: List<IDisplayFolder>) {
@@ -546,21 +579,22 @@ class EnhancedFolderListFragment() : SecureFragment() {
         val currentType =
             ApplicationPreferenceManager.getInstance().getFileGroupBy(FileGroupBy.FOLDERS)
         var checkedItem = -1
-        when (currentType) {
-            FileGroupBy.FOLDERS -> checkedItem = 0
-            FileGroupBy.CATEGORIES -> checkedItem = 1
-            FileGroupBy.SUBJECTS -> checkedItem = 2
-            else -> checkedItem = 0
+        checkedItem = when (currentType) {
+            FileGroupBy.FOLDERS -> 0
+            FileGroupBy.CATEGORIES -> 1
+            FileGroupBy.SUBJECTS -> 2
+            else -> 0
         }
-        builder.setSingleChoiceItems(items, checkedItem, object : DialogInterface.OnClickListener {
-            override fun onClick(dialog: DialogInterface, which: Int) {
-                val resultString = items[which].toString()
-                val result = FileGroupBy.fromDisplayName(resultString)
-                ApplicationPreferenceManager.getInstance().setFileGroupBy(result)
-                //displayFilesByGrouping(result)
-                dialog.dismiss()
-            }
-        })
+        builder.setSingleChoiceItems(items, checkedItem
+        ) { dialog, which ->
+            val resultString = items[which].toString()
+            val result = FileGroupBy.fromDisplayName(resultString)
+            ApplicationPreferenceManager.getInstance().setFileGroupBy(result)
+            viewModel.fileGrouping.value = result
+            setTitle("Local "+result.displayName)
+            //displayFilesByGrouping(result)
+            dialog.dismiss()
+        }
         val alert = builder.create()
         //display dialog box
         alert.show()

@@ -2,12 +2,18 @@ package com.quigglesproductions.secureimageviewer.ui.enhancedfolderviewer
 
 import android.os.Bundle
 import android.view.ContextMenu
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
 import androidx.navigation.NavDirections
 import androidx.navigation.Navigation
+import com.quigglesproductions.secureimageviewer.R
 import com.quigglesproductions.secureimageviewer.paging.repository.FavouriteFilesRepository
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.UnifiedFavouritesFolder
+import com.quigglesproductions.secureimageviewer.ui.adapter.filelist.EnhancedFolderFilesListOnClickListener
+import com.quigglesproductions.secureimageviewer.ui.adapter.itemmodel.folderfileviewer.FolderFileViewerModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -19,10 +25,10 @@ class EnhancedFavouritesViewerFragment: BaseFolderViewerFragment() {
         folderViewModel.folderFilesRepository = FavouriteFilesRepository(requestService,downloadFileDatabase)
         setUiState()
 
-        setFileClickListener(object: FolderFilesListOnClickListener {
+        setFileClickListener(object: EnhancedFolderFilesListOnClickListener {
             override fun onClick(position: Int) {
-                folderViewModel.selectedFile.value = adapter.peek(position)
-                folderViewModel.files.value = adapter.snapshot().items
+                folderViewModel.selectedFile.value = (adapter.peek(position) as FolderFileViewerModel.FileModel).file
+                folderViewModel.files.value = adapter.snapshot().items.filter{it is FolderFileViewerModel.FileModel}.map { (it as FolderFileViewerModel.FileModel).file }
                 val action: NavDirections =
                     EnhancedFavouritesViewerFragmentDirections.actionEnhancedFavouritesViewerFragmentToNavEnhancedFileViewFragment(position)
                 Navigation.findNavController(getRootView()).navigate(action)
@@ -44,5 +50,19 @@ class EnhancedFavouritesViewerFragment: BaseFolderViewerFragment() {
                 )*/
             }
         })
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.menu_folderview_fragment, menu)
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.folderview_fragment_sort -> showSortDialog()
+            else -> return false
+        }
+        return true
     }
 }

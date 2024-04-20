@@ -8,7 +8,6 @@ import com.quigglesproductions.secureimageviewer.retrofit.DeviceRegistrationRequ
 import com.quigglesproductions.secureimageviewer.retrofit.DownloadService
 import com.quigglesproductions.secureimageviewer.retrofit.IdRequestService
 import com.quigglesproductions.secureimageviewer.retrofit.ModularRequestService
-import com.quigglesproductions.secureimageviewer.retrofit.RequestService
 import com.skydoves.retrofit.adapters.paging.PagingCallAdapterFactory
 import dagger.Module
 import dagger.Provides
@@ -21,26 +20,6 @@ import retrofit2.converter.gson.GsonConverterFactory
 @Module
 @InstallIn(SingletonComponent::class)
 object RequestModule {
-    @Provides
-    fun provideReqService(
-        gson: Gson?,
-        @RequestServiceClient client: OkHttpClient?
-    ): RequestService {
-        var retrofit: Retrofit? = null
-        //try {
-        retrofit =
-            Retrofit.Builder() //.baseUrl(RequestManager.getInstance().getUrlManager().getBaseUrlString())
-                .baseUrl("https://quigleyserver.ddns.net:14500/api/")
-                .addConverterFactory(GsonConverterFactory.create(gson))
-                .client(client)
-                .build()
-        //} catch (RequestServiceNotConfiguredException e) {
-        //    throw new RuntimeException(e);
-        //}
-        return retrofit.create(
-            RequestService::class.java
-        )
-    }
 
     @Provides
     fun provideModularReqService(

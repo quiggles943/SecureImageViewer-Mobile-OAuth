@@ -22,6 +22,7 @@ import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.quigglesproductions.secureimageviewer.R
 import com.quigglesproductions.secureimageviewer.managers.VideoPlaybackManager
@@ -179,6 +180,7 @@ class EnhancedFileViewFragment : SecureFragment(), IFileViewer {
     private fun showFileInfoDialog(){
         val bottomSheetDialog = BottomSheetDialog(requireContext())
         bottomSheetDialog.setContentView(R.layout.bottomdialog_fileinfo)
+        bottomSheetDialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
         val itemNameText = bottomSheetDialog.findViewById<TextView>(R.id.item_name)
         val folderNameText = bottomSheetDialog.findViewById<TextView>(R.id.folder_name)
         val artistNameText = bottomSheetDialog.findViewById<TextView>(R.id.artist_name)
@@ -186,7 +188,7 @@ class EnhancedFileViewFragment : SecureFragment(), IFileViewer {
         val subjectsText = bottomSheetDialog.findViewById<TextView>(R.id.subjects)
         folderViewModel.selectedFile.value!!.dataSource.getFileMetadata(requiresRequestManager()) { metadata, exception -> //selectedFile.metadata = metadata;
             itemNameText!!.text = folderViewModel.selectedFile.value!!.name
-            folderNameText!!.text = folderViewModel.folder.value?.name
+            folderNameText!!.text = if(folderViewModel.selectedFile.value!!.file.cachedFolderName != null) folderViewModel.selectedFile.value!!.file.cachedFolderName else folderViewModel.folder.value?.name
             artistNameText!!.text = folderViewModel.selectedFile.value!!.artistName
             catagoriesText!!.text = folderViewModel.selectedFile.value!!.catagoryListString
             subjectsText!!.text = folderViewModel.selectedFile.value!!.subjectListString

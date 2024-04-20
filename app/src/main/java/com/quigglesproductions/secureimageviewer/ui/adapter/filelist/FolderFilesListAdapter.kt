@@ -1,4 +1,4 @@
-package com.quigglesproductions.secureimageviewer.ui.enhancedfolderviewer
+package com.quigglesproductions.secureimageviewer.ui.adapter.filelist
 
 import android.content.Context
 import android.util.Log

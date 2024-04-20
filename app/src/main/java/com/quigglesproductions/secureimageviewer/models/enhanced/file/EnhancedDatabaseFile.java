@@ -36,8 +36,8 @@ public class EnhancedDatabaseFile extends EnhancedFile implements IDatabaseFile{
         setDataSource(new LocalFileDataSource(this));
     }
     @Override
-    public long getId() {
-        return id;
+    public Long getId() {
+        return (long) id;
     }
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     public void setId(int id){

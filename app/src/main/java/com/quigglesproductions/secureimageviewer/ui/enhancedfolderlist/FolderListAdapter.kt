@@ -2,10 +2,12 @@ package com.quigglesproductions.secureimageviewer.ui.enhancedfolderlist
 
 import android.content.Context
 import android.graphics.PorterDuff
+import android.opengl.Visibility
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.paging.PagingDataAdapter
@@ -14,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.quigglesproductions.secureimageviewer.R
 import com.quigglesproductions.secureimageviewer.dagger.hilt.annotations.DownloadDatabase
+import com.quigglesproductions.secureimageviewer.models.enhanced.folder.IDisplayFolder
 import com.quigglesproductions.secureimageviewer.recycler.RecyclerViewSelectionMode
 import com.quigglesproductions.secureimageviewer.room.databases.unified.UnifiedFileDatabase
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedFolder
@@ -22,7 +25,7 @@ import kotlinx.coroutines.runBlocking
 import java.net.MalformedURLException
 import javax.inject.Inject
 
-class FolderListAdapter @Inject constructor(@ActivityContext context: Context,@DownloadDatabase val database: UnifiedFileDatabase) : PagingDataAdapter<RoomUnifiedFolder, ViewHolder>(
+class FolderListAdapter @Inject constructor(@ActivityContext context: Context,@DownloadDatabase val database: UnifiedFileDatabase) : PagingDataAdapter<IDisplayFolder, ViewHolder>(
     FolderDiffCallBack()
 ) {
     private var mContext : Context = context
@@ -32,7 +35,7 @@ class FolderListAdapter @Inject constructor(@ActivityContext context: Context,@D
     private var selectionModeChangeListener: SelectionChangedListener? =
         null
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
-        val folder: RoomUnifiedFolder? = getItem(position)
+        val folder: IDisplayFolder? = getItem(position)
 
         try {
             val dataSource : Any? =
@@ -113,10 +116,10 @@ class FolderListAdapter @Inject constructor(@ActivityContext context: Context,@D
         )
     }
 
-    fun getSelectedFolders() : List<RoomUnifiedFolder>{
-        val selectedFolders: ArrayList<RoomUnifiedFolder> = ArrayList()
+    fun getSelectedFolders() : List<IDisplayFolder>{
+        val selectedFolders: ArrayList<IDisplayFolder> = ArrayList()
         for(folderId: Int in selected){
-            val folder: RoomUnifiedFolder? = peek(folderId)
+            val folder: IDisplayFolder? = peek(folderId)
             if(folder != null)
                 selectedFolders.add(folder)
         }
@@ -135,12 +138,14 @@ class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     private val imageView: ImageView
     private val folderNameView: TextView
     private val syncView: ImageView
+    private val progressBar: ProgressBar
 
     init {
         itemView.setAllowClickWhenDisabled(false)
         imageView = view.findViewById<View>(R.id.grid_item_image) as ImageView
         folderNameView = view.findViewById(R.id.grid_item_label)
         syncView = view.findViewById(R.id.sync_icon)
+        progressBar = view.findViewById(R.id.grid_item_progressBar)
     }
 
     fun getImageView(): ImageView{
@@ -172,6 +177,7 @@ class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     }
     private fun enableView(){
         itemView.isEnabled = true
+        progressBar.visibility = View.VISIBLE
     }
     private fun disableView(mContext: Context){
         itemView.isEnabled = false
@@ -181,6 +187,7 @@ class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
                 mContext, R.color.progressBar_overlay_background
             ), PorterDuff.Mode.SRC_ATOP
         )
+        progressBar.visibility = View.VISIBLE
     }
 
     fun setFolderName(name: String?) {
@@ -189,17 +196,21 @@ class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 }
 
 
-class FolderDiffCallBack : DiffUtil.ItemCallback<RoomUnifiedFolder>() {
-    override fun areItemsTheSame(oldItem: RoomUnifiedFolder, newItem: RoomUnifiedFolder): Boolean {
+class FolderDiffCallBack : DiffUtil.ItemCallback<IDisplayFolder>() {
+    override fun areItemsTheSame(oldItem: IDisplayFolder, newItem: IDisplayFolder): Boolean {
         var isSame = true
         if(oldItem.onlineId != newItem.onlineId)
+            isSame = false
+        if(oldItem.fileGroupingType != newItem.fileGroupingType)
             isSame = false
         return isSame
     }
 
-    override fun areContentsTheSame(oldItem: RoomUnifiedFolder, newItem: RoomUnifiedFolder): Boolean {
+    override fun areContentsTheSame(oldItem: IDisplayFolder, newItem: IDisplayFolder): Boolean {
         var isSame = true
         if(oldItem.isAvailable != newItem.isAvailable)
+            isSame = false
+        if(oldItem.fileGroupingType != newItem.fileGroupingType)
             isSame = false
         return isSame
     }

@@ -11,20 +11,6 @@ interface IFolderDataSource {
     fun getFolderURL(): URL?
 
     @Throws(MalformedURLException::class)
-    fun getFilesFromDataSource(
-        context: Context,
-        callback: FolderDataSourceCallback,
-        sortType: SortType
-    )
-
-    @Throws(MalformedURLException::class)
-    suspend fun getThumbnailFromDataSource(
-        context: Context,
-        database: UnifiedFileDatabase,
-        callback: FolderDataSourceCallback
-    )
-
-    @Throws(MalformedURLException::class)
     suspend fun getThumbnailFromDataSourceSuspend(
         context: Context,
         database: UnifiedFileDatabase

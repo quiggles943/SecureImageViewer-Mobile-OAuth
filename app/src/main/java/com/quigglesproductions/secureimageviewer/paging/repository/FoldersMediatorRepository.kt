@@ -7,12 +7,20 @@ import androidx.paging.PagingData
 import androidx.paging.PagingSource
 import com.quigglesproductions.secureimageviewer.dagger.hilt.annotations.CachingDatabase
 import com.quigglesproductions.secureimageviewer.dagger.hilt.annotations.DownloadDatabase
+import com.quigglesproductions.secureimageviewer.models.enhanced.folder.IDisplayFolder
 import com.quigglesproductions.secureimageviewer.paging.FolderRemoteMediator
 import com.quigglesproductions.secureimageviewer.paging.datasource.OnlineFolderFilesDataSource
+import com.quigglesproductions.secureimageviewer.paging.source.DownloadedCategoriesPagingSource
 import com.quigglesproductions.secureimageviewer.paging.source.DownloadedFoldersPagingSource
+import com.quigglesproductions.secureimageviewer.paging.source.DownloadedSubjectFilesPagingSource
+import com.quigglesproductions.secureimageviewer.paging.source.DownloadedSubjectsPagingSource
 import com.quigglesproductions.secureimageviewer.retrofit.ModularRequestService
 import com.quigglesproductions.secureimageviewer.room.databases.unified.UnifiedFileDatabase
+import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedCategory
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedFolder
+import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedSubject
+import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.relations.RoomUnifiedEmbeddedCategory
+import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.relations.RoomUnifiedEmbeddedSubject
 import com.quigglesproductions.secureimageviewer.ui.enhancedfolderlist.FolderListType
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -31,6 +39,8 @@ class FoldersMediatorRepository @Inject constructor(requestService: ModularReque
     private var onlinePagingSource :PagingSource<Int,RoomUnifiedFolder>? = null
     private var offlinePagingSource :PagingSource<Int,RoomUnifiedFolder>? = null
 
+    private var offlineSubjectPagingSource :PagingSource<Int,RoomUnifiedSubject>? = null
+    private var offlineCategoryPagingSource :PagingSource<Int,RoomUnifiedCategory>? = null
     init {
 
         onlineFolderFilesDataSource = OnlineFolderFilesDataSource(requestService)
@@ -44,7 +54,7 @@ class FoldersMediatorRepository @Inject constructor(requestService: ModularReque
         val folderDao = pagingDatabase.folderDao()
         when(folderListType) {
                FolderListType.ONLINE -> return Pager(
-                                        config = PagingConfig(pageSize = 16),
+                                        config = PagingConfig(pageSize = 25),
                                         remoteMediator = FolderRemoteMediator(
                                             networkService = modularRequestService,
                                             database = pagingDatabase
@@ -84,5 +94,43 @@ class FoldersMediatorRepository @Inject constructor(requestService: ModularReque
         val source = DownloadedFoldersPagingSource(downloadedDatabase)
         offlinePagingSource = source
         return source
+    }
+
+    private fun createOfflineSubjectsSource():PagingSource<Int, RoomUnifiedSubject>{
+        val source = DownloadedSubjectsPagingSource(downloadedDatabase)
+        offlineSubjectPagingSource = source
+        return source
+    }
+
+    private fun createOfflineCategoriesSource():PagingSource<Int, RoomUnifiedCategory>{
+        val source = DownloadedCategoriesPagingSource(downloadedDatabase)
+        offlineCategoryPagingSource = source
+        return source
+    }
+
+    fun getSubjects(pagedListType: FolderListType): Flow<PagingData<RoomUnifiedSubject>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = 25,
+                enablePlaceholders = true,
+
+                ),
+            pagingSourceFactory = {
+                createOfflineSubjectsSource()
+            }
+        ).flow
+    }
+
+    fun getCategories(pagedListType: FolderListType): Flow<PagingData<RoomUnifiedCategory>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = 25,
+                enablePlaceholders = true,
+
+                ),
+            pagingSourceFactory = {
+                createOfflineCategoriesSource()
+            }
+        ).flow
     }
 }

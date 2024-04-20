@@ -72,7 +72,7 @@ public abstract class UnifiedFileDao {
     @Throws(DatabaseInsertionException::class)
     suspend fun insert(folder: RoomUnifiedFolder, @NonNull file: RoomUnifiedEmbeddedFile): Long {
         if (folder.uid == 0L) throw DatabaseInsertionException(NotInDatabaseException())
-        file.file.folderId = folder.uid
+        file.file.folderId = folder.uid!!
         val fileId = insert(file.file)
         file.metadata.metadata.uid = fileId
         if (file.metadata.artist != null) {
@@ -119,7 +119,7 @@ public abstract class UnifiedFileDao {
         if (files.size > 0) {
             for (file in files) {
                 if (folder.uid == 0L) throw DatabaseInsertionException(NotInDatabaseException())
-                file.file.folderId = folder.uid
+                file.file.folderId = folder.uid!!
                 val fileId = insert(file.file)
                 file.metadata.metadata.uid = fileId
                 if (file.metadata.artist != null) {
@@ -149,7 +149,6 @@ public abstract class UnifiedFileDao {
             }
         }
     }
-
     @Transaction
     @Insert
     @Throws(DatabaseInsertionException::class)
@@ -205,17 +204,17 @@ public abstract class UnifiedFileDao {
         }
     }
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     abstract suspend fun _insert(artist: RoomUnifiedArtist): Long
     @Query("SELECT * FROM Artists WHERE onlineId = :onlineId")
     abstract suspend fun getArtistByOnlineId(onlineId: Long): RoomUnifiedArtist
     @Update
     abstract suspend fun _update(artist: RoomUnifiedArtist)
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(category: RoomUnifiedCategory): Long {
-        val existingCategory = getCategoryByOnlineId(category.onlineId)
+        val existingCategory = getCategoryByOnlineId(category.onlineCategoryId)
         return if (existingCategory != null) {
-            category.uid = existingCategory.getUid()
+            category.categoryId = existingCategory.getUid()
             _update(category)
             existingCategory.getUid()
         } else {
@@ -223,27 +222,27 @@ public abstract class UnifiedFileDao {
         }
     }
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     abstract suspend fun _insert(category: RoomUnifiedCategory): Long
-    @Query("SELECT * FROM Categories WHERE onlineId = :onlineId")
+    @Query("SELECT * FROM Categories WHERE OnlineId = :onlineId")
     abstract suspend fun getCategoryByOnlineId(onlineId: Long): RoomUnifiedCategory
     @Update
     abstract suspend fun _update(category: RoomUnifiedCategory)
     @Insert
     suspend fun insert(subject: RoomUnifiedSubject): Long {
-        val existingSubject = getSubjectByOnlineId(subject.onlineId)
+        val existingSubject = getSubjectByOnlineId(subject.subjectOnlineId)
         return if (existingSubject != null) {
-            subject.uid = existingSubject.getUid()
+            subject.subjectId = existingSubject.subjectId
             _update(subject)
-            existingSubject.getUid()
+            existingSubject.subjectId
         } else {
             _insert(subject)
         }
     }
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     abstract suspend fun _insert(category: RoomUnifiedSubject): Long
-    @Query("SELECT * FROM subjects WHERE onlineId = :onlineId")
+    @Query("SELECT * FROM subjects WHERE OnlineId = :onlineId")
     abstract suspend fun getSubjectByOnlineId(onlineId: Long): RoomUnifiedSubject
     @Update
     abstract suspend fun update(file: RoomUnifiedFile)
@@ -251,9 +250,9 @@ public abstract class UnifiedFileDao {
     abstract suspend fun update(metadata: RoomUnifiedMetadata)
     @Update
     abstract suspend fun _update(category: RoomUnifiedSubject)
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     abstract suspend fun insert(subjectCrossRef: RoomUnifiedFileSubjectCrossRef)
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     abstract suspend fun insert(categoryCrossRef: RoomUnifiedFileCategoryCrossRef)
     @Delete
     abstract suspend fun delete(file: RoomUnifiedFile)
@@ -318,7 +317,7 @@ public abstract class UnifiedFileDao {
     @Transaction
     @Query("SELECT * FROM files WHERE FolderId = :folderId ORDER BY :sortColumn")
     abstract fun folderPagingSourceSorted(folderId: Int,sortColumn: String): PagingSource<Int, RoomUnifiedEmbeddedFile>
-    fun getFilesPaging(folderId: Int,sortType: FileSortType): PagingSource<Int, RoomUnifiedEmbeddedFile>{
+    fun getFilesPaging(folderId: Long,sortType: FileSortType): PagingSource<Int, RoomUnifiedEmbeddedFile>{
         return when(sortType){
             FileSortType.NAME_ASC -> getPagingFilesByNameAsc(folderId)
             FileSortType.NAME_DESC -> getPagingFilesByNameDesc(folderId)
@@ -328,16 +327,16 @@ public abstract class UnifiedFileDao {
     }
     @Transaction
     @Query("SELECT * FROM files WHERE FolderId = :folderId ORDER BY CreatedDate DESC ")
-    abstract fun getPagingFilesNewestFirst(folderId: Int): PagingSource<Int, RoomUnifiedEmbeddedFile>
+    abstract fun getPagingFilesNewestFirst(folderId: Long): PagingSource<Int, RoomUnifiedEmbeddedFile>
     @Transaction
     @Query("SELECT * FROM Files WHERE FolderId = :folderId ORDER BY CreatedDate ASC")
-    abstract fun getPagingFilesOldestFirst(folderId: Int): PagingSource<Int, RoomUnifiedEmbeddedFile>
+    abstract fun getPagingFilesOldestFirst(folderId: Long): PagingSource<Int, RoomUnifiedEmbeddedFile>
     @Transaction
     @Query("SELECT * FROM Files WHERE FolderId = :folderId ORDER BY NormalName ASC")
-    abstract fun getPagingFilesByNameAsc(folderId: Int): PagingSource<Int, RoomUnifiedEmbeddedFile>
+    abstract fun getPagingFilesByNameAsc(folderId: Long): PagingSource<Int, RoomUnifiedEmbeddedFile>
     @Transaction
     @Query("SELECT * FROM Files WHERE FolderId = :folderId ORDER BY NormalName DESC")
-    abstract fun getPagingFilesByNameDesc(folderId: Int): PagingSource<Int, RoomUnifiedEmbeddedFile>
+    abstract fun getPagingFilesByNameDesc(folderId: Long): PagingSource<Int, RoomUnifiedEmbeddedFile>
     @Query("SELECT RetrievedDate FROM files WHERE FolderId = :folderId ORDER BY RetrievedDate DESC LIMIT 1 ")
     abstract suspend fun lastUpdated(folderId: Int): LocalDateTime
     @Query("SELECT EXISTS(SELECT * FROM files WHERE OnlineId = :onlineId)")
@@ -374,17 +373,26 @@ public abstract class UnifiedFileDao {
         }
     }
 
-    @Query("SELECT * FROM Files WHERE isFavourite = 1 ORDER BY CreatedDate DESC LIMIT :loadSize OFFSET :offset ")
+    @Query("SELECT * FROM Files WHERE isFavourite = 1 ORDER BY CachedFolderName ASC LIMIT :loadSize OFFSET :offset ")
+    abstract suspend fun getFavouriteFiles(offset: Int, loadSize: Int): List<RoomUnifiedEmbeddedFile>
+
+    @Query("SELECT * FROM Files WHERE isFavourite = 1 ORDER BY CachedFolderName ASC, CreatedDate DESC LIMIT :loadSize OFFSET :offset ")
     abstract suspend fun getFavouriteFilesNewestFirst(offset: Int, loadSize: Int): List<RoomUnifiedEmbeddedFile>
-    @Query("SELECT * FROM Files WHERE isFavourite = 1 ORDER BY CreatedDate ASC LIMIT :loadSize OFFSET :offset ")
+    @Query("SELECT * FROM Files WHERE isFavourite = 1 ORDER BY CachedFolderName ASC, CreatedDate ASC LIMIT :loadSize OFFSET :offset ")
     abstract suspend fun getFavouriteFilesOldestFirst(offset: Int, loadSize: Int): List<RoomUnifiedEmbeddedFile>
-    @Query("SELECT * FROM Files WHERE isFavourite = 1 ORDER BY NormalName ASC LIMIT :loadSize OFFSET :offset ")
+    @Query("SELECT * FROM Files WHERE isFavourite = 1 ORDER BY CachedFolderName ASC, NormalName ASC LIMIT :loadSize OFFSET :offset ")
     abstract suspend fun getFavouriteFilesByNameAsc(offset: Int, loadSize: Int): List<RoomUnifiedEmbeddedFile>
-    @Query("SELECT * FROM Files WHERE isFavourite = 1 ORDER BY NormalName DESC LIMIT :loadSize OFFSET :offset ")
+    @Query("SELECT * FROM Files WHERE isFavourite = 1 ORDER BY CachedFolderName ASC, NormalName DESC LIMIT :loadSize OFFSET :offset ")
     abstract suspend fun getFavouriteFilesByNameDesc(offset: Int, loadSize: Int): List<RoomUnifiedEmbeddedFile>
     @RawQuery
     abstract suspend fun getFilesViaQuery(query: SupportSQLiteQuery): List<RoomUnifiedEmbeddedFile>
     @Transaction
     @Query("SELECT * FROM Files WHERE OnlineId = :onlineId LIMIT 1")
     abstract suspend fun getByOnlineId(onlineId: Int): RoomUnifiedEmbeddedFile?
+    @Query("SELECT fil.* FROM FileModularCategoryCrossRef ref LEFT JOIN Files fil on fil.FileId = ref.FileId WHERE ref.CategoryId = :uid LIMIT 1")
+    abstract suspend fun getThumbnailForCategory(uid: Long):RoomUnifiedFile?
+
+    @Query("SELECT fil.* FROM FileModularSubjectCrossRef ref LEFT JOIN Files fil on fil.FileId = ref.FileId WHERE ref.SubjectId = :uid LIMIT 1")
+    abstract suspend fun getThumbnailForSubject(uid: Long):RoomUnifiedFile?
+
 }

@@ -25,7 +25,7 @@ import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.EnhancedF
 import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.EnhancedFileViewerViewModel
 import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.NewTouchImageView
 
-class ImageFileViewFragmentKt() : BaseFileViewFragmentKt() {
+class ImageFileViewFragmentKt : BaseFileViewFragmentKt() {
     private var zoomLevelChangeCallback: ZoomLevelChangeCallback? = null
 
     override fun onCreateView(

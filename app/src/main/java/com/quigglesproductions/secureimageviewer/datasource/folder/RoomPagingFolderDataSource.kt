@@ -28,7 +28,7 @@ class RoomPagingFolderDataSource(private val folder: RoomUnifiedFolder) : IFolde
     val folderSourceType: FolderSourceType
         get() = folder.sourceType
 
-    @Throws(MalformedURLException::class)
+    /*@Throws(MalformedURLException::class)
     override fun getFilesFromDataSource(
         context: Context,
         callback: FolderDataSourceCallback,
@@ -39,9 +39,9 @@ class RoomPagingFolderDataSource(private val folder: RoomUnifiedFolder) : IFolde
             for (file in folder.files) files.add(file)
             callback.FolderFilesRetrieved(files, null)
         }
-    }
+    }*/
 
-    @Throws(MalformedURLException::class)
+    /*@Throws(MalformedURLException::class)
     override suspend fun getThumbnailFromDataSource(
         context: Context,
         database: UnifiedFileDatabase,
@@ -67,26 +67,26 @@ class RoomPagingFolderDataSource(private val folder: RoomUnifiedFolder) : IFolde
             e.printStackTrace()
             callback.FolderThumbnailRetrieved(null, e)
         }
-    }
+    }*/
 
     override suspend fun getThumbnailFromDataSourceSuspend(
         context: Context,
         database: UnifiedFileDatabase
     ): Any? {
         try {
-            when (folderSourceType) {
+            return when (folderSourceType) {
                 FolderSourceType.ONLINE -> {
                     val glideThumbnailUrl = GlideUrl(
                         getFolderURL(folder.onlineThumbnailId).toString() + "/thumbnail",
                         LazyHeaders.Builder()
                             .build()
                     )
-                    return glideThumbnailUrl
+                    glideThumbnailUrl
                 }
 
                 FolderSourceType.LOCAL -> {
                     val file = database.fileDao().getByOnlineId(folder.onlineThumbnailId)
-                    return file?.thumbnailFile
+                    file?.thumbnailFile
                 }
             }
         } catch (e: MalformedURLException) {

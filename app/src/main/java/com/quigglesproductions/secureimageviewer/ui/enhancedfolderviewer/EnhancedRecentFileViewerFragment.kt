@@ -8,6 +8,8 @@ import androidx.navigation.NavDirections
 import androidx.navigation.Navigation
 import com.quigglesproductions.secureimageviewer.paging.repository.RecentFilesRepository
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.UnifiedRecentsFolder
+import com.quigglesproductions.secureimageviewer.ui.adapter.filelist.EnhancedFolderFilesListOnClickListener
+import com.quigglesproductions.secureimageviewer.ui.adapter.itemmodel.folderfileviewer.FolderFileViewerModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -19,10 +21,10 @@ class EnhancedRecentFileViewerFragment: BaseFolderViewerFragment() {
         folderViewModel.folderFilesRepository = RecentFilesRepository(requestService,downloadFileDatabase)
         setUiState()
 
-        setFileClickListener(object: FolderFilesListOnClickListener {
+        setFileClickListener(object: EnhancedFolderFilesListOnClickListener {
             override fun onClick(position: Int) {
-                folderViewModel.selectedFile.value = adapter.peek(position)
-                folderViewModel.files.value = adapter.snapshot().items
+                folderViewModel.selectedFile.value = (adapter.peek(position) as FolderFileViewerModel.FileModel).file
+                folderViewModel.files.value = adapter.snapshot().items.filter{it is FolderFileViewerModel.FileModel}.map { (it as FolderFileViewerModel.FileModel).file }
                 val action: NavDirections =
                     EnhancedRecentFileViewerFragmentDirections.actionEnhancedRecentFileViewerFragmentToNavEnhancedFileViewFragment(position)
                 Navigation.findNavController(getRootView()).navigate(action)

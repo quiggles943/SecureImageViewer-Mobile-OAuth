@@ -32,7 +32,7 @@ public interface IDisplayFile {
 
     long getFolderId();
 
-    long getId();
+    Long getId();
 
     String getContentType();
 }

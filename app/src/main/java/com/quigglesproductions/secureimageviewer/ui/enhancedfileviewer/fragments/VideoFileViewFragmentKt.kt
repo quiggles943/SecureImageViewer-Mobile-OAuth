@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.OptIn
+import androidx.hilt.navigation.fragment.hiltNavGraphViewModels
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
@@ -15,14 +16,19 @@ import com.quigglesproductions.secureimageviewer.managers.VideoPlaybackManager
 import com.quigglesproductions.secureimageviewer.managers.VideoPlaybackManager.VideoPlayerCallback
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile
 import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.EnhancedFileViewerViewModel
+import com.quigglesproductions.secureimageviewer.ui.enhancedfolderviewer.FolderViewerViewModel
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
-class VideoFileViewFragmentKt(playbackManager: VideoPlaybackManager,
-                              val viewModel: EnhancedFileViewerViewModel
-    ) : BaseFileViewFragmentKt() {
+@AndroidEntryPoint
+class VideoFileViewFragmentKt() : BaseFileViewFragmentKt() {
+    private val viewModel by hiltNavGraphViewModels<EnhancedFileViewerViewModel>(R.id.main_navigation)
     var videoView: PlayerView? = null
     private var mPlayer: ExoPlayer? = null
     private var isPlaying = false
-    var playbackManager: VideoPlaybackManager = playbackManager
+    //var playbackManager: VideoPlaybackManager = playbackManager
+    @Inject
+    lateinit var playbackManager: VideoPlaybackManager
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,

@@ -228,7 +228,7 @@ class DownloadManager(var context: Context, recordDatabase: DownloadRecordDataba
                 downloadRecord!!.fileTotalCount = fileDownloads.size
                 downloadRecord!!.workerId = folder.getName() + "/" + folder.getOnlineId()
                 downloadRecord!!.folderName = folder.getName()
-                downloadRecord!!.folderId = roomDatabaseFolder.getId()
+                downloadRecord!!.folderId = roomDatabaseFolder.uid!!
                 val folderRecordId: Long = recordDatabase.downloadRecordDao()!!.insert(
                     downloadRecord!!
                 )

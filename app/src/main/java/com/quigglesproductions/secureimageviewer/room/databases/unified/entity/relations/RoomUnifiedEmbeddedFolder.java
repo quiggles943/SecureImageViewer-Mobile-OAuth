@@ -2,10 +2,12 @@ package com.quigglesproductions.secureimageviewer.room.databases.unified.entity.
 
 import androidx.room.Embedded;
 import androidx.room.Relation;
+import androidx.room.Transaction;
 
 import com.quigglesproductions.secureimageviewer.SortType;
 import com.quigglesproductions.secureimageviewer.datasource.folder.IFolderDataSource;
 import com.quigglesproductions.secureimageviewer.datasource.folder.RoomPagingFolderDataSource;
+import com.quigglesproductions.secureimageviewer.enums.FileGroupBy;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.IDatabaseFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.IDisplayFolder;
@@ -45,6 +47,16 @@ public class RoomUnifiedEmbeddedFolder implements IDisplayFolder, IDatabaseFolde
     @Override
     public String getName() {
         return folder.getName();
+    }
+
+    @Override
+    public Boolean getIsAvailable() {
+        return folder.isAvailable;
+    }
+
+    @Override
+    public Long getUid() {
+        return folder.getUid();
     }
 
     @Override
@@ -90,8 +102,8 @@ public class RoomUnifiedEmbeddedFolder implements IDisplayFolder, IDatabaseFolde
     }
 
     @Override
-    public List<IDisplayFile> getFiles() {
-        return files.stream().map(x->(IDisplayFile)x).collect(Collectors.toList());
+    public FileGroupBy getFileGroupingType() {
+        return FileGroupBy.FOLDERS;
     }
 
     @Override

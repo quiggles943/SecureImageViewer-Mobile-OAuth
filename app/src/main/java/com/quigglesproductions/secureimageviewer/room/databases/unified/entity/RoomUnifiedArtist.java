@@ -10,7 +10,7 @@ import com.google.gson.annotations.SerializedName;
 public class RoomUnifiedArtist implements IRoomFileTag {
     @ColumnInfo(name = "ArtistId")
     @PrimaryKey(autoGenerate = true)
-    public long uid;
+    public Long uid;
     @ColumnInfo(name = "OnlineId")
     public long onlineId;
     @ColumnInfo(name = "NormalName")

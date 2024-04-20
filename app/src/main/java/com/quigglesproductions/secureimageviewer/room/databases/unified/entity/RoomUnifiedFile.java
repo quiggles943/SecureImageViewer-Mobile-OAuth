@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 public class RoomUnifiedFile {
     @ColumnInfo(name = "FileId")
     @PrimaryKey(autoGenerate = true)
-    private long uid;
+    private Long uid;
 
     @ColumnInfo(name = "OnlineId")
     @SerializedName("Id")
@@ -79,6 +79,8 @@ public class RoomUnifiedFile {
     public boolean isDownloaded;
     @ColumnInfo(name = "isFavourite")
     public boolean isFavourite;
+    @ColumnInfo(name = "cachedFolderName")
+    public String cachedFolderName;
 
     @Ignore
     private File imageFile;
@@ -118,12 +120,12 @@ public class RoomUnifiedFile {
         return dataSource;
     }
 
-    public long getUid() {
+    public Long getUid() {
         return uid;
     }
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     public void setUid(long uid){
-        if(this.uid >0)
+        if(this.uid != null && this.uid >0)
             return;
         this.uid = uid;
     }

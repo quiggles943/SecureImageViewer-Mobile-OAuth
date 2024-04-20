@@ -40,7 +40,7 @@ class FolderDownloaderMediator @Inject constructor(@ApplicationContext val appCo
         val status = FolderDownloadWorkerStatus()
         status.workerId = requestId
         status.downloadState = DownloadState.RETRIEVING_DATA
-        status.folderId = folder.id
+        status.folderId = folder.id!!
         status.isComplete = false
         status.workerName = workName
         status.folderName = folder.normalName
@@ -58,7 +58,8 @@ class FolderDownloaderMediator @Inject constructor(@ApplicationContext val appCo
                     val workerId = workInfo.id
                     runBlocking {
                         val status = systemDatabase.folderDownloadWorkerStatusDao().getFolderDownloadWorkerStatus(workerId = workerId.toString())
-                        var progress: Data
+                        val folder = downloadedDatabase.folderDao().loadFolderById(status.folderId)
+                        val progress: Data
                         if(workInfo.state == WorkInfo.State.SUCCEEDED || workInfo.state == WorkInfo.State.FAILED || workInfo.state == WorkInfo.State.CANCELLED)
                             progress = workInfo.outputData
                         else
@@ -73,8 +74,12 @@ class FolderDownloaderMediator @Inject constructor(@ApplicationContext val appCo
                         }
                         if(progress.keyValueMap.containsKey(FolderDownloadWorker.Total))
                             status.fileCount = progress.getInt(FolderDownloadWorker.Total, 0)
-                        if(progress.keyValueMap.containsKey(FolderDownloadWorker.Progress))
-                            status.downloadedFileCount = progress.getInt(FolderDownloadWorker.Progress, 0)
+                        if(progress.keyValueMap.containsKey(FolderDownloadWorker.Progress)) {
+                            val downloadedFileCount = progress.getInt(FolderDownloadWorker.Progress, 0)
+                            if(status.downloadedFileCount != downloadedFileCount)
+                                updateFileDownloadStatus(folder.folder,downloadedFileCount,status.fileCount)
+                            status.downloadedFileCount =downloadedFileCount
+                        }
                         if(progress.keyValueMap.containsKey(FolderDownloadWorker.ErrorCount))
                             status.errorFileCount = progress.getInt(FolderDownloadWorker.ErrorCount,0)
                         status.workManagerState = workInfo.state
@@ -89,7 +94,7 @@ class FolderDownloaderMediator @Inject constructor(@ApplicationContext val appCo
                         when(workInfo.state){
                             WorkInfo.State.SUCCEEDED -> {
                                 NotificationManager.getInstance().showSnackbar(status.folderName+" downloaded",Snackbar.LENGTH_SHORT)
-                                val folder = downloadedDatabase.folderDao().loadFolderById(status.folderId)
+
                                 folderDownloaded(folder.folder)
                             }
                             WorkInfo.State.FAILED -> {NotificationManager.getInstance().showSnackbar(status.folderName+" failed to download successfully",Snackbar.LENGTH_SHORT)}

@@ -5,6 +5,7 @@ import androidx.annotation.NonNull;
 import com.google.gson.annotations.SerializedName;
 import com.quigglesproductions.secureimageviewer.SortType;
 import com.quigglesproductions.secureimageviewer.datasource.folder.IFolderDataSource;
+import com.quigglesproductions.secureimageviewer.enums.FileGroupBy;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.IDisplayFolder;
 import com.quigglesproductions.secureimageviewer.ui.enhancedfolderviewer.FolderOrigin;
@@ -46,6 +47,16 @@ public class ModularFolder implements IDisplayFolder {
 
     public String getName() {
         return normalName;
+    }
+
+    @Override
+    public Boolean getIsAvailable() {
+        return true;
+    }
+
+    @Override
+    public Long getUid() {
+        return (long) onlineId;
     }
 
     public long getOnlineId() {
@@ -96,6 +107,11 @@ public class ModularFolder implements IDisplayFolder {
 
     public void sortFiles(SortType newSortType) {
 
+    }
+
+    @Override
+    public FileGroupBy getFileGroupingType() {
+        return FileGroupBy.FOLDERS;
     }
 
     public List<IDisplayFile> getFiles(){

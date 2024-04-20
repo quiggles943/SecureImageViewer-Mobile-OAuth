@@ -2,6 +2,7 @@ package com.quigglesproductions.secureimageviewer.models.enhanced.folder;
 
 import com.quigglesproductions.secureimageviewer.SortType;
 import com.quigglesproductions.secureimageviewer.datasource.folder.IFolderDataSource;
+import com.quigglesproductions.secureimageviewer.enums.FileGroupBy;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile;
 import com.quigglesproductions.secureimageviewer.ui.enhancedfolderviewer.FolderOrigin;
 
@@ -12,7 +13,8 @@ public interface IDisplayFolder {
     IFolderDataSource getDataSource();
     boolean hasUpdates();
     String getName();
-
+    Boolean getIsAvailable();
+    Long getUid();
     void setHasUpdates(boolean b);
 
     long getOnlineId();
@@ -23,5 +25,5 @@ public interface IDisplayFolder {
 
     void sortFiles(SortType newSortType);
 
-    List<IDisplayFile> getFiles();
+    FileGroupBy getFileGroupingType();
 }

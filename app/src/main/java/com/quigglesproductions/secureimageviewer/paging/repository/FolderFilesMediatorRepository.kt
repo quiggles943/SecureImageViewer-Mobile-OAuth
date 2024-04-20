@@ -4,18 +4,21 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import androidx.paging.map
 import com.quigglesproductions.secureimageviewer.dagger.hilt.annotations.CachingDatabase
 import com.quigglesproductions.secureimageviewer.dagger.hilt.annotations.DownloadDatabase
+import com.quigglesproductions.secureimageviewer.models.enhanced.folder.IDisplayFolder
 import com.quigglesproductions.secureimageviewer.paging.FileRemoteMediator
 import com.quigglesproductions.secureimageviewer.paging.datasource.OnlineFolderFilesDataSource
 import com.quigglesproductions.secureimageviewer.paging.source.DownloadedFilesPagingSource
 import com.quigglesproductions.secureimageviewer.retrofit.ModularRequestService
 import com.quigglesproductions.secureimageviewer.room.databases.unified.UnifiedFileDatabase
-import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedFolder
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.relations.RoomUnifiedEmbeddedFile
 import com.quigglesproductions.secureimageviewer.room.enums.FileSortType
+import com.quigglesproductions.secureimageviewer.ui.adapter.itemmodel.folderfileviewer.FolderFileViewerModel
 import com.quigglesproductions.secureimageviewer.ui.enhancedfolderlist.FolderListType
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 
@@ -27,7 +30,7 @@ class FolderFilesMediatorRepository @Inject constructor(requestService: ModularR
     private val modularRequestService: ModularRequestService
     private val pagingDatabase: UnifiedFileDatabase
     private val downloadedDatabase: UnifiedFileDatabase
-    private lateinit var folder: RoomUnifiedFolder
+    private var folder: IDisplayFolder? = null
 
     init {
         onlineFolderFilesDataSource = OnlineFolderFilesDataSource(requestService)
@@ -36,7 +39,7 @@ class FolderFilesMediatorRepository @Inject constructor(requestService: ModularR
         this.downloadedDatabase = downloadedDatabase
     }
 
-    override fun setFolder(folder: RoomUnifiedFolder) {
+    override fun setFolder(folder: IDisplayFolder) {
         this.folder = folder
     }
 
@@ -44,20 +47,25 @@ class FolderFilesMediatorRepository @Inject constructor(requestService: ModularR
     override fun getFiles(
         folderListType: FolderListType,
         sortType: FileSortType
-    ): Flow<PagingData<RoomUnifiedEmbeddedFile>> {
+    ): Flow<PagingData<FolderFileViewerModel>> {
         val fileDao = pagingDatabase.fileDao()
         when (folderListType) {
             FolderListType.ONLINE -> return Pager(
-                config = PagingConfig(pageSize = 50),
+                config = PagingConfig(pageSize = 32),
                 remoteMediator = FileRemoteMediator(
-                    folderId = folder.onlineId,
+                    folderId = folder!!.onlineId.toInt(),
                     networkService = modularRequestService,
                     database = pagingDatabase,
-                    sortType = sortType
+                    sortType = sortType,
+                    groupingType = folder!!.fileGroupingType
                 )
             ) {
-                fileDao.getFilesPaging(folder.onlineId, sortType)
-            }.flow
+                fileDao.getFilesPaging(folder!!.onlineId, sortType)
+            }.flow.map { pagingData: PagingData<RoomUnifiedEmbeddedFile> ->
+                pagingData.map { file->
+                    FolderFileViewerModel.FileModel(file)
+                }
+            }
 
             FolderListType.DOWNLOADED -> return Pager(
                 config = PagingConfig(
@@ -66,9 +74,20 @@ class FolderFilesMediatorRepository @Inject constructor(requestService: ModularR
 
                     ),
                 pagingSourceFactory = {
-                    DownloadedFilesPagingSource(downloadedDatabase, folder.uid, sortType)
+                    DownloadedFilesPagingSource(downloadedDatabase, folder!!.uid, sortType,folder!!.fileGroupingType)
                 }
-            ).flow
+            ).flow.map { pagingData: PagingData<RoomUnifiedEmbeddedFile> ->
+                pagingData.map { file->
+                    FolderFileViewerModel.FileModel(file)
+                }
+            }
         }
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if(other !is FolderFilesMediatorRepository)
+            return false
+        val otherObj: FolderFilesMediatorRepository = other
+        return folder == otherObj.folder
     }
 }

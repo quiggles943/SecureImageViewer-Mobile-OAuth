@@ -6,6 +6,7 @@ import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
 import com.quigglesproductions.secureimageviewer.dagger.hilt.annotations.CachingDatabase
+import com.quigglesproductions.secureimageviewer.enums.FileGroupBy
 import com.quigglesproductions.secureimageviewer.retrofit.ModularRequestService
 import com.quigglesproductions.secureimageviewer.retrofit.RetrofitException
 import com.quigglesproductions.secureimageviewer.room.databases.unified.UnifiedFileDatabase
@@ -24,7 +25,8 @@ class FileRemoteMediator(
     @CachingDatabase private val database: UnifiedFileDatabase,
     private val networkService: ModularRequestService,
     private val folderId: Int,
-    private val sortType: FileSortType
+    private val sortType: FileSortType,
+    private val groupingType: FileGroupBy
 ) : RemoteMediator<Int, RoomUnifiedEmbeddedFile>() {
     val folderDao = database.folderDao()
     val fileDao = database.fileDao()
@@ -34,7 +36,9 @@ class FileRemoteMediator(
     override suspend fun initialize(): InitializeAction {
         val cacheTimeout = TimeUnit.MILLISECONDS.convert(15, TimeUnit.MINUTES)
         val updatedDate: LocalDateTime = fileDao.lastUpdated(folderId)
-        val updatedMillis = updatedDate.toInstant(ZoneOffset.UTC).toEpochMilli()
+        var updatedMillis: Long = 0
+        if(updatedDate != null)
+            updatedMillis = updatedDate.toInstant(ZoneOffset.UTC).toEpochMilli()
         return if (System.currentTimeMillis() - updatedMillis  <= cacheTimeout)
         {
             // Cached data is up-to-date, so there is no need to re-fetch

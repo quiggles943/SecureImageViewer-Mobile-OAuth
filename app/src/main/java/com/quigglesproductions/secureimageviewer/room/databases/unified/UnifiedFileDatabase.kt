@@ -21,7 +21,7 @@ import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.R
 
 @Database(
     entities = [RoomUnifiedFolder::class, RoomUnifiedFile::class, RoomUnifiedMetadata::class, RoomUnifiedArtist::class, RoomUnifiedCategory::class, RoomUnifiedSubject::class, RoomUnifiedFileCategoryCrossRef::class, RoomUnifiedFileSubjectCrossRef::class, RemoteKey::class],
-    version = 4
+    version = 7
 )
 @TypeConverters(Converters::class)
 abstract class UnifiedFileDatabase : RoomDatabase() {

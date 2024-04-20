@@ -7,12 +7,6 @@ import java.util.List;
 public interface IRemoteFolder extends IDisplayFolder {
     long getOnlineId();
 
-    void clearItems();
-
-    void addItem(IDisplayFile file);
-
-    List<IDisplayFile> getBaseItems();
-
     int getOnlineThumbnailId();
 
     String getName();

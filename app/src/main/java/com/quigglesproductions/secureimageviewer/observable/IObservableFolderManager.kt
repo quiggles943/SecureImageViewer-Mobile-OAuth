@@ -12,6 +12,9 @@ interface IObservableFolderManager {
     fun remove(observer: IFolderDownloadObserver) {
         observers.remove(observer)
     }
+    fun updateFileDownloadStatus(folder: RoomUnifiedFolder,count:Int,total:Int){
+        observers.forEach{it.downloadStatusUpdated(folder,count,total)}
+    }
 
     fun folderDownloaded(folder: RoomUnifiedFolder) {
         observers.forEach { it.folderDownloaded(folder) }

@@ -25,7 +25,7 @@ class FolderRemoteMediator(
     private val networkService: ModularRequestService
 ) : RemoteMediator<Int, RoomUnifiedFolder>() {
     val folderDao = database.folderDao()
-    val remoteKeyDao = database.UnifiedRemoteKeyDao()
+    private val remoteKeyDao = database.UnifiedRemoteKeyDao()
     var pageNumber: Int = 1
 
     override suspend fun initialize(): InitializeAction {

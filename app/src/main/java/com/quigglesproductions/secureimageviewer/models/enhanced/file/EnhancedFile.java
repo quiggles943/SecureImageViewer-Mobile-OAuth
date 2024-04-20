@@ -153,8 +153,8 @@ public class EnhancedFile implements ItemBaseModel,IDisplayFile {
     }
 
     @Override
-    public long getId() {
-        return onlineId;
+    public Long getId() {
+        return (long) onlineId;
     }
 
     public IFileDataSource getDataSource() {

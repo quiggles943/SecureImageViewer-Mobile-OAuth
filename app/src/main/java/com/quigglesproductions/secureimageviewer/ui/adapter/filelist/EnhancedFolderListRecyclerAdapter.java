@@ -1,4 +1,4 @@
-package com.quigglesproductions.secureimageviewer.ui.enhancedfolderlist;
+package com.quigglesproductions.secureimageviewer.ui.adapter.filelist;
 
 import android.content.Context;
 import android.graphics.PorterDuff;
