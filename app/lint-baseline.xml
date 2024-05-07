@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="6" by="lint 8.4.0" type="baseline" client="gradle" dependencies="false" name="AGP (8.4.0)" variant="fatal" version="8.4.0">
+
+    <issue
+        id="MissingDefaultResource"
+        message="The drawable &quot;app_splash_background&quot; in drawable-night has no declaration in the base `drawable` folder or in a `drawable-`*density*`dpi` folder; this can lead to crashes when the drawable is queried in a configuration that does not match this qualifier"
+        errorLine1="&lt;vector xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;"
+        errorLine2=" ~~~~~~">
+        <location
+            file="src/main/res/drawable-night/app_splash_background.xml"
+            line="1"
+            column="2"/>
+    </issue>
+
+    <issue
+        id="MissingDefaultResource"
+        message="The drawable &quot;app_splash_background&quot; in drawable-notnight has no declaration in the base `drawable` folder or in a `drawable-`*density*`dpi` folder; this can lead to crashes when the drawable is queried in a configuration that does not match this qualifier"
+        errorLine1="&lt;vector xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;"
+        errorLine2=" ~~~~~~">
+        <location
+            file="src/main/res/drawable-notnight/app_splash_background.xml"
+            line="1"
+            column="2"/>
+    </issue>
+
+    <issue
+        id="MissingDefaultResource"
+        message="The drawable &quot;ic_baseline_brush&quot; in drawable-night has no declaration in the base `drawable` folder or in a `drawable-`*density*`dpi` folder; this can lead to crashes when the drawable is queried in a configuration that does not match this qualifier"
+        errorLine1="&lt;vector android:height=&quot;24dp&quot; android:tint=&quot;#FFFFFF&quot;"
+        errorLine2=" ~~~~~~">
+        <location
+            file="src/main/res/drawable-night/ic_baseline_brush.xml"
+            line="1"
+            column="2"/>
+    </issue>
+
+    <issue
+        id="MissingDefaultResource"
+        message="The drawable &quot;ic_baseline_brush&quot; in drawable-notnight has no declaration in the base `drawable` folder or in a `drawable-`*density*`dpi` folder; this can lead to crashes when the drawable is queried in a configuration that does not match this qualifier"
+        errorLine1="&lt;vector android:height=&quot;24dp&quot; android:tint=&quot;#A5A5A5&quot;"
+        errorLine2=" ~~~~~~">
+        <location
+            file="src/main/res/drawable-notnight/ic_baseline_brush.xml"
+            line="1"
+            column="2"/>
+    </issue>
+
+    <issue
+        id="MissingDefaultResource"
+        message="The drawable &quot;ic_baseline_categories_new&quot; in drawable-night has no declaration in the base `drawable` folder or in a `drawable-`*density*`dpi` folder; this can lead to crashes when the drawable is queried in a configuration that does not match this qualifier"
+        errorLine1="&lt;vector android:height=&quot;24dp&quot; android:tint=&quot;#F9FAFF&quot;"
+        errorLine2=" ~~~~~~">
+        <location
+            file="src/main/res/drawable-night/ic_baseline_categories_new.xml"
+            line="1"
+            column="2"/>
+    </issue>
+
+    <issue
+        id="MissingDefaultResource"
+        message="The drawable &quot;ic_baseline_categories_new&quot; in drawable-notnight has no declaration in the base `drawable` folder or in a `drawable-`*density*`dpi` folder; this can lead to crashes when the drawable is queried in a configuration that does not match this qualifier"
+        errorLine1="&lt;vector android:height=&quot;24dp&quot; android:tint=&quot;#A5A5A5&quot;"
+        errorLine2=" ~~~~~~">
+        <location
+            file="src/main/res/drawable-notnight/ic_baseline_categories_new.xml"
+            line="1"
+            column="2"/>
+    </issue>
+
+    <issue
+        id="MissingDefaultResource"
+        message="The drawable &quot;ic_baseline_category&quot; in drawable-night has no declaration in the base `drawable` folder or in a `drawable-`*density*`dpi` folder; this can lead to crashes when the drawable is queried in a configuration that does not match this qualifier"
+        errorLine1="&lt;vector android:height=&quot;24dp&quot; android:tint=&quot;#FFFFFF&quot;"
+        errorLine2=" ~~~~~~">
+        <location
+            file="src/main/res/drawable-night/ic_baseline_category.xml"
+            line="1"
+            column="2"/>
+    </issue>
+
+    <issue
+        id="MissingDefaultResource"
+        message="The drawable &quot;ic_baseline_category&quot; in drawable-notnight has no declaration in the base `drawable` folder or in a `drawable-`*density*`dpi` folder; this can lead to crashes when the drawable is queried in a configuration that does not match this qualifier"
+        errorLine1="&lt;vector android:height=&quot;24dp&quot; android:tint=&quot;#A5A5A5&quot;"
+        errorLine2=" ~~~~~~">
+        <location
+            file="src/main/res/drawable-notnight/ic_baseline_category.xml"
+            line="1"
+            column="2"/>
+    </issue>
+
+    <issue
+        id="MissingDefaultResource"
+        message="The drawable &quot;ic_baseline_check&quot; in drawable-night has no declaration in the base `drawable` folder or in a `drawable-`*density*`dpi` folder; this can lead to crashes when the drawable is queried in a configuration that does not match this qualifier"
+        errorLine1="&lt;vector android:height=&quot;24dp&quot; android:tint=&quot;#F9FAFF&quot;"
+        errorLine2=" ~~~~~~">
+        <location
+            file="src/main/res/drawable-night/ic_baseline_check.xml"
+            line="1"
+            column="2"/>
+    </issue>
+
+    <issue
+        id="MissingDefaultResource"
+        message="The drawable &quot;ic_baseline_check&quot; in drawable-notnight has no declaration in the base `drawable` folder or in a `drawable-`*density*`dpi` folder; this can lead to crashes when the drawable is queried in a configuration that does not match this qualifier"
+        errorLine1="&lt;vector android:height=&quot;24dp&quot; android:tint=&quot;#A5A5A5&quot;"
+        errorLine2=" ~~~~~~">
+        <location
+            file="src/main/res/drawable-notnight/ic_baseline_check.xml"
+            line="1"
+            column="2"/>
+    </issue>
+
+    <issue
+        id="MissingDefaultResource"
+        message="The drawable &quot;ic_baseline_fingerprint&quot; in drawable-night-anydpi has no declaration in the base `drawable` folder or in a `drawable-`*density*`dpi` folder; this can lead to crashes when the drawable is queried in a configuration that does not match this qualifier"
+        errorLine1="&lt;vector android:height=&quot;96dp&quot; android:tint=&quot;#F9FAFF&quot;"
+        errorLine2=" ~~~~~~">
+        <location
+            file="src/main/res/drawable-night-anydpi/ic_baseline_fingerprint.xml"
+            line="1"
+            column="2"/>
+    </issue>
+
+    <issue
+        id="MissingDefaultResource"
+        message="The drawable &quot;ic_baseline_fingerprint&quot; in drawable-notnight-anydpi has no declaration in the base `drawable` folder or in a `drawable-`*density*`dpi` folder; this can lead to crashes when the drawable is queried in a configuration that does not match this qualifier"
+        errorLine1="&lt;vector android:height=&quot;96dp&quot; android:tint=&quot;@color/text_grey_200&quot;"
+        errorLine2=" ~~~~~~">
+        <location
+            file="src/main/res/drawable-notnight-anydpi/ic_baseline_fingerprint.xml"
+            line="1"
+            column="2"/>
+    </issue>
+
+    <issue
+        id="MissingDefaultResource"
+        message="The drawable &quot;ic_baseline_folder&quot; in drawable-night has no declaration in the base `drawable` folder or in a `drawable-`*density*`dpi` folder; this can lead to crashes when the drawable is queried in a configuration that does not match this qualifier"
+        errorLine1="&lt;vector android:height=&quot;24dp&quot; android:tint=&quot;#FFFFFF&quot;"
+        errorLine2=" ~~~~~~">
+        <location
+            file="src/main/res/drawable-night/ic_baseline_folder.xml"
+            line="1"
+            column="2"/>
+    </issue>
+
+    <issue
+        id="MissingDefaultResource"
+        message="The drawable &quot;ic_baseline_folder&quot; in drawable-notnight has no declaration in the base `drawable` folder or in a `drawable-`*density*`dpi` folder; this can lead to crashes when the drawable is queried in a configuration that does not match this qualifier"
+        errorLine1="&lt;vector android:height=&quot;24dp&quot; android:tint=&quot;#A5A5A5&quot;"
+        errorLine2=" ~~~~~~">
+        <location
+            file="src/main/res/drawable-notnight/ic_baseline_folder.xml"
+            line="1"
+            column="2"/>
+    </issue>
+
+    <issue
+        id="MissingDefaultResource"
+        message="The drawable &quot;ic_baseline_people&quot; in drawable-night has no declaration in the base `drawable` folder or in a `drawable-`*density*`dpi` folder; this can lead to crashes when the drawable is queried in a configuration that does not match this qualifier"
+        errorLine1="&lt;vector android:height=&quot;24dp&quot; android:tint=&quot;#FFFFFF&quot;"
+        errorLine2=" ~~~~~~">
+        <location
+            file="src/main/res/drawable-night/ic_baseline_people.xml"
+            line="1"
+            column="2"/>
+    </issue>
+
+    <issue
+        id="MissingDefaultResource"
+        message="The drawable &quot;ic_baseline_people&quot; in drawable-notnight has no declaration in the base `drawable` folder or in a `drawable-`*density*`dpi` folder; this can lead to crashes when the drawable is queried in a configuration that does not match this qualifier"
+        errorLine1="&lt;vector android:height=&quot;24dp&quot; android:tint=&quot;#A5A5A5&quot;"
+        errorLine2=" ~~~~~~">
+        <location
+            file="src/main/res/drawable-notnight/ic_baseline_people.xml"
+            line="1"
+            column="2"/>
+    </issue>
+
+    <issue
+        id="MissingDefaultResource"
+        message="The drawable &quot;ic_baseline_settings_24&quot; in drawable-night-anydpi has no declaration in the base `drawable` folder or in a `drawable-`*density*`dpi` folder; this can lead to crashes when the drawable is queried in a configuration that does not match this qualifier"
+        errorLine1="&lt;vector android:height=&quot;24dp&quot; android:tint=&quot;#F9FAFF&quot;"
+        errorLine2=" ~~~~~~">
+        <location
+            file="src/main/res/drawable-night-anydpi/ic_baseline_settings_24.xml"
+            line="1"
+            column="2"/>
+    </issue>
+
+    <issue
+        id="MissingDefaultResource"
+        message="The drawable &quot;ic_baseline_settings_24&quot; in drawable-notnight-anydpi has no declaration in the base `drawable` folder or in a `drawable-`*density*`dpi` folder; this can lead to crashes when the drawable is queried in a configuration that does not match this qualifier"
+        errorLine1="&lt;vector android:height=&quot;24dp&quot; android:tint=&quot;@color/text_grey_200&quot;"
+        errorLine2=" ~~~~~~">
+        <location
+            file="src/main/res/drawable-notnight-anydpi/ic_baseline_settings_24.xml"
+            line="1"
+            column="2"/>
+    </issue>
+
+    <issue
+        id="MissingDefaultResource"
+        message="The drawable &quot;ic_baseline_short_text&quot; in drawable-night has no declaration in the base `drawable` folder or in a `drawable-`*density*`dpi` folder; this can lead to crashes when the drawable is queried in a configuration that does not match this qualifier"
+        errorLine1="&lt;vector android:autoMirrored=&quot;true&quot; android:height=&quot;24dp&quot;"
+        errorLine2=" ~~~~~~">
+        <location
+            file="src/main/res/drawable-night/ic_baseline_short_text.xml"
+            line="1"
+            column="2"/>
+    </issue>
+
+    <issue
+        id="MissingDefaultResource"
+        message="The drawable &quot;ic_baseline_short_text&quot; in drawable-notnight has no declaration in the base `drawable` folder or in a `drawable-`*density*`dpi` folder; this can lead to crashes when the drawable is queried in a configuration that does not match this qualifier"
+        errorLine1="&lt;vector android:autoMirrored=&quot;true&quot; android:height=&quot;24dp&quot;"
+        errorLine2=" ~~~~~~">
+        <location
+            file="src/main/res/drawable-notnight/ic_baseline_short_text.xml"
+            line="1"
+            column="2"/>
+    </issue>
+
+    <issue
+        id="MissingDefaultResource"
+        message="The drawable &quot;ic_baseline_wifi_24&quot; in drawable-night-anydpi has no declaration in the base `drawable` folder or in a `drawable-`*density*`dpi` folder; this can lead to crashes when the drawable is queried in a configuration that does not match this qualifier"
+        errorLine1="&lt;vector android:height=&quot;24dp&quot; android:tint=&quot;#F9FAFF&quot;"
+        errorLine2=" ~~~~~~">
+        <location
+            file="src/main/res/drawable-night-anydpi/ic_baseline_wifi_24.xml"
+            line="1"
+            column="2"/>
+    </issue>
+
+    <issue
+        id="MissingDefaultResource"
+        message="The drawable &quot;ic_baseline_wifi_24&quot; in drawable-notnight-anydpi has no declaration in the base `drawable` folder or in a `drawable-`*density*`dpi` folder; this can lead to crashes when the drawable is queried in a configuration that does not match this qualifier"
+        errorLine1="&lt;vector android:height=&quot;24dp&quot; android:tint=&quot;@color/text_grey_200&quot;"
+        errorLine2=" ~~~~~~">
+        <location
+            file="src/main/res/drawable-notnight-anydpi/ic_baseline_wifi_24.xml"
+            line="1"
+            column="2"/>
+    </issue>
+
+    <issue
+        id="MissingDefaultResource"
+        message="The drawable &quot;ic_image_24&quot; in drawable-night-anydpi has no declaration in the base `drawable` folder or in a `drawable-`*density*`dpi` folder; this can lead to crashes when the drawable is queried in a configuration that does not match this qualifier"
+        errorLine1="&lt;vector android:height=&quot;24dp&quot; android:tint=&quot;#F9FAFF&quot;"
+        errorLine2=" ~~~~~~">
+        <location
+            file="src/main/res/drawable-night-anydpi/ic_image_24.xml"
+            line="1"
+            column="2"/>
+    </issue>
+
+    <issue
+        id="MissingDefaultResource"
+        message="The drawable &quot;ic_image_24&quot; in drawable-notnight-anydpi has no declaration in the base `drawable` folder or in a `drawable-`*density*`dpi` folder; this can lead to crashes when the drawable is queried in a configuration that does not match this qualifier"
+        errorLine1="&lt;vector android:height=&quot;24dp&quot; android:tint=&quot;@color/text_grey_200&quot;"
+        errorLine2=" ~~~~~~">
+        <location
+            file="src/main/res/drawable-notnight-anydpi/ic_image_24.xml"
+            line="1"
+            column="2"/>
+    </issue>
+
+    <issue
+        id="MissingDefaultResource"
+        message="The drawable &quot;ic_logo&quot; in drawable-night-anydpi has no declaration in the base `drawable` folder or in a `drawable-`*density*`dpi` folder; this can lead to crashes when the drawable is queried in a configuration that does not match this qualifier"
+        errorLine1="&lt;vector xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;"
+        errorLine2=" ~~~~~~">
+        <location
+            file="src/main/res/drawable-night-anydpi/ic_logo.xml"
+            line="1"
+            column="2"/>
+    </issue>
+
+    <issue
+        id="MissingDefaultResource"
+        message="The drawable &quot;ic_logo&quot; in drawable-notnight-anydpi has no declaration in the base `drawable` folder or in a `drawable-`*density*`dpi` folder; this can lead to crashes when the drawable is queried in a configuration that does not match this qualifier"
+        errorLine1="&lt;vector xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;"
+        errorLine2=" ~~~~~~">
+        <location
+            file="src/main/res/drawable-notnight-anydpi/ic_logo.xml"
+            line="1"
+            column="2"/>
+    </issue>
+
+</issues>
