@@ -143,4 +143,8 @@ class RoomUnifiedEmbeddedCategory : IDisplayFolder, IDatabaseFolder {
     override fun getThumbnailChecksum(): FileChecksum? {
         return null
     }
+
+    override fun getIsSecure(): Boolean {
+        return false
+    }
 }

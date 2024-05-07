@@ -74,7 +74,7 @@ class AuroraLoginActivity : SecureActivity() {
     private fun setupBiometrics() {
         val uiHandler = Handler(Looper.getMainLooper())
         uiHandler.post {
-            auroraAuthenticationManager.biometricAuthenticator.callBiometricLogin(mContext as SecureActivity?) { success, exception ->
+            auroraAuthenticationManager.biometricAuthenticator.callBiometricLogin(mContext as SecureActivity) { success, exception ->
                 if (success) {
                     loginSucceeded()
                 } else {

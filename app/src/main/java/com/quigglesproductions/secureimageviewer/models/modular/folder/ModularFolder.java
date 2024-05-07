@@ -23,8 +23,6 @@ public class ModularFolder implements IDisplayFolder {
     public String encodedName;
     @SerializedName("NormalName")
     public String normalName;
-    @SerializedName("Uri")
-    public String onlineUri;
     @SerializedName("LastAccessTime")
     public LocalDateTime onlineAccessTime;
     @SerializedName("ThumbnailId")
@@ -35,9 +33,10 @@ public class ModularFolder implements IDisplayFolder {
     public int defaultOnlineSubjectId;
     @SerializedName("ThumbnailChecksum")
     public String thumbnailChecksum;
-
     @SerializedName("ThumbnailChecksumMethod")
     public String thumbnailChecksumMethod;
+    @SerializedName("IsSecure")
+    public Boolean isSecure;
 
     private Status status;
 
@@ -76,6 +75,10 @@ public class ModularFolder implements IDisplayFolder {
 
     public int getOnlineThumbnailId() {
         return onlineThumbnailId;
+    }
+
+    public Boolean getSecure() {
+        return isSecure;
     }
 
     public Status getStatus() {
@@ -146,6 +149,11 @@ public class ModularFolder implements IDisplayFolder {
     @Override
     public FileChecksum getThumbnailChecksum() {
         return new FileChecksum(thumbnailChecksum,thumbnailChecksumMethod);
+    }
+
+    @Override
+    public boolean getIsSecure() {
+        return isSecure;
     }
 
     public List<IDisplayFile> getFiles(){

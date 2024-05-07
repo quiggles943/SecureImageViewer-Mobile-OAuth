@@ -1,5 +1,6 @@
 package com.quigglesproductions.secureimageviewer.dagger.hilt.module;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 
 import com.quigglesproductions.secureimageviewer.dagger.hilt.annotations.AuthServiceClient;
@@ -30,11 +31,14 @@ import okhttp3.logging.HttpLoggingInterceptor;
 @InstallIn(SingletonComponent.class)
 public class NetworkModule {
 
+    @SuppressLint("CustomX509TrustManager")
     final static TrustManager[] trustAllCerts = new TrustManager[] {
             new X509TrustManager() {
+                @SuppressLint("TrustAllX509TrustManager")
                 @Override
                 public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) {}
 
+                @SuppressLint("TrustAllX509TrustManager")
                 @Override
                 public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) {}
 
@@ -130,7 +134,6 @@ public class NetworkModule {
     }
 
     private static ConnectionPool getConnectionPool(){
-        ConnectionPool connectionPool = new ConnectionPool(5,5,TimeUnit.MINUTES);
-        return connectionPool;
+        return new ConnectionPool(5,5,TimeUnit.MINUTES);
     }
 }

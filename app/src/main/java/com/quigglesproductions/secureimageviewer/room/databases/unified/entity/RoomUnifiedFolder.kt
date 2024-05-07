@@ -104,6 +104,9 @@ open class RoomUnifiedFolder : IDisplayFolder, IRemoteFolder {
     @SerializedName("ThumbnailChecksumMethod")
     @JvmField
     var thumbnailChecksumMethod: String? = null
+    @ColumnInfo(name = "IsSecure")
+    @JvmField
+    var isSecure: Boolean = false
 
     @Ignore
     var thumbnailFile: File? = null
@@ -233,6 +236,10 @@ open class RoomUnifiedFolder : IDisplayFolder, IRemoteFolder {
         return checksum
     }
 
+    override fun getIsSecure(): Boolean {
+        return isSecure
+    }
+
     fun getLastUpdateTime(): LocalDateTime? {
         return lastUpdateTime
             ?:retrievedDate
@@ -276,6 +283,7 @@ open class RoomUnifiedFolder : IDisplayFolder, IRemoteFolder {
             folder.defaultOnlineSubjectId = onlineFolder.defaultOnlineSubjectId
             folder.thumbnailChecksum = onlineFolder.thumbnailChecksum
             folder.thumbnailChecksumMethod = onlineFolder.thumbnailChecksumMethod
+            folder.isSecure = onlineFolder.isSecure
             return folder
         }
 
@@ -290,6 +298,7 @@ open class RoomUnifiedFolder : IDisplayFolder, IRemoteFolder {
             folder.defaultOnlineSubjectId = onlineFolder.defaultOnlineSubjectId
             folder.thumbnailChecksum = onlineFolder.thumbnailChecksum
             folder.thumbnailChecksumMethod = onlineFolder.thumbnailChecksumMethod
+            folder.isSecure = onlineFolder.isSecure
             return folder
         }
 

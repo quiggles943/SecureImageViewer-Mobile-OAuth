@@ -6,11 +6,11 @@
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/nav_overviewFragment"
-            android:icon="@drawable/ic_baseline_home_24"
+            android:icon="@drawable/outline_home_24"
             android:title="@string/menu_home" />
         <item
             android:id="@+id/nav_enhancedFolderListFragment"
-            android:icon="@drawable/ic_baseline_wifi_24"
+            android:icon="@drawable/baseline_cloud_outline_24"
             android:title="@string/online_viewer_title" />
         <item
             android:id="@+id/nav_enhancedOfflineFolderListFragment"
@@ -18,7 +18,7 @@
             android:title="@string/offline_viewer_title" />
         <item
             android:id="@+id/nav_settingsFragment"
-            android:icon="@drawable/ic_baseline_settings_24"
+            android:icon="@drawable/outline_settings_24"
             android:title="@string/settings_title" />
         <item
             android:id="@+id/nav_userOptions"

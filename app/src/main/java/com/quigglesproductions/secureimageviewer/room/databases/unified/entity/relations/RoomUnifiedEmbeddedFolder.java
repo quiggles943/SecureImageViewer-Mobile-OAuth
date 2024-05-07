@@ -145,5 +145,10 @@ public class RoomUnifiedEmbeddedFolder implements IDisplayFolder, IDatabaseFolde
         return folder.getThumbnailChecksum();
     }
 
+    @Override
+    public boolean getIsSecure() {
+        return folder.isSecure;
+    }
+
 
 }

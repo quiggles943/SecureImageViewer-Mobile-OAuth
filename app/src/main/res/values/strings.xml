@@ -97,4 +97,8 @@
     <string name="sort_by">Sort By</string>
     <string name="menu_user_title">User</string>
 
+    <string name="file_viewer_title">Folders</string>
+    <string name="file_search_title">Search</string>
+    <string name="folder_authentication_title">Folder Authentication</string>
+    <string name="folder_authentication_subtitle">Authentication is required to view this folder</string>
 </resources>

@@ -90,7 +90,7 @@ public class SecurityManager {
                     case BiometricPrompt.ERROR_NO_BIOMETRICS:
                         //No Fingerprints enrolled
                     default:
-                        Toast.makeText(rootContext, "Authentication error: " + errString, Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(rootContext, "Authentication error: " + errString, Toast.LENGTH_SHORT).show();
                         activity.finishAndRemoveTask();
                         break;
                 }

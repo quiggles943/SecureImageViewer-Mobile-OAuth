@@ -35,4 +35,5 @@ public interface IDisplayFolder {
     boolean getIsAvailableOffline();
     boolean isAvailableOfflineSet();
     FileChecksum getThumbnailChecksum();
+    boolean getIsSecure();
 }

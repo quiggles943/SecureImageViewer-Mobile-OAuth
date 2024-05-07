@@ -1,9 +1,7 @@
 package com.quigglesproductions.secureimageviewer.ui.enhancedfolderlist
 
-import android.R.attr.fragment
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.text.TextUtils
 import android.view.ContextMenu
 import android.view.ContextMenu.ContextMenuInfo
 import android.view.LayoutInflater
@@ -12,9 +10,9 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
-import androidx.annotation.NonNull
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
@@ -28,9 +26,6 @@ import androidx.work.Data
 import androidx.work.OneTimeWorkRequest
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
-import com.bumptech.glide.Glide
-import com.bumptech.glide.ListPreloader.PreloadModelProvider
-import com.bumptech.glide.RequestBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.quigglesproductions.secureimageviewer.R
 import com.quigglesproductions.secureimageviewer.databinding.FragmentFolderListBinding
@@ -40,6 +35,7 @@ import com.quigglesproductions.secureimageviewer.managers.ApplicationPreferenceM
 import com.quigglesproductions.secureimageviewer.managers.FolderManager
 import com.quigglesproductions.secureimageviewer.managers.NotificationManager
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.IDisplayFolder
+import com.quigglesproductions.secureimageviewer.models.modular.folder.ModularFolder
 import com.quigglesproductions.secureimageviewer.observable.IFolderDownloadObserver
 import com.quigglesproductions.secureimageviewer.recycler.RecyclerViewSelectionMode
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedFolder
@@ -213,11 +209,15 @@ class EnhancedFolderListFragment() : SecureFragment() {
                     if (adapter.getSelectedCount() == 0) adapter.setMultiselect(false)
                 } else {
                     val value = adapter.peek(position)
-                    val action =
+
+                    if (value != null) {
+                        navigateToFolder(value)
+                    }
+                    /*val action =
                         EnhancedFolderListFragmentDirections.actionEnhancedFolderListFragmentToEnhancedFolderFileViewerFragment()
                     viewModel.selectedFolder.value = value
                     //FolderManager.instance.currentFolder = value!!
-                    findNavController(binding!!.root).navigate(action)
+                    findNavController(binding!!.root).navigate(action)*/
                 }
             }
 
@@ -240,6 +240,30 @@ class EnhancedFolderListFragment() : SecureFragment() {
         //recyclerView.addItemDecoration(new RecyclerViewMargin(0,columnCount));
         recyclerView.adapter = adapter
         registerForContextMenu((recyclerView))
+    }
+
+    private fun navigateToFolder(selectedFolder: IDisplayFolder){
+        if(selectedFolder.isSecure)
+            requiresAuroraAuthenticationManager().biometricAuthenticator.requestBiometricAuthentication(
+                requiresSecureActivity(),
+                R.string.folder_authentication_title,
+                R.string.folder_authentication_subtitle)
+            { success, _ ->
+                if(success)
+                    navigate(selectedFolder)
+                else
+                    NotificationManager.getInstance().showToast("Unable to access folder", Toast.LENGTH_SHORT)
+            }
+        else
+            navigate(selectedFolder)
+    }
+
+    private fun navigate(selectedFolder: IDisplayFolder){
+        val action =
+            EnhancedFolderListFragmentDirections.actionEnhancedFolderListFragmentToEnhancedFolderFileViewerFragment()
+        viewModel.selectedFolder.value = selectedFolder
+        //FolderManager.instance.currentFolder = value!!
+        findNavController(binding!!.root).navigate(action)
     }
     private fun setupSwipeRefreshLayout(){
         swipeLayout.setOnRefreshListener {
