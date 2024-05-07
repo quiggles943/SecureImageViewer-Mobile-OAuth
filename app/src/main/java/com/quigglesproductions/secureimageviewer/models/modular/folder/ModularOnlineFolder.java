@@ -92,4 +92,5 @@ public class ModularOnlineFolder extends ModularFolder implements IRemoteFolder 
     public List<IDisplayFile> getFiles(){
         return new ArrayList<>(files);
     }
+
 }

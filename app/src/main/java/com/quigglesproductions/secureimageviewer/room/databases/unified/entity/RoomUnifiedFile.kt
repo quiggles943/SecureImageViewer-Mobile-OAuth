@@ -1,186 +1,147 @@
-package com.quigglesproductions.secureimageviewer.room.databases.unified.entity;
+package com.quigglesproductions.secureimageviewer.room.databases.unified.entity
 
-import androidx.annotation.VisibleForTesting;
-import androidx.room.ColumnInfo;
-import androidx.room.Entity;
-import androidx.room.Ignore;
-import androidx.room.PrimaryKey;
-
-import com.google.gson.annotations.SerializedName;
-import com.quigglesproductions.secureimageviewer.datasource.file.IFileDataSource;
-
-import java.io.File;
-import java.time.LocalDateTime;
+import androidx.annotation.VisibleForTesting
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.Ignore
+import androidx.room.PrimaryKey
+import com.google.gson.annotations.SerializedName
+import com.quigglesproductions.secureimageviewer.checksum.ChecksumAlgorithm
+import com.quigglesproductions.secureimageviewer.checksum.FileChecksum
+import com.quigglesproductions.secureimageviewer.datasource.file.IFileDataSource
+import java.io.File
+import java.time.LocalDateTime
 
 @Entity(tableName = "Files")
-public class RoomUnifiedFile {
+class RoomUnifiedFile {
     @ColumnInfo(name = "FileId")
     @PrimaryKey(autoGenerate = true)
-    private Long uid;
+    var uid: Long? = null
 
+    @JvmField
     @ColumnInfo(name = "OnlineId")
     @SerializedName("Id")
-    public int onlineId;
+    var onlineId = 0
 
+    @JvmField
     @ColumnInfo(name = "EncodedName")
     @SerializedName("EncodedName")
-    public String encodedName;
+    var encodedName: String? = null
 
+    @JvmField
     @ColumnInfo(name = "NormalName")
     @SerializedName("NormalName")
-    public String normalName;
+    var name: String? = null
 
+    @JvmField
     @ColumnInfo(name = "Size")
     @SerializedName("Size")
-    public long size;
+    var size: Long = 0
 
+    @JvmField
     @ColumnInfo(name = "OnlineFolderId")
     @SerializedName("FolderId")
-    public int onlineFolderId;
+    var onlineFolderId = 0
 
+    @JvmField
     @ColumnInfo(name = "ContentType")
     @SerializedName("ContentType")
-    public String contentType;
+    var contentType: String? = null
 
+    @JvmField
     @ColumnInfo(name = "FileChecksum")
     @SerializedName("FileChecksum")
-    public String fileChecksum;
+    var checksumString: String? = null
 
+    @JvmField
     @ColumnInfo(name = "ChecksumMethod")
     @SerializedName("ChecksumMethod")
-    public String checksumMethod;
+    var checksumMethod: ChecksumAlgorithm? = null
 
+    @JvmField
     @ColumnInfo(name = "HasVarients")
     @SerializedName("HasVarients")
-    public boolean hasVarients;
+    var hasVarients = false
 
+    @JvmField
     @ColumnInfo(name = "CreatedDate")
     @SerializedName("CreatedDate")
-    public LocalDateTime createdDate;
+    var createdDate: LocalDateTime? = null
 
+    @JvmField
     @ColumnInfo(name = "HasAnimatedThumbnail")
     @SerializedName("HasAnimatedThumbnail")
-    public boolean hasAnimatedThumbnail;
+    var hasAnimatedThumbnail = false
 
     //TODO update
     //@SerializedName("Metadata")
     //public FileMetadata metadata;
     @ColumnInfo(name = "FolderId")
-    private long folderId;
+    var folderId: Long = 0
+        set(folderId) {
+            if (this.folderId > 0) return
+            field = folderId
+        }
+
+    @JvmField
     @ColumnInfo(name = "FilePath")
-    private String filePath;
+    var filePath: String? = null
+
+    @JvmField
     @ColumnInfo(name = "ThumbnailPath")
-    private String thumbnailPath;
+    var thumbnailPath: String? = null
+
+    @JvmField
     @ColumnInfo(name = "RetrievedDate")
-    public LocalDateTime retrievedDate;
+    var retrievedDate: LocalDateTime? = null
+
+    @JvmField
     @ColumnInfo(name = "DownloadedDate")
-    public LocalDateTime downloadedDate;
+    var downloadedDate: LocalDateTime? = null
+
+    @JvmField
     @ColumnInfo(name = "IsDownloaded")
-    public boolean isDownloaded;
+    var isDownloaded = false
+
+    @JvmField
     @ColumnInfo(name = "isFavourite")
-    public boolean isFavourite;
+    var isFavourite = false
+
+    @JvmField
     @ColumnInfo(name = "cachedFolderName")
-    public String cachedFolderName;
+    var cachedFolderName: String? = null
 
     @Ignore
-    private File imageFile;
-    @Ignore
-    private File thumbnailFile;
-    @Ignore
-    private String folderName;
+    var imageFile: File? = null
+        get() {
+            if (filePath != null && !filePath!!.isEmpty()) field = File(filePath)
+            return field
+        }
 
     @Ignore
-    transient IFileDataSource dataSource;
+    var thumbnailFile: File? = null
+        get() {
+            if (thumbnailPath != null && !thumbnailPath!!.isEmpty()) field = File(thumbnailPath)
+            return field
+        }
 
-    public RoomUnifiedFile(){
+    @Ignore
+    var folderName: String? = null
 
-    }
+    @JvmField
+    @Ignore
+    @Transient
+    var dataSource: IFileDataSource? = null
 
-    public int getOnlineId() {
-        return onlineId;
-    }
 
-    public int getOnlineFolderId() {
-        return onlineFolderId;
-    }
+    val checksum: FileChecksum
+        get() {
+            return FileChecksum(checksumString,checksumMethod)
+        }
 
-    public String getName() {
-        return normalName;
-    }
-
-    public String getContentType() {
-        return contentType;
-    }
-
-    public void setDataSource(IFileDataSource dataSource){
-        this.dataSource = dataSource;
-    }
-
-    public IFileDataSource getDataSource() {
-        return dataSource;
-    }
-
-    public Long getUid() {
-        return uid;
-    }
-    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    public void setUid(long uid){
-        if(this.uid != null && this.uid >0)
-            return;
-        this.uid = uid;
-    }
-
-    public File getImageFile() {
-        if(filePath != null && !filePath.isEmpty())
-            imageFile = new File(filePath);
-        return imageFile;
-    }
-
-    public File getThumbnailFile() {
-        if(thumbnailPath != null && !thumbnailPath.isEmpty())
-            thumbnailFile = new File(thumbnailPath);
-        return thumbnailFile;
-    }
-
-    public long getFolderId() {
-        return folderId;
-    }
-
-    public void setImageFile(File file) {
-        imageFile = file;
-    }
-
-    public void setThumbnailFile(File thumbnail) {
-        thumbnailFile = thumbnail;
-    }
-
-    public void setFolderName(String name){
-        this.folderName = name;
-    }
-
-    public String getFolderName(){
-        return folderName;
-    }
-
-    public void setFolderId(long folderId) {
-        if(this.folderId>0)
-            return;
-        this.folderId = folderId;
-    }
-
-    public String getFilePath() {
-        return filePath;
-    }
-
-    public String getThumbnailPath() {
-        return thumbnailPath;
-    }
-
-    public void setFilePath(String filePath){
-        this.filePath = filePath;
-    }
-
-    public void setThumbnailPath(String thumbnailPath) {
-        this.thumbnailPath = thumbnailPath;
-    }
+    /*@VisibleForTesting
+    fun setUid(uid: Long) {
+        if (this.uid != null && this.uid!! > 0) return
+        this.uid = uid
+    }*/
 }

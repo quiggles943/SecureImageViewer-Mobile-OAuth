@@ -3,6 +3,7 @@ package com.quigglesproductions.secureimageviewer.room;
 import androidx.room.TypeConverter;
 import androidx.work.WorkInfo;
 
+import com.quigglesproductions.secureimageviewer.checksum.ChecksumAlgorithm;
 import com.quigglesproductions.secureimageviewer.datasource.folder.IFolderDataSource;
 import com.quigglesproductions.secureimageviewer.downloader.DownloadState;
 import com.quigglesproductions.secureimageviewer.room.databases.system.enums.SystemParameter;
@@ -91,5 +92,18 @@ public class Converters {
             return state.name();
         else
             return "";
+    }
+
+    @TypeConverter
+    public static ChecksumAlgorithm toChecksumAlgorithm(String value){
+        if(value != null)
+            return ChecksumAlgorithm.valueOf(value);
+        else
+            return ChecksumAlgorithm.UNKNOWN;
+    }
+
+    @TypeConverter
+    public static String fromChecksumAlgorithm(ChecksumAlgorithm checksumAlgorithm){
+        return checksumAlgorithm.name();
     }
 }

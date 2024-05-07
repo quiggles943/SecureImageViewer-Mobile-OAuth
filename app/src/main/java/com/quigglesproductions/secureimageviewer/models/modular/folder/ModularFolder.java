@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 
 import com.google.gson.annotations.SerializedName;
 import com.quigglesproductions.secureimageviewer.SortType;
+import com.quigglesproductions.secureimageviewer.checksum.FileChecksum;
 import com.quigglesproductions.secureimageviewer.datasource.folder.IFolderDataSource;
 import com.quigglesproductions.secureimageviewer.enums.FileGroupBy;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile;
@@ -32,6 +33,11 @@ public class ModularFolder implements IDisplayFolder {
     public int defaultOnlineArtistId;
     @SerializedName("DefaultSubjectId")
     public int defaultOnlineSubjectId;
+    @SerializedName("ThumbnailChecksum")
+    public String thumbnailChecksum;
+
+    @SerializedName("ThumbnailChecksumMethod")
+    public String thumbnailChecksumMethod;
 
     private Status status;
 
@@ -112,6 +118,34 @@ public class ModularFolder implements IDisplayFolder {
     @Override
     public FileGroupBy getFileGroupingType() {
         return FileGroupBy.FOLDERS;
+    }
+
+    @Override
+    public IFolderDataSource.FolderSourceType getSourceType() {
+        return IFolderDataSource.FolderSourceType.LOCAL;
+    }
+
+    boolean isAvailableOfflineSet = false;
+    boolean isAvailableOffline = false;
+    @Override
+    public void setIsAvailableOffline(boolean value) {
+        isAvailableOffline = value;
+        isAvailableOfflineSet = true;
+    }
+
+    @Override
+    public boolean getIsAvailableOffline() {
+        return isAvailableOffline;
+    }
+
+    @Override
+    public boolean isAvailableOfflineSet() {
+        return isAvailableOfflineSet;
+    }
+
+    @Override
+    public FileChecksum getThumbnailChecksum() {
+        return new FileChecksum(thumbnailChecksum,thumbnailChecksumMethod);
     }
 
     public List<IDisplayFile> getFiles(){

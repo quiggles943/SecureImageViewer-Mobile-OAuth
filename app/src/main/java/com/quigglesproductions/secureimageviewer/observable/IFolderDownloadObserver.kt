@@ -4,5 +4,6 @@ import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.R
 
 interface IFolderDownloadObserver {
     fun folderDownloaded(folder: RoomUnifiedFolder)
+    fun folderThumbnailDownloaded(folder: RoomUnifiedFolder)
     abstract fun downloadStatusUpdated(folder: RoomUnifiedFolder, count: Int, total: Int)
 }

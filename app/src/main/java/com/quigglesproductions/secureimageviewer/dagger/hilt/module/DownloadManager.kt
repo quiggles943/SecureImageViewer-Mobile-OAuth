@@ -294,7 +294,7 @@ class DownloadManager(var context: Context, recordDatabase: DownloadRecordDataba
             try {
                 val fileId: Long =
                     fileDatabase.fileDao()!!.insert(folder, fileWithMetadata)
-                fileWithMetadata!!.file.setUid(fileId)
+                fileWithMetadata!!.file.uid = fileId
             } catch (exception: DatabaseInsertionException) {
                 Log.e("DownloadManager","Database file insert failed",exception)
             }

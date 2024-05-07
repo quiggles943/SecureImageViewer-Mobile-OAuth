@@ -6,7 +6,9 @@ import androidx.room.Ignore
 import androidx.room.Junction
 import androidx.room.Relation
 import com.quigglesproductions.secureimageviewer.SortType
+import com.quigglesproductions.secureimageviewer.checksum.FileChecksum
 import com.quigglesproductions.secureimageviewer.datasource.folder.IFolderDataSource
+import com.quigglesproductions.secureimageviewer.datasource.folder.IFolderDataSource.FolderSourceType
 import com.quigglesproductions.secureimageviewer.enums.FileGroupBy
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.IDatabaseFolder
@@ -117,5 +119,24 @@ class RoomUnifiedEmbeddedSubject : IDisplayFolder, IDatabaseFolder {
 
     override fun getDownloadTime(): LocalDateTime {
         return LocalDateTime.MIN
+    }
+    override fun getSourceType(): FolderSourceType {
+        return subject!!.sourceType
+    }
+
+    override fun setIsAvailableOffline(value: Boolean) {
+        subject!!.isAvailableOffline = value
+    }
+
+    override fun getIsAvailableOffline(): Boolean {
+        return subject!!.isAvailableOffline
+    }
+
+    override fun isAvailableOfflineSet(): Boolean {
+        return subject!!.isAvailableOfflineSet
+    }
+
+    override fun getThumbnailChecksum(): FileChecksum? {
+        return null
     }
 }

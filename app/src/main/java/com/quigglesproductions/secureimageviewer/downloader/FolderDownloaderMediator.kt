@@ -1,6 +1,9 @@
 package com.quigglesproductions.secureimageviewer.downloader
 
 import android.content.Context
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import androidx.work.Data
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequest
@@ -22,15 +25,83 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.runBlocking
 import java.util.UUID
 import javax.inject.Inject
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-class FolderDownloaderMediator @Inject constructor(@ApplicationContext val appContext: Context,val systemDatabase: SystemDatabase): IObservableFolderManager {
+class FolderDownloaderMediator @Inject  constructor(@ApplicationContext val appContext: Context,
+                                                   private val systemDatabase: SystemDatabase): IObservableFolderManager {
     override val observers: ArrayList<IFolderDownloadObserver> = ArrayList()
+    val downloadInProgress : MutableLiveData<Boolean> = MutableLiveData(false)
+    private var foldersDownloading: Int = 0
 
     @Inject
     @DownloadDatabase
     lateinit var downloadedDatabase: UnifiedFileDatabase
+
+
+    init {
+        updateWorkers()
+    }
+
+    private fun updateWorkers(){
+        val downloadsInProgress: ArrayList<FolderDownloadWorkerStatus> = ArrayList()
+        runBlocking {
+            downloadsInProgress.addAll(systemDatabase.folderDownloadWorkerStatusDao()
+                .getDownloadWorkersByState(DownloadState.DOWNLOADING.name))
+            downloadsInProgress.addAll(systemDatabase.folderDownloadWorkerStatusDao()
+                .getDownloadWorkersByState(DownloadState.RETRIEVING_DATA.name))
+            downloadsInProgress.addAll(systemDatabase.folderDownloadWorkerStatusDao()
+                .getDownloadWorkersByState(DownloadState.READY.name))
+        }
+        for (workerStatus: FolderDownloadWorkerStatus in downloadsInProgress){
+            val newStatus = checkWorkerStatus(workerStatus)
+            runBlocking {
+                systemDatabase.folderDownloadWorkerStatusDao()
+                    .update(newStatus)
+            }
+            if(!newStatus.isComplete) {
+                setupFolderDownloadObserver(newStatus.workerId)
+                foldersDownloading++
+            }
+        }
+        downloadInProgress.value = foldersDownloading > 0
+    }
+
+    private fun checkWorkerStatus(worker: FolderDownloadWorkerStatus):FolderDownloadWorkerStatus {
+        val workerInfo = WorkManager.getInstance(appContext).getWorkInfoById(worker.workerId)
+        if(workerInfo.isDone) {
+            val workerState = workerInfo.get().state
+            worker.workManagerState = workerState
+            when (workerState) {
+                WorkInfo.State.SUCCEEDED -> {
+                    worker.isComplete = true
+                    worker.isSuccessful = true
+                    worker.downloadState = DownloadState.COMPLETE
+                }
+
+                WorkInfo.State.FAILED -> {
+                    worker.isComplete = true
+                    worker.isSuccessful = false
+                    worker.downloadState = DownloadState.COMPLETE
+                }
+
+                WorkInfo.State.CANCELLED -> {
+                    worker.isComplete = true
+                    worker.isSuccessful = false
+                    worker.downloadState = DownloadState.COMPLETE
+                }
+
+                else -> {}
+            }
+        }
+        else{
+            worker.isComplete = true
+            worker.isSuccessful = false
+            worker.downloadState = DownloadState.UNKNOWN
+        }
+        return worker
+    }
     fun enqueueFolderDownload(folder: RoomUnifiedFolder,workRequest: OneTimeWorkRequest){
         val requestId = workRequest.id
         val groupName = "Folder downloader"
@@ -39,7 +110,7 @@ class FolderDownloaderMediator @Inject constructor(@ApplicationContext val appCo
             ExistingWorkPolicy.APPEND_OR_REPLACE,workRequest)
         val status = FolderDownloadWorkerStatus()
         status.workerId = requestId
-        status.downloadState = DownloadState.RETRIEVING_DATA
+        status.downloadState = DownloadState.READY
         status.folderId = folder.id!!
         status.isComplete = false
         status.workerName = workName
@@ -48,7 +119,10 @@ class FolderDownloaderMediator @Inject constructor(@ApplicationContext val appCo
             systemDatabase.folderDownloadWorkerStatusDao().insert(status)
         }
         setupFolderDownloadObserver(requestId)
+        foldersDownloading++
+        downloadInProgress.value = true
     }
+
 
     private fun setupFolderDownloadObserver(id: UUID){
         WorkManager.getInstance(appContext)
@@ -64,6 +138,9 @@ class FolderDownloaderMediator @Inject constructor(@ApplicationContext val appCo
                             progress = workInfo.outputData
                         else
                             progress = workInfo.progress
+                        val thumbnailDownloaded = progress.getBoolean(FolderDownloadWorker.ThumbnailDownloaded,false)
+                        if(thumbnailDownloaded)
+                            folderThumbnailDownloaded(folder.folder)
                         val stateString = progress.getString(FolderDownloadWorker.State)
                         if(stateString != null) {
                             try {
@@ -96,6 +173,9 @@ class FolderDownloaderMediator @Inject constructor(@ApplicationContext val appCo
                                 NotificationManager.getInstance().showSnackbar(status.folderName+" downloaded",Snackbar.LENGTH_SHORT)
 
                                 folderDownloaded(folder.folder)
+                                foldersDownloading--
+                                if(foldersDownloading == 0)
+                                    downloadInProgress.value = false
                             }
                             WorkInfo.State.FAILED -> {NotificationManager.getInstance().showSnackbar(status.folderName+" failed to download successfully",Snackbar.LENGTH_SHORT)}
                             WorkInfo.State.CANCELLED -> {NotificationManager.getInstance().showSnackbar(status.folderName+" download cancelled",Snackbar.LENGTH_SHORT)}

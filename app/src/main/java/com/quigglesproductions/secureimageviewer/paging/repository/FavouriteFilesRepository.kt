@@ -55,9 +55,9 @@ class FavouriteFilesRepository @Inject constructor(requestService: ModularReques
                 FolderFileViewerModel.FileModel(file)
             }.insertSeparators { before, after ->
                 when{
-                    before == null -> FolderFileViewerModel.HeaderModel(after!!.file.file.cachedFolderName)
+                    before == null -> FolderFileViewerModel.HeaderModel(after!!.file.file.cachedFolderName!!)
                     after == null -> null
-                    !before.file.file.cachedFolderName.equals(after.file.file.cachedFolderName) -> FolderFileViewerModel.HeaderModel(after.file.file.cachedFolderName)
+                    !before.file.file.cachedFolderName.equals(after.file.file.cachedFolderName) -> FolderFileViewerModel.HeaderModel(after.file.file.cachedFolderName!!)
                     else -> null
                 }
             }

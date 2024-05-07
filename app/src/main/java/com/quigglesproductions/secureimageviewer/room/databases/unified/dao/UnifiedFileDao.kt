@@ -72,7 +72,7 @@ public abstract class UnifiedFileDao {
     @Throws(DatabaseInsertionException::class)
     suspend fun insert(folder: RoomUnifiedFolder, @NonNull file: RoomUnifiedEmbeddedFile): Long {
         if (folder.uid == 0L) throw DatabaseInsertionException(NotInDatabaseException())
-        file.file.folderId = folder.uid!!
+        file.file.folderId = folder.uid
         val fileId = insert(file.file)
         file.metadata.metadata.uid = fileId
         if (file.metadata.artist != null) {
@@ -244,8 +244,38 @@ public abstract class UnifiedFileDao {
     abstract suspend fun _insert(category: RoomUnifiedSubject): Long
     @Query("SELECT * FROM subjects WHERE OnlineId = :onlineId")
     abstract suspend fun getSubjectByOnlineId(onlineId: Long): RoomUnifiedSubject
-    @Update
+    @Update(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun update(file: RoomUnifiedFile)
+
+    suspend fun update(file: RoomUnifiedEmbeddedFile){
+        if (file.file.uid == 0L) throw DatabaseInsertionException(NotInDatabaseException())
+        val fileId = file.file.uid!!
+        update(file.file)
+        if (file.metadata.artist != null) {
+            val artistId = insert(file.metadata.artist)
+            file.metadata.metadata.artistId = artistId
+            file.metadata.metadata.onlineArtistId = file.metadata.artist.onlineId
+        }
+        if (file.categories != null) {
+            for (category in file.categories) {
+                val categoryId = insert(category)
+                val categoryCrossRef = RoomUnifiedFileCategoryCrossRef()
+                categoryCrossRef.categoryId = categoryId
+                categoryCrossRef.fileId = fileId
+                insert(categoryCrossRef)
+            }
+        }
+        if (file.subjects != null) {
+            for (subject in file.subjects) {
+                val subjectId = insert(subject)
+                val subjectCrossRef = RoomUnifiedFileSubjectCrossRef()
+                subjectCrossRef.subjectId = subjectId
+                subjectCrossRef.fileId = fileId
+                insert(subjectCrossRef)
+            }
+        }
+        insert(file.metadata.metadata)
+    }
     @Update
     abstract suspend fun update(metadata: RoomUnifiedMetadata)
     @Update
@@ -394,5 +424,8 @@ public abstract class UnifiedFileDao {
 
     @Query("SELECT fil.* FROM FileModularSubjectCrossRef ref LEFT JOIN Files fil on fil.FileId = ref.FileId WHERE ref.SubjectId = :uid LIMIT 1")
     abstract suspend fun getThumbnailForSubject(uid: Long):RoomUnifiedFile?
+
+    @Query("SELECT * FROM Files WHERE OnlineId = :fileId LIMIT 1")
+    abstract suspend fun loadFileByOnlineId(fileId: Long): RoomUnifiedEmbeddedFile
 
 }

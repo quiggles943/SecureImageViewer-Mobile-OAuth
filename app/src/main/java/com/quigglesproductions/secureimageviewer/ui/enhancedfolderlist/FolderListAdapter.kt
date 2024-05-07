@@ -3,25 +3,44 @@ package com.quigglesproductions.secureimageviewer.ui.enhancedfolderlist
 import android.content.Context
 import android.graphics.PorterDuff
 import android.opengl.Visibility
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.findViewTreeLifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.RequestOptions
+import com.bumptech.glide.request.target.Target
+import com.bumptech.glide.signature.ObjectKey
 import com.quigglesproductions.secureimageviewer.R
 import com.quigglesproductions.secureimageviewer.dagger.hilt.annotations.DownloadDatabase
+import com.quigglesproductions.secureimageviewer.datasource.folder.IFolderDataSource
+import com.quigglesproductions.secureimageviewer.glide.ChecksumSignature
+import com.quigglesproductions.secureimageviewer.models.FileUpdateTracker
+import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateResponse
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.IDisplayFolder
 import com.quigglesproductions.secureimageviewer.recycler.RecyclerViewSelectionMode
 import com.quigglesproductions.secureimageviewer.room.databases.unified.UnifiedFileDatabase
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedFolder
 import dagger.hilt.android.qualifiers.ActivityContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import java.net.MalformedURLException
 import javax.inject.Inject
 
@@ -32,26 +51,52 @@ class FolderListAdapter @Inject constructor(@ActivityContext context: Context,@D
     private lateinit var onClickListener: FolderListOnClickListener
     private val selected = ArrayList<Int>()
     private var multiSelect = false
+    private var fileUpdates = FileUpdateTracker()
     private var selectionModeChangeListener: SelectionChangedListener? =
         null
-    override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
-        val folder: IDisplayFolder? = getItem(position)
 
+    private var offlineFolders: List<RoomUnifiedFolder> = emptyList()
+    override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
+        val options :RequestOptions = RequestOptions().error(R.drawable.ic_broken_image).skipMemoryCache(true)
+        val folder: IDisplayFolder? = getItem(position)
         try {
-            val dataSource : Any? =
-            runBlocking {
-                    folder?.dataSource
-                        ?.getThumbnailFromDataSourceSuspend(mContext,database)
+            CoroutineScope(Dispatchers.IO).launch{
+                val dataSource : Any? = folder?.dataSource?.getThumbnailFromDataSourceSuspend(mContext,database)
+                withContext(Dispatchers.Main) {
+                    Glide.with(viewHolder.itemView.context)
+                        .setDefaultRequestOptions(options)
+                .load(dataSource).signature(ChecksumSignature(folder?.thumbnailChecksum))
+                      .fitCenter().into(viewHolder.getImageView())
+                }
             }
-            Glide.with(viewHolder.itemView.context)
-                .load(dataSource).error(R.drawable.ic_broken_image)
-                .fitCenter().into(viewHolder.getImageView())
 
         } catch (ex: MalformedURLException) {
             ex.printStackTrace()
         }
         viewHolder.setSelected(mContext,getIsSelected(position))
-        viewHolder.setSyncIconVisible(folder!!.hasUpdates())
+        if(folder?.sourceType == IFolderDataSource.FolderSourceType.ONLINE){
+            if(!folder.isAvailableOfflineSet) {
+                runBlocking {
+                    if (database.folderDao().loadFolderByOnlineId(folder.onlineId) != null) {
+                        folder.isAvailableOffline = true
+                    }
+                }
+            }
+            if(folder.isAvailableOffline){
+                viewHolder.setDownloadedIconVisible(true)
+            }
+            else {
+                viewHolder.setDownloadedIconVisible(false)
+            }
+        }
+        else{
+            if(fileUpdates.doesFolderHaveUpdates(folder!!.onlineId)){
+                viewHolder.setSyncIconVisible(true)
+            }
+            else
+                viewHolder.setSyncIconVisible(false)
+        }
+        //viewHolder.setSyncIconVisible(folder.hasUpdates())
         viewHolder.setFolderName(folder.name)
         viewHolder.itemView.setOnClickListener {
             if (onClickListener != null) onClickListener.onClick(
@@ -131,6 +176,14 @@ class FolderListAdapter @Inject constructor(@ActivityContext context: Context,@D
     fun getSelectedCount(): Int {
         return selected.size
     }
+
+    fun setOfflineFolders(offlineFolders: List<RoomUnifiedFolder>) {
+        this.offlineFolders = offlineFolders
+    }
+
+    fun setFileUpdates(value: FileUpdateTracker?) {
+        fileUpdates = value ?: FileUpdateTracker()
+    }
 }
 
 
@@ -139,12 +192,14 @@ class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     private val folderNameView: TextView
     private val syncView: ImageView
     private val progressBar: ProgressBar
+    private val downloadView: ImageView
 
     init {
         itemView.setAllowClickWhenDisabled(false)
         imageView = view.findViewById<View>(R.id.grid_item_image) as ImageView
         folderNameView = view.findViewById(R.id.grid_item_label)
         syncView = view.findViewById(R.id.sync_icon)
+        downloadView = view.findViewById(R.id.download_icon)
         progressBar = view.findViewById(R.id.grid_item_progressBar)
     }
 
@@ -162,11 +217,24 @@ class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         else
             imageView.colorFilter = null
     }
+    fun setSyncIconDrawable(@DrawableRes id: Int){
+        syncView.setImageResource(id)
+    }
     fun setSyncIconVisible(value: Boolean){
-        if (value)
+        if (value) {
+            setDownloadedIconVisible(false)
             syncView.setVisibility(View.VISIBLE)
-        else
+        }else
             syncView.setVisibility(View.GONE)
+
+    }
+
+    fun setDownloadedIconVisible(value: Boolean){
+        if (value) {
+            setSyncIconVisible(false)
+            downloadView.setVisibility(View.VISIBLE)
+        }else
+            downloadView.setVisibility(View.GONE)
 
     }
     fun setEnabled(mContext: Context, value: Boolean){

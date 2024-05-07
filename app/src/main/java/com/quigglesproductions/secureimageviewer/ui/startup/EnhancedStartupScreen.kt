@@ -34,7 +34,7 @@ class EnhancedStartupScreen : SecureActivity() {
     private lateinit var progressBar: ProgressBar
     private val viewModel: EnhancedStartupScreenViewModel by viewModels()
     lateinit var context: Context
-    private var locationRequestPermissionLauncher: ActivityResultLauncher<String>? = null
+    private var requestPermissionLauncher: ActivityResultLauncher<String>? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         window.requestFeature(Window.FEATURE_ACTIVITY_TRANSITIONS)
         window.enterTransition = Fade()
@@ -95,9 +95,8 @@ class EnhancedStartupScreen : SecureActivity() {
                     call: Call<ResponseBody?>,
                     response: Response<ResponseBody?>
                 ) {
-                    if (response.isSuccessful) viewModel.isOnline.setValue(true) else viewModel.isOnline.setValue(
-                        false
-                    )
+                    if (response.isSuccessful) viewModel.isOnline.setValue(true)
+                    else viewModel.isOnline.setValue(false)
                 }
 
                 override fun onFailure(call: Call<ResponseBody?>, t: Throwable) {
@@ -161,12 +160,12 @@ class EnhancedStartupScreen : SecureActivity() {
     private fun initiateLogin() {
         if (ContextCompat.checkSelfPermission(
                 context,
-                Manifest.permission.ACCESS_FINE_LOCATION
+                Manifest.permission.POST_NOTIFICATIONS
             ) == PackageManager.PERMISSION_GRANTED
         ) {
             progressToLoginScreen()
         } else {
-            locationRequestPermissionLauncher!!.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+            requestPermissionLauncher!!.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
 
         //finish();
@@ -182,38 +181,38 @@ class EnhancedStartupScreen : SecureActivity() {
 
     private fun setProgressBarUpdate(state: StartupProgressState) {
         if (state == StartupProgressState.COMPLETE) {
-            progressBar!!.max = 1
-            progressBar!!.progress = 1
-            progressBar!!.isIndeterminate = false
+            progressBar.max = 1
+            progressBar.progress = 1
+            progressBar.isIndeterminate = false
         }
         when (state) {
             StartupProgressState.VALIDATING_CONNECTION_STATUS -> {
-                progressBar!!.progressTintList =
+                progressBar.progressTintList =
                     ColorStateList.valueOf(baseContext.resources.getColor(R.color.progressBar_default_tint))
-                progressBar!!.progressTintMode = PorterDuff.Mode.MULTIPLY
+                progressBar.progressTintMode = PorterDuff.Mode.MULTIPLY
             }
 
             StartupProgressState.AUTHENTICATING -> {
-                progressBar!!.progressTintList =
+                progressBar.progressTintList =
                     ColorStateList.valueOf(baseContext.resources.getColor(R.color.progressBar_default_tint))
-                progressBar!!.progressTintMode = PorterDuff.Mode.MULTIPLY
+                progressBar.progressTintMode = PorterDuff.Mode.MULTIPLY
             }
 
             StartupProgressState.COMPLETE -> {
-                progressBar!!.progressTintList =
+                progressBar.progressTintList =
                     ColorStateList.valueOf(baseContext.resources.getColor(R.color.progressBar_complete_tint))
-                progressBar!!.progressTintMode = PorterDuff.Mode.MULTIPLY
+                progressBar.progressTintMode = PorterDuff.Mode.MULTIPLY
             }
 
             StartupProgressState.ERROR -> {
-                progressBar!!.progressTintList = ColorStateList.valueOf(Color.RED)
-                progressBar!!.progressTintMode = PorterDuff.Mode.MULTIPLY
+                progressBar.progressTintList = ColorStateList.valueOf(Color.RED)
+                progressBar.progressTintMode = PorterDuff.Mode.MULTIPLY
             }
         }
     }
 
     private fun setupLocationPermissionRequestCallback() {
-        locationRequestPermissionLauncher =
+        requestPermissionLauncher =
             registerForActivityResult<String, Boolean>(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
                 if (isGranted) {
                     // Permission is granted. Continue the action or workflow in your
@@ -226,6 +225,7 @@ class EnhancedStartupScreen : SecureActivity() {
                     // settings in an effort to convince the user to change their
                     // decision.
                 }
+                progressToLoginScreen()
             }
     }
 

@@ -52,10 +52,9 @@ public class NetworkModule {
         authenticationInterceptor.setContext(context);
         interceptor.setLevel(HttpLoggingInterceptor.Level.HEADERS);
         try {
-        OkHttpClient client = new OkHttpClient().newBuilder().addInterceptor(interceptor)
+            return new OkHttpClient().newBuilder().addInterceptor(interceptor)
                 .addInterceptor(authenticationInterceptor)
-                //.authenticator(new Authenticator(context))
-                .connectTimeout(20, TimeUnit.SECONDS)
+                .connectTimeout(10, TimeUnit.SECONDS)
                 .writeTimeout(10, TimeUnit.SECONDS)
                 .readTimeout(10, TimeUnit.SECONDS)
                 .sslSocketFactory(getSSLContext().getSocketFactory(),(X509TrustManager) trustAllCerts[0])
@@ -63,9 +62,7 @@ public class NetworkModule {
                 .hostnameVerifier(((hostname, session) -> true))
                 .dispatcher(getDispatcher())
                 .connectionPool(getConnectionPool())
-                //.cache(cache)
                 .build();
-        return client;
         }
         catch(NoSuchAlgorithmException | KeyManagementException ex){
             return null;
@@ -79,9 +76,8 @@ public class NetworkModule {
         authenticationInterceptor.setContext(context);
         interceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
         try {
-            OkHttpClient client = new OkHttpClient().newBuilder().addInterceptor(interceptor)
+            return new OkHttpClient().newBuilder().addInterceptor(interceptor)
                     .addInterceptor(authenticationInterceptor)
-                    //.authenticator(new Authenticator(context))
                     .connectTimeout(20, TimeUnit.SECONDS)
                     .writeTimeout(10, TimeUnit.SECONDS)
                     .readTimeout(10, TimeUnit.SECONDS)
@@ -91,7 +87,6 @@ public class NetworkModule {
                     .connectionPool(getConnectionPool())
                     //.cache(cache)
                     .build();
-            return client;
         }
         catch(NoSuchAlgorithmException | KeyManagementException ex){
             return null;
@@ -104,7 +99,7 @@ public class NetworkModule {
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
         interceptor.setLevel(HttpLoggingInterceptor.Level.HEADERS);
         try {
-            OkHttpClient client = new OkHttpClient().newBuilder().addInterceptor(interceptor)
+            return new OkHttpClient().newBuilder().addInterceptor(interceptor)
                     .connectTimeout(20, TimeUnit.SECONDS)
                     .writeTimeout(10, TimeUnit.SECONDS)
                     .readTimeout(10, TimeUnit.SECONDS)
@@ -114,7 +109,6 @@ public class NetworkModule {
                     .connectionPool(getConnectionPool())
                     //.cache(cache)
                     .build();
-            return client;
         }
         catch(NoSuchAlgorithmException | KeyManagementException ex){
             return null;

@@ -8,7 +8,7 @@ import com.quigglesproductions.secureimageviewer.aurora.authentication.appauth.A
 
 public class ViewerLifecycleObserver implements DefaultLifecycleObserver {
 
-    private AuroraAuthenticationManager authenticationManager;
+    private final AuroraAuthenticationManager authenticationManager;
     public ViewerLifecycleObserver(AuroraAuthenticationManager authenticationManager){
         this.authenticationManager = authenticationManager;
     }

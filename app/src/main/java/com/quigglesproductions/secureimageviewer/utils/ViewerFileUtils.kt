@@ -77,16 +77,20 @@ object ViewerFileUtils {
         return File(context.filesDir.toString() + File.separator + ".Pictures" + File.separator + file.getFolderId() + File.separator + file.id)
     }
 
-    suspend fun deleteFile(database: UnifiedFileDatabase, files: List<RoomUnifiedEmbeddedFile>): Boolean {
-        if (files == null || files.size == 0) return false
+    suspend fun deleteFiles(database: UnifiedFileDatabase, files: List<RoomUnifiedEmbeddedFile>): Boolean {
+        if (files.isEmpty()) return false
         for (file in files) {
-            var thumbnailDeleted = true
-            var fileDeleted = true
-            if (file.thumbnailFile != null) thumbnailDeleted = file.thumbnailFile.delete()
-            if (file.imageFile != null) fileDeleted = file.imageFile.delete()
-            if (thumbnailDeleted && fileDeleted) database.fileDao()!!.delete(file,)
-            database.fileDao()!!.delete(file)
+            deleteFile(database,file)
         }
+        return true
+    }
+
+    suspend fun deleteFile(database: UnifiedFileDatabase, file: RoomUnifiedEmbeddedFile): Boolean {
+        var thumbnailDeleted = true
+        var fileDeleted = true
+        if (file.thumbnailFile != null) thumbnailDeleted = file.thumbnailFile.delete()
+        if (file.imageFile != null) fileDeleted = file.imageFile.delete()
+        if (thumbnailDeleted && fileDeleted) database.fileDao().delete(file)
         return true
     }
 }

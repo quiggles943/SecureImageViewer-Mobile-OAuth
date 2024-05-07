@@ -1,38 +1,55 @@
-package com.quigglesproductions.secureimageviewer.utils;
+package com.quigglesproductions.secureimageviewer.utils
 
-import android.content.Context;
+import android.content.Context
+import com.google.gson.reflect.TypeToken
+import com.quigglesproductions.secureimageviewer.gson.ViewerGson
+import com.quigglesproductions.secureimageviewer.managers.ApplicationPreferenceManager
+import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateLog
+import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateLog.UpdateType
+import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateResponse
+import java.util.stream.Collectors
 
-import com.google.gson.reflect.TypeToken;
-import com.quigglesproductions.secureimageviewer.gson.ViewerGson;
-import com.quigglesproductions.secureimageviewer.managers.ApplicationPreferenceManager;
-import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateLog;
-import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateResponse;
-
-import org.jetbrains.annotations.NotNull;
-
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-public class FileSyncUtils {
-    @NotNull
-    public static ArrayList<EnhancedFileUpdateResponse> getUpdateLogs(Context context){
-        String json = ApplicationPreferenceManager.getInstance().getPreferenceString(ApplicationPreferenceManager.ManagedPreference.SYNC_VALUES, null);
-        if(json == null)
-            return new ArrayList<>();
-        Type listType = new TypeToken<ArrayList<EnhancedFileUpdateLog>>() {
-        }.getType();
-        ArrayList<EnhancedFileUpdateResponse> updateLogs = ViewerGson.getGson().fromJson(json, listType);
-        return updateLogs;
+class FileSyncUtils {
+    fun getUpdateLogs(context: Context?): ArrayList<EnhancedFileUpdateResponse> {
+        val json = ApplicationPreferenceManager.getInstance()
+            .getPreferenceString(ApplicationPreferenceManager.ManagedPreference.SYNC_VALUES, null)
+            ?: return ArrayList()
+        val listType = object :
+            TypeToken<ArrayList<EnhancedFileUpdateResponse?>?>() {}.type
+        return ViewerGson.getGson().fromJson(json, listType)
     }
-    @NotNull
-    public static ArrayList<EnhancedFileUpdateResponse> getUpdateLogs(Context context, EnhancedFileUpdateLog.UpdateType updateType){
-        ArrayList<EnhancedFileUpdateResponse> updateLogs = getUpdateLogs(context);
-        List<EnhancedFileUpdateResponse> filter = updateLogs.stream().filter(x-> x.updates.stream().filter(y->y.getUpdateType() == updateType).collect(Collectors.toList()).size()>0).collect(Collectors.toList());
+
+    fun getUpdateLogs(context: Context?,updateType: UpdateType): ArrayList<EnhancedFileUpdateResponse> {
+        val updateLogs = getUpdateLogs(context)
+        val filter = updateLogs.stream().filter { x: EnhancedFileUpdateResponse ->
+            x.updates.stream().filter { y: EnhancedFileUpdateLog -> y.updateType == updateType }
+                .collect(Collectors.toList()).isNotEmpty()
+        }.collect(Collectors.toList())
         //ArrayList<EnhancedFileUpdateLog> filteredLogs = (ArrayList<EnhancedFileUpdateLog>) updateLogs.stream().filter(x->x.getUpdateType() == updateType).collect(Collectors.toList());
-        return (ArrayList<EnhancedFileUpdateResponse>) filter;
+        return filter as ArrayList<EnhancedFileUpdateResponse>
+    }
+    companion object{
+        fun getUpdateLogs(updateLogs: List<EnhancedFileUpdateResponse>?,updateType: UpdateType): List<EnhancedFileUpdateResponse> {
+            if (updateLogs == null) return emptyList()
+            val filter = updateLogs.stream().filter { x: EnhancedFileUpdateResponse ->
+                x.updates.stream().anyMatch { y: EnhancedFileUpdateLog -> y.updateType == updateType }
+            }.collect(Collectors.toList())
+            return filter as ArrayList<EnhancedFileUpdateResponse>
+        }
+
+        fun getUpdateLogsForType(updateLogs: EnhancedFileUpdateResponse,updateType: UpdateType): List<EnhancedFileUpdateLog>{
+            val filter = updateLogs.updates.stream().filter{ x: EnhancedFileUpdateLog -> x.updateType == updateType}.collect(Collectors.toList());
+            return filter
+        }
+
+        fun getUpdateLogs(): ArrayList<EnhancedFileUpdateResponse> {
+            val json = ApplicationPreferenceManager.getInstance()
+                .getPreferenceString(ApplicationPreferenceManager.ManagedPreference.SYNC_VALUES, null)
+                ?: return ArrayList()
+            val listType = object :
+                TypeToken<ArrayList<EnhancedFileUpdateResponse?>?>() {}.type
+            return ViewerGson.getGson().fromJson(json, listType)
+        }
     }
 }
-
 

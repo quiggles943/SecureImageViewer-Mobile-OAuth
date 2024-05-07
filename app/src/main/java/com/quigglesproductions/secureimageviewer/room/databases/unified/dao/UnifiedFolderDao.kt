@@ -59,7 +59,7 @@ abstract class UnifiedFolderDao {
             _update(folder)
             existingFolder.folder.uid
         } else {
-            folder.sourceType = IFolderDataSource.FolderSourceType.LOCAL
+            folder.folderSourceType = IFolderDataSource.FolderSourceType.LOCAL
             _insert(folder)
         }
     }
@@ -77,6 +77,9 @@ abstract class UnifiedFolderDao {
 
     @get:Query("SELECT * FROM folders")
     abstract val folders: List<RoomUnifiedFolder>
+
+    @Query("SELECT * FROM folders")
+    abstract suspend fun getAllFolders() : List<RoomUnifiedFolder>
 
     @get:Query("SELECT * FROM folders")
     abstract val embeddedFolders : List<RoomUnifiedEmbeddedFolder>

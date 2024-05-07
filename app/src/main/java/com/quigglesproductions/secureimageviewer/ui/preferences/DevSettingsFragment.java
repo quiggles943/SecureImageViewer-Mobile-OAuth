@@ -2,6 +2,7 @@ package com.quigglesproductions.secureimageviewer.ui.preferences;
 
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.preference.Preference;
 
@@ -55,6 +56,14 @@ public class DevSettingsFragment  extends SecurePreferenceFragmentCompat {
                     }
                 });
                 return true;
+            }
+        });
+
+        androidx.preference.Preference testCrash = getPreferenceManager().findPreference("test_crash");
+        testCrash.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(@NonNull Preference preference) {
+                throw new RuntimeException("Test Crash");
             }
         });
     }

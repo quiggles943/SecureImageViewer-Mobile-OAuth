@@ -6,6 +6,7 @@ import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
 import com.quigglesproductions.secureimageviewer.SortType
+import com.quigglesproductions.secureimageviewer.checksum.FileChecksum
 import com.quigglesproductions.secureimageviewer.datasource.folder.IFolderDataSource
 import com.quigglesproductions.secureimageviewer.datasource.folder.IFolderDataSource.FolderSourceType
 import com.quigglesproductions.secureimageviewer.datasource.folder.RoomPagingFolderDataSource
@@ -84,7 +85,7 @@ open class RoomUnifiedFolder : IDisplayFolder, IRemoteFolder {
     var retrievedDate: LocalDateTime? = null
 
     @ColumnInfo(name = "SourceType")
-    lateinit var sourceType: FolderSourceType
+    lateinit var folderSourceType: FolderSourceType
 
     @ColumnInfo(name = "IsAvailable")
     @JvmField
@@ -93,6 +94,16 @@ open class RoomUnifiedFolder : IDisplayFolder, IRemoteFolder {
     @ColumnInfo(name = "DownloadSuccessful")
     @JvmField
     var downloadSuccessful: Boolean? = null
+
+    @ColumnInfo(name = "ThumbnailChecksum")
+    @SerializedName("ThumbnailChecksum")
+    @JvmField
+    var thumbnailChecksum: String? = null
+
+    @ColumnInfo(name = "ThumbnailChecksumMethod")
+    @SerializedName("ThumbnailChecksumMethod")
+    @JvmField
+    var thumbnailChecksumMethod: String? = null
 
     @Ignore
     var thumbnailFile: File? = null
@@ -190,15 +201,41 @@ open class RoomUnifiedFolder : IDisplayFolder, IRemoteFolder {
         return FileGroupBy.FOLDERS
     }
 
-    fun getLastUpdateTime(): LocalDateTime {
+    override fun getSourceType(): FolderSourceType {
+        return folderSourceType
+    }
+
+    @Ignore
+    @JvmField
+    var isAvailableOfflineSet = false
+    @Ignore
+    @JvmField
+    var isAvailableOffline = false
+
+    val checksum: FileChecksum
+        get() {
+            return FileChecksum(thumbnailChecksum,thumbnailChecksumMethod)
+        }
+    override fun setIsAvailableOffline(value: Boolean) {
+        isAvailableOffline = value
+        isAvailableOfflineSet = true
+    }
+
+    override fun getIsAvailableOffline(): Boolean {
+        return isAvailableOffline
+    }
+
+    override fun isAvailableOfflineSet(): Boolean {
+        return isAvailableOfflineSet
+    }
+
+    override fun getThumbnailChecksum(): FileChecksum {
+        return checksum
+    }
+
+    fun getLastUpdateTime(): LocalDateTime? {
         return lastUpdateTime
-            ?: LocalDateTime.of(
-                1900,
-                1,
-                1,
-                0,
-                0
-            )
+            ?:retrievedDate
     }
 
     override fun getIsAvailable(): Boolean {
@@ -237,6 +274,8 @@ open class RoomUnifiedFolder : IDisplayFolder, IRemoteFolder {
             folder.onlineThumbnailId = onlineFolder.onlineThumbnailId
             folder.defaultOnlineArtistId = onlineFolder.defaultOnlineArtistId
             folder.defaultOnlineSubjectId = onlineFolder.defaultOnlineSubjectId
+            folder.thumbnailChecksum = onlineFolder.thumbnailChecksum
+            folder.thumbnailChecksumMethod = onlineFolder.thumbnailChecksumMethod
             return folder
         }
 
@@ -249,6 +288,8 @@ open class RoomUnifiedFolder : IDisplayFolder, IRemoteFolder {
             folder.onlineThumbnailId = onlineFolder.onlineThumbnailId
             folder.defaultOnlineArtistId = onlineFolder.defaultOnlineArtistId
             folder.defaultOnlineSubjectId = onlineFolder.defaultOnlineSubjectId
+            folder.thumbnailChecksum = onlineFolder.thumbnailChecksum
+            folder.thumbnailChecksumMethod = onlineFolder.thumbnailChecksumMethod
             return folder
         }
 

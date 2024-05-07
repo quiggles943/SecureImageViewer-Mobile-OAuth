@@ -6,6 +6,37 @@
     android:layout_height="match_parent">
 
     <LinearLayout
+        android:id="@+id/download_status_layout"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:outlineProvider="bounds"
+        android:orientation="horizontal"
+        android:padding="5dp"
+        android:visibility="gone"
+        android:elevation="2dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/download_status_folder_name"
+                android:text="Folder Name" />
+            <ProgressBar
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/download_status_progress_bar"
+                style="?android:attr/progressBarStyleHorizontal"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/connectivity_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -14,7 +45,7 @@
         android:padding="5dp"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@+id/download_status_layout">
 
         <TextView
             android:layout_width="wrap_content"
@@ -278,30 +309,6 @@
                         android:text="No updates" />
                 </LinearLayout>
 
-                <!-- Child LinearLayout 2 -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginTop="20dp"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="20dp"
-
-                        android:text="Last Sync:" />
-
-                    <View
-                        android:layout_width="5dp"
-                        android:layout_height="match_parent" />
-
-                    <TextView
-                        android:id="@+id/overview_lastSyncTime"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="never" />
-                </LinearLayout>
                 <!-- Child LinearLayout 3 -->
                 <LinearLayout
                     android:layout_width="match_parent"

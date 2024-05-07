@@ -86,7 +86,7 @@ class FolderRemoteMediator(
                     for (folder in response.body()!!) {
                         val databaseFolder =
                             RoomUnifiedFolder.Creator().loadFromOnlineFolder(folder).build()
-                        databaseFolder.sourceType = IFolderDataSource.FolderSourceType.ONLINE
+                        databaseFolder.folderSourceType = IFolderDataSource.FolderSourceType.ONLINE
                         databaseFolder.isAvailable = true
                         folders.add(databaseFolder)
                     }

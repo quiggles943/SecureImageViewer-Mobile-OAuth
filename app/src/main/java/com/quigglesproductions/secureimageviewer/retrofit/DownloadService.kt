@@ -73,7 +73,7 @@ interface DownloadService {
     @AuthenticationRequired
     @GET("/api/v2/file/{id}")
     fun doGetFile(
-        @Path("id") id: Int,
+        @Path("id") id: Long,
         @Query("metadata") containsMetadata: Boolean
     ): Call<ModularOnlineFile?>?
 

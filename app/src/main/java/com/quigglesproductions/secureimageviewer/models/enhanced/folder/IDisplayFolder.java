@@ -1,6 +1,7 @@
 package com.quigglesproductions.secureimageviewer.models.enhanced.folder;
 
 import com.quigglesproductions.secureimageviewer.SortType;
+import com.quigglesproductions.secureimageviewer.checksum.FileChecksum;
 import com.quigglesproductions.secureimageviewer.datasource.folder.IFolderDataSource;
 import com.quigglesproductions.secureimageviewer.enums.FileGroupBy;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile;
@@ -26,4 +27,12 @@ public interface IDisplayFolder {
     void sortFiles(SortType newSortType);
 
     FileGroupBy getFileGroupingType();
+
+    IFolderDataSource.FolderSourceType getSourceType();
+
+    void setIsAvailableOffline(boolean value);
+
+    boolean getIsAvailableOffline();
+    boolean isAvailableOfflineSet();
+    FileChecksum getThumbnailChecksum();
 }

@@ -6,6 +6,7 @@ import androidx.room.Ignore;
 import androidx.room.Junction;
 import androidx.room.Relation;
 
+import com.quigglesproductions.secureimageviewer.checksum.ChecksumAlgorithm;
 import com.quigglesproductions.secureimageviewer.datasource.file.IFileDataSource;
 import com.quigglesproductions.secureimageviewer.datasource.file.RoomPagingFileDataSource;
 import com.quigglesproductions.secureimageviewer.models.ItemBaseModel;
@@ -46,7 +47,7 @@ public class RoomUnifiedEmbeddedFile implements ItemBaseModel, IDatabaseFile {
 
     @Override
     public String getName() {
-        return file.getName();
+        return file.name;
     }
 
     @Override
@@ -142,7 +143,7 @@ public class RoomUnifiedEmbeddedFile implements ItemBaseModel, IDatabaseFile {
 
     @Override
     public void setDataSource(IFileDataSource retrofitFileDataSource) {
-        file.setDataSource(retrofitFileDataSource);
+        file.dataSource = retrofitFileDataSource;
     }
 
     @Override
@@ -157,7 +158,7 @@ public class RoomUnifiedEmbeddedFile implements ItemBaseModel, IDatabaseFile {
 
     @Override
     public int getOnlineId() {
-        return file.getOnlineId();
+        return file.onlineId;
     }
 
     @Override
@@ -175,34 +176,34 @@ public class RoomUnifiedEmbeddedFile implements ItemBaseModel, IDatabaseFile {
 
     @Override
     public String getFilePath() {
-        return file.getFilePath();
+        return file.filePath;
     }
 
     @Override
     public void setFilePath(String filePath) {
-        file.setFilePath(filePath);
+        file.filePath = filePath;
     }
 
     @Override
     public String getThumbnailPath() {
-        return file.getThumbnailPath();
+        return file.thumbnailPath;
     }
 
     @Override
     public void setThumbnailPath(String thumbnailPath) {
-        file.setThumbnailPath(thumbnailPath);
+        file.thumbnailPath = thumbnailPath;
     }
 
     @Override
     public void setImageFile(File file) {
         this.file.setImageFile(file);
-        this.file.setFilePath(file.getAbsolutePath());
+        this.file.filePath = file.getAbsolutePath();
     }
 
     @Override
     public void setThumbnailFile(File thumbnail) {
         this.file.setThumbnailFile(thumbnail);
-        this.file.setThumbnailPath(thumbnail.getAbsolutePath());
+        this.file.thumbnailPath = thumbnail.getAbsolutePath();
     }
 
     public void setDownloadTime(LocalDateTime time) {
@@ -268,13 +269,13 @@ public class RoomUnifiedEmbeddedFile implements ItemBaseModel, IDatabaseFile {
             RoomUnifiedFile databaseFile = new RoomUnifiedFile();
             databaseFile.onlineId = onlineFile.onlineId;
             databaseFile.encodedName = onlineFile.encodedName;
-            databaseFile.normalName = onlineFile.normalName;
+            databaseFile.name = onlineFile.normalName;
             databaseFile.size = onlineFile.size;
             databaseFile.onlineFolderId = onlineFile.onlineFolderId;
             databaseFile.contentType = onlineFile.contentType;
             databaseFile.hasVarients = onlineFile.hasVarients;
-            databaseFile.checksumMethod = onlineFile.checksumMethod;
-            databaseFile.fileChecksum = onlineFile.checksum;
+            databaseFile.checksumMethod = ChecksumAlgorithm.getAlgorithmFromString(onlineFile.checksumMethod);
+            databaseFile.checksumString = onlineFile.checksum;
             databaseFile.createdDate = onlineFile.createdDate;
             databaseFile.retrievedDate = LocalDateTime.now();
             return databaseFile;

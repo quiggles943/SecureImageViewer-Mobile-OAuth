@@ -7,7 +7,9 @@ import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
 import com.quigglesproductions.secureimageviewer.SortType
+import com.quigglesproductions.secureimageviewer.checksum.FileChecksum
 import com.quigglesproductions.secureimageviewer.datasource.folder.IFolderDataSource
+import com.quigglesproductions.secureimageviewer.datasource.folder.IFolderDataSource.FolderSourceType
 import com.quigglesproductions.secureimageviewer.enums.FileGroupBy
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.IDisplayFolder
 import com.quigglesproductions.secureimageviewer.room.databases.unified.UnifiedFileDatabase
@@ -98,5 +100,31 @@ class RoomUnifiedCategory : IRoomFileTag, IDisplayFolder {
     override fun sortFiles(newSortType: SortType) {}
     override fun getFileGroupingType(): FileGroupBy {
         return FileGroupBy.CATEGORIES
+    }
+    override fun getSourceType(): FolderSourceType {
+        return FolderSourceType.LOCAL
+    }
+
+    @Ignore
+    @JvmField
+    var isAvailableOfflineSet = false
+    @Ignore
+    @JvmField
+    var isAvailableOffline = false
+    override fun setIsAvailableOffline(value: Boolean) {
+        isAvailableOffline = value
+        isAvailableOfflineSet = true
+    }
+
+    override fun getIsAvailableOffline(): Boolean {
+        return isAvailableOffline
+    }
+
+    override fun isAvailableOfflineSet(): Boolean {
+        return isAvailableOfflineSet
+    }
+
+    override fun getThumbnailChecksum(): FileChecksum? {
+        return null
     }
 }

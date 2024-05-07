@@ -3,10 +3,7 @@ package com.quigglesproductions.secureimageviewer.datasource.folder
 import android.content.Context
 import com.bumptech.glide.load.model.GlideUrl
 import com.bumptech.glide.load.model.LazyHeaders
-import com.quigglesproductions.secureimageviewer.SortType
-import com.quigglesproductions.secureimageviewer.datasource.folder.IFolderDataSource.FolderDataSourceCallback
 import com.quigglesproductions.secureimageviewer.datasource.folder.IFolderDataSource.FolderSourceType
-import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile
 import com.quigglesproductions.secureimageviewer.room.databases.unified.UnifiedFileDatabase
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedFolder
 import java.net.MalformedURLException
@@ -26,7 +23,7 @@ class RoomPagingFolderDataSource(private val folder: RoomUnifiedFolder) : IFolde
     }
 
     val folderSourceType: FolderSourceType
-        get() = folder.sourceType
+        get() = folder.folderSourceType
 
     /*@Throws(MalformedURLException::class)
     override fun getFilesFromDataSource(

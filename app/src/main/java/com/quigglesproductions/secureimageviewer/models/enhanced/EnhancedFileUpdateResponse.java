@@ -12,9 +12,6 @@ public class EnhancedFileUpdateResponse {
     public List<EnhancedFileUpdateLog> updates;
 
     public boolean hasUpdates() {
-        if(updates != null && updates.size()>0)
-            return true;
-        else
-            return false;
+        return updates != null && !updates.isEmpty();
     }
 }

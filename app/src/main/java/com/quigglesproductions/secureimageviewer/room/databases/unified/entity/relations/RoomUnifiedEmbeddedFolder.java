@@ -2,9 +2,9 @@ package com.quigglesproductions.secureimageviewer.room.databases.unified.entity.
 
 import androidx.room.Embedded;
 import androidx.room.Relation;
-import androidx.room.Transaction;
 
 import com.quigglesproductions.secureimageviewer.SortType;
+import com.quigglesproductions.secureimageviewer.checksum.FileChecksum;
 import com.quigglesproductions.secureimageviewer.datasource.folder.IFolderDataSource;
 import com.quigglesproductions.secureimageviewer.datasource.folder.RoomPagingFolderDataSource;
 import com.quigglesproductions.secureimageviewer.enums.FileGroupBy;
@@ -19,7 +19,6 @@ import java.io.File;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class RoomUnifiedEmbeddedFolder implements IDisplayFolder, IDatabaseFolder {
     @Embedded
@@ -120,4 +119,31 @@ public class RoomUnifiedEmbeddedFolder implements IDisplayFolder, IDatabaseFolde
     public LocalDateTime getDownloadTime() {
         return folder.getDownloadTime();
     }
+
+    @Override
+    public IFolderDataSource.FolderSourceType getSourceType() {
+        return folder.folderSourceType;
+    }
+
+    @Override
+    public void setIsAvailableOffline(boolean value) {
+        folder.setIsAvailableOffline(value);
+    }
+
+    @Override
+    public boolean getIsAvailableOffline() {
+        return folder.getIsAvailableOffline();
+    }
+
+    @Override
+    public boolean isAvailableOfflineSet() {
+        return folder.isAvailableOfflineSet();
+    }
+
+    @Override
+    public FileChecksum getThumbnailChecksum() {
+        return folder.getThumbnailChecksum();
+    }
+
+
 }

@@ -23,6 +23,7 @@ import com.quigglesproductions.secureimageviewer.R
 import com.quigglesproductions.secureimageviewer.databinding.FilegridHeaderBinding
 import com.quigglesproductions.secureimageviewer.databinding.FilegridLayoutConstrainedBinding
 import com.quigglesproductions.secureimageviewer.datasource.file.IFileDataSource.DataSourceCallback
+import com.quigglesproductions.secureimageviewer.glide.ChecksumSignature
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.relations.RoomUnifiedEmbeddedFile
 import com.quigglesproductions.secureimageviewer.ui.adapter.itemmodel.folderfileviewer.FolderFileViewerModel
 import dagger.hilt.android.qualifiers.ActivityContext
@@ -38,18 +39,18 @@ class EnhancedFolderFilesListAdapter @Inject constructor(@ActivityContext contex
         return when(peek(position)){
             is FolderFileViewerModel.FileModel -> R.layout.filegrid_layout_constrained
             is FolderFileViewerModel.HeaderModel -> R.layout.filegrid_header
-            else -> throw ClassCastException("Unknown viewType")
+            else -> R.layout.filegrid_layout_constrained
         }
     }
     override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder, position: Int) {
         when(viewHolder){
             is FileViewHolder ->{
-                val file = getItem(position) as FolderFileViewerModel.FileModel
-                file.let { viewHolder.bind(it.file,onClickListener) }
+                val file = getItem(position) as FolderFileViewerModel.FileModel?
+                file.let { viewHolder.bind(it?.file,onClickListener) }
             }
             is HeaderViewHolder ->{
-                val item = getItem(position) as FolderFileViewerModel.HeaderModel
-                item.let { viewHolder.bind(it.title) }
+                val item = getItem(position) as FolderFileViewerModel.HeaderModel?
+                item.let { viewHolder.bind(it?.title) }
 
             }
         }
@@ -85,8 +86,8 @@ class EnhancedFolderFileViewHolder(view: View) : RecyclerView.ViewHolder(view),
     }
 
     class FileViewHolder private constructor(val context: Context?,val binding: FilegridLayoutConstrainedBinding): RecyclerView.ViewHolder(binding.root){
-        fun bind(file: RoomUnifiedEmbeddedFile,onClickListener: EnhancedFolderFilesListOnClickListener){
-            file.dataSource.getFileThumbnailDataSource(context,object : DataSourceCallback {
+        fun bind(file: RoomUnifiedEmbeddedFile?,onClickListener: EnhancedFolderFilesListOnClickListener){
+            file?.dataSource?.getFileThumbnailDataSource(context,object : DataSourceCallback {
                 override fun FileDataSourceRetrieved(dataSource: Any?, exception: Exception?) {}
                 override fun FileThumbnailDataSourceRetrieved(
                     dataSource: Any?,
@@ -94,7 +95,7 @@ class EnhancedFolderFileViewHolder(view: View) : RecyclerView.ViewHolder(view),
                 ) {
                     context?.let {
                         Glide.with(it)
-                            .addDefaultRequestListener(object : RequestListener<Any?> {
+                            /*.addDefaultRequestListener(object : RequestListener<Any?> {
                                 override fun onLoadFailed(
                                     e: GlideException?,
                                     model: Any?,
@@ -115,7 +116,8 @@ class EnhancedFolderFileViewHolder(view: View) : RecyclerView.ViewHolder(view),
                                 ): Boolean {
                                     return false
                                 }
-                            }).load(dataSource).into(binding.gridItemImage).clearOnDetach()
+                            })*/
+                            .load(dataSource).signature(ChecksumSignature(file.file.checksum)).into(binding.gridItemImage).clearOnDetach()
                     }
                 }
 
@@ -150,7 +152,7 @@ class EnhancedFolderFileViewHolder(view: View) : RecyclerView.ViewHolder(view),
     }
 
     class HeaderViewHolder private constructor(val context: Context?,val binding: FilegridHeaderBinding): RecyclerView.ViewHolder(binding.root){
-        fun bind(title: String){
+        fun bind(title: String?){
 
             binding.filegridHeaderText.text = title
         }

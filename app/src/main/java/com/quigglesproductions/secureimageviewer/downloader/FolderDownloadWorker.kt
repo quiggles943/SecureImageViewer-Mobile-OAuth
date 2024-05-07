@@ -1,11 +1,15 @@
 package com.quigglesproductions.secureimageviewer.downloader
 
+import android.Manifest
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkManager
@@ -19,6 +23,7 @@ import com.quigglesproductions.secureimageviewer.retrofit.DownloadService
 import com.quigglesproductions.secureimageviewer.room.databases.unified.UnifiedFileDatabase
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedFolder
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.relations.RoomUnifiedEmbeddedFile
+import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.relations.RoomUnifiedEmbeddedFolder
 import com.quigglesproductions.secureimageviewer.utils.ViewerFileUtils
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -63,6 +68,10 @@ class FolderDownloadWorker @AssistedInject constructor (
         var hadError = 0
         notificationManager.notify(embeddedFolder.id.toInt(),buildNotificationWithProgress(0,"Downloading folder "+folder.normalName))
         setProgress(progress)
+        if(retrieveThumbnailFile(folder)) {
+            progress = workDataOf(ThumbnailDownloaded to true)
+            setProgress(progress)
+        }
         while(hasMoreFiles){
             val retrievedFiles = retrievePagedFiles(folder = folder, page = pageCount)
             databaseList.addAll(retrievedFiles)
@@ -85,7 +94,7 @@ class FolderDownloadWorker @AssistedInject constructor (
                 ErrorCount to hadError)
             setProgress(update)
             val percentage = calculatePercentage(progressCount,databaseList.size)
-            notificationManager.notify(embeddedFolder.id.toInt(),buildNotificationWithProgress(percentage,"Downloading folder "+folder.normalName))
+            fireNotification(embeddedFolder,buildNotificationWithProgress(percentage,"Downloading folder "+folder.normalName))
             Log.d("PagedFolderDownloader","Folder ${folder.normalName} - $progressCount/${databaseList.size} downloaded")
         }
         Log.i("PagedFolderDownloader","Folder ${folder.normalName} - ${databaseList.size} downloaded ($completedSuccessfully successful, $hadError unsuccessful)")
@@ -95,9 +104,22 @@ class FolderDownloadWorker @AssistedInject constructor (
             FolderName to folder.normalName)
         //setProgress(update)
         embeddedFolder.folder.isAvailable = true
+        embeddedFolder.folder.retrievedDate = LocalDateTime.now()
         database.folderDao().update(embeddedFolder.folder)
-        notificationManager.notify(embeddedFolder.id.toInt(),buildNotificationWithMessage("Download of folder "+folder.normalName+" complete "))
+        fireNotification(embeddedFolder,buildNotificationWithMessage("Download of folder "+folder.normalName+" complete "))
         return Result.success(update)
+    }
+
+    private suspend fun retrieveThumbnailFile(folder: RoomUnifiedFolder):Boolean{
+        val response = downloadService.doGetFile(folder.onlineThumbnailId.toLong(),true)
+            ?.awaitResponse()
+        if (response == null || !response.isSuccessful)
+            return false
+
+        val databaseFile =
+            RoomUnifiedEmbeddedFile.Creator().loadFromOnlineFile(response.body()).withFolder(folder).build()
+        databaseFile.file.isDownloaded = false
+        return downloadFileContent(folder,databaseFile)
     }
 
 
@@ -130,28 +152,50 @@ class FolderDownloadWorker @AssistedInject constructor (
     }
 
     private suspend fun downloadFileContent(folder: RoomUnifiedFolder, file: RoomUnifiedEmbeddedFile) :Boolean{
-        val fileId = database.fileDao().insert(folder,file)
-        file.file.uid = fileId
-        try {
-            val response = downloadService.doGetFileContent(file.onlineId).awaitResponse()
-            if (response.isSuccessful) {
-                val body: ResponseBody? = response.body()
-                ViewerFileUtils.createFileOnDisk(
-                    context,
-                    file,
-                    body!!.byteStream()
-                )
-                file.setDownloadTime(LocalDateTime.now())
-                file.file.isDownloaded = true
-                database.fileDao().update(file.file)
-                database.fileDao().update(file.metadata.metadata)
-                return true
-            } else
-                return false
-
+        val existingFile = database.fileDao().getByOnlineId(file.onlineId)
+        var existingFileDownloaded = false
+        var existingFileContentDownloaded = false
+        if(existingFile != null){
+            existingFileDownloaded = true
+            if(!existingFile.filePath.isNullOrEmpty() && !existingFile.thumbnailPath.isNullOrEmpty()){
+                existingFileContentDownloaded = true
+            }
         }
-        catch (ex: Exception){
-            return false
+        if(!existingFileDownloaded) {
+            val fileId = database.fileDao().insert(folder, file)
+            file.file.uid = fileId
+            try {
+                if(!existingFileContentDownloaded) {
+                    val response = downloadService.doGetFileContent(file.onlineId).awaitResponse()
+                    if (response.isSuccessful) {
+                        val body: ResponseBody? = response.body()
+                        ViewerFileUtils.createFileOnDisk(
+                            context,
+                            file,
+                            body!!.byteStream()
+                        )
+                        file.setDownloadTime(LocalDateTime.now())
+                        file.file.isDownloaded = true
+                        database.fileDao().update(file.file)
+                        database.fileDao().update(file.metadata.metadata)
+                        return true
+                    } else
+                        return false
+                }
+                else
+                    return true
+
+            } catch (ex: Exception) {
+                return false
+            }
+        }
+        else
+            return true
+    }
+
+    private fun fireNotification(folder: RoomUnifiedEmbeddedFolder,message: Notification){
+        if(ContextCompat.checkSelfPermission(context,Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED){
+            notificationManager.notify(folder.id.toInt(),message)
         }
     }
 
@@ -228,5 +272,6 @@ class FolderDownloadWorker @AssistedInject constructor (
         const val Progress = "Progress"
         const val ErrorCount = "ErrorCount"
         const val State = "State"
+        const val ThumbnailDownloaded = "ThumbnailDownloaded"
     }
 }

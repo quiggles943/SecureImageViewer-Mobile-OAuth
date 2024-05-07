@@ -2,9 +2,12 @@ package com.quigglesproductions.secureimageviewer.managers
 
 import android.content.Context
 import com.quigglesproductions.secureimageviewer.room.databases.unified.UnifiedFileDatabase
+import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedFile
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedFolder
+import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.relations.RoomUnifiedEmbeddedFile
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.relations.RoomUnifiedEmbeddedFolder
 import com.quigglesproductions.secureimageviewer.utils.ViewerFileUtils.deleteFile
+import com.quigglesproductions.secureimageviewer.utils.ViewerFileUtils.deleteFiles
 import java.io.File
 
 class FolderManager {
@@ -17,7 +20,7 @@ class FolderManager {
     suspend fun removeLocalFolder(fileDatabase: UnifiedFileDatabase, folder: RoomUnifiedEmbeddedFolder) {
         val folderFile = folder.folder.folderFile
 
-        deleteFile(fileDatabase,folder.files)
+        deleteFiles(fileDatabase,folder.files)
         fileDatabase.folderDao().delete(folder.folder)
         deleteRecursive(folderFile)
     }
@@ -42,6 +45,10 @@ class FolderManager {
     private fun clearPictureFolder() {
         val picFolder = File(rootContext!!.filesDir.toString() + "/.Pictures")
         deleteRecursive(picFolder)
+    }
+
+    suspend fun removeFileFromFolder(fileDatabase: UnifiedFileDatabase, folder: RoomUnifiedFolder, file: RoomUnifiedEmbeddedFile): Boolean {
+        return deleteFile(fileDatabase,file)
     }
 
     companion object {

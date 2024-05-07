@@ -104,7 +104,7 @@ interface ModularRequestService {
 
     @AuthenticationRequired
     @POST("/api/v2/file/updates")
-    fun doGetFileUpdates(@Body fileUpdateSendModel: EnhancedFileUpdateSendModel?): Call<List<EnhancedFileUpdateResponse?>?>?
+    fun doGetFileUpdates(@Body fileUpdateSendModel: EnhancedFileUpdateSendModel?): Call<List<EnhancedFileUpdateResponse>?>?
 
     @AuthenticationRequired
     @GET("/api/v2/folder/paginated")

@@ -24,7 +24,7 @@ object RequestModule {
     @Provides
     fun provideModularReqService(
         gson: Gson?,
-        @RequestServiceClient client: OkHttpClient?
+        @RequestServiceClient client: OkHttpClient
     ): ModularRequestService {
         var retrofit: Retrofit? = null
         //try {
@@ -44,7 +44,7 @@ object RequestModule {
     @Provides
     fun provideDownloadService(
         gson: Gson?,
-        @DownloadServiceClient client: OkHttpClient?
+        @DownloadServiceClient client: OkHttpClient
     ): DownloadService {
         var retrofit: Retrofit? = null
         //try {

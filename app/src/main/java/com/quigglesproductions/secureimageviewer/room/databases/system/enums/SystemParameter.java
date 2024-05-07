@@ -7,7 +7,8 @@ public enum SystemParameter {
 
     LAST_UPDATE_TIME,
     LAST_ONLINE_SYNC_TIME,
-    OFFLINE_FILE_GROUP_BY;
+    OFFLINE_FILE_GROUP_BY,
+    FILE_SYNC_STATUS;
 
     public static SystemParameter getFromKey(String key){
         for(SystemParameter type : SystemParameter.values()){

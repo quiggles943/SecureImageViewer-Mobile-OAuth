@@ -13,8 +13,8 @@ public class EnhancedFileUpdateLog {
     @SerializedName("UpdateTime")
     private LocalDateTime updateTime;
 
-    @SerializedName("Type")
-    private String type;
+    @SerializedName("UpdateType")
+    private String updateType;
     public LocalDateTime getUpdateTime() {
         return updateTime;
     }
@@ -27,20 +27,20 @@ public class EnhancedFileUpdateLog {
         return folderId;
     }
     public String getTypeString(){
-        return type;
+        return updateType;
     }
     public UpdateType getUpdateType(){
-        return UpdateType.getUpdateType(type);
+        return UpdateType.getUpdateType(updateType);
     }
 
     public enum UpdateType{
-        Unknown,
-        Created,
-        Modified,
-        Deleted;
+        UNKNOWN,
+        ADD,
+        UPDATE,
+        DELETE;
 
         public static UpdateType getUpdateType(String value){
-            UpdateType result = Unknown;
+            UpdateType result = UNKNOWN;
             for(UpdateType type :UpdateType.values()){
                 if(type.name().equalsIgnoreCase(value))
                     result = type;

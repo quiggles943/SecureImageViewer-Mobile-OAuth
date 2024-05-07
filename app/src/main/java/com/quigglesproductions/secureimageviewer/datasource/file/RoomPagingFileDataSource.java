@@ -75,7 +75,7 @@ public class RoomPagingFileDataSource implements IFileDataSource {
             if(file.getThumbnailPath() != null)
                 callback.FileThumbnailDataSourceRetrieved(file.getThumbnailFile(), null);
             else {
-                GlideUrl glideThumbnailUrl = new GlideUrl(getFileURL(file.file.getOnlineId()) + "/thumbnail", new LazyHeaders.Builder()
+                GlideUrl glideThumbnailUrl = new GlideUrl(getFileURL(file.file.onlineId) + "/thumbnail", new LazyHeaders.Builder()
                         //.addHeader("Authorization", "Bearer " + accessToken)
                         .build());
                 callback.FileThumbnailDataSourceRetrieved(glideThumbnailUrl, null);

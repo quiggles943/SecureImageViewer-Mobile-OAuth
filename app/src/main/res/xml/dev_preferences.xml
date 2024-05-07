@@ -29,4 +29,10 @@
             android:title="Test Database Retrieve"
             android:persistent="false"/>
     </PreferenceCategory>
+    <PreferenceCategory android:title="Crash Analytics">
+        <Preference
+            android:key="test_crash"
+            android:title="Test Crash"
+            android:persistent="false"/>
+    </PreferenceCategory>
 </PreferenceScreen>

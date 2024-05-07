@@ -5,6 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
+import com.quigglesproductions.secureimageviewer.downloader.DownloadState
 import com.quigglesproductions.secureimageviewer.room.databases.system.entity.FolderDownloadWorkerStatus
 
 @Dao
@@ -24,4 +25,6 @@ abstract class FolderDownloadWorkerStatusDao {
     abstract suspend fun _delete(info: FolderDownloadWorkerStatus)
     @Update
     abstract suspend fun update(deviceRegistrationInfo: FolderDownloadWorkerStatus)
+    @Query("SELECT * FROM FolderDownloadWorkerStatus where DownloadState = :state")
+    abstract suspend fun getDownloadWorkersByState(state: String): List<FolderDownloadWorkerStatus>
 }

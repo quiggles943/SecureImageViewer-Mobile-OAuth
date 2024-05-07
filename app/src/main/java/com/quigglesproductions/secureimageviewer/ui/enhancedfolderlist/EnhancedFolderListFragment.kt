@@ -1,8 +1,9 @@
 package com.quigglesproductions.secureimageviewer.ui.enhancedfolderlist
 
+import android.R.attr.fragment
 import android.annotation.SuppressLint
-import android.content.DialogInterface
 import android.os.Bundle
+import android.text.TextUtils
 import android.view.ContextMenu
 import android.view.ContextMenu.ContextMenuInfo
 import android.view.LayoutInflater
@@ -13,6 +14,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
+import androidx.annotation.NonNull
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
@@ -26,6 +28,9 @@ import androidx.work.Data
 import androidx.work.OneTimeWorkRequest
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
+import com.bumptech.glide.Glide
+import com.bumptech.glide.ListPreloader.PreloadModelProvider
+import com.bumptech.glide.RequestBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.quigglesproductions.secureimageviewer.R
 import com.quigglesproductions.secureimageviewer.databinding.FragmentFolderListBinding
@@ -41,9 +46,11 @@ import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.R
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.relations.RoomUnifiedEmbeddedFolder
 import com.quigglesproductions.secureimageviewer.ui.EnhancedMainMenuActivity
 import com.quigglesproductions.secureimageviewer.ui.SecureFragment
+import com.quigglesproductions.secureimageviewer.ui.overview.OverviewViewModel
 import com.quigglesproductions.secureimageviewer.utils.ObjectUtils
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
 
 class EnhancedFolderListFragment() : SecureFragment() {
     var binding: FragmentFolderListBinding? = null
@@ -58,15 +65,13 @@ class EnhancedFolderListFragment() : SecureFragment() {
 
     private lateinit var downloadObserver: IFolderDownloadObserver
     private val args : EnhancedFolderListFragmentArgs by navArgs()
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-    }
+    private val overviewViewModel by activityViewModels<OverviewViewModel>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         setHasOptionsMenu(true)
         binding = FragmentFolderListBinding.inflate(inflater, container, false)
         root = binding!!.root
@@ -99,6 +104,10 @@ class EnhancedFolderListFragment() : SecureFragment() {
                 viewModel.invalidatePagedData()
             }
 
+            override fun folderThumbnailDownloaded(folder: RoomUnifiedFolder) {
+                viewModel.invalidatePagedData()
+            }
+
             override fun downloadStatusUpdated(folder: RoomUnifiedFolder, count: Int, total: Int) {
 
             }
@@ -125,6 +134,10 @@ class EnhancedFolderListFragment() : SecureFragment() {
         viewModel.fileGrouping.observe(viewLifecycleOwner){
             viewLifecycleOwner.lifecycleScope.launch {
                 viewModel.createPagedSource(it)
+                if(viewModel.folderListType.value == FolderListType.DOWNLOADED) {
+                    //val offlineFolders = downloadFileDatabase.folderDao().getFolders()
+                    //adapter.setOfflineFolders(offlineFolders)
+                }
                 viewModel.pagedFolders!!.collect { files ->
                     adapter.submitData(viewLifecycleOwner.lifecycle, files)
                 }
@@ -137,7 +150,10 @@ class EnhancedFolderListFragment() : SecureFragment() {
         val columnCount = resources.getInteger(R.integer.column_count_folderlist)
         val layoutManager = GridLayoutManager(context, columnCount)
         recyclerView.layoutManager = layoutManager
+        recyclerView.setHasFixedSize(true)
+        recyclerView.setItemViewCacheSize(20)
         adapter = FolderListAdapter(requireContext(),downloadFileDatabase)
+        adapter.setFileUpdates(overviewViewModel.fileUpdates.value)
         adapter.setOnSelectionModeChangeListener(object :
             SelectionChangedListener {
 
@@ -628,4 +644,6 @@ class EnhancedFolderListFragment() : SecureFragment() {
     private fun setActionBarColor(@ColorRes color: Int) {
         (requireActivity() as EnhancedMainMenuActivity).overrideActionBarColor(color)
     }
+
 }
+

@@ -19,4 +19,8 @@ interface IObservableFolderManager {
     fun folderDownloaded(folder: RoomUnifiedFolder) {
         observers.forEach { it.folderDownloaded(folder) }
     }
+
+    fun folderThumbnailDownloaded(folder: RoomUnifiedFolder) {
+        observers.forEach { it.folderThumbnailDownloaded(folder) }
+    }
 }
