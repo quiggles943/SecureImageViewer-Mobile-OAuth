@@ -3,13 +3,15 @@ package com.quigglesproductions.secureimageviewer.ui;
 import androidx.fragment.app.Fragment;
 
 import com.google.gson.Gson;
-import com.quigglesproductions.secureimageviewer.authentication.AuthenticationManager;
+import com.quigglesproductions.secureimageviewer.aurora.authentication.appauth.AuroraAuthenticationManager;
 import com.quigglesproductions.secureimageviewer.dagger.hilt.module.DownloadManager;
+import com.quigglesproductions.secureimageviewer.downloader.FolderDownloaderMediator;
+import com.quigglesproductions.secureimageviewer.downloader.PagedFolderDownloader;
+import com.quigglesproductions.secureimageviewer.retrofit.ModularRequestService;
 import com.quigglesproductions.secureimageviewer.retrofit.RequestManager;
-import com.quigglesproductions.secureimageviewer.retrofit.RequestService;
 import com.quigglesproductions.secureimageviewer.room.databases.download.DownloadRecordDatabase;
-import com.quigglesproductions.secureimageviewer.room.databases.file.FileDatabase;
 import com.quigglesproductions.secureimageviewer.room.databases.system.SystemDatabase;
+import com.quigglesproductions.secureimageviewer.room.databases.unified.UnifiedFileDatabase;
 import com.techyourchance.threadposter.BackgroundThreadPoster;
 import com.techyourchance.threadposter.UiThreadPoster;
 
@@ -19,7 +21,7 @@ public class SecureFragment extends Fragment {
     public SecureActivity getSecureActivity(){
         return getHost() == null ? null : (SecureActivity) getActivity();
     }
-    public SecureActivity requiresSecureActivity(){
+    public SecureActivity requiresSecureActivity() throws IllegalStateException{
         SecureActivity activity = getSecureActivity();
         if(activity == null){
             throw new IllegalStateException("Fragment " + this + " not attached to an activity.");
@@ -35,30 +37,42 @@ public class SecureFragment extends Fragment {
         return uiThreadPoster;
     }
 
-    public RequestManager requiresRequestManager(){
+    public RequestManager requiresRequestManager() throws IllegalStateException{
         return requiresSecureActivity().getRequestManager();
     }
 
-    public RequestService getRequestService(){
+    public ModularRequestService getRequestService() throws IllegalStateException{
         return requiresRequestManager().getRequestService();
     }
 
-    public AuthenticationManager requiresAuthenticationManager(){
-        return requiresSecureActivity().getAuthenticationManager();
+    public AuroraAuthenticationManager requiresAuroraAuthenticationManager() throws IllegalStateException{
+        return requiresSecureActivity().getAuroraAuthenticationManager();
     }
-    public Gson getGson(){
+    public Gson getGson() throws IllegalStateException {
         return requiresSecureActivity().getGson();
     }
-    public DownloadManager getDownloadManager(){
+    public DownloadManager getDownloadManager() throws IllegalStateException {
         return requiresSecureActivity().getDownloadManager();
     }
-    public FileDatabase getFileDatabase(){
-        return requiresSecureActivity().getFileDatabase();
+
+    public UnifiedFileDatabase getCachingDatabase() throws IllegalStateException {
+        return requiresSecureActivity().getCachingDatabase();
     }
-    public DownloadRecordDatabase getRecordDatabase(){
+    public UnifiedFileDatabase getDownloadFileDatabase() throws IllegalStateException {
+        return requiresSecureActivity().getDownloadFileDatabase();
+    }
+    public DownloadRecordDatabase getRecordDatabase() throws IllegalStateException {
         return requiresSecureActivity().getRecordDatabase();
     }
-    public SystemDatabase getSystemDatabase(){
+    public SystemDatabase getSystemDatabase() throws IllegalStateException {
         return requiresSecureActivity().getSystemDatabase();
+    }
+
+    public PagedFolderDownloader getPagedFolderDownloaded() throws IllegalStateException {
+        return requiresSecureActivity().getPagedFolderDownloader();
+    }
+
+    public FolderDownloaderMediator getFolderDownloaderMediator() throws IllegalStateException{
+        return requiresSecureActivity().getFolderDownloaderMediator();
     }
 }

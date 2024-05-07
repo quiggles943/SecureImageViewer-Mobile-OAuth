@@ -8,22 +8,60 @@
     android:outlineProvider="bounds">
 
     <ImageView
+        android:id="@+id/sync_icon"
+        android:layout_width="35dp"
+        android:layout_height="37dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:elevation="4dp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_baseline_sync"
+        app:tint="#FFC107" />
+
+    <ImageView
+        android:id="@+id/download_icon"
+        android:layout_width="35dp"
+        android:layout_height="37dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:elevation="4dp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/baseline_download_24" />
+
+    <ImageView
         android:id="@+id/grid_item_image"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:contentDescription="Folder Thumbnail"
-        android:scaleType="centerCrop"
         android:layout_margin="6dp"
-        android:paddingTop="4dp"
+        android:contentDescription="Folder Thumbnail"
         android:elevation="2dp"
         android:outlineProvider="bounds"
+        android:paddingTop="4dp"
+        android:scaleType="centerCrop"
         app:layout_constrainedHeight="false"
         app:layout_constrainedWidth="true"
         app:layout_constraintBottom_toTopOf="@+id/grid_item_label"
         app:layout_constraintDimensionRatio="1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ProgressBar
+        android:id="@+id/grid_item_progressBar"
+        android:visibility="invisible"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="4dp"
+        app:layout_constraintBottom_toBottomOf="@+id/grid_item_image"
+        app:layout_constraintEnd_toEndOf="@+id/grid_item_image"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="@+id/grid_item_image" />
 
     <TextView
         android:id="@+id/grid_item_label"
@@ -43,15 +81,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintDimensionRatio="1"/>
 
-    <ImageView
-        android:id="@+id/sync_icon"
-        android:layout_width="35dp"
-        android:layout_height="37dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:visibility="invisible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_baseline_sync" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -16,7 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.quigglesproductions.secureimageviewer.R;
 import com.quigglesproductions.secureimageviewer.recycler.RecyclerViewSelectionMode;
 import com.quigglesproductions.secureimageviewer.room.databases.download.entity.FolderDownloadRecord;
-import com.quigglesproductions.secureimageviewer.ui.enhancedfolderlist.EnhancedFolderListRecyclerAdapter;
+import com.quigglesproductions.secureimageviewer.ui.adapter.filelist.EnhancedFolderListRecyclerAdapter;
 
 import java.util.ArrayList;
 import java.util.List;

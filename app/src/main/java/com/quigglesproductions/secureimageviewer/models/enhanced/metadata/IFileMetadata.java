@@ -1,11 +1,8 @@
 package com.quigglesproductions.secureimageviewer.models.enhanced.metadata;
 
-import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileTag;
 import com.quigglesproductions.secureimageviewer.models.enhanced.IFileTag;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 public interface IFileMetadata {
     int getWidth();
@@ -28,7 +25,6 @@ public interface IFileMetadata {
 
     String getFileExtension();
     //void setFileExtension(String fileExtension);
-    String getContentType();
     //void setContentType(String contentType);
     String getFileType();
     //void setFileType(String fileType);
@@ -36,11 +32,15 @@ public interface IFileMetadata {
     //void setOnlineFileId(long fileId);
     IFileTag getArtist();
 
-    List<IFileTag> getCategories();
-    List<IFileTag> getSubjects();
     String getArtistName();
     long getFileId();
     //void setFileId(long fileId);
     LocalDateTime getDownloadTime();
+
+    int getPageNumber();
+
+    String getOrientation();
+
+    void setDownloadTime(LocalDateTime time);
     //void setDownloadTime(LocalDateTime dateTime);
 }

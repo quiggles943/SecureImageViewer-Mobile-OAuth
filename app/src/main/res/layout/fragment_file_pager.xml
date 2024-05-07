@@ -5,8 +5,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="false"
+    android:keepScreenOn="true"
 
-    tools:context=".ui.enhancedfileviewer.FileViewActivity">
+    tools:context=".ui.enhancedfileviewer.EnhancedFileViewFragment">
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/fragment_view_pager"
@@ -21,7 +22,7 @@
 
     </androidx.viewpager2.widget.ViewPager2>
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/topLinearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -32,25 +33,56 @@
         android:paddingVertical="5dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        android:keepScreenOn="true">
 
         <ImageButton
             android:id="@+id/backButton"
             style="@style/ImagePagerButton.Back"
             android:layout_width="50dp"
+            android:background="?android:attr/actionBarItemBackground"
+            android:contentDescription="@string/back_button_desc_string"
             app:cornerRadius="5dp"
-            android:background="?android:attr/actionBarItemBackground"/>
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/file_name"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:id="@+id/file_title"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
             android:ellipsize="end"
             android:gravity="center_vertical"
             android:maxLines="1"
             android:paddingHorizontal="10dp"
-            />
-    </LinearLayout>
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/backButton"
+            app:layout_constraintEnd_toStartOf="@id/favouriteButton"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ToggleButton
+            android:id="@+id/favouriteButton"
+            style="@style/ImagePagerButton.Favourite"
+            android:layout_width="30dp"
+            android:background="?android:attr/actionBarItemBackground"
+            android:contentDescription="@string/favourite_button_desc_string"
+            app:cornerRadius="5dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/optionsButton"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageButton
+            android:id="@+id/optionsButton"
+            style="@style/ImagePagerButton.Options"
+            android:layout_width="30dp"
+            android:layout_marginEnd="8dp"
+            android:background="?android:attr/actionBarItemBackground"
+            android:contentDescription="@string/back_button_desc_string"
+            app:cornerRadius="5dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
     <com.quigglesproductions.secureimageviewer.ui.compoundcontrols.FileViewerNavigator
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -59,65 +91,5 @@
         android:background="#25000000"
         android:fitsSystemWindows="true"
         android:id="@+id/fileviewer_navigator"/>
-
-
-    <!--<RelativeLayout
-        android:id="@+id/bottomLinearLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#25000000"
-        android:layoutDirection="ltr"
-
-        app:layout_constraintBottom_toBottomOf="parent">
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:layout_centerVertical="true"
-            style="@style/ImagePagerButton">
-            <TextView
-                android:id="@+id/imagecount"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="5"
-                android:textAlignment="center" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="/"
-                android:textAlignment="center" />
-            <TextView
-                android:id="@+id/imagetotal"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="42"
-                android:textAlignment="center" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/image_pager_controls"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:layoutDirection="ltr"
-            android:paddingHorizontal="10dp"
-            android:paddingBottom="10dp"
-            app:layout_constraintBottom_toBottomOf="parent">
-
-            <ImageButton
-                android:id="@+id/imagepager_prev"
-                style="@style/ImagePagerButton.Previous" />
-
-            <ImageButton
-                android:id="@+id/imagepager_next"
-                style="@style/ImagePagerButton.Next" />
-        </LinearLayout>
-    </RelativeLayout>-->
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

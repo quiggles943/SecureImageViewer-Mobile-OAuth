@@ -4,9 +4,11 @@ import android.content.Context;
 
 import androidx.room.Room;
 
+import com.quigglesproductions.secureimageviewer.dagger.hilt.annotations.CachingDatabase;
+import com.quigglesproductions.secureimageviewer.dagger.hilt.annotations.DownloadDatabase;
 import com.quigglesproductions.secureimageviewer.room.databases.download.DownloadRecordDatabase;
-import com.quigglesproductions.secureimageviewer.room.databases.file.FileDatabase;
 import com.quigglesproductions.secureimageviewer.room.databases.system.SystemDatabase;
+import com.quigglesproductions.secureimageviewer.room.databases.unified.UnifiedFileDatabase;
 
 import javax.inject.Singleton;
 
@@ -21,29 +23,36 @@ import dagger.hilt.components.SingletonComponent;
 public class DatabaseModule {
 
     @Provides
+    @DownloadDatabase
     @Singleton
-    public static FileDatabase provideFileDatabase(@ApplicationContext Context context){
-        FileDatabase fileDatabase = Room.databaseBuilder(context,FileDatabase.class,"File Database")
-                                        .fallbackToDestructiveMigration()
-                                        .build();
-        return fileDatabase;
+    public static UnifiedFileDatabase provideDownloadFileDatabase(@ApplicationContext Context context){
+        return Room.databaseBuilder(context,UnifiedFileDatabase.class,"Download File Database")
+                .fallbackToDestructiveMigration()
+                .build();
+    }
+
+    @Provides
+    @CachingDatabase
+    @Singleton
+    public static UnifiedFileDatabase provideCachingFileDatabase(@ApplicationContext Context context){
+        return Room.databaseBuilder(context,UnifiedFileDatabase.class,"Paging File Database")
+                .fallbackToDestructiveMigration()
+                .build();
     }
 
     @Provides
     @Singleton
     public static DownloadRecordDatabase provideDownloadRecordDatabase(@ApplicationContext Context context){
-        DownloadRecordDatabase downloadRecordDatabase = Room.databaseBuilder(context,DownloadRecordDatabase.class,"Download Record Database")
+        return Room.databaseBuilder(context,DownloadRecordDatabase.class,"Download Record Database")
                 .fallbackToDestructiveMigration()
                 .build();
-        return downloadRecordDatabase;
     }
 
     @Provides
     @Singleton
     public static SystemDatabase provideSystemDatabase(@ApplicationContext Context context){
-        SystemDatabase systemDatabase = Room.databaseBuilder(context,SystemDatabase.class,"System Database")
+        return Room.databaseBuilder(context,SystemDatabase.class,"System Database")
                 .fallbackToDestructiveMigration()
                 .build();
-        return systemDatabase;
     }
 }

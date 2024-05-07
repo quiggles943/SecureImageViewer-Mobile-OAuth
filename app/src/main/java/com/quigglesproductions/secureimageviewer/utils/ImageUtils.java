@@ -136,7 +136,7 @@ public class ImageUtils {
             //if(file.exists())
             //    file.delete();
             file.createNewFile();
-            int size = dpToPx(150,context);
+            int size = dpToPx(300,context);
             Size size1 = new Size(size,size);
             Bitmap thumbnail;
             if(item.getContentType().contentEquals("VIDEO"))
@@ -165,7 +165,7 @@ public class ImageUtils {
 
 
     public static File getThumbnailIfExists(Context context, FileModel item){
-        File file = null;
+        File file;
         File folder = new File(context.getFilesDir(),".Pictures");
         if (!folder.exists()) {
             folder.mkdirs();
@@ -189,7 +189,7 @@ public class ImageUtils {
     }
 
     public static File getImageFileIfExists(Context context, FileModel item){
-        File file = null;
+        File file;
         File folder = new File(context.getFilesDir(),".Pictures");
         if (!folder.exists()) {
             folder.mkdirs();

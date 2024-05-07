@@ -7,4 +7,8 @@ public class DatabaseInsertionException extends Exception{
     public DatabaseInsertionException(Throwable t){
         super(t);
     }
+
+    public DatabaseInsertionException(String message){
+        super(message);
+    }
 }

@@ -1,8 +1,6 @@
 package com.quigglesproductions.secureimageviewer.models;
 
-import android.os.Parcelable;
-
-import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.IFileDataSource;
+import com.quigglesproductions.secureimageviewer.datasource.file.IFileDataSource;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.FileType;
 
 public interface ItemBaseModel{

@@ -1,5 +1,7 @@
 package com.quigglesproductions.secureimageviewer.utils;
 
+import static net.openid.appauth.Preconditions.checkNotNull;
+
 import android.net.Uri;
 
 import androidx.annotation.NonNull;
@@ -17,8 +19,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import static net.openid.appauth.Preconditions.checkNotNull;
 
 public final class JsonUtil {
 

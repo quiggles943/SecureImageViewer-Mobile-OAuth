@@ -1,6 +1,6 @@
 package com.quigglesproductions.secureimageviewer.models.file;
 
-import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.IFileDataSource;
+import com.quigglesproductions.secureimageviewer.datasource.file.IFileDataSource;
 
 import java.io.File;
 import java.util.Date;

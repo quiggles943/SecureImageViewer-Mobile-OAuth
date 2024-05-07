@@ -15,39 +15,15 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
-import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.NavDirections;
-import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.room.Room;
 
-import com.google.android.material.snackbar.Snackbar;
 import com.quigglesproductions.secureimageviewer.R;
 import com.quigglesproductions.secureimageviewer.databinding.FragmentDownloadViewerBinding;
-import com.quigglesproductions.secureimageviewer.managers.FolderManager;
-import com.quigglesproductions.secureimageviewer.managers.NotificationManager;
-import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.RetrofitRecentFilesDataSource;
-import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedFile;
-import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedOnlineFile;
-import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedOnlineFolder;
-import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedRecentsFolder;
-import com.quigglesproductions.secureimageviewer.retrofit.RetrofitException;
-import com.quigglesproductions.secureimageviewer.room.databases.download.DownloadRecordDatabase;
-import com.quigglesproductions.secureimageviewer.room.databases.download.entity.FolderDownloadPackage;
 import com.quigglesproductions.secureimageviewer.room.databases.download.entity.FolderDownloadRecord;
-import com.quigglesproductions.secureimageviewer.room.databases.file.relations.FolderWithFiles;
 import com.quigglesproductions.secureimageviewer.ui.SecureFragment;
-import com.quigglesproductions.secureimageviewer.ui.enhancedfolderlist.EnhancedFolderListFragmentDirections;
 
 import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class DownloadViewerFragment extends SecureFragment {
     FragmentDownloadViewerBinding binding;
@@ -65,7 +41,7 @@ public class DownloadViewerFragment extends SecureFragment {
         binding.fragmentDownloadViewerRecyclerView.setLayoutManager(layoutManager);
         DownloadViewerRecyclerAdapter adapter = new DownloadViewerRecyclerAdapter(getContext());
         binding.fragmentDownloadViewerRecyclerView.setAdapter(adapter);
-        LiveData<List<FolderDownloadRecord>> folderDownloads = getRecordDatabase().downloadRecordDao().getAllFoldersLive();
+        LiveData<List<FolderDownloadRecord>> folderDownloads = getRecordDatabase().downloadRecordDao().allFoldersLive();
         folderDownloads.observe(getViewLifecycleOwner(), new Observer<List<FolderDownloadRecord>>() {
             @Override
             public void onChanged(List<FolderDownloadRecord> folderDownloadPackages) {

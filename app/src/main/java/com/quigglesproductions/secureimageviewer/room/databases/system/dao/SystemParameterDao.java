@@ -3,6 +3,7 @@ package com.quigglesproductions.secureimageviewer.room.databases.system.dao;
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.Query;
+import androidx.room.Update;
 
 import com.quigglesproductions.secureimageviewer.room.databases.system.entity.Parameter;
 import com.quigglesproductions.secureimageviewer.room.databases.system.enums.SystemParameter;
@@ -24,6 +25,9 @@ public abstract class SystemParameterDao {
         parameter.updateTime = LocalDateTime.now();
         return _insert(parameter);
     }
+
+    @Update
+    public abstract void update(Parameter parameter);
 
     @Insert
     abstract long _insert(Parameter parameter);

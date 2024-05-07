@@ -6,7 +6,7 @@ import android.os.Parcelable;
 
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
-import com.quigglesproductions.secureimageviewer.models.enhanced.datasource.IFileDataSource;
+import com.quigglesproductions.secureimageviewer.datasource.file.IFileDataSource;
 import com.quigglesproductions.secureimageviewer.models.ArtistModel;
 import com.quigglesproductions.secureimageviewer.models.CatagoryModel;
 import com.quigglesproductions.secureimageviewer.models.ItemBaseModel;
@@ -18,8 +18,8 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class FileModel implements ItemBaseModel, Parcelable {
     private int ID;

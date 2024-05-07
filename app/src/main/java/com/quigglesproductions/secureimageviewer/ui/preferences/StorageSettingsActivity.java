@@ -10,7 +10,6 @@ import androidx.preference.Preference;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.quigglesproductions.secureimageviewer.R;
-import com.quigglesproductions.secureimageviewer.managers.FolderManager;
 import com.quigglesproductions.secureimageviewer.managers.NotificationManager;
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
 import com.quigglesproductions.secureimageviewer.ui.SecurePreferenceFragmentCompat;
@@ -52,8 +51,8 @@ public class StorageSettingsActivity  extends SecureActivity {
         getBackgroundThreadPoster().post(()->{
             long storageUsedByte = getFolderSize(context.getFilesDir());
             long storageUsedMb = storageUsedByte/1024/1024;
-            long folderCount = getFileDatabase().folderDao().getAll().size();
-            long fileCount = getFileDatabase().fileDao().getAll().size();
+            long folderCount = getDownloadFileDatabase().folderDao().getFolders().size();
+            long fileCount = getDownloadFileDatabase().fileDao().getFiles().size();
             getUiThreadPoster().post(()->{
                 fileCountString.setText(String.valueOf(fileCount));
                 folderCountString.setText(String.valueOf(folderCount));
@@ -78,8 +77,9 @@ public class StorageSettingsActivity  extends SecureActivity {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
                     new Thread(()->{
-                        FolderManager.getInstance().removeAllFolders(getFileDatabase());
-                        getFileDatabase().clearAllTables();
+                        //TODO replace
+                        //FolderManager.Companion.getInstance().removeAllFolders(getDownloadFileDatabase());
+                        getDownloadFileDatabase().clearAllTables();
                         getRecordDatabase().clearAllTables();
                         //getRecordDatabase().downloadRecordDao().archiveAll();
                         NotificationManager.getInstance().showSnackbar("All folders removed", Snackbar.LENGTH_SHORT);

@@ -5,7 +5,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.ColorInt;
@@ -13,7 +13,6 @@ import androidx.annotation.ColorRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
-import androidx.core.view.WindowCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -25,13 +24,20 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.load.model.GlideUrl;
+import com.bumptech.glide.load.model.LazyHeaders;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.google.android.material.navigation.NavigationView;
 import com.quigglesproductions.secureimageviewer.R;
-import com.quigglesproductions.secureimageviewer.appauth.AuthManager;
+import com.quigglesproductions.secureimageviewer.aurora.authentication.AuroraUser;
 import com.quigglesproductions.secureimageviewer.databinding.ActivityMainNavigationBinding;
-import com.quigglesproductions.secureimageviewer.managers.SecurityManager;
 import com.quigglesproductions.secureimageviewer.managers.ViewerConnectivityManager;
-import com.quigglesproductions.secureimageviewer.ui.data.model.LoggedInUser;
+import com.quigglesproductions.secureimageviewer.ui.enhancedfolderlist.FolderListType;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -53,10 +59,10 @@ public class EnhancedMainMenuActivity extends SecureActivity{
         setSupportActionBar(binding.appBarNavigation.toolbar);
         final TextView usernameView = binding.navView.getHeaderView(0).findViewById(R.id.user_name);
         final TextView userEmailView = binding.navView.getHeaderView(0).findViewById(R.id.user_email);
-        LoggedInUser user = SecurityManager.getInstance().getLoggedInUser();
+        AuroraUser user = getAuroraAuthenticationManager().getUser();
         if(user != null) {
-            usernameView.setText(user.getDisplayName());
-            userEmailView.setText(user.getEmailAddress());
+            usernameView.setText(user.userName);
+            userEmailView.setText(user.emailAddress);
         }
 
         if(mActionBarSetListener != null)
@@ -75,13 +81,13 @@ public class EnhancedMainMenuActivity extends SecureActivity{
         NavDestination onlineFolderListDestination = navController.getGraph().findNode(R.id.nav_enhancedFolderListFragment);
         onlineFolderListDestination.addArgument("state", new NavArgument.Builder()
                 .setType(NavType.StringType)
-                .setDefaultValue("online")
+                .setDefaultValue(FolderListType.ONLINE.name())
                 .build());
         NavDestination offlineFolderListDestination = navController.getGraph().findNode(R.id.nav_enhancedOfflineFolderListFragment);
         offlineFolderListDestination.addArgument("state", new NavArgument.Builder()
                 .setType(NavType.StringType)
                 //.setDefaultValue("offline")
-                .setDefaultValue("offline-room")
+                .setDefaultValue(FolderListType.DOWNLOADED.name())
                 .build());
         getViewModel().getIsOnline().setValue(ViewerConnectivityManager.getInstance().isConnected());
         getViewModel().getAppBarTitle().observe(this, new Observer<String>() {
@@ -93,6 +99,31 @@ public class EnhancedMainMenuActivity extends SecureActivity{
             }
         });
         getWindow().setNavigationBarColor(context.getColor(R.color.transparent));
+        navigationView.getMenu().findItem(R.id.nav_logout).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(@NonNull MenuItem item) {
+                getAuroraAuthenticationManager().logout();
+                return true;
+            }
+        });
+
+        ImageView userIcon = binding.navView.getHeaderView(0).findViewById(R.id.user_icon);
+        GlideUrl glideUrl = new GlideUrl("https://quigleyid.ddns.net/v2/oauth/userinfo/thumbnail", new LazyHeaders.Builder()
+                //.addHeader("Authorization", "Bearer " + accessToken)
+                .build());
+        Glide.with(this).addDefaultRequestListener(new RequestListener<Object>() {
+            @Override
+            public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Object> target, boolean isFirstResource) {
+                //Log.e("Image Load Fail", e.getMessage());
+                //e.logRootCauses("Image Load Fail");
+                return false;
+            }
+
+            @Override
+            public boolean onResourceReady(Object resource, Object model, Target<Object> target, DataSource dataSource, boolean isFirstResource) {
+                return false;
+            }
+        }).load(glideUrl).diskCacheStrategy(DiskCacheStrategy.ALL).error(R.drawable.ic_launcher_foreground).fitCenter().into(userIcon);
     }
     private EnhancedMainMenuViewModel getViewModel(){
         if(viewModel == null){

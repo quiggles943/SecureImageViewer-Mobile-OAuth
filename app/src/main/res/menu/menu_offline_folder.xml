@@ -2,18 +2,23 @@
 <menu xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/offline_folder_delete"
-        android:title="Delete folder"
+        android:title="@string/delete_folder"
         android:visible="false"
         android:icon="@drawable/ic_baseline_delete_24"
         app:showAsAction="always"/>
+    <item android:id="@+id/offline_folder_favourites"
+        android:title="@string/favourites"
+        android:icon="@drawable/favorite_filled_24"
+        app:showAsAction="ifRoom"/>
     <item android:id="@+id/offline_folder_sync"
         android:icon="@drawable/ic_baseline_sync"
         app:showAsAction="always"
         android:visible="false"/>
     <item android:id="@+id/offline_folder_sort_type"
-        android:title="Sort By"
+        android:title="@string/sort_by"
         android:icon="@drawable/ic_baseline_sort"
         app:showAsAction="always"/>
+
     <!--<item android:id="@+id/offline_folder_multiselect"
         android:title="Single"
         app:showAsAction="never"/>-->

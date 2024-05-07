@@ -16,11 +16,20 @@
             android:id="@+id/nav_enhancedOfflineFolderListFragment"
             android:icon="@drawable/ic_image_24"
             android:title="@string/offline_viewer_title" />
-    </group>
-    <group android:checkableBehavior="single">
         <item
             android:id="@+id/nav_settingsFragment"
             android:icon="@drawable/ic_baseline_settings_24"
             android:title="@string/settings_title" />
+        <item
+            android:id="@+id/nav_userOptions"
+            android:title="@string/menu_user_title">
+            <menu>
+                <item
+                    android:id="@+id/nav_logout"
+                    android:icon="@drawable/baseline_logout_24"
+                    android:title="@string/menu_logout" />
+            </menu>
+        </item>
+
     </group>
 </menu>

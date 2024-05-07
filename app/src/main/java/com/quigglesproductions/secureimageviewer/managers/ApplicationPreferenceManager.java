@@ -5,7 +5,7 @@ import android.content.SharedPreferences;
 
 import com.quigglesproductions.secureimageviewer.SortType;
 import com.quigglesproductions.secureimageviewer.enums.FileGroupBy;
-import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateLog;
+import com.quigglesproductions.secureimageviewer.room.enums.FileSortType;
 
 public class ApplicationPreferenceManager {
     private static ApplicationPreferenceManager singleton;
@@ -24,23 +24,17 @@ public class ApplicationPreferenceManager {
         this.context = context.getApplicationContext();
     }
 
-    public SortType getOfflineFolderSortType(){
+    public FileSortType getOfflineFolderSortType(){
         if(sharedPreferences == null)
             sharedPreferences = context.getSharedPreferences(PREFERENCES_MAIN, Context.MODE_PRIVATE);
         String sortString = sharedPreferences.getString(ManagedPreference.SORT_OFFLINE.getPreferenceKey(),"NAME_ASC");
-        return SortType.getFromName(sortString);
+        return FileSortType.valueOf(sortString);
     }
-    public SortType getOfflineFolderSortType(SortType def){
+    public FileSortType getFolderSortType(){
         if(sharedPreferences == null)
             sharedPreferences = context.getSharedPreferences(PREFERENCES_MAIN, Context.MODE_PRIVATE);
-        String sortString = sharedPreferences.getString(ManagedPreference.SORT_OFFLINE.getPreferenceKey(),def.toString());
-        return SortType.getFromName(sortString);
-    }
-    public SortType getOnlineFolderSortType(){
-        if(sharedPreferences == null)
-            sharedPreferences = context.getSharedPreferences(PREFERENCES_MAIN, Context.MODE_PRIVATE);
-        String sortString = sharedPreferences.getString(ManagedPreference.SORT_ONLINE.getPreferenceKey(),"NAME_ASC");
-        return SortType.getFromName(sortString);
+        String sortString = sharedPreferences.getString(ManagedPreference.SORT.getPreferenceKey(),"NAME_ASC");
+        return FileSortType.valueOf(sortString);
     }
     public SortType getOnlineFolderSortType(SortType def){
         if(sharedPreferences == null)
@@ -54,15 +48,10 @@ public class ApplicationPreferenceManager {
         String sortString = sharedPreferences.getString(ManagedPreference.OFFLINE_FILE_GROUP_BY.getPreferenceKey(),def.toString());
         return FileGroupBy.fromDisplayName(sortString);
     }
-    public void setOfflineFolderSortType(SortType newSortType) {
+    public void setFolderSortType(FileSortType newSortType) {
         if(sharedPreferences == null)
             sharedPreferences = context.getSharedPreferences(PREFERENCES_MAIN, Context.MODE_PRIVATE);
-        sharedPreferences.edit().putString(ManagedPreference.SORT_OFFLINE.getPreferenceKey(),newSortType.toString()).commit();
-    }
-    public void setOnlineFolderSortType(SortType newSortType) {
-        if(sharedPreferences == null)
-            sharedPreferences = context.getSharedPreferences(PREFERENCES_MAIN, Context.MODE_PRIVATE);
-        sharedPreferences.edit().putString(ManagedPreference.SORT_ONLINE.getPreferenceKey(),newSortType.toString()).commit();
+        sharedPreferences.edit().putString(ManagedPreference.SORT.getPreferenceKey(),newSortType.toString()).commit();
     }
     public void setFileGroupBy(FileGroupBy newSortType) {
         if(sharedPreferences == null)
@@ -105,6 +94,7 @@ public class ApplicationPreferenceManager {
     public enum ManagedPreference{
         SORT_OFFLINE("com.secureimageviewer.preference.folder.sort.offline"),
         SORT_ONLINE("com.secureimageviewer.preference.folder.sort.online"),
+        SORT("com.secureimageviewer.preference.folder.sort.default"),
         OFFLINE_FILE_GROUP_BY("com.secureimageviewer.preference.folderlist.groupby"),
         SYNC_VALUES("com.secureimageviewer.preference.sync.values");
 

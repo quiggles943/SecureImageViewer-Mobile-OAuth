@@ -5,7 +5,7 @@ import android.os.Bundle;
 import androidx.preference.PreferenceFragmentCompat;
 
 import com.quigglesproductions.secureimageviewer.room.databases.download.DownloadRecordDatabase;
-import com.quigglesproductions.secureimageviewer.room.databases.file.FileDatabase;
+import com.quigglesproductions.secureimageviewer.room.databases.unified.UnifiedFileDatabase;
 
 public class SecurePreferenceFragmentCompat extends PreferenceFragmentCompat {
     @Override
@@ -23,8 +23,8 @@ public class SecurePreferenceFragmentCompat extends PreferenceFragmentCompat {
         }
         return activity;
     }
-    public FileDatabase getFileDatabase(){
-        return requiresSecureActivity().getFileDatabase();
+    public UnifiedFileDatabase getDownloadFileDatabase(){
+        return requiresSecureActivity().getDownloadFileDatabase();
     }
     public DownloadRecordDatabase getRecordDatabase(){
         return requiresSecureActivity().getRecordDatabase();

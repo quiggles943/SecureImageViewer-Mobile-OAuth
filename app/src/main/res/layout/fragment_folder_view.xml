@@ -1,27 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/offline_folder_layout"
+    android:id="@+id/folderViewer_swipe_container"
     android:fitsSystemWindows="false"
     android:numColumns="@integer/column_count_filelist">
-    <!--<androidx.recyclerview.widget.RecyclerView
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/file_recyclerview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:numColumns="3"/>-->
-    <com.mikelau.views.shimmer.ShimmerRecyclerViewX
+        android:numColumns="3"/>
+    <!--<com.mikelau.views.shimmer.ShimmerRecyclerViewX
         android:id="@+id/file_shimmer_recycler_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:overScrollMode="never"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:shimmer_demo_child_count="21"
         app:shimmer_demo_grid_child_count="3"
         app:shimmer_demo_layout="@layout/layout_filegrid_shimmer"
         app:shimmer_demo_layout_manager_type="grid"
         app:shimmer_demo_angle="20"
-        />
+        />-->
     <!--<GridView
         android:id="@+id/file_gridview"
         android:layout_width="match_parent"
@@ -29,4 +30,4 @@
         android:numColumns="3"
         android:stretchMode="columnWidth" />-->
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

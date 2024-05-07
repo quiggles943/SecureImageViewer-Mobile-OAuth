@@ -1,14 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/app_recent_files"
-        android:title="Recents"
+        android:id="@+id/online_folder_recent_files"
+        android:title="@string/recent_files"
+        android:icon="@drawable/baseline_recent_files"
         app:showAsAction="always"/>
     <item
-        android:id="@+id/app_bar_search"
-        android:icon="@drawable/ic_search_black_24dp"
-        android:title="Search"
-        app:actionViewClass="android.widget.SearchView"
-        app:showAsAction="collapseActionView|ifRoom" />
+        android:id="@+id/online_folder_download_viewer"
+        android:title="@string/view_downloads"
+        android:icon="@drawable/baseline_download_viewer"
+        app:showAsAction="ifRoom"/>
+    <item
+        android:visible="false"
+        android:icon="@android:drawable/stat_sys_download"
+        android:id="@+id/online_folder_download_selection"
+        app:showAsAction="always"
+        android:title="@string/download_selection" />
 </menu>

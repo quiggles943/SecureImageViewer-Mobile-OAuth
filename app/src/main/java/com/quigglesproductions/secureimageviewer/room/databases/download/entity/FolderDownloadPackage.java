@@ -1,8 +1,6 @@
 package com.quigglesproductions.secureimageviewer.room.databases.download.entity;
 
-import androidx.annotation.RequiresPermission;
 import androidx.room.Embedded;
-import androidx.room.Entity;
 import androidx.room.Relation;
 
 import java.util.List;

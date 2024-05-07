@@ -6,7 +6,6 @@ import androidx.preference.Preference;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.quigglesproductions.secureimageviewer.R;
-import com.quigglesproductions.secureimageviewer.managers.FolderManager;
 import com.quigglesproductions.secureimageviewer.managers.NotificationManager;
 import com.quigglesproductions.secureimageviewer.ui.SecurePreferenceFragmentCompat;
 
@@ -22,9 +21,10 @@ public class StorageSettingsFragment extends SecurePreferenceFragmentCompat {
         resetPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                FolderManager.getInstance().removeAllFolders(getFileDatabase());
+                //TODO replace
+                //FolderManager.Companion.getInstance().removeAllFolders(getDownloadFileDatabase());
                 new Thread(()->{
-                    getFileDatabase().clearAllTables();
+                    getDownloadFileDatabase().clearAllTables();
                 }).start();
 
                 //DatabaseHandler.getInstance().clearFiles();
