@@ -41,5 +41,7 @@
 
     <color name="AppYellow">#FAB123</color>
 
+    <color name="accent_main">@color/blue_500</color>
+
     <color name="demo_dark_transparent">#24000000</color>
 </resources>

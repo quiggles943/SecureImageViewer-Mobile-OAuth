@@ -3,8 +3,6 @@ package com.quigglesproductions.secureimageviewer.dagger.hilt.module;
 import com.google.gson.Gson;
 import com.quigglesproductions.secureimageviewer.aurora.authentication.appauth.AuroraAuthenticationManager;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.EnhancedOnlineFile;
-import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedDatabaseFolder;
-import com.quigglesproductions.secureimageviewer.models.enhanced.folder.EnhancedOnlineFolder;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -85,16 +83,6 @@ public class ConversionModuleTest {
     }
 
     @Test
-    public void assertEnhancedOnlineFolderConversion() {
-        Gson testGson = ConversionModule.provideGson(authenticationManager);
-        TestObject testObject = testGson.fromJson(enhancedOnlineFolderTestJson,TestObject.class);
-        Assert.assertNotNull(testObject.testEnhancedOnlineFolder);
-        Assert.assertEquals(1234,testObject.testEnhancedOnlineFolder.onlineId);
-        Assert.assertEquals("TestName",testObject.testEnhancedOnlineFolder.normalName);
-        LocalDateTime expectedDate = LocalDateTime.parse("2023-01-01T12:00:00");
-        Assert.assertEquals(expectedDate,testObject.testEnhancedOnlineFolder.onlineAccessTime);
-    }
-    @Test
     public void assertEnhancedOnlineFileConversion() {
         Gson testGson = ConversionModule.provideGson(authenticationManager);
         TestObject testObject = testGson.fromJson(enhancedOnlineFileTestJson,TestObject.class);
@@ -108,26 +96,10 @@ public class ConversionModuleTest {
         Assert.assertTrue(testObject.testEnhancedOnlineFile.metadata.isEncrypted);
     }
 
-    @Test
-    public void assertEnhancedDatabaseFolderConversion() {
-        Gson testGson = ConversionModule.provideGson(authenticationManager);
-        TestObject testObject = testGson.fromJson(enhancedDatabaseFolderTestJson,TestObject.class);
-        Assert.assertNotNull(testObject.testEnhancedDatabaseFolder);
-        Assert.assertEquals(1234,testObject.testEnhancedDatabaseFolder.onlineId);
-        Assert.assertEquals("TestName",testObject.testEnhancedDatabaseFolder.normalName);
-        LocalDateTime expectedDate = LocalDateTime.parse("2023-01-01T12:00:00");
-        Assert.assertEquals(expectedDate,testObject.testEnhancedDatabaseFolder.onlineAccessTime);
-        LocalDateTime expectedOfflineDate = LocalDateTime.parse("2023-02-03T12:00:00");
-        Assert.assertEquals(expectedOfflineDate,testObject.testEnhancedDatabaseFolder.getAccessTime());
-        Assert.assertTrue(testObject.testEnhancedDatabaseFolder.getThumbnailFileUri().endsWith("Test"));
-        Assert.assertEquals(5678,testObject.testEnhancedDatabaseFolder.getId());
-    }
 
     class TestObject{
         public Date testDate;
         public LocalDateTime testLocalDateTime;
         public EnhancedOnlineFile testEnhancedOnlineFile;
-        public EnhancedOnlineFolder testEnhancedOnlineFolder;
-        public EnhancedDatabaseFolder testEnhancedDatabaseFolder;
     }
 }

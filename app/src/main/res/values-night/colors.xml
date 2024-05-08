@@ -10,4 +10,6 @@
     <color name="navigationHeader_gradient_start">@color/purple_100</color>
     <color name="navigationHeader_gradient_middle">@color/purple_200</color>
     <color name="navigationHeader_gradient_end">@color/purple_500</color>
+
+    <color name="accent_main">@color/purple_200</color>
 </resources>
