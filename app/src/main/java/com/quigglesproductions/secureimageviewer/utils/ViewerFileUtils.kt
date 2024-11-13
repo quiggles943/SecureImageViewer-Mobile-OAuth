@@ -75,12 +75,12 @@ object ViewerFileUtils {
     suspend fun deleteFilesFromStorage(files: List<RoomUnifiedEmbeddedFile>): Boolean{
         if(files.isEmpty()) return false;
         for(file in files){
-            val thumbnailFile = File(file.thumbnailPath)
-            val itemFile = File(file.filePath)
-            if(thumbnailFile.exists())
-                thumbnailFile.delete()
-            if(itemFile.exists())
-                itemFile.delete()
+            if(file.thumbnailFile != null)
+                if(file.thumbnailFile.exists())
+                    file.thumbnailFile.delete()
+            if(file.imageFile != null)
+                if(file.imageFile.exists())
+                    file.imageFile.delete()
         }
         return true
     }
@@ -96,8 +96,8 @@ object ViewerFileUtils {
     suspend fun deleteFileFromDatabase(database: UnifiedFileDatabase, file: RoomUnifiedEmbeddedFile): Boolean {
         var thumbnailDeleted = true
         var fileDeleted = true
-        if (file.thumbnailFile != null) thumbnailDeleted = file.thumbnailFile.delete()
-        if (file.imageFile != null) fileDeleted = file.imageFile.delete()
+        if (file.thumbnailFile != null) thumbnailDeleted = !file.thumbnailFile.exists()
+        if (file.imageFile != null) fileDeleted = !file.imageFile.exists()
         if (thumbnailDeleted && fileDeleted) database.fileDao().delete(file)
         return true
     }
