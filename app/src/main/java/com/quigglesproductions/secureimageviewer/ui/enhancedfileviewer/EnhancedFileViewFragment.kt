@@ -100,7 +100,7 @@ class EnhancedFileViewFragment : SecureFragment(), IFileViewer {
                 topLayout.invalidate()
                 favouriteButton.isChecked = selectedFile!!.file.isFavourite
                 facescanButton.isEnabled = selectedFile.faceScanModels.isNotEmpty()
-                facescanButton.visibility = if (selectedFile.faceScanModels.isNotEmpty()) View.VISIBLE else View.INVISIBLE
+                facescanButton.visibility = if (selectedFile.faceScanModels.isNotEmpty()) View.VISIBLE else View.GONE
             }
         })
         viewPager.setCurrentItem(collectionAdapter.getPosition(folderViewModel.selectedFile.value), false)

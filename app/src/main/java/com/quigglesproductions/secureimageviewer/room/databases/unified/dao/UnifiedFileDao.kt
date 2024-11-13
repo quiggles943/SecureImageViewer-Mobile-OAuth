@@ -99,6 +99,16 @@ public abstract class UnifiedFileDao {
                 insert(subjectCrossRef)
             }
         }
+        if(file.faceScanModels != null){
+            for(model in file.faceScanModels){
+                model.model.fileId = fileId
+                val modelId = insert(model.model)
+                for (landmark in model.landmarks){
+                    landmark.faceScanModelId = modelId
+                    insert(landmark)
+                }
+            }
+        }
         insert(file.metadata.metadata)
         return fileId
     }
