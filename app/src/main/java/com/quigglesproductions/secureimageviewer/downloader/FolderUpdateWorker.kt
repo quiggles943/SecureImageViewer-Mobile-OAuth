@@ -156,7 +156,6 @@ class FolderUpdateWorker @AssistedInject constructor (
         for(fileUpdate: EnhancedFileUpdateLog in fileUpdates){
             val file = database.fileDao().loadFileByOnlineId(fileUpdate.fileId)
             val success = folderManager.removeFileFromFolder(fileDatabase = database,
-                folder = folder,
                 file = file)
 
             if(!success)

@@ -35,11 +35,11 @@ class FolderManager(private val rootContext: Context) {
     }
 
     private fun clearPictureFolder() {
-        val picFolder = File(rootContext!!.filesDir.toString() + "/.Pictures")
+        val picFolder = File(rootContext.filesDir.toString() + "/.Pictures")
         deleteRecursive(picFolder)
     }
 
-    suspend fun removeFileFromFolder(fileDatabase: UnifiedFileDatabase, folder: RoomUnifiedFolder, file: RoomUnifiedEmbeddedFile): Boolean {
+    suspend fun removeFileFromFolder(fileDatabase: UnifiedFileDatabase, file: RoomUnifiedEmbeddedFile): Boolean {
         return deleteFileFromDatabase(fileDatabase,file)
     }
 }
