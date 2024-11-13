@@ -360,7 +360,6 @@ public class NewTouchImageView extends ImageView {
 
     /**
      * Set zoom to the specified scale. Image will be centered by default.
-     * @param scale
      */
     public void setZoom(float scale) {
         setZoom(scale, 0.5f, 0.5f);
@@ -371,9 +370,6 @@ public class NewTouchImageView extends ImageView {
      * (focusX, focusY). These floats range from 0 to 1 and denote the focus point
      * as a fraction from the left and top of the view. For example, the top left
      * corner of the image would be (0, 0). And the bottom right corner would be (1, 1).
-     * @param scale
-     * @param focusX
-     * @param focusY
      */
     public void setZoom(float scale, float focusX, float focusY) {
         setZoom(scale, focusX, focusY, mScaleType);
@@ -384,10 +380,6 @@ public class NewTouchImageView extends ImageView {
      * (focusX, focusY). These floats range from 0 to 1 and denote the focus point
      * as a fraction from the left and top of the view. For example, the top left
      * corner of the image would be (0, 0). And the bottom right corner would be (1, 1).
-     * @param scale
-     * @param focusX
-     * @param focusY
-     * @param scaleType
      */
     public void setZoom(float scale, float focusX, float focusY, ScaleType scaleType) {
         //
@@ -416,7 +408,6 @@ public class NewTouchImageView extends ImageView {
     /**
      * Set zoom parameters equal to another TouchImageView. Including scale, position,
      * and ScaleType.
-     * @param img
      */
     public void setZoom(NewTouchImageView img) {
         PointF center = img.getScrollPosition();
@@ -447,8 +438,6 @@ public class NewTouchImageView extends ImageView {
     /**
      * Set the focus point of the zoomed image. The focus points are denoted as a fraction from the
      * left and top of the view. The focus points can range in value between 0 and 1.
-     * @param focusX
-     * @param focusY
      */
     public void setScrollPosition(float focusX, float focusY) {
         setZoom(normalizedScale, focusX, focusY);
@@ -678,10 +667,6 @@ public class NewTouchImageView extends ImageView {
     /**
      * Set view dimensions based on layout params
      *
-     * @param mode
-     * @param size
-     * @param drawableWidth
-     * @return
      */
     private int setViewSize(int mode, int size, int drawableWidth) {
         int viewSize;
@@ -1066,7 +1051,6 @@ public class NewTouchImageView extends ImageView {
          * Interpolate between where the image should start and end in order to translate
          * the image so that the point that is touched is what ends up centered at the end
          * of the zoom.
-         * @param t
          */
         private void translateImageToCenterTouchPosition(float t) {
             float targetX = startTouch.x + t * (endTouch.x - startTouch.x);
@@ -1077,7 +1061,6 @@ public class NewTouchImageView extends ImageView {
 
         /**
          * Use interpolator to get t
-         * @return
          */
         private float interpolate() {
             long currTime = System.currentTimeMillis();
@@ -1089,8 +1072,6 @@ public class NewTouchImageView extends ImageView {
         /**
          * Interpolate the current targeted zoom and get the delta
          * from the current zoom.
-         * @param t
-         * @return
          */
         private double calculateDeltaScale(float t) {
             double zoom = startZoom + t * (targetZoom - startZoom);

@@ -25,7 +25,7 @@ class EnhancedFolderFileViewerFragment: BaseFolderViewerFragment() {
     private val folderListViewModel by activityViewModels<EnhancedFolderListViewModel>()
     //private lateinit var root: View
 
-    override fun onContextItemSelected(item: MenuItem): Boolean {
+    /*override fun onContextItemSelected(item: MenuItem): Boolean {
         val selectedFile = (adapter.peek(item.itemId) as FolderFileViewerModel.FileModel).file
         when (item.groupId) {
             CONTEXTMENU_INFO -> {
@@ -63,7 +63,7 @@ class EnhancedFolderFileViewerFragment: BaseFolderViewerFragment() {
             CONTEXTMENU_UPLOAD -> {}
         }
         return true
-    }
+    }*/
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

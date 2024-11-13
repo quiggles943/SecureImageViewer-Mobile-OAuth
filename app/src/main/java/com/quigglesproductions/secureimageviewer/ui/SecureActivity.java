@@ -35,6 +35,7 @@ import com.quigglesproductions.secureimageviewer.dagger.hilt.annotations.Downloa
 import com.quigglesproductions.secureimageviewer.dagger.hilt.module.DownloadManager;
 import com.quigglesproductions.secureimageviewer.downloader.FolderDownloaderMediator;
 import com.quigglesproductions.secureimageviewer.downloader.PagedFolderDownloader;
+import com.quigglesproductions.secureimageviewer.managers.FolderManager;
 import com.quigglesproductions.secureimageviewer.managers.NotificationManager;
 import com.quigglesproductions.secureimageviewer.managers.SecurityManager;
 import com.quigglesproductions.secureimageviewer.managers.ViewerConnectivityManager;
@@ -73,6 +74,8 @@ public class SecureActivity extends AppCompatActivity {
     Gson gson;
     @Inject
     public DownloadManager downloadManager;
+    @Inject
+    public FolderManager folderManager;
 
     @Inject
     @CachingDatabase
@@ -372,15 +375,22 @@ public class SecureActivity extends AppCompatActivity {
         if(getSupportActionBar() != null)
             getSupportActionBar().hide();
 
+        if(this instanceof EnhancedMainMenuActivity){
+            ((EnhancedMainMenuActivity)this).hideNavigationDrawer();
+        }
     }
 
     public void showSystemUI() {
+        postponeEnterTransition();
         WindowInsetsControllerCompat insetController = WindowCompat.getInsetsController(getWindow(),getWindow().getDecorView());
         insetController.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_DEFAULT);
         insetController.show(WindowInsetsCompat.Type.statusBars() | WindowInsetsCompat.Type.navigationBars());
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         if(getSupportActionBar() != null)
             getSupportActionBar().show();
-
+        if(this instanceof EnhancedMainMenuActivity){
+            ((EnhancedMainMenuActivity)this).showNavigationDrawer();
+        }
+        startPostponedEnterTransition();
     }
 }

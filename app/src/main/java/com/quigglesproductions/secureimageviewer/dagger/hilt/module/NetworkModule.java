@@ -3,6 +3,9 @@ package com.quigglesproductions.secureimageviewer.dagger.hilt.module;
 import android.annotation.SuppressLint;
 import android.content.Context;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.quigglesproductions.secureimageviewer.dagger.hilt.annotations.AuthServiceClient;
 import com.quigglesproductions.secureimageviewer.dagger.hilt.annotations.DownloadServiceClient;
 import com.quigglesproductions.secureimageviewer.dagger.hilt.annotations.RequestServiceClient;
@@ -48,10 +51,10 @@ public class NetworkModule {
                 }
             }
     };
-
+    
     @RequestServiceClient
     @Provides
-    public static OkHttpClient provideRequestServiceHttpClient(@ApplicationContext Context context, AuthenticationInterceptor authenticationInterceptor, Cache cache){
+    public static OkHttpClient provideRequestServiceHttpClient(@ApplicationContext Context context, @NonNull AuthenticationInterceptor authenticationInterceptor, Cache cache){
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
         authenticationInterceptor.setContext(context);
         interceptor.setLevel(HttpLoggingInterceptor.Level.HEADERS);
@@ -75,7 +78,7 @@ public class NetworkModule {
 
     @DownloadServiceClient
     @Provides
-    public static OkHttpClient provideDownloadServiceHttpClient(@ApplicationContext Context context, AuthenticationInterceptor authenticationInterceptor){
+    public static OkHttpClient provideDownloadServiceHttpClient(@ApplicationContext Context context, @NonNull AuthenticationInterceptor authenticationInterceptor){
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
         authenticationInterceptor.setContext(context);
         interceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);

@@ -28,6 +28,7 @@ class EnhancedFileCollectionAdapterKt<T : IDisplayFile?>(fragment: Fragment,
         var fragment: Fragment = when (file!!.fileTypeString) {
             "IMAGE" -> ImageFileViewFragmentKt()
             "VIDEO" -> VideoFileViewFragmentKt()
+            "AUDIO" -> VideoFileViewFragmentKt()
             else -> ImageFileViewFragmentKt()
         }
         val args = Bundle()

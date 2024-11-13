@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/unified_folder_recent_files"
+        android:icon="@drawable/baseline_recent_files"
+        android:title="@string/recent_files"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/unified_file_location_toggle"
+        android:title="Switch"
+        app:actionLayout="@layout/online_switch"
+        app:showAsAction="always" />
+</menu>

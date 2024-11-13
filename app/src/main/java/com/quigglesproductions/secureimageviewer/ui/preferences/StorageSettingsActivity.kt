@@ -1,128 +1,114 @@
-package com.quigglesproductions.secureimageviewer.ui.preferences;
+package com.quigglesproductions.secureimageviewer.ui.preferences
 
-import android.content.Context;
-import android.os.Bundle;
-import android.view.MenuItem;
-import android.widget.TextView;
+import android.content.Context
+import android.os.Bundle
+import android.view.MenuItem
+import android.widget.TextView
+import androidx.preference.Preference
+import com.google.android.material.snackbar.Snackbar
+import com.quigglesproductions.secureimageviewer.R
+import com.quigglesproductions.secureimageviewer.managers.FolderManager
+import com.quigglesproductions.secureimageviewer.managers.NotificationManager
+import com.quigglesproductions.secureimageviewer.ui.SecureActivity
+import com.quigglesproductions.secureimageviewer.ui.SecurePreferenceFragmentCompat
+import kotlinx.coroutines.runBlocking
+import java.io.File
 
-import androidx.appcompat.app.ActionBar;
-import androidx.preference.Preference;
+class StorageSettingsActivity : SecureActivity() {
+    private var context: Context? = null
+    var fileCountString: TextView? = null
+    var folderCountString: TextView? = null
+    var storageUsedString: TextView? = null
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        context = this
 
-import com.google.android.material.snackbar.Snackbar;
-import com.quigglesproductions.secureimageviewer.R;
-import com.quigglesproductions.secureimageviewer.managers.NotificationManager;
-import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
-import com.quigglesproductions.secureimageviewer.ui.SecurePreferenceFragmentCompat;
-
-import java.io.File;
-
-public class StorageSettingsActivity  extends SecureActivity {
-    private Context context;
-    TextView fileCountString, folderCountString, storageUsedString;
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        context = this;
-
-        setContentView(R.layout.activity_settings_storage);
-        fileCountString = findViewById(R.id.storage_file_count);
-        folderCountString = findViewById(R.id.storage_folder_count);
-        storageUsedString = findViewById(R.id.storage_size_used);
+        setContentView(R.layout.activity_settings_storage)
+        fileCountString = findViewById(R.id.storage_file_count)
+        folderCountString = findViewById(R.id.storage_folder_count)
+        storageUsedString = findViewById(R.id.storage_size_used)
         if (savedInstanceState == null) {
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.settings_storage, new StorageSettingsActivity.SettingsFragment(new SettingsFragment.StorageInformationUpdatedCallback() {
-                        @Override
-                        public void informationUpdated() {
-                            getStorageInfo();
+            supportFragmentManager
+                .beginTransaction()
+                .replace(
+                    R.id.settings_storage,
+                    SettingsFragment(object : SettingsFragment.StorageInformationUpdatedCallback {
+                        override fun informationUpdated() {
+                            getStorageInfo()
                         }
-                    }))
-                    .commit();
+                    },folderManager)
+                )
+                .commit()
         }
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
-        getStorageInfo();
+        val actionBar = supportActionBar
+        actionBar?.setDisplayHomeAsUpEnabled(true)
+        getStorageInfo()
     }
 
-    public void getStorageInfo(){
-        //DatabaseHandler databaseHandler = new DatabaseHandler(context,databaseHelper.getWritableDatabase());
-        getBackgroundThreadPoster().post(()->{
-            long storageUsedByte = getFolderSize(context.getFilesDir());
-            long storageUsedMb = storageUsedByte/1024/1024;
-            long folderCount = getDownloadFileDatabase().folderDao().getFolders().size();
-            long fileCount = getDownloadFileDatabase().fileDao().getFiles().size();
-            getUiThreadPoster().post(()->{
-                fileCountString.setText(String.valueOf(fileCount));
-                folderCountString.setText(String.valueOf(folderCount));
-                storageUsedString.setText(String.valueOf(storageUsedMb)+"Mb");
-            });
-
-        });
-
-
-    }
-
-    public static class SettingsFragment extends SecurePreferenceFragmentCompat {
-        StorageInformationUpdatedCallback callback;
-        public SettingsFragment(StorageInformationUpdatedCallback callback){
-            this.callback = callback;
-        }
-        @Override
-        public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-            setPreferencesFromResource(R.xml.storage_preferences, rootKey);
-            androidx.preference.Preference resetPreference  = getPreferenceManager().findPreference("file_reset");
-            resetPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-                @Override
-                public boolean onPreferenceClick(Preference preference) {
-                    new Thread(()->{
-                        //TODO replace
-                        //FolderManager.Companion.getInstance().removeAllFolders(getDownloadFileDatabase());
-                        getDownloadFileDatabase().clearAllTables();
-                        getRecordDatabase().clearAllTables();
-                        //getRecordDatabase().downloadRecordDao().archiveAll();
-                        NotificationManager.getInstance().showSnackbar("All folders removed", Snackbar.LENGTH_SHORT);
-                        if(callback != null)
-                            callback.informationUpdated();
-                    }).start();
-                    //DatabaseHandler.getInstance().clearFiles();
-
-                    return true;
+    fun getStorageInfo(): Unit
+        {
+            backgroundThreadPoster.post {
+                val storageUsedByte = getFolderSize(context!!.filesDir)
+                val storageUsedMb = storageUsedByte / 1024 / 1024
+                val folderCount =
+                    downloadFileDatabase.folderDao().folders.size.toLong()
+                val fileCount = downloadFileDatabase.fileDao().files.size.toLong()
+                uiThreadPoster.post {
+                    fileCountString!!.text = fileCount.toString()
+                    folderCountString!!.text = folderCount.toString()
+                    storageUsedString!!.text = storageUsedMb.toString() + "Mb"
                 }
-            });
+            }
         }
 
-        public interface StorageInformationUpdatedCallback{
-            void informationUpdated();
+    class SettingsFragment(var callback: StorageInformationUpdatedCallback?, private val folderManager: FolderManager) :
+        SecurePreferenceFragmentCompat() {
+        override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+            setPreferencesFromResource(R.xml.storage_preferences, rootKey)
+            val resetPreference = preferenceManager.findPreference<Preference>("file_reset")
+            resetPreference!!.onPreferenceClickListener =
+                Preference.OnPreferenceClickListener {
+                    Thread {
+                        runBlocking {
+                            folderManager.removeAllFolders(downloadFileDatabase)
+                        }
+                        downloadFileDatabase.clearAllTables()
+                        recordDatabase.clearAllTables()
+                        //getRecordDatabase().downloadRecordDao().archiveAll();
+                        NotificationManager.getInstance()
+                            .showSnackbar("All folders removed", Snackbar.LENGTH_SHORT)
+                        if (callback != null) callback!!.informationUpdated()
+                    }.start()
+                    //DatabaseHandler.getInstance().clearFiles();
+                    true
+                }
+        }
+
+        interface StorageInformationUpdatedCallback {
+            fun informationUpdated()
         }
     }
 
-    private long getFolderSize(File file) {
-        if (file == null || !file.exists())
-            return 0;
-        long size = 0;
-        if (file.isDirectory()) {
-            File[] files = file.listFiles();
-            if (files == null || files.length == 0)
-                return size;
-            for (File f : files)
-                size += getFolderSize(f);
-        } else
-            size += file.length();
-        return size;
-
+    private fun getFolderSize(file: File?): Long {
+        if (file == null || !file.exists()) return 0
+        var size: Long = 0
+        if (file.isDirectory) {
+            val files = file.listFiles()
+            if (files == null || files.size == 0) return size
+            for (f in files) size += getFolderSize(f)
+        } else size += file.length()
+        return size
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                onBackPressed();
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            android.R.id.home -> {
+                onBackPressed()
                 //NavUtils.navigateUpFromSameTask(this);
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+                return true
+            }
+
+            else -> return super.onOptionsItemSelected(item)
         }
     }
 }

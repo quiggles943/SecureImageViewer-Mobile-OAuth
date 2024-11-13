@@ -10,18 +10,23 @@ import com.quigglesproductions.secureimageviewer.room.databases.unified.dao.Unif
 import com.quigglesproductions.secureimageviewer.room.databases.unified.dao.UnifiedRemoteKeyDao
 import com.quigglesproductions.secureimageviewer.room.databases.unified.dao.UnifiedSubjectDao
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RemoteKey
+import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomSearchItem
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedArtist
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedCategory
+import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedFaceScanLandmark
+import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedFaceScanModel
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedFile
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedFileCategoryCrossRef
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedFileSubjectCrossRef
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedFolder
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedMetadata
+import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedSearchItem
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedSubject
 
 @Database(
-    entities = [RoomUnifiedFolder::class, RoomUnifiedFile::class, RoomUnifiedMetadata::class, RoomUnifiedArtist::class, RoomUnifiedCategory::class, RoomUnifiedSubject::class, RoomUnifiedFileCategoryCrossRef::class, RoomUnifiedFileSubjectCrossRef::class, RemoteKey::class],
-    version = 10
+    entities = [RoomUnifiedFolder::class, RoomUnifiedFile::class, RoomUnifiedMetadata::class, RoomUnifiedArtist::class, RoomUnifiedCategory::class, RoomUnifiedSubject::class, RoomUnifiedFileCategoryCrossRef::class, RoomUnifiedFileSubjectCrossRef::class, RemoteKey::class, RoomUnifiedFaceScanLandmark::class, RoomUnifiedFaceScanModel::class],
+    version = 12,
+    views = [RoomSearchItem::class]
 )
 @TypeConverters(Converters::class)
 abstract class UnifiedFileDatabase : RoomDatabase() {

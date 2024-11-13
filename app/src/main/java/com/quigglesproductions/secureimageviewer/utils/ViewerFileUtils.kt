@@ -3,7 +3,6 @@ package com.quigglesproductions.secureimageviewer.utils
 import android.content.Context
 import android.util.Log
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDatabaseFile
-import com.quigglesproductions.secureimageviewer.models.file.FileModel
 import com.quigglesproductions.secureimageviewer.room.databases.unified.UnifiedFileDatabase
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.relations.RoomUnifiedEmbeddedFile
 import java.io.File
@@ -73,19 +72,28 @@ object ViewerFileUtils {
         }
     }
 
-    fun getFilePathForFile(context: Context, file: FileModel): File {
-        return File(context.filesDir.toString() + File.separator + ".Pictures" + File.separator + file.getFolderId() + File.separator + file.id)
-    }
-
-    suspend fun deleteFiles(database: UnifiedFileDatabase, files: List<RoomUnifiedEmbeddedFile>): Boolean {
-        if (files.isEmpty()) return false
-        for (file in files) {
-            deleteFile(database,file)
+    suspend fun deleteFilesFromStorage(files: List<RoomUnifiedEmbeddedFile>): Boolean{
+        if(files.isEmpty()) return false;
+        for(file in files){
+            val thumbnailFile = File(file.thumbnailPath)
+            val itemFile = File(file.filePath)
+            if(thumbnailFile.exists())
+                thumbnailFile.delete()
+            if(itemFile.exists())
+                itemFile.delete()
         }
         return true
     }
 
-    suspend fun deleteFile(database: UnifiedFileDatabase, file: RoomUnifiedEmbeddedFile): Boolean {
+    suspend fun deleteFilesFromDatabase(database: UnifiedFileDatabase, files: List<RoomUnifiedEmbeddedFile>): Boolean {
+        if (files.isEmpty()) return false
+        for (file in files) {
+            deleteFileFromDatabase(database,file)
+        }
+        return true
+    }
+
+    suspend fun deleteFileFromDatabase(database: UnifiedFileDatabase, file: RoomUnifiedEmbeddedFile): Boolean {
         var thumbnailDeleted = true
         var fileDeleted = true
         if (file.thumbnailFile != null) thumbnailDeleted = file.thumbnailFile.delete()

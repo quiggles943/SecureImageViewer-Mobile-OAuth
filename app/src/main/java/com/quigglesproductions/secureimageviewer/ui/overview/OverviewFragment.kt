@@ -7,12 +7,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavDirections
-import androidx.navigation.Navigation.findNavController
-import androidx.transition.AutoTransition
-import androidx.transition.TransitionManager
 import androidx.work.Data
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequest
@@ -22,27 +17,17 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.google.android.material.snackbar.Snackbar
 import com.quigglesproductions.secureimageviewer.R
-import com.quigglesproductions.secureimageviewer.databinding.ActivityOverviewBinding
-import com.quigglesproductions.secureimageviewer.downloader.DownloadState
-import com.quigglesproductions.secureimageviewer.downloader.FolderDownloadWorker
+import com.quigglesproductions.secureimageviewer.databinding.ActivityOverviewUpdatedBinding
 import com.quigglesproductions.secureimageviewer.downloader.FolderUpdateWorker
-import com.quigglesproductions.secureimageviewer.gson.ViewerGson
-import com.quigglesproductions.secureimageviewer.managers.ApplicationPreferenceManager
 import com.quigglesproductions.secureimageviewer.managers.NotificationManager
 import com.quigglesproductions.secureimageviewer.managers.ViewerConnectivityManager
-import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateFolder
-import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateLog
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateResponse
-import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateSendModel
 import com.quigglesproductions.secureimageviewer.models.modular.ModularServerStatus
 import com.quigglesproductions.secureimageviewer.observable.IFolderDownloadObserver
 import com.quigglesproductions.secureimageviewer.room.databases.system.enums.SystemParameter
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedFolder
 import com.quigglesproductions.secureimageviewer.ui.SecureFragment
-import com.quigglesproductions.secureimageviewer.ui.enhancedfolderlist.FolderListType
-import com.quigglesproductions.secureimageviewer.utils.FileSyncUtils.Companion.getUpdateLogs
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -50,44 +35,24 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 class OverviewFragment : SecureFragment() {
-    var binding: ActivityOverviewBinding? = null
+    lateinit var binding: ActivityOverviewUpdatedBinding
     //var viewModel: OverviewViewModel? = null
     private val viewModel by activityViewModels<OverviewViewModel>()
-    var sameYearPattern = DateTimeFormatter.ofPattern("hh:mm a, EEEE dd MMMM")
-    var previousYearPattern = DateTimeFormatter.ofPattern("hh:mm a, EEEE dd MMMM yyyy")
-    var downloadObserver: IFolderDownloadObserver? = null
+    var sameYearPattern: DateTimeFormatter = DateTimeFormatter.ofPattern("hh:mm a, EEEE dd MMMM")
+    var previousYearPattern: DateTimeFormatter = DateTimeFormatter.ofPattern("hh:mm a, EEEE dd MMMM yyyy")
+    private var downloadObserver: IFolderDownloadObserver? = null
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = ActivityOverviewBinding.inflate(inflater, container, false)
-        val root: View = binding!!.getRoot()
+        binding = ActivityOverviewUpdatedBinding.inflate(inflater, container, false)
+        val root: View = binding.getRoot()
         //viewModel = ViewModelProvider(this).get(OverviewViewModel::class.java)
         setDataObservers(viewModel)
         setupFolderDownloadObserver()
-        val onlineStatusExpandButton = binding!!.serverStatusArrowButton
-        val deviceStatusExpandButton = binding!!.deviceStatusArrowButton
-        val deviceFilesViewButton: Button = binding!!.overviewLocalfilesButton
-        val onlineFilesViewButton: Button = binding!!.overviewServerfilesButton
-        val onlineFileSyncButton: Button = binding!!.overviewServersyncButton
-        onlineStatusExpandButton.setOnClickListener {
-            val hiddenView: View = binding!!.serverStatusHiddenView
-            if (hiddenView.visibility == View.VISIBLE) {
-                expandServerStatusView(false)
-            } else {
-                expandServerStatusView(true)
-            }
-        }
-        deviceStatusExpandButton.setOnClickListener {
-            val hiddenView: View = binding!!.hiddenView
-            if (hiddenView.visibility == View.VISIBLE) {
-                expandDeviceStatusView(false)
-            } else {
-                expandDeviceStatusView(true)
-            }
-        }
-        deviceFilesViewButton.setOnClickListener {
+        val onlineFileSyncButton: Button = binding.overviewServersyncButton
+        /*deviceFilesViewButton.setOnClickListener {
             val action: NavDirections =
                 OverviewFragmentDirections.actionNavEnhancedMainMenuFragmentToNavEnhancedOfflineFolderListFragment(
                     FolderListType.DOWNLOADED.name
@@ -100,11 +65,10 @@ class OverviewFragment : SecureFragment() {
                     FolderListType.ONLINE.name
                 )
             findNavController(binding!!.getRoot()).navigate(action)
-        }
+        }*/
         onlineFileSyncButton.setOnClickListener { syncFolders() }
-        setupViewModelData(viewModel!!)
-        expandDeviceStatusView(true)
-        if (java.lang.Boolean.TRUE == viewModel!!.isOnline.getValue()) {
+        setupViewModelData(viewModel)
+        if (java.lang.Boolean.TRUE == viewModel.isOnline.getValue()) {
             requestService.doGetServerStatus()!!.enqueue(object : Callback<ModularServerStatus?> {
                 override fun onResponse(
                     call: Call<ModularServerStatus?>,
@@ -112,8 +76,8 @@ class OverviewFragment : SecureFragment() {
                 ) {
                     if (response.isSuccessful) {
                         val status = response.body()
-                        viewModel!!.filesOnServer.value = status!!.fileCount
-                        viewModel!!.foldersOnServer.value = status.folderCount
+                        viewModel.filesOnServer.value = status!!.fileCount
+                        viewModel.foldersOnServer.value = status.folderCount
                     }
                 }
 
@@ -160,22 +124,22 @@ class OverviewFragment : SecureFragment() {
         }
         viewModel.filesOnDevice.observe(getViewLifecycleOwner(), object : Observer<Long> {
             override fun onChanged(value: Long) {
-                binding!!.overviewFilesOnDevice.text = value.toString() + ""
+                binding.overviewFilesOnDevice.text = value.toString() + ""
             }
         })
         viewModel.filesOnServer.observe(getViewLifecycleOwner(), object : Observer<Long> {
             override fun onChanged(value: Long) {
-                binding!!.overviewFilesOnServer.text = value.toString() + ""
+                binding.overviewFilesOnServer.text = value.toString() + ""
             }
         })
         viewModel.foldersOnDevice.observe(getViewLifecycleOwner(), object : Observer<Long> {
             override fun onChanged(value: Long) {
-                binding!!.overviewFoldersOnDevice.text = value.toString() + ""
+                binding.overviewFoldersOnDevice.text = value.toString() + ""
             }
         })
         viewModel.foldersOnServer.observe(getViewLifecycleOwner(), object : Observer<Long> {
             override fun onChanged(value: Long) {
-                binding!!.overviewFoldersOnServer.text = value.toString() + ""
+                binding.overviewFoldersOnServer.text = value.toString() + ""
             }
         })
         viewModel.lastUpdateTime.observe(
@@ -195,14 +159,14 @@ class OverviewFragment : SecureFragment() {
             })
         viewModel.onlineUpdateStatus.observe(getViewLifecycleOwner(), object : Observer<String> {
             override fun onChanged(value: String) {
-                binding!!.overviewUpdateStatus.text = value
+                binding.overviewUpdateStatus.text = value
             }
         })
         viewModel.hasOnlineUpdates.observe(getViewLifecycleOwner(), object : Observer<Boolean> {
             override fun onChanged(value: Boolean) {
-                binding!!.overviewServersyncButton.setEnabled(value)
-                if (value) binding!!.overviewServersyncButton.visibility =
-                    View.VISIBLE else binding!!.overviewServersyncButton.visibility = View.GONE
+                binding.overviewServersyncButton.setEnabled(value)
+                if (value) binding.overviewServersyncButton.visibility =
+                    View.VISIBLE else binding.overviewServersyncButton.visibility = View.GONE
             }
         })
     }
@@ -243,7 +207,7 @@ class OverviewFragment : SecureFragment() {
     }
 
     private fun setConnectivityIndicator(isOnline: Boolean) {
-        val connectivityTextView = binding!!.overviewConnectivityIndicator
+        val connectivityTextView = binding.overviewConnectivityIndicator
         if (isOnline) {
             connectivityTextView.text = requireContext().getString(R.string.connectivity_status_online)
             connectivityTextView.setTextColor(requireContext().getColor(R.color.connectionIndicator_online))
@@ -254,21 +218,18 @@ class OverviewFragment : SecureFragment() {
     }
 
     private fun setOnlineStatusVisible(isOnline: Boolean) {
-        val onlineStatusCardView = binding!!.serverStatus
-        binding!!.serverStatusHeaderText.setTextColor(requireContext().getColorStateList(R.color.cardview_enabled))
+        val onlineStatusCardView = binding.serverStatus
+        binding.serverStatusHeaderText.setTextColor(requireContext().getColorStateList(R.color.cardview_enabled))
         if (isOnline) {
-            onlineStatusCardView.setEnabled(true)
-            binding!!.serverStatusHeaderLayout.setEnabled(true)
-            binding!!.serverStatusArrowButton.setEnabled(true)
-            binding!!.serverStatusHeaderText.setEnabled(true)
-            binding!!.serverStatusArrowButton.clearColorFilter()
-            expandServerStatusView(true)
+            onlineStatusCardView!!.setEnabled(true)
+            binding.serverStatusHeaderLayout.setEnabled(true)
+            binding.serverStatusHeaderText.setEnabled(true)
+            binding.overviewUpdateStatus.isEnabled = true
         } else {
-            onlineStatusCardView.setEnabled(false)
-            binding!!.serverStatusHeaderLayout.setEnabled(false)
-            binding!!.serverStatusArrowButton.setEnabled(false)
-            binding!!.serverStatusHeaderText.setEnabled(false)
-            binding!!.serverStatusArrowButton.setColorFilter(requireContext().getColor(R.color.imagebutton_greyout_filter))
+            onlineStatusCardView!!.setEnabled(false)
+            binding.serverStatusHeaderLayout.setEnabled(false)
+            binding.serverStatusHeaderText.setEnabled(false)
+            binding.overviewUpdateStatus.isEnabled = false
         }
     }
 
@@ -277,8 +238,8 @@ class OverviewFragment : SecureFragment() {
             getViewLifecycleOwner(),
             object : Observer<Boolean> {
                 override fun onChanged(aBoolean: Boolean) {
-                    if (aBoolean) binding!!.downloadStatusLayout.visibility =
-                        View.VISIBLE else binding!!.downloadStatusLayout.visibility = View.GONE
+                    if (aBoolean) binding.downloadStatusLayout.visibility =
+                        View.VISIBLE else binding.downloadStatusLayout.visibility = View.GONE
                 }
             })
         downloadObserver = object : IFolderDownloadObserver {
@@ -302,38 +263,6 @@ class OverviewFragment : SecureFragment() {
         if(isOnline) {
             viewModel.viewModelScope.launch {
                 viewModel.getFileUpdates(requestService)
-            }
-        }
-    }
-
-    private fun expandDeviceStatusView(expand: Boolean) {
-        val hiddenView: View = binding!!.hiddenView
-        if (expand) {
-            TransitionManager.beginDelayedTransition(binding!!.deviceStatus, AutoTransition())
-            hiddenView.visibility = View.VISIBLE
-            binding!!.deviceStatusArrowButton.setImageResource(R.drawable.ic_baseline_expand_less_24)
-        } else {
-            // The transition of the hiddenView is carried out by the TransitionManager class.
-            // Here we use an object of the AutoTransition Class to create a default transition
-            TransitionManager.beginDelayedTransition(binding!!.deviceStatus, AutoTransition())
-            hiddenView.visibility = View.GONE
-            binding!!.deviceStatusArrowButton.setImageResource(R.drawable.ic_baseline_expand_more_24)
-        }
-    }
-
-    private fun expandServerStatusView(expand: Boolean) {
-        val hiddenView: View = binding!!.serverStatusHiddenView
-        if (binding!!.serverStatus.isEnabled) {
-            if (expand) {
-                TransitionManager.beginDelayedTransition(binding!!.serverStatus, AutoTransition())
-                hiddenView.visibility = View.VISIBLE
-                binding!!.serverStatusArrowButton.setImageResource(R.drawable.ic_baseline_expand_less_24)
-            } else {
-                // The transition of the hiddenView is carried out by the TransitionManager class.
-                // Here we use an object of the AutoTransition Class to create a default transition
-                TransitionManager.beginDelayedTransition(binding!!.serverStatus, AutoTransition())
-                hiddenView.visibility = View.GONE
-                binding!!.serverStatusArrowButton.setImageResource(R.drawable.ic_baseline_expand_more_24)
             }
         }
     }

@@ -57,7 +57,7 @@ class FileRemoteMediator(
         state: PagingState<Int, RoomUnifiedEmbeddedFile>
     ): MediatorResult {
         return try {
-            val loadKey: Int = when (loadType){
+            var loadKey: Int = when (loadType){
                 LoadType.REFRESH -> 1
                 LoadType.PREPEND ->
                     return MediatorResult.Success(endOfPaginationReached = true)

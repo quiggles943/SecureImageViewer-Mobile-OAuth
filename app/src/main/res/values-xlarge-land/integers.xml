@@ -1,4 +1,4 @@
 <resources>
-    <integer name="column_count_folderlist">5</integer>
-    <integer name="column_count_filelist">6</integer>
+    <integer name="column_count_folderlist">4</integer>
+    <integer name="column_count_filelist">5</integer>
 </resources>

@@ -15,9 +15,13 @@ import com.quigglesproductions.secureimageviewer.models.enhanced.file.FileType;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDatabaseFile;
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.IDisplayFolder;
 import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.IFileMetadata;
+import com.quigglesproductions.secureimageviewer.models.facescan.FaceScanLandmark;
+import com.quigglesproductions.secureimageviewer.models.facescan.FaceScanModel;
 import com.quigglesproductions.secureimageviewer.models.modular.file.ModularOnlineFile;
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedArtist;
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedCategory;
+import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedFaceScanLandmark;
+import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedFaceScanModel;
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedFile;
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedFileCategoryCrossRef;
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedFileSubjectCrossRef;
@@ -38,6 +42,8 @@ public class RoomUnifiedEmbeddedFile implements ItemBaseModel, IDatabaseFile {
     public List<RoomUnifiedSubject> subjects;
     @Relation(parentColumn = "FileId",entityColumn = "CategoryId",associateBy = @Junction(RoomUnifiedFileCategoryCrossRef.class))
     public List<RoomUnifiedCategory> categories;
+    @Relation(parentColumn = "FileId",entityColumn = "FileId",entity = RoomUnifiedFaceScanModel.class)
+    public List<RoomUnifiedEmbeddedFaceScanModel> faceScanModels;
     @Ignore
     private transient IFileDataSource dataSource;
     public RoomUnifiedEmbeddedFile() {
@@ -219,6 +225,7 @@ public class RoomUnifiedEmbeddedFile implements ItemBaseModel, IDatabaseFile {
         RoomUnifiedArtist artist;
         List<RoomUnifiedCategory> categories;
         List<RoomUnifiedSubject> subjects;
+        List<RoomUnifiedEmbeddedFaceScanModel> faceScanModels;
         public Creator loadFromOnlineFile(ModularOnlineFile onlineFile){
             databaseFile = generateFileFromOnlineFile(onlineFile);
             metadata = generateMetadataFromOnlineFile(onlineFile.getMetadata());
@@ -226,6 +233,7 @@ public class RoomUnifiedEmbeddedFile implements ItemBaseModel, IDatabaseFile {
                 artist = generateArtistFromFileTag(onlineFile.getArtist());
             categories = generateCategoryListFromFileTags(new ArrayList<>(onlineFile.categories));
             subjects = generateSubjectListFromFileTags(new ArrayList<>(onlineFile.subjects));
+            faceScanModels = generateFaceScanModels(onlineFile.faceScanModels);
             return this;
         }
 
@@ -243,6 +251,7 @@ public class RoomUnifiedEmbeddedFile implements ItemBaseModel, IDatabaseFile {
             fileWithMetadata.metadata.artist = artist;
             fileWithMetadata.categories = categories;
             fileWithMetadata.subjects = subjects;
+            fileWithMetadata.faceScanModels = faceScanModels;
             return fileWithMetadata;
         }
 
@@ -317,6 +326,42 @@ public class RoomUnifiedEmbeddedFile implements ItemBaseModel, IDatabaseFile {
                 subjectList.add(generateSubjectFromFileTag(fileTag));
             }
             return subjectList;
+        }
+
+        private List<RoomUnifiedEmbeddedFaceScanModel> generateFaceScanModels(List<FaceScanModel> models){
+            List<RoomUnifiedEmbeddedFaceScanModel> embeddedFaceScanModels = new ArrayList<>();
+            for(FaceScanModel model : models){
+                embeddedFaceScanModels.add(generateFaceScanModelFromOnline(model));
+            }
+            return embeddedFaceScanModels;
+        }
+
+        private RoomUnifiedEmbeddedFaceScanModel generateFaceScanModelFromOnline(FaceScanModel onlineModel){
+            RoomUnifiedEmbeddedFaceScanModel embeddedFaceScanModel = new RoomUnifiedEmbeddedFaceScanModel();
+            RoomUnifiedFaceScanModel model = new RoomUnifiedFaceScanModel();
+            model.confidence = onlineModel.confidence;
+            model.faceHeight = onlineModel.faceHeight;
+            model.faceWidth = onlineModel.faceWidth;
+            model.faceXCoordinate = onlineModel.faceXCoordinate;
+            model.faceYCoordinate = onlineModel.faceYCoordinate;
+            model.createdDate = onlineModel.createdDate;
+            model.updatedDate = onlineModel.updatedDate;
+            model.faceScanOnlineId = onlineModel.Id;
+            embeddedFaceScanModel.model = model;
+            embeddedFaceScanModel.landmarks = new ArrayList<>();
+            for(FaceScanLandmark landmark : onlineModel.landmarks){
+                embeddedFaceScanModel.landmarks.add(generateLandmark(landmark));
+            }
+
+            return embeddedFaceScanModel;
+        }
+
+        private RoomUnifiedFaceScanLandmark generateLandmark(FaceScanLandmark landmark){
+            RoomUnifiedFaceScanLandmark dbLandmark = new RoomUnifiedFaceScanLandmark();
+            dbLandmark.faceScanLandmarkOnlineId = landmark.Id;
+            dbLandmark.landmarkXCoordinate = landmark.landmarkXCoordinate;
+            dbLandmark.landmarkYCoordinate = landmark.landmarkYCoordinate;
+            return dbLandmark;
         }
 
         /*private RoomDatabaseFile generateFileFromDatabaseFile(EnhancedDatabaseFile uploadFile){

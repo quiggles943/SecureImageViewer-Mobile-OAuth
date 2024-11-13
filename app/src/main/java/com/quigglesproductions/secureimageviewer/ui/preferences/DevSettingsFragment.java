@@ -10,13 +10,20 @@ import com.quigglesproductions.secureimageviewer.R;
 import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.FileMetadata;
 import com.quigglesproductions.secureimageviewer.ui.SecurePreferenceFragmentCompat;
 
+import java.io.IOException;
+
+import javax.inject.Inject;
+
 import dagger.hilt.android.AndroidEntryPoint;
+import okhttp3.Cache;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 @AndroidEntryPoint
 public class DevSettingsFragment  extends SecurePreferenceFragmentCompat {
     DevSettingsViewModel viewModel;
+    @Inject
+    Cache cache;
     //@Inject
     //RequestManager requestManager;
     /*@Inject
@@ -29,6 +36,18 @@ public class DevSettingsFragment  extends SecurePreferenceFragmentCompat {
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         setPreferencesFromResource(R.xml.dev_preferences, rootKey);
         viewModel = new ViewModelProvider(this).get(DevSettingsViewModel.class);
+        androidx.preference.Preference cacheClear = getPreferenceManager().findPreference("http_cache_clear");
+        cacheClear.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(@NonNull Preference preference) {
+                try {
+                    cache.evictAll();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                return true;
+            }
+        });
         androidx.preference.Preference networkRefresh = getPreferenceManager().findPreference("data_inject");
         networkRefresh.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override

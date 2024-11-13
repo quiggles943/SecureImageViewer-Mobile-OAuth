@@ -37,11 +37,12 @@ class EnhancedFolderListViewModel @Inject constructor(
     init {
     }
 
-    fun createPagedSource(type: FileGroupBy){
+    fun createPagedSource(type: FileGroupBy):Boolean{
         if(pagedGroupedBy != type || folderListType.value != pagedListType){
             pagedListType = folderListType.value
             pagedGroupedBy = type
-            if(pagedListType != null && pagedGroupedBy != null){
+            if(pagedListType != null){
+                pagedFolders = null
                 pagedFolders = when(pagedGroupedBy){
                     FOLDERS -> folderMediatorRepository.getFolders(pagedListType!!).map { pagingData: PagingData<RoomUnifiedFolder> ->
                             pagingData.map { folder: RoomUnifiedFolder ->
@@ -65,8 +66,10 @@ class EnhancedFolderListViewModel @Inject constructor(
                     }.cachedIn(viewModelScope)
                     else -> TODO()
                 }
+                return true
             }
         }
+        return false
     }
 
     fun getFolders(listType: FolderListType): Flow<PagingData<RoomUnifiedFolder>> {

@@ -1,17 +1,21 @@
 package com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer
 
 import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import android.view.ContextThemeWrapper
 import android.view.Gravity
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.PopupMenu
 import android.widget.TextView
 import android.widget.ToggleButton
+import androidx.activity.addCallback
 import androidx.annotation.OptIn
+import androidx.annotation.RequiresApi
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.ActionProvider
 import androidx.fragment.app.activityViewModels
@@ -44,6 +48,7 @@ class EnhancedFileViewFragment : SecureFragment(), IFileViewer {
     lateinit var topLayout: ConstraintLayout
     private lateinit var backButton: ImageButton
     private lateinit var optionsButton: ImageButton
+    private lateinit var facescanButton: ImageButton
     private lateinit var favouriteButton: ToggleButton
     lateinit var fileName: TextView
     @UnstableApi
@@ -94,11 +99,13 @@ class EnhancedFileViewFragment : SecureFragment(), IFileViewer {
                 fileNavigator.setFilePosition(position + 1)
                 topLayout.invalidate()
                 favouriteButton.isChecked = selectedFile!!.file.isFavourite
+                facescanButton.isEnabled = selectedFile.faceScanModels.isNotEmpty()
+                facescanButton.visibility = if (selectedFile.faceScanModels.isNotEmpty()) View.VISIBLE else View.INVISIBLE
             }
         })
         viewPager.setCurrentItem(collectionAdapter.getPosition(folderViewModel.selectedFile.value), false)
         fileName.text = folderViewModel.selectedFile.value!!.getName()
-        viewPager.setNestedScrollingEnabled(true)
+        viewPager.isNestedScrollingEnabled = true
         collectionAdapter.setFileZoomLevelCallback(EnhancedFileCollectionAdapterKt.ZoomLevelChangeCallback { isZoomed ->
             if (isZoomed) setViewPagerSlop(11) else setViewPagerSlop(1)
             return@ZoomLevelChangeCallback
@@ -130,6 +137,7 @@ class EnhancedFileViewFragment : SecureFragment(), IFileViewer {
         topLayout = view.findViewById(R.id.topLinearLayout)
         backButton = topLayout.findViewById(R.id.backButton)
         optionsButton = topLayout.findViewById(R.id.optionsButton)
+        facescanButton = topLayout.findViewById(R.id.facescanButton)
         favouriteButton = topLayout.findViewById(R.id.favouriteButton)
         fileName = topLayout.findViewById(R.id.file_title)
         fileNavigator = view.findViewById(R.id.fileviewer_navigator)
@@ -166,6 +174,9 @@ class EnhancedFileViewFragment : SecureFragment(), IFileViewer {
                 }
             }
         }
+        facescanButton.setOnClickListener(View.OnClickListener {
+
+        })
         fileNavigator.setPreviousButtonOnClickListener(View.OnClickListener {
             viewPager.setCurrentItem(
                 viewPager.currentItem - 1,
@@ -186,12 +197,14 @@ class EnhancedFileViewFragment : SecureFragment(), IFileViewer {
         val artistNameText = bottomSheetDialog.findViewById<TextView>(R.id.artist_name)
         val catagoriesText = bottomSheetDialog.findViewById<TextView>(R.id.catagories)
         val subjectsText = bottomSheetDialog.findViewById<TextView>(R.id.subjects)
+        val faceScanText = bottomSheetDialog.findViewById<TextView>(R.id.facescan)
         folderViewModel.selectedFile.value!!.dataSource.getFileMetadata(requiresRequestManager()) { metadata, exception -> //selectedFile.metadata = metadata;
             itemNameText!!.text = folderViewModel.selectedFile.value!!.name
             folderNameText!!.text = if(folderViewModel.selectedFile.value!!.file.cachedFolderName != null) folderViewModel.selectedFile.value!!.file.cachedFolderName else folderViewModel.folder.value?.name
             artistNameText!!.text = folderViewModel.selectedFile.value!!.artistName
             catagoriesText!!.text = folderViewModel.selectedFile.value!!.catagoryListString
             subjectsText!!.text = folderViewModel.selectedFile.value!!.subjectListString
+            faceScanText!!.text = folderViewModel.selectedFile.value!!.faceScanModels.size.toString() + " faces detected"
             bottomSheetDialog.create()
             bottomSheetDialog.show()
         }
@@ -210,9 +223,14 @@ class EnhancedFileViewFragment : SecureFragment(), IFileViewer {
         super.onAttach(context)
     }
 
+    override fun onStop() {
+        requiresSecureActivity().showSystemUI()
+        super.onStop()
+    }
+
     override fun onDetach() {
         super.onDetach()
-        requiresSecureActivity().showSystemUI()
+
     }
 
     @Deprecated("Deprecated in Java")

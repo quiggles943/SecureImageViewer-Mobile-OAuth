@@ -16,10 +16,7 @@ import androidx.core.content.ContextCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.NavArgument;
 import androidx.navigation.NavController;
-import androidx.navigation.NavDestination;
-import androidx.navigation.NavType;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
@@ -37,7 +34,6 @@ import com.quigglesproductions.secureimageviewer.R;
 import com.quigglesproductions.secureimageviewer.aurora.authentication.AuroraUser;
 import com.quigglesproductions.secureimageviewer.databinding.ActivityMainNavigationBinding;
 import com.quigglesproductions.secureimageviewer.managers.ViewerConnectivityManager;
-import com.quigglesproductions.secureimageviewer.ui.enhancedfolderlist.FolderListType;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -53,7 +49,7 @@ public class EnhancedMainMenuActivity extends SecureActivity{
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityMainNavigationBinding.inflate(getLayoutInflater());
-        getViewModel().getIsOnline().observe(this,this::setOnlineEnabled);
+        //getViewModel().getIsOnline().observe(this,this::setOnlineEnabled);
         setContentView(binding.getRoot());
         mContext = this;
         setSupportActionBar(binding.appBarNavigation.toolbar);
@@ -67,28 +63,10 @@ public class EnhancedMainMenuActivity extends SecureActivity{
 
         if(mActionBarSetListener != null)
             mActionBarSetListener.SupportActionBarSet();
-        DrawerLayout drawer = binding.drawerLayout;
-        NavigationView navigationView = binding.navView;
-        // Passing each menu ID as a set of Ids because each
-        // menu should be considered as top level destinations.
-        mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_overviewFragment, R.id.nav_enhancedFolderListFragment, R.id.nav_enhancedOfflineFolderListFragment,R.id.nav_settingsFragment)
-                .setOpenableLayout(drawer)
-                .build();
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_navigation);
-        NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
-        NavigationUI.setupWithNavController(navigationView, navController);
-        NavDestination onlineFolderListDestination = navController.getGraph().findNode(R.id.nav_enhancedFolderListFragment);
-        onlineFolderListDestination.addArgument("state", new NavArgument.Builder()
-                .setType(NavType.StringType)
-                .setDefaultValue(FolderListType.ONLINE.name())
-                .build());
-        NavDestination offlineFolderListDestination = navController.getGraph().findNode(R.id.nav_enhancedOfflineFolderListFragment);
-        offlineFolderListDestination.addArgument("state", new NavArgument.Builder()
-                .setType(NavType.StringType)
-                //.setDefaultValue("offline")
-                .setDefaultValue(FolderListType.DOWNLOADED.name())
-                .build());
+        if(binding.drawerLayout instanceof DrawerLayout)
+            setupModalNavigationView();
+        else
+            setupStandardNavigationView();
         getViewModel().getIsOnline().setValue(ViewerConnectivityManager.getInstance().isConnected());
         getViewModel().getAppBarTitle().observe(this, new Observer<String>() {
             @Override
@@ -99,13 +77,6 @@ public class EnhancedMainMenuActivity extends SecureActivity{
             }
         });
         getWindow().setNavigationBarColor(context.getColor(R.color.transparent));
-        navigationView.getMenu().findItem(R.id.nav_logout).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(@NonNull MenuItem item) {
-                getAuroraAuthenticationManager().logout();
-                return true;
-            }
-        });
 
         ImageView userIcon = binding.navView.getHeaderView(0).findViewById(R.id.user_icon);
         GlideUrl glideUrl = new GlideUrl("https://quigleyid.ddns.net/v2/oauth/userinfo/thumbnail", new LazyHeaders.Builder()
@@ -124,6 +95,50 @@ public class EnhancedMainMenuActivity extends SecureActivity{
                 return false;
             }
         }).load(glideUrl).diskCacheStrategy(DiskCacheStrategy.ALL).error(R.drawable.ic_launcher_foreground).fitCenter().into(userIcon);
+    }
+
+    private void setupModalNavigationView(){
+        DrawerLayout drawer = (DrawerLayout) binding.drawerLayout;
+        NavigationView navigationView = binding.navView;
+        // Passing each menu ID as a set of Ids because each
+        // menu should be considered as top level destinations.
+        mAppBarConfiguration = new AppBarConfiguration.Builder(
+                R.id.nav_overviewFragment, R.id.nav_enhancedFolderListFragment, R.id.nav_SearchFragment,R.id.nav_settingsFragment)
+                .setOpenableLayout(drawer)
+                .build();
+        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_navigation);
+        NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
+        NavigationUI.setupWithNavController(navigationView, navController);
+
+        navigationView.getMenu().findItem(R.id.nav_logout).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(@NonNull MenuItem item) {
+                getAuroraAuthenticationManager().logout();
+                return true;
+            }
+        });
+
+    }
+
+    private void setupStandardNavigationView(){
+        NavigationView navigationView = binding.navView;
+        // Passing each menu ID as a set of Ids because each
+        // menu should be considered as top level destinations.
+        mAppBarConfiguration = new AppBarConfiguration.Builder(
+                R.id.nav_overviewFragment, R.id.nav_enhancedFolderListFragment, R.id.nav_SearchFragment,R.id.nav_settingsFragment)
+                .build();
+        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_navigation);
+        NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
+        NavigationUI.setupWithNavController(navigationView, navController);
+
+        navigationView.getMenu().findItem(R.id.nav_logout).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(@NonNull MenuItem item) {
+                getAuroraAuthenticationManager().logout();
+                return true;
+            }
+        });
+
     }
     private EnhancedMainMenuViewModel getViewModel(){
         if(viewModel == null){
@@ -171,6 +186,14 @@ public class EnhancedMainMenuActivity extends SecureActivity{
     }
     public void overrideActionBarColor(@ColorRes int color) {
         getSupportActionBar().setBackgroundDrawable(new ColorDrawable(ContextCompat.getColor(context,color)));
+    }
+
+    public void hideNavigationDrawer(){
+        binding.navView.setVisibility(View.GONE);
+    }
+
+    public void showNavigationDrawer(){
+        binding.navView.setVisibility(View.VISIBLE);
     }
 
     public void hideStatusBar(){

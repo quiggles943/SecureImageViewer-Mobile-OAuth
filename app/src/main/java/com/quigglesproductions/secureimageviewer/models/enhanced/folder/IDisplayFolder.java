@@ -4,10 +4,7 @@ import com.quigglesproductions.secureimageviewer.SortType;
 import com.quigglesproductions.secureimageviewer.checksum.FileChecksum;
 import com.quigglesproductions.secureimageviewer.datasource.folder.IFolderDataSource;
 import com.quigglesproductions.secureimageviewer.enums.FileGroupBy;
-import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile;
 import com.quigglesproductions.secureimageviewer.ui.enhancedfolderviewer.FolderOrigin;
-
-import java.util.List;
 
 public interface IDisplayFolder {
 

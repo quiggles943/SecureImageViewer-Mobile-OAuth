@@ -9,7 +9,7 @@
         android:id="@+id/nav_overviewFragment"
         android:name="com.quigglesproductions.secureimageviewer.ui.overview.OverviewFragment"
         android:label="Overview"
-        tools:layout="@layout/activity_overview">
+        tools:layout="@layout/activity_overview_updated">
         <action
             android:id="@+id/action_enhancedMainMenuFragment_to_enhancedFolderListFragment"
             app:destination="@id/nav_enhancedFolderListFragment"
@@ -25,12 +25,8 @@
             app:popEnterAnim="@anim/nav_default_pop_enter_anim"
             app:popExitAnim="@anim/nav_default_pop_exit_anim" />
         <action
-            android:id="@+id/action_nav_enhancedMainMenuFragment_to_nav_enhancedOfflineFolderListFragment"
-            app:destination="@id/nav_enhancedOfflineFolderListFragment"
-            app:enterAnim="@anim/nav_default_enter_anim"
-            app:exitAnim="@anim/nav_default_exit_anim"
-            app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-            app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+            android:id="@+id/action_nav_overviewFragment_to_searchViewerFragment"
+            app:destination="@id/nav_SearchFragment" />
     </fragment>
 
     <fragment
@@ -38,9 +34,6 @@
         android:name="com.quigglesproductions.secureimageviewer.ui.enhancedfolderlist.EnhancedFolderListFragment"
         android:label="Folders"
         tools:layout="@layout/fragment_folder_list" >
-        <argument
-            android:name="state"
-            app:argType="string"/>
         <action
             android:id="@+id/action_enhancedFolderListFragment_to_enhancedFolderFileViewerFragment"
             app:destination="@id/nav_enhancedFolderFileViewerFragment"
@@ -78,9 +71,9 @@
             android:id="@+id/action_enhancedFolderFileViewerFragment_to_enhancedFileViewFragment"
             app:destination="@id/nav_enhancedFileViewFragment"
             app:enterAnim="@anim/fade_in"
-            app:exitAnim="@anim/fade_out"
+            app:exitAnim="@anim/slide_out_horizontal"
             app:popEnterAnim="@anim/fade_in"
-            app:popExitAnim="@anim/fade_out" />
+            app:popExitAnim="@anim/slide_out_horizontal" />
 
     </fragment>
     <fragment
@@ -96,37 +89,6 @@
         <argument
             android:name="startPosition"
             app:argType="integer"/>
-    </fragment>
-
-    <fragment
-        android:id="@+id/nav_enhancedOfflineFolderListFragment"
-        android:name="com.quigglesproductions.secureimageviewer.ui.enhancedfolderlist.EnhancedFolderListFragment"
-        android:label="Local Folders"
-        tools:layout="@layout/fragment_folder_list" >
-        <argument
-            android:name="state"
-            app:argType="string"/>
-        <action
-            android:id="@+id/action_enhancedFolderListFragment_to_enhancedFolderFileViewerFragment"
-            app:destination="@id/nav_enhancedFolderFileViewerFragment"
-            app:enterAnim="@anim/slide_in_horizontal"
-            app:exitAnim="@anim/fade_out"
-            app:popEnterAnim="@anim/fade_in"
-            app:popExitAnim="@anim/slide_out_horizontal" />
-        <action
-            android:id="@+id/action_enhancedFolderListFragment_to_enhancedFavouritesViewerFragment"
-            app:destination="@id/enhancedFavouritesViewerFragment"
-            app:enterAnim="@anim/slide_in_horizontal"
-            app:exitAnim="@anim/fade_out"
-            app:popEnterAnim="@anim/fade_in"
-            app:popExitAnim="@anim/slide_out_horizontal"/>
-        <action
-            android:id="@+id/action_enhancedFolderListFragment_to_enhancedRecentFileViewerFragment"
-            app:destination="@id/enhancedRecentFileViewerFragment"
-            app:enterAnim="@anim/slide_in_horizontal"
-            app:exitAnim="@anim/fade_out"
-            app:popEnterAnim="@anim/fade_in"
-            app:popExitAnim="@anim/slide_out_horizontal"/>
     </fragment>
 
 
@@ -185,6 +147,15 @@
         tools:layout="@layout/fragment_folder_view" >
         <action
             android:id="@+id/action_enhancedRecentFileViewerFragment_to_nav_enhancedFileViewFragment"
+            app:destination="@id/nav_enhancedFileViewFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/nav_SearchFragment"
+        android:name="com.quigglesproductions.secureimageviewer.ui.searchviewer.SearchViewerFragment"
+        android:label="Search"
+        tools:layout="@layout/fragment_search_view">
+        <action
+            android:id="@+id/action_nav_SearchFragment_to_nav_enhancedFileViewFragment"
             app:destination="@id/nav_enhancedFileViewFragment" />
     </fragment>
 </navigation>

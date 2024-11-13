@@ -100,7 +100,6 @@ public class App extends Application implements Configuration.Provider {
 
     private void initializeSingletons() {
         // Initialize Singletons.
-        FolderManager.Companion.getInstance().setRootContext(context.getApplicationContext());
         //DatabaseHandler.getInstance().setRootContext(context.getApplicationContext());
         SecurityManager.getInstance().setRootContext(context.getApplicationContext());
         ApplicationPreferenceManager.getInstance().setContext(context.getApplicationContext());

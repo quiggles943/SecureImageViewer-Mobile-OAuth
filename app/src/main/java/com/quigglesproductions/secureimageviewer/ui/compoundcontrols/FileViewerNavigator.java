@@ -236,7 +236,6 @@ import com.quigglesproductions.secureimageviewer.R;
 
     /**
      * Sets whether the controls make use of animations or not
-     * @param isAnimated
      */
     public void setIsAnimated(boolean isAnimated){
         this.isAnimated = isAnimated;

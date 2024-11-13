@@ -1,5 +1,8 @@
 package com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.fragments
 
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -11,19 +14,27 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import com.quigglesproductions.secureimageviewer.R
+import com.quigglesproductions.secureimageviewer.datasource.file.IFileDataSource.DataSourceCallback
+import com.quigglesproductions.secureimageviewer.glide.ChecksumSignature
 import com.quigglesproductions.secureimageviewer.managers.VideoPlaybackManager
 import com.quigglesproductions.secureimageviewer.managers.VideoPlaybackManager.VideoPlayerCallback
+import com.quigglesproductions.secureimageviewer.models.enhanced.file.FileType
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile
 import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.EnhancedFileViewerViewModel
-import com.quigglesproductions.secureimageviewer.ui.enhancedfolderviewer.FolderViewerViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
+
 @AndroidEntryPoint
-class VideoFileViewFragmentKt() : BaseFileViewFragmentKt() {
+class VideoFileViewFragmentKt : BaseFileViewFragmentKt() {
     private val viewModel by hiltNavGraphViewModels<EnhancedFileViewerViewModel>(R.id.main_navigation)
-    var videoView: PlayerView? = null
+    private var videoView: PlayerView? = null
     private var mPlayer: ExoPlayer? = null
     private var isPlaying = false
     //var playbackManager: VideoPlaybackManager = playbackManager
@@ -69,6 +80,7 @@ class VideoFileViewFragmentKt() : BaseFileViewFragmentKt() {
     }
 
 
+    @OptIn(UnstableApi::class)
     private fun loadVideo(itemView: View?, item: IDisplayFile?, savedInstanceState: Bundle?) {
         try {
             if (itemView != null && mPlayer == null) {
@@ -102,6 +114,56 @@ class VideoFileViewFragmentKt() : BaseFileViewFragmentKt() {
                         resumePlayback(savedInstanceState)
                         if (viewerNavigator == null) return@VideoPlayerCallback
                     })
+                if(item.fileType == FileType.MP3){
+                    file.dataSource.getFileThumbnailDataSource(requireContext(), object: DataSourceCallback{
+                        override fun FileDataSourceRetrieved(
+                            dataSource: Any?,
+                            exception: java.lang.Exception?
+                        ) {
+                            TODO("Not yet implemented")
+                        }
+
+                        override fun FileThumbnailDataSourceRetrieved(
+                            dataSource: Any?,
+                            exception: java.lang.Exception?
+                        ) {
+                            Glide.with(requireContext()).asBitmap().load(dataSource)
+                                .signature(ChecksumSignature(file.file.checksum))
+                                .listener(object:RequestListener<Bitmap>{
+                                    override fun onLoadFailed(
+                                        e: GlideException?,
+                                        model: Any?,
+                                        target: Target<Bitmap>,
+                                        isFirstResource: Boolean
+                                    ): Boolean {
+                                        e!!.logRootCauses("AudioArtwork")
+                                        return false;
+                                    }
+
+                                    override fun onResourceReady(
+                                        resource: Bitmap,
+                                        model: Any,
+                                        target: Target<Bitmap>?,
+                                        dataSource: DataSource,
+                                        isFirstResource: Boolean
+                                    ): Boolean {
+                                        videoView!!.defaultArtwork = BitmapDrawable(resources,resource)
+                                        return false
+                                    }
+
+                                }).submit()
+                        }
+
+                        override fun FileRetrievalDataSourceRetrieved(
+                            fileDataSource: Any?,
+                            fileThumbnailDataSource: Any?,
+                            exception: java.lang.Exception?
+                        ) {
+                            TODO("Not yet implemented")
+                        }
+                    })
+
+                }
             } else if (mPlayer != null) {
                 videoView!!.player = mPlayer
                 if (isPlaying) mPlayer!!.play() else mPlayer!!.pause()

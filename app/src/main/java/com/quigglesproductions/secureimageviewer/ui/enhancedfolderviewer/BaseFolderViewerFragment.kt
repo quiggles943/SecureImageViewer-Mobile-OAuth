@@ -23,6 +23,7 @@ import com.quigglesproductions.secureimageviewer.ui.SecureFragment
 import com.quigglesproductions.secureimageviewer.ui.adapter.filelist.EnhancedFolderFilesListAdapter
 import com.quigglesproductions.secureimageviewer.ui.adapter.filelist.EnhancedFolderFilesListOnClickListener
 import com.quigglesproductions.secureimageviewer.ui.adapter.itemmodel.folderfileviewer.FolderFileViewerModel
+import com.quigglesproductions.secureimageviewer.ui.adapter.loadstate.MyLoadStateAdapter
 import com.quigglesproductions.secureimageviewer.ui.enhancedfolderlist.EnhancedFolderListViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -38,6 +39,7 @@ open class BaseFolderViewerFragment : SecureFragment() {
     private val folderListViewModel by activityViewModels<EnhancedFolderListViewModel>()
     private lateinit var root: View
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
+    private var firstLoad: Boolean = true
 
     @Inject
     lateinit var adapter: EnhancedFolderFilesListAdapter
@@ -57,8 +59,15 @@ open class BaseFolderViewerFragment : SecureFragment() {
                 return when (adapter.getItemViewType(position)) {
                     R.layout.filegrid_header -> columnCount
                     R.layout.filegrid_layout_constrained -> 1
+                    0 -> columnCount
                     else -> 1
                 }
+            }
+        }
+        adapter.addOnPagesUpdatedListener {
+            if(adapter.itemCount > 0 && firstLoad) {
+                layoutManager.scrollToPositionWithOffset(0, 0)
+                firstLoad = false
             }
         }
         binding.fileRecyclerview.layoutManager = layoutManager
@@ -81,12 +90,14 @@ open class BaseFolderViewerFragment : SecureFragment() {
                 val artistNameText = bottomSheetDialog.findViewById<TextView>(R.id.artist_name)
                 val catagoriesText = bottomSheetDialog.findViewById<TextView>(R.id.catagories)
                 val subjectsText = bottomSheetDialog.findViewById<TextView>(R.id.subjects)
+                val faceScanText = bottomSheetDialog.findViewById<TextView>(R.id.facescan)
                 selectedFile!!.dataSource.getFileMetadata(requiresRequestManager()) { metadata, exception -> //selectedFile.metadata = metadata;
                     itemNameText!!.text = selectedFile.name
                     folderNameText!!.text = if(selectedFile.file.cachedFolderName != null) selectedFile.file.cachedFolderName else folderListViewModel.selectedFolder.value!!.name
                     artistNameText!!.text = selectedFile.artistName
                     catagoriesText!!.text = selectedFile.catagoryListString
                     subjectsText!!.text = selectedFile.subjectListString
+                    faceScanText!!.text = selectedFile.faceScanModels.size.toString() + " faces detected"
                     bottomSheetDialog.create()
                     bottomSheetDialog.show()
                 }
@@ -116,7 +127,7 @@ open class BaseFolderViewerFragment : SecureFragment() {
     }
 
     private fun initView() {
-        binding.fileRecyclerview.adapter = adapter
+        binding.fileRecyclerview.adapter = adapter.asConcatAdapter(MyLoadStateAdapter(adapter::retry),MyLoadStateAdapter(adapter::retry))
         swipeRefreshLayout.setOnRefreshListener {
             adapter.refresh()
             swipeRefreshLayout.isRefreshing = false

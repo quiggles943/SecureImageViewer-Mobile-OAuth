@@ -11,6 +11,7 @@ import androidx.room.RawQuery
 import androidx.room.Transaction
 import androidx.room.Update
 import androidx.sqlite.db.SupportSQLiteQuery
+import com.quigglesproductions.secureimageviewer.enums.FileTagType
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.*
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.relations.*
 import com.quigglesproductions.secureimageviewer.room.enums.FileSortType
@@ -112,7 +113,7 @@ public abstract class UnifiedFileDao {
      * @param files The files to insert to the database
      * @throws DatabaseInsertionException
      */
-    @Transaction
+    /*@Transaction
     @Insert
     @Throws(DatabaseInsertionException::class)
     suspend fun insertAll(folder: RoomUnifiedFolder, files: ArrayList<RoomUnifiedEmbeddedFile>) {
@@ -148,7 +149,7 @@ public abstract class UnifiedFileDao {
                 insert(file.metadata.metadata)
             }
         }
-    }
+    }*/
     @Transaction
     @Insert
     @Throws(DatabaseInsertionException::class)
@@ -179,6 +180,16 @@ public abstract class UnifiedFileDao {
                         subjectCrossRef.subjectId = subjectId
                         subjectCrossRef.fileId = fileId
                         insert(subjectCrossRef)
+                    }
+                }
+                if(file.faceScanModels != null){
+                    for(model in file.faceScanModels){
+                        model.model.fileId = fileId
+                        val modelId = insert(model.model)
+                        for (landmark in model.landmarks){
+                            landmark.faceScanModelId = modelId
+                            insert(landmark)
+                        }
                     }
                 }
                 insert(file.metadata.metadata)
@@ -244,6 +255,44 @@ public abstract class UnifiedFileDao {
     abstract suspend fun _insert(category: RoomUnifiedSubject): Long
     @Query("SELECT * FROM subjects WHERE OnlineId = :onlineId")
     abstract suspend fun getSubjectByOnlineId(onlineId: Long): RoomUnifiedSubject
+
+    @Insert
+    suspend fun insert(facescanModel: RoomUnifiedFaceScanModel): Long {
+        val existingFaceScanModel = getFaceScanModelByOnlineId(facescanModel.faceScanOnlineId)
+        return if (existingFaceScanModel != null) {
+            facescanModel.faceScanId = existingFaceScanModel.faceScanId
+            _update(facescanModel)
+            existingFaceScanModel.faceScanId
+        } else {
+            _insert(facescanModel)
+        }
+    }
+
+    @Query("SELECT * FROM facescanmodel WHERE OnlineId = :onlineId")
+    abstract suspend fun getFaceScanModelByOnlineId(onlineId: Long): RoomUnifiedFaceScanModel
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    abstract suspend fun _insert(model: RoomUnifiedFaceScanModel): Long
+    @Update
+    abstract suspend fun _update(model: RoomUnifiedFaceScanModel)
+
+    @Insert
+    suspend fun insert(faceScanLandmark: RoomUnifiedFaceScanLandmark): Long {
+        val existingFaceScanLandmark = getFaceScanLandmarkByOnlineId(faceScanLandmark.faceScanLandmarkOnlineId)
+        return if (existingFaceScanLandmark != null) {
+            faceScanLandmark.faceScanLandmarkId = existingFaceScanLandmark.faceScanLandmarkId
+            _update(faceScanLandmark)
+            existingFaceScanLandmark.faceScanLandmarkId
+        } else {
+            _insert(faceScanLandmark)
+        }
+    }
+
+    @Query("SELECT * FROM facescanlandmark WHERE OnlineId = :onlineId")
+    abstract suspend fun getFaceScanLandmarkByOnlineId(onlineId: Long): RoomUnifiedFaceScanLandmark
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    abstract suspend fun _insert(model: RoomUnifiedFaceScanLandmark): Long
+    @Update
+    abstract suspend fun _update(model: RoomUnifiedFaceScanLandmark)
     @Update(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun update(file: RoomUnifiedFile)
 
@@ -427,5 +476,17 @@ public abstract class UnifiedFileDao {
 
     @Query("SELECT * FROM Files WHERE OnlineId = :fileId LIMIT 1")
     abstract suspend fun loadFileByOnlineId(fileId: Long): RoomUnifiedEmbeddedFile
+
+    @Query("SELECT * from RoomSearchItem")
+    abstract suspend fun getViewSearchItems(): List<RoomSearchItem>
+
+    suspend fun getSearchItems(): List<RoomUnifiedSearchItem>{
+        val searchItemsDto = getViewSearchItems();
+        val results = ArrayList<RoomUnifiedSearchItem>()
+        for(searchItem: RoomSearchItem in searchItemsDto){
+            results.add(RoomUnifiedSearchItem(searchItem.name, FileTagType.valueOf(searchItem.type)))
+        }
+        return results;
+    }
 
 }

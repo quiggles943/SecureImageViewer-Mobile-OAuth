@@ -2,35 +2,27 @@ package com.quigglesproductions.secureimageviewer.managers
 
 import android.content.Context
 import com.quigglesproductions.secureimageviewer.room.databases.unified.UnifiedFileDatabase
-import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedFile
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedFolder
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.relations.RoomUnifiedEmbeddedFile
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.relations.RoomUnifiedEmbeddedFolder
-import com.quigglesproductions.secureimageviewer.utils.ViewerFileUtils.deleteFile
-import com.quigglesproductions.secureimageviewer.utils.ViewerFileUtils.deleteFiles
+import com.quigglesproductions.secureimageviewer.utils.ViewerFileUtils.deleteFileFromDatabase
+import com.quigglesproductions.secureimageviewer.utils.ViewerFileUtils.deleteFilesFromDatabase
+import com.quigglesproductions.secureimageviewer.utils.ViewerFileUtils.deleteFilesFromStorage
 import java.io.File
 
-class FolderManager {
-    private var rootContext: Context? = null
-    var currentFolder: RoomUnifiedFolder? = null
-    fun setRootContext(context: Context) {
-        rootContext = context.applicationContext
-    }
+class FolderManager(private val rootContext: Context) {
 
     suspend fun removeLocalFolder(fileDatabase: UnifiedFileDatabase, folder: RoomUnifiedEmbeddedFolder) {
         val folderFile = folder.folder.folderFile
-
-        deleteFiles(fileDatabase,folder.files)
+        deleteFilesFromStorage(folder.files)
+        deleteFilesFromDatabase(fileDatabase,folder.files)
         fileDatabase.folderDao().delete(folder.folder)
         deleteRecursive(folderFile)
     }
 
-    private fun deleteRecursive(fileOrDirectory: File?) {
-        if (fileOrDirectory == null) return
-        if (fileOrDirectory.isDirectory) for (child in fileOrDirectory.listFiles()) deleteRecursive(
-            child
-        )
-        fileOrDirectory.delete()
+    private fun deleteRecursive(fileOrDirectory: File?): Boolean {
+        if (fileOrDirectory == null) return false
+        return fileOrDirectory.deleteRecursively()
     }
 
     suspend fun removeAllFolders(fileDatabase: UnifiedFileDatabase): Boolean {
@@ -48,10 +40,6 @@ class FolderManager {
     }
 
     suspend fun removeFileFromFolder(fileDatabase: UnifiedFileDatabase, folder: RoomUnifiedFolder, file: RoomUnifiedEmbeddedFile): Boolean {
-        return deleteFile(fileDatabase,file)
-    }
-
-    companion object {
-        val instance = FolderManager()
+        return deleteFileFromDatabase(fileDatabase,file)
     }
 }

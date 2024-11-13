@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_overviewFragment"
+            android:icon="@drawable/outline_home_24"
+            android:title="@string/menu_home" />
+        <item
+            android:id="@+id/nav_enhancedFolderListFragment"
+            android:icon="@drawable/baseline_folder_open_24"
+            android:title="@string/file_viewer_title" />
+        <item
+            android:id="@+id/nav_SearchFragment"
+            android:icon="@drawable/baseline_image_search_24"
+            android:title="@string/file_search_title" />
+        <item
+            android:id="@+id/nav_settingsFragment"
+            android:icon="@drawable/outline_settings_24"
+            android:title="@string/settings_title" />
+        <item
+            android:id="@+id/nav_userOptions"
+            android:title="@string/menu_user_title">
+            <menu>
+                <item
+                    android:id="@+id/nav_logout"
+                    android:icon="@drawable/baseline_logout_24"
+                    android:title="@string/menu_logout" />
+            </menu>
+        </item>
+
+    </group>
+</menu>

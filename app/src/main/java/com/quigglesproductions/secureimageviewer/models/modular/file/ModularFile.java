@@ -7,6 +7,7 @@ import com.quigglesproductions.secureimageviewer.datasource.file.IFileDataSource
 import com.quigglesproductions.secureimageviewer.models.ItemBaseModel;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.FileType;
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile;
+import com.quigglesproductions.secureimageviewer.models.facescan.FaceScanModel;
 import com.quigglesproductions.secureimageviewer.models.modular.ModularArtist;
 import com.quigglesproductions.secureimageviewer.models.modular.ModularCategory;
 import com.quigglesproductions.secureimageviewer.models.modular.ModularFileMetadata;
@@ -34,7 +35,6 @@ public class ModularFile implements ItemBaseModel, IDisplayFile {
     public String checksum;
     @SerializedName("ChecksumMethod")
     public String checksumMethod;
-
     @SerializedName("UpdateTime")
     public LocalDateTime updateTime;
     @SerializedName("Varients")
@@ -49,6 +49,9 @@ public class ModularFile implements ItemBaseModel, IDisplayFile {
     public ArrayList<ModularCategory> categories;
     @SerializedName("Subjects")
     public ArrayList<ModularSubject> subjects;
+    @SerializedName("FaceScanModels")
+    public ArrayList<FaceScanModel> faceScanModels;
+
     @SerializedName("CreatedDate")
     public LocalDateTime createdDate;
 

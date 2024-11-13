@@ -11,14 +11,19 @@ import android.view.View.OnLongClickListener
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ImageView
+import androidx.paging.LoadStateAdapter
 import androidx.paging.PagingDataAdapter
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.RequestBuilder
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
+import com.bumptech.glide.signature.ObjectKey
 import com.quigglesproductions.secureimageviewer.R
 import com.quigglesproductions.secureimageviewer.databinding.FilegridHeaderBinding
 import com.quigglesproductions.secureimageviewer.databinding.FilegridLayoutConstrainedBinding
@@ -26,6 +31,7 @@ import com.quigglesproductions.secureimageviewer.datasource.file.IFileDataSource
 import com.quigglesproductions.secureimageviewer.glide.ChecksumSignature
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.relations.RoomUnifiedEmbeddedFile
 import com.quigglesproductions.secureimageviewer.ui.adapter.itemmodel.folderfileviewer.FolderFileViewerModel
+import com.quigglesproductions.secureimageviewer.ui.adapter.loadstate.MyLoadStateAdapter
 import dagger.hilt.android.qualifiers.ActivityContext
 import javax.inject.Inject
 
@@ -35,11 +41,24 @@ class EnhancedFolderFilesListAdapter @Inject constructor(@ActivityContext contex
     private var mContext : Context? = context
     private lateinit var onClickListener: EnhancedFolderFilesListOnClickListener
 
+    fun asConcatAdapter(header: LoadStateAdapter<*>, footer: LoadStateAdapter<*>): ConcatAdapter{
+        addLoadStateListener { loadStates ->
+            header.loadState = loadStates.refresh
+            footer.loadState = loadStates.append
+        }
+
+        return ConcatAdapter(header,this,footer)
+    }
+
     override fun getItemViewType(position: Int): Int {
-        return when(peek(position)){
-            is FolderFileViewerModel.FileModel -> R.layout.filegrid_layout_constrained
-            is FolderFileViewerModel.HeaderModel -> R.layout.filegrid_header
-            else -> R.layout.filegrid_layout_constrained
+        return try {
+            when (peek(position)) {
+                is FolderFileViewerModel.FileModel -> R.layout.filegrid_layout_constrained
+                is FolderFileViewerModel.HeaderModel -> R.layout.filegrid_header
+                else -> 0
+            }
+        }catch (exc : IndexOutOfBoundsException){
+            0
         }
     }
     override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder, position: Int) {
@@ -95,29 +114,10 @@ class EnhancedFolderFileViewHolder(view: View) : RecyclerView.ViewHolder(view),
                 ) {
                     context?.let {
                         Glide.with(it)
-                            /*.addDefaultRequestListener(object : RequestListener<Any?> {
-                                override fun onLoadFailed(
-                                    e: GlideException?,
-                                    model: Any?,
-                                    target: Target<Any?>,
-                                    isFirstResource: Boolean
-                                ): Boolean {
-                                    Log.e("Image Load Fail", e!!.message!!)
-                                    e.logRootCauses("Image Load Fail")
-                                    return false
-                                }
-
-                                override fun onResourceReady(
-                                    resource: Any,
-                                    model: Any,
-                                    target: Target<Any?>?,
-                                    dataSource: DataSource,
-                                    isFirstResource: Boolean
-                                ): Boolean {
-                                    return false
-                                }
-                            })*/
-                            .load(dataSource).signature(ChecksumSignature(file.file.checksum)).into(binding.gridItemImage).clearOnDetach()
+                            .load(dataSource)
+                            .signature(ChecksumSignature(file.file.checksum))
+                            .thumbnail(0.10f)
+                            .into(binding.gridItemImage)
                     }
                 }
 
@@ -132,14 +132,13 @@ class EnhancedFolderFileViewHolder(view: View) : RecyclerView.ViewHolder(view),
                 .setOnClickListener(View.OnClickListener { onClickListener.onClick(absoluteAdapterPosition) })
             binding.gridItemImage.setOnLongClickListener(OnLongClickListener { false })
             binding.gridItemImage
-                .setOnCreateContextMenuListener(OnCreateContextMenuListener { menu, v, menuInfo ->
-                    var menuInfo = menuInfo
-                    menuInfo = AdapterView.AdapterContextMenuInfo(
+                .setOnCreateContextMenuListener(OnCreateContextMenuListener { menu, v, _ ->
+                    val customMenuInfo: ContextMenuInfo? = AdapterView.AdapterContextMenuInfo(
                         itemView,
                         absoluteAdapterPosition,
                         0
                     )
-                    onClickListener.onCreateContextMenu(menu, v, menuInfo)
+                    onClickListener.onCreateContextMenu(menu, v, customMenuInfo)
                 })
         }
         companion object {

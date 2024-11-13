@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/searchitem_view"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:foregroundTintMode="add"
+    android:background="@drawable/pill_bg"
+    android:orientation="horizontal"
+    android:backgroundTint="@color/accent_main"
+    android:outlineProvider="bounds">
+    <TextView
+        android:id="@+id/searchitem_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:text="Test text"
+        android:textColor="@color/white"/>
+
+    <ImageButton
+        android:id="@+id/searchitem_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/baseline_close_24"
+        android:layout_gravity="center_vertical"
+        android:paddingEnd="5dp"
+        android:background="?android:selectableItemBackgroundBorderless"/>
+</LinearLayout>

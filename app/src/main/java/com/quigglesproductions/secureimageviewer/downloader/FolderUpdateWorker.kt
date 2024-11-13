@@ -56,6 +56,8 @@ class FolderUpdateWorker @AssistedInject constructor (
     lateinit var downloadService: DownloadService
     @Inject
     lateinit var gson: Gson
+    @Inject
+    lateinit var folderManager: FolderManager
 
     private val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
@@ -151,7 +153,6 @@ class FolderUpdateWorker @AssistedInject constructor (
 
     private suspend fun deleteFilesFromFolder(folder: RoomUnifiedFolder, fileUpdates: List<EnhancedFileUpdateLog>): Boolean{
         var isSuccessful = true
-        val folderManager = FolderManager.instance
         for(fileUpdate: EnhancedFileUpdateLog in fileUpdates){
             val file = database.fileDao().loadFileByOnlineId(fileUpdate.fileId)
             val success = folderManager.removeFileFromFolder(fileDatabase = database,

@@ -1,35 +1,22 @@
-package com.quigglesproductions.secureimageviewer.glide;
+package com.quigglesproductions.secureimageviewer.glide
 
-import androidx.annotation.NonNull;
+import com.bumptech.glide.load.Key
+import com.quigglesproductions.secureimageviewer.checksum.FileChecksum
+import java.security.MessageDigest
 
-import com.bumptech.glide.load.Key;
-import com.quigglesproductions.secureimageviewer.checksum.FileChecksum;
-
-import java.nio.ByteBuffer;
-import java.security.MessageDigest;
-
-public class ChecksumSignature implements Key {
-    private final FileChecksum checksum;
-
-    public ChecksumSignature(FileChecksum fileChecksum) {
-        this.checksum = fileChecksum;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o instanceof ChecksumSignature) {
-            ChecksumSignature other = (ChecksumSignature) o;
-            return checksum == other.checksum;
+class ChecksumSignature(private val checksum: FileChecksum) : Key {
+    override fun equals(other: Any?): Boolean {
+        if (other is ChecksumSignature) {
+            return checksum === other.checksum
         }
-        return false;
+        return false
     }
 
-    @Override
-    public int hashCode() {
-        return checksum.hashCode();
+    override fun hashCode(): Int {
+        return checksum.hashCode()
     }
-    @Override
-    public void updateDiskCacheKey(@NonNull MessageDigest messageDigest) {
-        messageDigest.update(checksum.getChecksumString().getBytes(CHARSET));
+
+    override fun updateDiskCacheKey(messageDigest: MessageDigest) {
+        messageDigest.update(checksum.checksumString.toByteArray(Key.CHARSET))
     }
 }

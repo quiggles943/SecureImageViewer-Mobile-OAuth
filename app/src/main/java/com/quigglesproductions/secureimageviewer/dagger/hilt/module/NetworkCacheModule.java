@@ -2,6 +2,8 @@ package com.quigglesproductions.secureimageviewer.dagger.hilt.module;
 
 import android.content.Context;
 
+import androidx.annotation.NonNull;
+
 import java.io.File;
 
 import dagger.Module;
@@ -15,11 +17,11 @@ import okhttp3.Cache;
 @InstallIn(SingletonComponent.class)
 public class NetworkCacheModule {
 
+    @NonNull
     @Provides
-    public static Cache provideNetworkCache(@ApplicationContext Context context){
+    public static Cache provideNetworkCache(@NonNull @ApplicationContext Context context){
         File cacheDirectory = new File(context.getCacheDir(),"http_cache");
         int cacheSize = 50*1024*1024;
-        Cache cache = new Cache(cacheDirectory,cacheSize);
-        return cache;
+        return new Cache(cacheDirectory,cacheSize);
     }
 }

@@ -5,6 +5,7 @@ public enum FileType {
     PNG,
     JPG,
     GIF,
+    MP3,
     MP4,
     WEBP;
 
@@ -22,6 +23,8 @@ public enum FileType {
                 return GIF;
             case "webp":
                 return WEBP;
+            case "mp3":
+                return MP3;
             case "mp4":
                 return MP4;
             default:

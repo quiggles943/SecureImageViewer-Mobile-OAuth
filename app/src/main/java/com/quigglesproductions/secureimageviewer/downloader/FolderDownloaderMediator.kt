@@ -71,7 +71,7 @@ class FolderDownloaderMediator @Inject  constructor(@ApplicationContext val appC
     private fun checkWorkerStatus(worker: FolderDownloadWorkerStatus):FolderDownloadWorkerStatus {
         val workerInfo = WorkManager.getInstance(appContext).getWorkInfoById(worker.workerId)
         if(workerInfo.isDone) {
-            val workerState = workerInfo.get().state
+            val workerState = workerInfo.get()!!.state
             worker.workManagerState = workerState
             when (workerState) {
                 WorkInfo.State.SUCCEEDED -> {

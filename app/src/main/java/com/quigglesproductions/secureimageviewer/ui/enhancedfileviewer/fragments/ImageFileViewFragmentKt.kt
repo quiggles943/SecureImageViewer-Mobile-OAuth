@@ -19,6 +19,7 @@ import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.signature.ObjectKey
 import com.quigglesproductions.secureimageviewer.R
 import com.quigglesproductions.secureimageviewer.datasource.file.IFileDataSource.DataSourceCallback
+import com.quigglesproductions.secureimageviewer.glide.ChecksumSignature
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.relations.RoomUnifiedEmbeddedFile
 import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.EnhancedFileCollectionAdapterKt.ZoomLevelChangeCallback
 import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.EnhancedFileViewFragment
@@ -106,10 +107,10 @@ class ImageFileViewFragmentKt : BaseFileViewFragmentKt() {
                         .thumbnail(
                             Glide.with(context!!)
                                 .load(fileThumbnailDataSource)
-                                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)
-                                .signature(ObjectKey(item.metadata.creationTime)) //.signature(new ObjectKey(item.getMetadata().getCreationTime()))
+                                .signature(ChecksumSignature(item.file.checksum))
                                 .dontTransform()
                         )
+                        .signature(ChecksumSignature(item.file.checksum))
                         .dontTransform()
                         .format(decodeFormat)
                         .into(imageView)

@@ -5,10 +5,12 @@ import com.quigglesproductions.secureimageviewer.dagger.hilt.mapper.ModularOnlin
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateResponse
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateSendModel
 import com.quigglesproductions.secureimageviewer.models.enhanced.metadata.FileMetadata
+import com.quigglesproductions.secureimageviewer.models.modular.ModularSearchItem
 import com.quigglesproductions.secureimageviewer.models.modular.ModularServerStatus
 import com.quigglesproductions.secureimageviewer.models.modular.file.ModularOnlineFile
 import com.quigglesproductions.secureimageviewer.models.modular.folder.ModularOnlineFolder
 import com.quigglesproductions.secureimageviewer.retrofit.annotations.AuthenticationRequired
+import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedSearchItem
 import com.skydoves.retrofit.adapters.paging.NetworkPagingSource
 import com.skydoves.retrofit.adapters.paging.annotations.PagingKey
 import com.skydoves.retrofit.adapters.paging.annotations.PagingKeyConfig
@@ -111,4 +113,13 @@ interface ModularRequestService {
     fun doGetFoldersPaginated(
         @Query("page")page: Int,
         @Query("pageSize")pageSize: Int): Call<List<ModularOnlineFolder>>
+
+    @AuthenticationRequired
+    @GET("/api/v2/search/items")
+    fun doGetSearchTerms(): Call<List<ModularSearchItem>>
+
+    @AuthenticationRequired
+    @POST("/api/v2/search")
+    fun doGetSearchFiles( @Body searchTerms: List<ModularSearchItem>
+    ): Call<List<ModularOnlineFile>>
 }
