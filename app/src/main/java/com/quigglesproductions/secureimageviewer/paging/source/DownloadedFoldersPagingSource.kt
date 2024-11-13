@@ -18,12 +18,14 @@ class DownloadedFoldersPagingSource (
         val pageNumber = params.key ?: 0
         val offset = pageNumber * params.loadSize
         return try{
-            val folders = folderDao!!.getFolders(offset,params.loadSize)
-            var nextPageNumber: Int?
-            if(folders.isEmpty() || folders.size < params.loadSize)
-                nextPageNumber = null
+            val folders = folderDao.getFolders(offset,params.loadSize)
+            for(folder in folders){
+                folder.setIsAvailableOffline(true)
+            }
+            val nextPageNumber: Int? = if(folders.isEmpty() || folders.size < params.loadSize)
+                null
             else
-                nextPageNumber = pageNumber+1
+                pageNumber+1
             return LoadResult.Page(
                 data = folders,
                 prevKey = null,
