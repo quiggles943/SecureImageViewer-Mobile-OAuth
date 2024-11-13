@@ -7,6 +7,7 @@ import com.quigglesproductions.secureimageviewer.aurora.authentication.appauth.A
 import com.quigglesproductions.secureimageviewer.dagger.hilt.module.DownloadManager;
 import com.quigglesproductions.secureimageviewer.downloader.FolderDownloaderMediator;
 import com.quigglesproductions.secureimageviewer.downloader.PagedFolderDownloader;
+import com.quigglesproductions.secureimageviewer.managers.FolderManager;
 import com.quigglesproductions.secureimageviewer.retrofit.ModularRequestService;
 import com.quigglesproductions.secureimageviewer.retrofit.RequestManager;
 import com.quigglesproductions.secureimageviewer.room.databases.download.DownloadRecordDatabase;
@@ -74,5 +75,9 @@ public class SecureFragment extends Fragment {
 
     public FolderDownloaderMediator getFolderDownloaderMediator() throws IllegalStateException{
         return requiresSecureActivity().getFolderDownloaderMediator();
+    }
+
+    public FolderManager getFolderManager() throws IllegalStateException{
+        return requiresSecureActivity().folderManager;
     }
 }

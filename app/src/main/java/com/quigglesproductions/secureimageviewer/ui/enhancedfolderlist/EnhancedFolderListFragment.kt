@@ -54,6 +54,7 @@ import com.quigglesproductions.secureimageviewer.utils.ObjectUtils
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 
@@ -65,8 +66,6 @@ class EnhancedFolderListFragment : SecureFragment() {
     private lateinit var swipeLayout: SwipeRefreshLayout
     @Inject
     lateinit var adapter: FolderListAdapter
-    @Inject
-    lateinit var folderManager: FolderManager
     lateinit var root:View
     private var folderLoadJob: Job? = null
 
@@ -339,10 +338,12 @@ class EnhancedFolderListFragment : SecureFragment() {
                     if(selectedFolder.id != null) {
                         val databaseFolder: RoomUnifiedEmbeddedFolder =
                             downloadFileDatabase.folderDao().loadFolderByOnlineId(selectedFolder.onlineId.toLong())
-                        folderManager.removeLocalFolder(
-                            fileDatabase = downloadFileDatabase,
-                            folder = databaseFolder
-                        )
+                        runBlocking {
+                            folderManager.removeLocalFolder(
+                                fileDatabase = downloadFileDatabase,
+                                folder = databaseFolder
+                            )
+                        }
                     }
                     adapter.refresh()
                 }
