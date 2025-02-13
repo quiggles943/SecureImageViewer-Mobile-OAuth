@@ -11,6 +11,7 @@ import android.view.ViewGroup
 import androidx.annotation.OptIn
 import androidx.hilt.navigation.fragment.hiltNavGraphViewModels
 import androidx.media3.common.Player
+import androidx.media3.common.util.RepeatModeUtil.REPEAT_TOGGLE_MODE_ONE
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
@@ -54,11 +55,14 @@ class VideoFileViewFragmentKt : BaseFileViewFragmentKt() {
         val file = file
         loadVideo(view, file, savedInstanceState)
         super.onViewCreated(view, savedInstanceState)
+        viewerNavigator!!.isEnabled = false
+        viewerNavigator!!.visibility = View.GONE
     }
 
     @OptIn(UnstableApi::class)
     override fun onResume() {
         super.onResume()
+        videoView!!.setRepeatToggleModes(REPEAT_TOGGLE_MODE_ONE)
         if (viewerNavigator!!.isFullyVisible) {
             videoView!!.showController()
         } else videoView!!.hideController()
@@ -69,6 +73,14 @@ class VideoFileViewFragmentKt : BaseFileViewFragmentKt() {
                 8 -> viewerNavigator!!.hide()
             }
         })
+        /*viewerNavigator!!.setRepeatButtonOnClickListener {
+            if(mPlayer!!.repeatMode == Player.REPEAT_MODE_OFF) {
+                mPlayer!!.repeatMode = Player.REPEAT_MODE_ONE
+            }
+            else {
+                mPlayer!!.repeatMode = Player.REPEAT_MODE_OFF
+            }
+        }*/
     }
 
     override fun onPause() {

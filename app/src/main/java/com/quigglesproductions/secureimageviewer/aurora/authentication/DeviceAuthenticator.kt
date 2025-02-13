@@ -28,12 +28,12 @@ class DeviceAuthenticator(
         rootContext = context.applicationContext
     }
 
-    suspend fun getDeviceRegistration(): DeviceRegistrationInfo?{
+    suspend fun getDeviceRegistration(): DeviceRegistrationInfo {
         return authenticationManager.systemDatabase.deviceRegistrationDao().getDeviceRegistrationInfo()
     }
 
     suspend fun checkDeviceIsRegistered(isOnline:Boolean):Boolean{
-        var deviceRegistrationInfo = authenticationManager.deviceAuthenticator.getDeviceRegistration()
+        var deviceRegistrationInfo = getDeviceRegistration()
         return if(isOnline)
             checkDeviceOnlineRegistration(deviceRegistrationInfo)
         else
@@ -68,10 +68,10 @@ class DeviceAuthenticator(
     private suspend fun checkDeviceOnlineRegistration(deviceRegistrationInfo:DeviceRegistrationInfo?):Boolean{
         Log.i("Device-Registration", "Authenticating device online")
         if (deviceRegistrationInfo == null) {
-            val newDeviceRegistrationInfo = authenticationManager.deviceAuthenticator.registerDevice()
+            val newDeviceRegistrationInfo = registerDevice()
             return true
         } else {
-            val response = authenticationManager.deviceAuthenticator.checkDeviceStatus()
+            val response = checkDeviceStatus()
             if (response != null) {
                 if (response.isActive) {
                     Log.i("Device-Registration", "Device is authenticated and active")

@@ -62,7 +62,8 @@
 
         <ImageButton android:id="@id/exo_play_pause"
             style="@style/ExoStyledControls.Button.Center.PlayPause"/>
-
+        <ImageButton android:id="@id/exo_repeat_toggle"
+            style="@style/ExoStyledControls.Button.Center.Repeat"/>
         <include layout="@layout/exo_player_control_ffwd_button" />
 
     </LinearLayout>

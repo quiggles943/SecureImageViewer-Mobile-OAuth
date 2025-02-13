@@ -14,4 +14,6 @@
     <color name="layout_background">#FF424242</color>
 
     <color name="accent_main">@color/purple_200</color>
+
+    <color name="accent_main_translucent">#B3E1BEE7</color>
 </resources>

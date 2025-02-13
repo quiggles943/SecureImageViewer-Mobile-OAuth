@@ -232,7 +232,7 @@ class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     }
     private fun enableView(){
         itemView.isEnabled = true
-        progressBar.visibility = View.VISIBLE
+        progressBar.visibility = View.GONE
     }
     private fun disableView(mContext: Context){
         itemView.isEnabled = false

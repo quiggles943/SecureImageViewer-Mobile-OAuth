@@ -28,6 +28,11 @@
         <item name="android:contentDescription">@string/exo_controls_play_description</item>
         <item name="android:layout_marginHorizontal">20dp</item>
     </style>
+    <style name="ExoStyledControls.Button.Center.Repeat">
+        <item name="android:src">@drawable/exo_styled_controls_repeat_off</item>
+        <item name="android:contentDescription">@string/exo_controls_repeat_off_description</item>
+        <item name="android:layout_marginHorizontal">20dp</item>
+    </style>
     <style name="ExoMediaButton.Previous">
         <item name="android:src">@drawable/exo_controls_previous</item>
         <item name="android:contentDescription">@string/exo_controls_previous_description</item>
@@ -44,11 +49,15 @@
     </style>
     <style name="ImagePagerButton.Previous">
         <item name="android:src">@drawable/image_pager_navigate_before</item>
-        <item name="android:layout_marginHorizontal">40dp</item>
+        <item name="android:layout_marginHorizontal">10dp</item>
+    </style>
+    <style name="ImagePagerButton.Repeat">
+        <item name="android:src">@drawable/exo_styled_controls_repeat_off</item>
+        <item name="android:layout_marginHorizontal">20dp</item>
     </style>
     <style name="ImagePagerButton.Next">
         <item name="android:src">@drawable/image_pager_navigate_next</item>
-        <item name="android:layout_marginHorizontal">40dp</item>
+        <item name="android:layout_marginHorizontal">10dp</item>
     </style>
     <style name="ImagePagerButton.Back">
         <item name="android:src">@drawable/ic_baseline_back</item>

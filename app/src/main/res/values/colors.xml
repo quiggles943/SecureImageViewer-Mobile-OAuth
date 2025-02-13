@@ -44,5 +44,7 @@
 
     <color name="accent_main">@color/blue_500</color>
 
+    <color name="accent_main_translucent">#B390CAF9</color>
+
     <color name="demo_dark_transparent">#24000000</color>
 </resources>

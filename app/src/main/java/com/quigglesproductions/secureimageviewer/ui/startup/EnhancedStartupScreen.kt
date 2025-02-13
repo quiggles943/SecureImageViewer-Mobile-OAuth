@@ -79,11 +79,11 @@ class EnhancedStartupScreen : SecureActivity() {
                 viewModel.startupProgressState.setValue(StartupProgressState.COMPLETE)
             } else {
                 viewModel.startupProgressState.setValue(StartupProgressState.ERROR)
-                infoTextView!!.setText(R.string.online_authentication_required)
+                infoTextView.setText(R.string.online_authentication_required)
             }
         }
         viewModel.progressString.observe(this
-        ) { s -> infoTextView!!.text = s }
+        ) { s -> infoTextView.text = s }
     }
 
     private fun validateConnection() {

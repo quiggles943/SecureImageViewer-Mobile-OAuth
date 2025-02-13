@@ -16,7 +16,9 @@ import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.core.view.ActionProvider;
+import androidx.media3.common.Player;
 import androidx.media3.common.util.UnstableApi;
+import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.ui.DefaultTimeBar;
 
 import com.quigglesproductions.secureimageviewer.R;
@@ -24,14 +26,14 @@ import com.quigglesproductions.secureimageviewer.R;
 @UnstableApi public class FileViewerNavigator extends LinearLayout {
     Context context;
     View rootView;
-    ImageButton prevBtn,nextBtn;
+    ImageButton prevBtn,nextBtn, repeatBtn;
     String mPosition,mTotal;
     TextView positionView, totalView;
     DefaultTimeBar seekBar;
     private AnimatorSet hideMainBarAnimator,showAllBarsAnimator;
     private int uxState;
     private ActionProvider.VisibilityListener visibilityListener;
-
+    private Player.Listener exoPlayerListener;
     private boolean isAnimated;
 
     private static final long ANIMATION_INTERVAL_MS = 2_000;
@@ -75,6 +77,7 @@ import com.quigglesproductions.secureimageviewer.R;
         rootView = inflate(context, R.layout.fileviewer_navigation_bar,this);
         prevBtn = rootView.findViewById(R.id.imagepager_prev);
         nextBtn = rootView.findViewById(R.id.imagepager_next);
+        //repeatBtn = rootView.findViewById(R.id.imagepager_repeat);
         positionView = rootView.findViewById(R.id.imagecount);
         totalView = rootView.findViewById(R.id.imagetotal);
         positionView.setText(mPosition);
@@ -119,6 +122,29 @@ import com.quigglesproductions.secureimageviewer.R;
         showAllBarsAnimator
                 .play(fadeInAnimator)
                 .with(ofTranslationY(translationYForProgressBar, 0, rootView));
+
+        exoPlayerListener = new Player.Listener() {
+            @Override
+            public void onRepeatModeChanged(int repeatMode) {
+                Player.Listener.super.onRepeatModeChanged(repeatMode);
+                switch (repeatMode){
+                    case Player.REPEAT_MODE_OFF -> setRepeatModeOff();
+                    case Player.REPEAT_MODE_ONE -> setRepeatModeOne();
+                    case Player.REPEAT_MODE_ALL -> setRepeatModeAll();
+                }
+            }
+        };
+    }
+
+    private void setRepeatModeOff(){
+    }
+
+    private void setRepeatModeOne(){
+        //repeatBtn.setImageResource(android.R.drawable.exo_styled_controls_repeat_off);
+    }
+
+    private void setRepeatModeAll(){
+
     }
 
     public void setFileTotal(int total){
@@ -137,6 +163,9 @@ import com.quigglesproductions.secureimageviewer.R;
     }
     public void setNextButtonOnClickListener(OnClickListener clickListener){
         nextBtn.setOnClickListener(clickListener);
+    }
+    public void setRepeatButtonOnClickListener(OnClickListener clickListener){
+        repeatBtn.setOnClickListener(clickListener);
     }
 
     public boolean isFullyVisible() {
