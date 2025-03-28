@@ -1,208 +1,215 @@
-package com.quigglesproductions.secureimageviewer.ui;
+package com.quigglesproductions.secureimageviewer.ui
 
-import android.content.Context;
-import android.graphics.drawable.ColorDrawable;
-import android.os.Bundle;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
-
-import androidx.annotation.ColorInt;
-import androidx.annotation.ColorRes;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-import androidx.navigation.ui.AppBarConfiguration;
-import androidx.navigation.ui.NavigationUI;
-
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.DataSource;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.engine.GlideException;
-import com.bumptech.glide.load.model.GlideUrl;
-import com.bumptech.glide.load.model.LazyHeaders;
-import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.target.Target;
-import com.google.android.material.navigation.NavigationView;
-import com.quigglesproductions.secureimageviewer.R;
-import com.quigglesproductions.secureimageviewer.aurora.authentication.AuroraUser;
-import com.quigglesproductions.secureimageviewer.databinding.ActivityMainNavigationBinding;
-import com.quigglesproductions.secureimageviewer.managers.ViewerConnectivityManager;
-
-import dagger.hilt.android.AndroidEntryPoint;
+import android.content.Context
+import android.graphics.drawable.ColorDrawable
+import android.os.Bundle
+import android.view.MenuItem
+import android.view.View
+import android.widget.ImageView
+import android.widget.TextView
+import androidx.activity.viewModels
+import androidx.annotation.ColorInt
+import androidx.annotation.ColorRes
+import androidx.core.content.ContextCompat
+import androidx.drawerlayout.widget.DrawerLayout
+import androidx.navigation.Navigation.findNavController
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.NavigationUI.navigateUp
+import androidx.navigation.ui.NavigationUI.setupActionBarWithNavController
+import androidx.navigation.ui.NavigationUI.setupWithNavController
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.load.model.GlideUrl
+import com.bumptech.glide.load.model.LazyHeaders
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
+import com.quigglesproductions.secureimageviewer.R
+import com.quigglesproductions.secureimageviewer.aurora.authentication.device.ConnectivityState
+import com.quigglesproductions.secureimageviewer.databinding.ActivityMainNavigationBinding
+import com.quigglesproductions.secureimageviewer.managers.ViewerConnectivityManager
+import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-public class EnhancedMainMenuActivity extends SecureActivity{
-    ActivityMainNavigationBinding binding;
-    Context mContext;
-    EnhancedMainMenuViewModel viewModel;
-    private AppBarConfiguration mAppBarConfiguration;
-    SupportActionBarSetListener mActionBarSetListener;
+class EnhancedMainMenuActivity : SecureActivity() {
+    private var binding: ActivityMainNavigationBinding? = null
+    var mContext: Context? = null
+    private val viewModel by viewModels<EnhancedMainMenuViewModel>()
+    private var mAppBarConfiguration: AppBarConfiguration? = null
+    private var mActionBarSetListener: SupportActionBarSetListener? = null
 
-    @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        binding = ActivityMainNavigationBinding.inflate(getLayoutInflater());
-        //getViewModel().getIsOnline().observe(this,this::setOnlineEnabled);
-        setContentView(binding.getRoot());
-        mContext = this;
-        setSupportActionBar(binding.appBarNavigation.toolbar);
-        final TextView usernameView = binding.navView.getHeaderView(0).findViewById(R.id.user_name);
-        final TextView userEmailView = binding.navView.getHeaderView(0).findViewById(R.id.user_email);
-        AuroraUser user = getAuroraAuthenticationManager().getUser();
-        if(user != null) {
-            usernameView.setText(user.userName);
-            userEmailView.setText(user.emailAddress);
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityMainNavigationBinding.inflate(
+            layoutInflater
+        )
+        setContentView(binding!!.root)
+        mContext = this
+        setSupportActionBar(binding!!.appBarNavigation.toolbar)
+        val usernameView = binding!!.navView.getHeaderView(0).findViewById<TextView>(R.id.user_name)
+        val userEmailView =
+            binding!!.navView.getHeaderView(0).findViewById<TextView>(R.id.user_email)
+        val user = getAuroraAuthenticationManager().user
+        if (user != null) {
+            usernameView.text = user.userName
+            userEmailView.text = user.emailAddress
         }
 
-        if(mActionBarSetListener != null)
-            mActionBarSetListener.SupportActionBarSet();
-        if(binding.drawerLayout instanceof DrawerLayout)
-            setupModalNavigationView();
-        else
-            setupStandardNavigationView();
-        getViewModel().getIsOnline().setValue(ViewerConnectivityManager.getInstance().isConnected());
-        getViewModel().getAppBarTitle().observe(this, new Observer<String>() {
-            @Override
-            public void onChanged(String s) {
-                if(getSupportActionBar() != null)
-                    if(!s.isEmpty())
-                        getSupportActionBar().setTitle(s);
-            }
-        });
-        getWindow().setNavigationBarColor(context.getColor(R.color.transparent));
+        if (mActionBarSetListener != null) mActionBarSetListener!!.SupportActionBarSet()
+        if (binding!!.drawerLayout is DrawerLayout) setupModalNavigationView()
+        else setupStandardNavigationView()
+        viewModel.appBarTitle?.observe(
+            this
+        ) { s: String ->
+            if (supportActionBar != null) if (!s.isEmpty()) supportActionBar!!.title = s
+        }
+        window.navigationBarColor = context.getColor(R.color.transparent)
 
-        ImageView userIcon = binding.navView.getHeaderView(0).findViewById(R.id.user_icon);
-        GlideUrl glideUrl = new GlideUrl("https://quigleyid.ddns.net/v2/oauth/userinfo/thumbnail", new LazyHeaders.Builder()
-                //.addHeader("Authorization", "Bearer " + accessToken)
-                .build());
-        Glide.with(this).addDefaultRequestListener(new RequestListener<Object>() {
-            @Override
-            public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Object> target, boolean isFirstResource) {
+        val userIcon = binding!!.navView.getHeaderView(0).findViewById<ImageView>(R.id.user_icon)
+        val glideUrl = GlideUrl(
+            "https://quigleyid.ddns.net/v2/oauth/userinfo/thumbnail",
+            LazyHeaders.Builder() //.addHeader("Authorization", "Bearer " + accessToken)
+                .build()
+        )
+        Glide.with(this).addDefaultRequestListener(object : RequestListener<Any?> {
+            override fun onLoadFailed(
+                e: GlideException?,
+                model: Any?,
+                target: Target<Any?>,
+                isFirstResource: Boolean
+            ): Boolean {
                 //Log.e("Image Load Fail", e.getMessage());
                 //e.logRootCauses("Image Load Fail");
-                return false;
+                return false
             }
 
-            @Override
-            public boolean onResourceReady(Object resource, Object model, Target<Object> target, DataSource dataSource, boolean isFirstResource) {
-                return false;
+            override fun onResourceReady(
+                resource: Any,
+                model: Any,
+                target: Target<Any?>,
+                dataSource: DataSource,
+                isFirstResource: Boolean
+            ): Boolean {
+                return false
             }
-        }).load(glideUrl).diskCacheStrategy(DiskCacheStrategy.ALL).error(R.drawable.ic_launcher_foreground).fitCenter().into(userIcon);
+        }).load(glideUrl).diskCacheStrategy(DiskCacheStrategy.ALL)
+            .error(R.drawable.ic_launcher_foreground).fitCenter().into(userIcon)
     }
 
-    private void setupModalNavigationView(){
-        DrawerLayout drawer = (DrawerLayout) binding.drawerLayout;
-        NavigationView navigationView = binding.navView;
+    private fun setupModalNavigationView() {
+        val drawer = binding!!.drawerLayout as DrawerLayout
+        val navigationView = binding!!.navView
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
-        mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_overviewFragment, R.id.nav_enhancedFolderListFragment, R.id.nav_SearchFragment,R.id.nav_settingsFragment)
-                .setOpenableLayout(drawer)
-                .build();
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_navigation);
-        NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
-        NavigationUI.setupWithNavController(navigationView, navController);
+        mAppBarConfiguration = AppBarConfiguration.Builder(
+            R.id.nav_overviewFragment,
+            R.id.nav_enhancedFolderListFragment,
+            R.id.nav_SearchFragment,
+            R.id.nav_settingsFragment
+        )
+            .setOpenableLayout(drawer)
+            .build()
+        val navController = findNavController(this, R.id.nav_host_fragment_content_navigation)
+        setupActionBarWithNavController(this, navController, mAppBarConfiguration!!)
+        setupWithNavController(navigationView, navController)
 
-        navigationView.getMenu().findItem(R.id.nav_logout).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(@NonNull MenuItem item) {
-                getAuroraAuthenticationManager().logout();
-                return true;
-            }
-        });
-
+        navigationView.menu.findItem(R.id.nav_logout).setOnMenuItemClickListener {
+            getAuroraAuthenticationManager().logout()
+            true
+        }
     }
 
-    private void setupStandardNavigationView(){
-        NavigationView navigationView = binding.navView;
+    private fun setupStandardNavigationView() {
+        val navigationView = binding!!.navView
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
-        mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_overviewFragment, R.id.nav_enhancedFolderListFragment, R.id.nav_SearchFragment,R.id.nav_settingsFragment)
-                .build();
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_navigation);
-        NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
-        NavigationUI.setupWithNavController(navigationView, navController);
+        mAppBarConfiguration = AppBarConfiguration.Builder(
+            R.id.nav_overviewFragment,
+            R.id.nav_enhancedFolderListFragment,
+            R.id.nav_SearchFragment,
+            R.id.nav_settingsFragment
+        )
+            .build()
+        val navController = findNavController(this, R.id.nav_host_fragment_content_navigation)
+        setupActionBarWithNavController(this, navController, mAppBarConfiguration!!)
+        setupWithNavController(navigationView, navController)
 
-        navigationView.getMenu().findItem(R.id.nav_logout).setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(@NonNull MenuItem item) {
-                getAuroraAuthenticationManager().logout();
-                return true;
-            }
-        });
-
-    }
-    private EnhancedMainMenuViewModel getViewModel(){
-        if(viewModel == null){
-            viewModel = new ViewModelProvider(this).get(EnhancedMainMenuViewModel.class);
+        navigationView.menu.findItem(R.id.nav_logout).setOnMenuItemClickListener {
+            getAuroraAuthenticationManager().logout()
+            true
         }
-        return viewModel;
-    }
-    @Override
-    public void onConnectionRestored() {
-        super.onConnectionRestored();
-        getViewModel().getIsOnline().setValue(true);
     }
 
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        return super.onOptionsItemSelected(item);
+    override fun onConnectionRestored() {
+        super.onConnectionRestored()
     }
 
-    @Override
-    public boolean onSupportNavigateUp() {
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_navigation);
-        return NavigationUI.navigateUp(navController, mAppBarConfiguration)
-                || super.onSupportNavigateUp();
+    override fun onConnectionStateUpdated(connectivityState: ConnectivityState) {
+        super.onConnectionStateUpdated(connectivityState)
+        viewModel.connectivityState.postValue(connectivityState)
     }
 
-    public void setOnlineEnabled(boolean enabled){
-        MenuItem onlineMenuItem = binding.navView.getMenu().getItem(1);
-        onlineMenuItem.setEnabled(enabled);
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return super.onOptionsItemSelected(item)
     }
 
-    public void setActionBarTitle(String title){
-        getViewModel().getAppBarTitle().setValue(title);
+    override fun onSupportNavigateUp(): Boolean {
+        val navController = findNavController(this, R.id.nav_host_fragment_content_navigation)
+        return navigateUp(navController, mAppBarConfiguration!!)
+                || super.onSupportNavigateUp()
     }
 
-    public void overrideActionBarTitle(String title){
-        if(getSupportActionBar() == null){
+    fun setOnlineEnabled(enabled: Boolean) {
+        val onlineMenuItem = binding!!.navView.menu.getItem(1)
+        onlineMenuItem.setEnabled(enabled)
+    }
 
+    fun setActionBarTitle(title: String?) {
+        viewModel.appBarTitle.value = title
+    }
+
+    fun overrideActionBarTitle(title: String?) {
+        if (supportActionBar == null) {
         }
-        getSupportActionBar().setTitle(title);
+        supportActionBar!!.title = title
         //setTitle(title);
     }
 
-    public void overrideActionBarColorFromInt(@ColorInt int color){
-        getSupportActionBar().setBackgroundDrawable(new ColorDrawable(color));
-    }
-    public void overrideActionBarColor(@ColorRes int color) {
-        getSupportActionBar().setBackgroundDrawable(new ColorDrawable(ContextCompat.getColor(context,color)));
+    fun overrideActionBarColorFromInt(@ColorInt color: Int) {
+        supportActionBar!!.setBackgroundDrawable(ColorDrawable(color))
     }
 
-    public void hideNavigationDrawer(){
-        binding.navView.setVisibility(View.GONE);
+    fun overrideActionBarColor(@ColorRes color: Int) {
+        supportActionBar!!.setBackgroundDrawable(
+            ColorDrawable(
+                ContextCompat.getColor(
+                    context,
+                    color
+                )
+            )
+        )
     }
 
-    public void showNavigationDrawer(){
-        binding.navView.setVisibility(View.VISIBLE);
+    fun hideNavigationDrawer() {
+        binding!!.navView.visibility = View.GONE
     }
 
-    public void hideStatusBar(){
-        this.getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_FULLSCREEN);
+    fun showNavigationDrawer() {
+        binding!!.navView.visibility = View.VISIBLE
     }
-    public void showStatusBar(){
-        this.getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+
+    fun hideStatusBar() {
+        this.window.decorView.systemUiVisibility =
+            View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_FULLSCREEN
     }
-    public void registerActionBarSetListener(SupportActionBarSetListener listener){
-        mActionBarSetListener = listener;
+
+    fun showStatusBar() {
+        this.window.decorView.systemUiVisibility =
+            View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+    }
+
+    fun registerActionBarSetListener(listener: SupportActionBarSetListener?) {
+        mActionBarSetListener = listener
     }
 }

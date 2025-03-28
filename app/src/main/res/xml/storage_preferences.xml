@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+    <PreferenceCategory android:title="@string/storage_info_header">
+    <Preference android:title="Files on Device"
+        android:summary="123" app:key="files_on_device"/>
+    <Preference android:title="Folders on Device"
+        android:summary="14" app:key="folders_on_device"/>
+    <Preference android:title="Storage Space Used"
+        android:summary="18Mb" app:key="device_storage_used"/>
+    </PreferenceCategory>
 <PreferenceCategory android:title="@string/storage_header">
     <Preference android:title="Reset storage"
         android:summary="Delete all files stored locally" app:key="file_reset"/>

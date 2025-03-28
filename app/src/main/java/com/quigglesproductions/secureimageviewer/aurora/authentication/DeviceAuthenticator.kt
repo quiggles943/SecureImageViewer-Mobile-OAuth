@@ -6,6 +6,8 @@ import android.util.Log
 import com.google.gson.Gson
 import com.quigglesproductions.secureimageviewer.BuildConfig
 import com.quigglesproductions.secureimageviewer.aurora.authentication.appauth.AuroraAuthenticationManager
+import com.quigglesproductions.secureimageviewer.aurora.authentication.device.AuthenticationState
+import com.quigglesproductions.secureimageviewer.aurora.authentication.device.DeviceAuthenticationResult
 import com.quigglesproductions.secureimageviewer.aurora.authentication.device.DeviceRegistration
 import com.quigglesproductions.secureimageviewer.aurora.authentication.device.DeviceRegistrationRequest
 import com.quigglesproductions.secureimageviewer.aurora.authentication.device.DeviceStatus
@@ -40,7 +42,7 @@ class DeviceAuthenticator(
             checkDeviceLocalRegistration(deviceRegistrationInfo)
     }
 
-    private fun checkDeviceLocalRegistration(deviceRegistrationInfo:DeviceRegistrationInfo?):Boolean{
+    fun checkDeviceLocalRegistration(deviceRegistrationInfo:DeviceRegistrationInfo?):Boolean{
         Log.i("Device-Registration", "Authenticating device offline")
         val isAuthenticated: Boolean
         if(deviceRegistrationInfo != null && deviceRegistrationInfo.nextRequiredCheckin.isAfter(LocalDateTime.now())){
@@ -65,7 +67,7 @@ class DeviceAuthenticator(
         }
     }
 
-    private suspend fun checkDeviceOnlineRegistration(deviceRegistrationInfo:DeviceRegistrationInfo?):Boolean{
+    suspend fun checkDeviceOnlineRegistration(deviceRegistrationInfo:DeviceRegistrationInfo?):Boolean{
         Log.i("Device-Registration", "Authenticating device online")
         if (deviceRegistrationInfo == null) {
             val newDeviceRegistrationInfo = registerDevice()
@@ -82,6 +84,30 @@ class DeviceAuthenticator(
             }
         }
         return false
+    }
+
+    suspend fun checkDeviceOnlineRegistrationForResult(deviceRegistrationInfo:DeviceRegistrationInfo?):DeviceAuthenticationResult{
+        Log.i("Device-Registration", "Authenticating device online")
+        if (deviceRegistrationInfo == null) {
+            val newDeviceRegistrationInfo = registerDevice()
+            return DeviceAuthenticationResult(AuthenticationState.AUTHENTICATED)
+        } else {
+            try {
+                val response = checkDeviceStatus()
+                if (response != null) {
+                    if (response.isActive) {
+                        Log.i("Device-Registration", "Device is authenticated and active")
+                        return DeviceAuthenticationResult(AuthenticationState.AUTHENTICATED)
+                    } else
+                        Log.i("Device-Registration", "Device is authenticated but is not active")
+                    return DeviceAuthenticationResult(AuthenticationState.NOT_AUTHENTICATED)
+                }
+            }
+            catch (ex: Exception){
+                return DeviceAuthenticationResult(AuthenticationState.UNABLE_TO_AUTHENTICATE,ex)
+            }
+        }
+        return DeviceAuthenticationResult(AuthenticationState.UNABLE_TO_AUTHENTICATE)
     }
 
     private fun deviceRegistrationCheckFailed(response: Response<DeviceRegistration>?):Boolean {
@@ -142,8 +168,8 @@ class DeviceAuthenticator(
     }
 
     suspend fun checkDeviceStatus(): DeviceStatus? {
-        val deviceRegistrationInfo: DeviceRegistrationInfo? = authenticationManager.systemDatabase.deviceRegistrationDao().getDeviceRegistrationInfo()
-        val response = authenticationManager.requestService.getDeviceStatus(deviceRegistrationInfo!!.onlineId).awaitResponse()
+        val deviceRegistrationInfo: DeviceRegistrationInfo = authenticationManager.systemDatabase.deviceRegistrationDao().getDeviceRegistrationInfo()
+        val response = authenticationManager.requestService.getDeviceStatus(deviceRegistrationInfo.onlineId).awaitResponse()
         if(response.isSuccessful)
             updateDeviceStatus(response.body()!!)
         return response.body()

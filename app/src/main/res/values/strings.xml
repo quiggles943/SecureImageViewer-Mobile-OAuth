@@ -34,6 +34,7 @@
     <!-- Messages Preferences -->
     <string name="sso_settings_header">SSO Settings</string>
     <string name="web_server_header">Web Server Settings</string>
+    <string name="storage_info_header">Storage Information</string>
     <string name="storage_header">Storage Settings</string>
     <string name="web_server_settings_button">Server Settings</string>
     <string name="storage_settings_button">Storage</string>
@@ -84,6 +85,7 @@
     <string name="title_activity_device_login">DeviceLoginActivity</string>
     <string name="connectivity_status_header">Connectivity Status: </string>
     <string name="connectivity_status_offline">Offline</string>
+    <string name="connectivity_status_connecting">Connecting</string>
     <string name="connectivity_status_online">Online</string>
     <string name="twofactor_code_invalid">2FA code invalid. Please try again</string>
     <string name="back_button_desc_string">Back button</string>

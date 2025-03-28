@@ -27,6 +27,7 @@
     <color name="underline">#818181</color>
 
     <color name="connectionIndicator_offline">#B71C1C</color>
+    <color name="connectionIndicator_connecting">#A07C1A</color>
     <color name="connectionIndicator_online">#1B5E20</color>
 
     <color name="imagebutton_greyout_filter">#40808080</color>

@@ -193,6 +193,6 @@ public class ModularFileMetadata implements IFileMetadata {
 
     //@Override
     public void setDownloadTime(LocalDateTime dateTime) {
-        this.downloadTime = downloadTime;
+        this.downloadTime = dateTime;
     }
 }

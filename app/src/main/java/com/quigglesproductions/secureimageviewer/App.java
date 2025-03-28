@@ -2,7 +2,9 @@ package com.quigglesproductions.secureimageviewer;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatDelegate;
@@ -17,6 +19,8 @@ import com.quigglesproductions.secureimageviewer.lifecycle.ViewerLifecycleObserv
 import com.quigglesproductions.secureimageviewer.managers.ApplicationPreferenceManager;
 import com.quigglesproductions.secureimageviewer.managers.FolderManager;
 import com.quigglesproductions.secureimageviewer.managers.SecurityManager;
+import com.quigglesproductions.secureimageviewer.managers.ViewerConnectivityManager;
+import com.quigglesproductions.secureimageviewer.receiver.NetworkStateReceiver;
 import com.quigglesproductions.secureimageviewer.retrofit.ModularRequestService;
 
 import org.acra.ACRA;
@@ -42,6 +46,10 @@ public class App extends Application implements Configuration.Provider {
     HiltWorkerFactory workerFactory;
     @Inject
     ModularRequestService requestService;
+    @Inject
+    ViewerConnectivityManager viewerConnectivityManager;
+
+    NetworkStateReceiver networkStateReceiver;
 
     @Override
     public void onCreate() {
@@ -50,6 +58,7 @@ public class App extends Application implements Configuration.Provider {
         viewerLifecycleObserver = new ViewerLifecycleObserver(authenticationManager);
         ProcessLifecycleOwner.get().getLifecycle().addObserver(viewerLifecycleObserver);
         TooLargeTool.startLogging(this);
+        registerConnectivityReceiver();
         initializeSingletons();
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         String darkModePreference = preferences.getString("display_darkmode", "device");
@@ -70,7 +79,7 @@ public class App extends Application implements Configuration.Provider {
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
         HttpSenderConfiguration httpSenderConfiguration = new HttpSenderConfigurationBuilder()
-                .withUri("https://quigleyserver.ddns.net:14500/api/report/ ")
+                .withUri("http://quigleyserver.ddns.net:14501/api/report/ ")
                 // defaults to POST
                 .withHttpMethod(HttpSender.Method.POST)
                 //defaults to 5000ms
@@ -79,7 +88,7 @@ public class App extends Application implements Configuration.Provider {
                 .withSocketTimeout(20000)
                 // defaults to false
                 .withDropReportsOnTimeout(false)
-                .withResCertificate(R.raw.quigleyidca)
+                //.withResCertificate(R.raw.quigleyidca)
                 //defaults to false. Recommended if your backend supports it
                 .withCompress(false)
                 //defaults to all
@@ -104,6 +113,18 @@ public class App extends Application implements Configuration.Provider {
         SecurityManager.getInstance().setRootContext(context.getApplicationContext());
         ApplicationPreferenceManager.getInstance().setContext(context.getApplicationContext());
         //AuthenticationManager.setSingleton(context.getApplicationContext());
+    }
+
+    public NetworkStateReceiver getNetworkStateReceiver(){
+        if(networkStateReceiver == null)
+            networkStateReceiver = new NetworkStateReceiver(viewerConnectivityManager);
+        return networkStateReceiver;
+    }
+
+    private void registerConnectivityReceiver(){
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        registerReceiver(getNetworkStateReceiver(),filter);
     }
 
     public void registerActivityContextForAuthentication(Context activityContext){

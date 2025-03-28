@@ -8,6 +8,7 @@ import com.quigglesproductions.secureimageviewer.dagger.hilt.module.DownloadMana
 import com.quigglesproductions.secureimageviewer.downloader.FolderDownloaderMediator;
 import com.quigglesproductions.secureimageviewer.downloader.PagedFolderDownloader;
 import com.quigglesproductions.secureimageviewer.managers.FolderManager;
+import com.quigglesproductions.secureimageviewer.managers.ViewerConnectivityManager;
 import com.quigglesproductions.secureimageviewer.retrofit.ModularRequestService;
 import com.quigglesproductions.secureimageviewer.retrofit.RequestManager;
 import com.quigglesproductions.secureimageviewer.room.databases.download.DownloadRecordDatabase;
@@ -79,5 +80,9 @@ public class SecureFragment extends Fragment {
 
     public FolderManager getFolderManager() throws IllegalStateException{
         return requiresSecureActivity().folderManager;
+    }
+
+    public ViewerConnectivityManager getConnectivityManager() throws IllegalStateException{
+        return requiresSecureActivity().viewerConnectivityManager;
     }
 }

@@ -32,8 +32,8 @@ public class EnhancedSettingsFragment extends PreferenceFragmentCompat {
         storagePreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                Intent intent = new Intent(getContext(),StorageSettingsActivity.class);
-                startActivity(intent);
+                NavDirections action = EnhancedSettingsFragmentDirections.actionNavSettingsFragmentToStorageSettingsFragment();
+                findNavController(getView()).navigate(action);
                 return true;
             }
         });

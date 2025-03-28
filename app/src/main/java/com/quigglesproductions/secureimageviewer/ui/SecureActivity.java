@@ -29,6 +29,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.gson.Gson;
 import com.quigglesproductions.secureimageviewer.App;
 import com.quigglesproductions.secureimageviewer.aurora.authentication.appauth.AuroraAuthenticationManager;
+import com.quigglesproductions.secureimageviewer.aurora.authentication.device.ConnectivityState;
 import com.quigglesproductions.secureimageviewer.barcodescanner.BarcodeCaptureActivity;
 import com.quigglesproductions.secureimageviewer.dagger.hilt.annotations.CachingDatabase;
 import com.quigglesproductions.secureimageviewer.dagger.hilt.annotations.DownloadDatabase;
@@ -94,6 +95,9 @@ public class SecureActivity extends AppCompatActivity {
 
     @Inject
     FolderDownloaderMediator folderDownloaderMediator;
+
+    @Inject
+    ViewerConnectivityManager viewerConnectivityManager;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -102,7 +106,7 @@ public class SecureActivity extends AppCompatActivity {
         ((App)getApplicationContext()).registerActivityContextForAuthentication(context);
         Configuration config = getResources().getConfiguration();
         try {
-            Class configClass = config.getClass();
+            Class<? extends Configuration> configClass = config.getClass();
             if(configClass.getField("SEM_DESKTOP_MODE_ENABLED").getInt(configClass) == configClass.getField("semDesktopModeEnabled").getInt(config)) {
                 SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
                 boolean desktopAllowed = prefs.getBoolean("streaming_support",false);
@@ -125,7 +129,7 @@ public class SecureActivity extends AppCompatActivity {
         } catch(IllegalArgumentException e) {
             //Handle the IllegalArgumentException
         }
-        ViewerConnectivityManager.getInstance().setCallback(new ViewerConnectivityManager.ViewerConnectivityCallback() {
+        viewerConnectivityManager.setCallback(new ViewerConnectivityManager.ViewerConnectivityCallback() {
             @Override
             public void connectionEstablished() {
                 onConnectionRestored();
@@ -134,6 +138,11 @@ public class SecureActivity extends AppCompatActivity {
             @Override
             public void connectionLost() {
                 onConnectionLost();
+            }
+
+            @Override
+            public void connectionStateUpdated(ConnectivityState connectionState) {
+                onConnectionStateUpdated(connectionState);
             }
         });
         NotificationManager.getInstance().setNotificationCallback(new NotificationManager.NotificationCallback(){
@@ -155,7 +164,7 @@ public class SecureActivity extends AppCompatActivity {
     }
     @Override
     protected void onResume() {
-        ViewerConnectivityManager.getInstance().setCallback(new ViewerConnectivityManager.ViewerConnectivityCallback() {
+        viewerConnectivityManager.setCallback(new ViewerConnectivityManager.ViewerConnectivityCallback() {
             @Override
             public void connectionEstablished() {
                 onConnectionRestored();
@@ -164,6 +173,11 @@ public class SecureActivity extends AppCompatActivity {
             @Override
             public void connectionLost() {
                 onConnectionLost();
+            }
+
+            @Override
+            public void connectionStateUpdated(ConnectivityState connectionState) {
+                onConnectionStateUpdated(connectionState);
             }
         });
         NotificationManager.getInstance().setNotificationCallback(new NotificationManager.NotificationCallback(){
@@ -231,6 +245,10 @@ public class SecureActivity extends AppCompatActivity {
 
     }
 
+    public void onConnectionStateUpdated(ConnectivityState connectivityState){
+
+    }
+
     public BackgroundThreadPoster getBackgroundThreadPoster(){
         return backgroundThreadPoster;
     }
@@ -287,10 +305,6 @@ public class SecureActivity extends AppCompatActivity {
                 break;
         }
 
-    }
-
-    public boolean isConnectedToServer(){
-        return ViewerConnectivityManager.getInstance().isConnected();
     }
 
     public boolean isNetworkAvailable() {
@@ -360,6 +374,10 @@ public class SecureActivity extends AppCompatActivity {
 
     public FolderDownloaderMediator getFolderDownloaderMediator() {
         return folderDownloaderMediator;
+    }
+
+    public ViewerConnectivityManager getConnectivityManager(){
+        return viewerConnectivityManager;
     }
 
     @Override

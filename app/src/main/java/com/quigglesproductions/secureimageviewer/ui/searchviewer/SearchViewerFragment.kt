@@ -55,7 +55,7 @@ open class SearchViewerFragment : SecureFragment() {
         val columnCount = resources.getInteger(R.integer.column_count_filelist)
         val layoutManager = GridLayoutManager(context, columnCount)
 
-        if(ViewerConnectivityManager.getInstance().isConnected) {
+        if(connectivityManager.isConnected) {
             if(viewModel.folderListType.value == null){
                 viewModel.folderListType.value = FolderListType.ONLINE
             }
@@ -187,7 +187,7 @@ open class SearchViewerFragment : SecureFragment() {
                 val switch: SwitchMaterial? = item.actionView?.findViewById(R.id.switchMaterial)
                 if(switch != null){
                     switch.isChecked = viewModel.folderListType.value == FolderListType.DOWNLOADED
-                    if(!ViewerConnectivityManager.getInstance().isConnected)
+                    if(!connectivityManager.isConnected)
                         switch.isEnabled = false
                     switch.setOnCheckedChangeListener { _, isChecked ->
                         if(isChecked)

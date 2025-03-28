@@ -109,6 +109,9 @@
         <action
             android:id="@+id/action_nav_settingsFragment_to_securitySettingsFragment"
             app:destination="@id/securitySettingsFragment" />
+        <action
+            android:id="@+id/action_nav_settingsFragment_to_storageSettingsFragment"
+            app:destination="@id/storageSettingsFragment" />
     </fragment>
     <fragment
         android:id="@+id/aboutSettingsFragment"
@@ -126,6 +129,10 @@
         android:id="@+id/securitySettingsFragment"
         android:name="com.quigglesproductions.secureimageviewer.ui.preferences.SecuritySettingsFragment"
         android:label="Security" />
+    <fragment
+        android:id="@+id/storageSettingsFragment"
+        android:name="com.quigglesproductions.secureimageviewer.ui.preferences.StorageSettingsFragment"
+        android:label="Storage" />
     <fragment
         android:id="@+id/downloadViewerFragment"
         android:name="com.quigglesproductions.secureimageviewer.ui.downloadviewer.DownloadViewerFragment"

@@ -258,18 +258,20 @@ public class RoomUnifiedEmbeddedFile implements ItemBaseModel, IDatabaseFile {
         private RoomUnifiedEmbeddedMetadata generateMetadataFromOnlineFile(IFileMetadata fileMetadata) {
             RoomUnifiedEmbeddedMetadata metadata = new RoomUnifiedEmbeddedMetadata();
             RoomUnifiedMetadata roomFileMetadata = new RoomUnifiedMetadata();
-            roomFileMetadata.width = fileMetadata.getWidth();
-            roomFileMetadata.height = fileMetadata.getHeight();
-            roomFileMetadata.fileSize = fileMetadata.getFileSize();
-            roomFileMetadata.hasAnimatedThumbnail = fileMetadata.hasAnimatedThumbnail();
-            roomFileMetadata.creationTime = fileMetadata.getCreationTime();
-            roomFileMetadata.isEncrypted = fileMetadata.getIsEncrypted();
-            roomFileMetadata.fileExtension = fileMetadata.getFileExtension();
-            roomFileMetadata.fileType = fileMetadata.getFileType();
-            roomFileMetadata.onlineFileId = fileMetadata.getOnlineFileId();
-            roomFileMetadata.artistId = fileMetadata.getOnlineArtistId();
-            roomFileMetadata.pageNumber = fileMetadata.getPageNumber();
-            roomFileMetadata.orientation = fileMetadata.getOrientation();
+            if(fileMetadata != null) {
+                roomFileMetadata.width = fileMetadata.getWidth();
+                roomFileMetadata.height = fileMetadata.getHeight();
+                roomFileMetadata.fileSize = fileMetadata.getFileSize();
+                roomFileMetadata.hasAnimatedThumbnail = fileMetadata.hasAnimatedThumbnail();
+                roomFileMetadata.creationTime = fileMetadata.getCreationTime();
+                roomFileMetadata.isEncrypted = fileMetadata.getIsEncrypted();
+                roomFileMetadata.fileExtension = fileMetadata.getFileExtension();
+                roomFileMetadata.fileType = fileMetadata.getFileType();
+                roomFileMetadata.onlineFileId = fileMetadata.getOnlineFileId();
+                roomFileMetadata.artistId = fileMetadata.getOnlineArtistId();
+                roomFileMetadata.pageNumber = fileMetadata.getPageNumber();
+                roomFileMetadata.orientation = fileMetadata.getOrientation();
+            }
             metadata.metadata = roomFileMetadata;
             return metadata;
         }

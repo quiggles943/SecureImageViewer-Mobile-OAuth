@@ -174,7 +174,7 @@ class EnhancedFolderListFragment : SecureFragment() {
     }
 
     private fun getIsOnline():Boolean{
-        return ViewerConnectivityManager.getInstance().isConnected
+        return connectivityManager.isConnected
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

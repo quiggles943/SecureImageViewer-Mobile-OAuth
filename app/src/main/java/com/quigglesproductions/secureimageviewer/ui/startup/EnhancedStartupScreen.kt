@@ -18,7 +18,18 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import androidx.work.BackoffPolicy
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequest
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.OutOfQuotaPolicy
+import androidx.work.PeriodicWorkRequest
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import com.quigglesproductions.secureimageviewer.R
+import com.quigglesproductions.secureimageviewer.aurora.authentication.device.DeviceAuthenticationCheckWorker
+import com.quigglesproductions.secureimageviewer.downloader.FolderDownloadWorker
 import com.quigglesproductions.secureimageviewer.managers.ViewerConnectivityManager
 import com.quigglesproductions.secureimageviewer.ui.EnhancedMainMenuActivity
 import com.quigglesproductions.secureimageviewer.ui.SecureActivity
@@ -28,6 +39,7 @@ import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.util.concurrent.TimeUnit
 
 class EnhancedStartupScreen : SecureActivity() {
     private lateinit var infoTextView: TextView
@@ -54,30 +66,30 @@ class EnhancedStartupScreen : SecureActivity() {
     private fun setupObservers() {
         viewModel.startupProgressState.observe(this
         ) { startupProgressState -> setProgressBarUpdate(startupProgressState) }
-        viewModel.isOnline.observe(this) { aBoolean ->
+        /*viewModel.isOnline.observe(this) { aBoolean ->
             lifecycleScope.launch {
                 ViewerConnectivityManager.getInstance().setIsConnected(aBoolean)
-                authenticateDevice(aBoolean)
+                authenticateDevice()
+                val workManager = WorkManager.getInstance(context)
+                val isRegistrationValid = auroraAuthenticationManager.deviceAuthenticator.checkDeviceIsRegistered(false)
+                viewModel.deviceAuthenticated.value = isRegistrationValid
+                val deviceRegistrationCheckRequest: PeriodicWorkRequest =
+                    PeriodicWorkRequestBuilder<DeviceAuthenticationCheckWorker>(15,TimeUnit.MINUTES)
+                        .setBackoffCriteria(BackoffPolicy.LINEAR,30,TimeUnit.SECONDS)
+                        .addTag("DeviceAuthenticationCheck")
+                        .setTraceTag("DeviceAuthenticationCheck")
+                        .build()
+                workManager.enqueueUniquePeriodicWork("DeviceAuthenticationCheck",ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,deviceRegistrationCheckRequest)
             }
-            /*if (aBoolean) {
-                ViewerConnectivityManager.getInstance().networkConnected()
-                lifecycleScope.launch {
-                    authenticateDevice(viewModel.isOnline.value)
-                }
-
-            } else {
-                ViewerConnectivityManager.getInstance().networkLost()
-                lifecycleScope.launch {
-                    offlineDeviceAuthentication()
-                }
-            }*/
-        }
+        }*/
         viewModel.deviceAuthenticated.observe(this
         ) { aBoolean ->
             if (aBoolean) {
+                Log.i("Startup","Device is authenticated, continuing login")
                 initiateLogin()
                 viewModel.startupProgressState.setValue(StartupProgressState.COMPLETE)
             } else {
+                Log.i("Startup","Device is not authenticated")
                 viewModel.startupProgressState.setValue(StartupProgressState.ERROR)
                 infoTextView.setText(R.string.online_authentication_required)
             }
@@ -89,6 +101,10 @@ class EnhancedStartupScreen : SecureActivity() {
     private fun validateConnection() {
         viewModel.progressString.value = "Validating connection"
         Log.i("Startup", "Validating network connection")
+        lifecycleScope.launch {
+            authenticateDevice()
+
+        }
         requestManager.requestService!!.doGetServerAvailable()!!
             .enqueue(object : Callback<ResponseBody?> {
                 override fun onResponse(
@@ -105,11 +121,21 @@ class EnhancedStartupScreen : SecureActivity() {
             })
     }
 
-    private suspend fun authenticateDevice(isOnline: Boolean) {
+    private suspend fun authenticateDevice() {
         viewModel.progressString.value = "Authenticating device"
         viewModel.startupProgressState.value = StartupProgressState.AUTHENTICATING
-        viewModel.deviceAuthenticated.value = auroraAuthenticationManager.deviceAuthenticator.checkDeviceIsRegistered(isOnline)
         Log.i("Startup","Retrieved device authentication from server");
+        val workManager = WorkManager.getInstance(context)
+        val isRegistrationValid = auroraAuthenticationManager.deviceAuthenticator.checkDeviceIsRegistered(false)
+        viewModel.deviceAuthenticated.value = isRegistrationValid
+        Log.i("Startup","Setting up device registration checker")
+        val deviceRegistrationCheckRequest: PeriodicWorkRequest =
+            PeriodicWorkRequestBuilder<DeviceAuthenticationCheckWorker>(15,TimeUnit.MINUTES)
+                .setBackoffCriteria(BackoffPolicy.LINEAR,30,TimeUnit.SECONDS)
+                .addTag("DeviceAuthenticationCheck")
+                .setTraceTag("DeviceAuthenticationCheck")
+                .build()
+        workManager.enqueueUniquePeriodicWork("DeviceAuthenticationCheck",ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE,deviceRegistrationCheckRequest)
     }
 
     /*private fun deviceRegistrationCheckFailed(response: Response<DeviceRegistration>?) {
