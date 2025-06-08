@@ -4,6 +4,7 @@ import android.os.Bundle;
 
 import androidx.preference.PreferenceFragmentCompat;
 
+import com.quigglesproductions.secureimageviewer.base.activity.SecureActivity;
 import com.quigglesproductions.secureimageviewer.room.databases.download.DownloadRecordDatabase;
 import com.quigglesproductions.secureimageviewer.room.databases.unified.UnifiedFileDatabase;
 

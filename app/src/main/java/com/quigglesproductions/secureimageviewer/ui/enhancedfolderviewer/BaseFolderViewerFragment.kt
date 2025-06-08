@@ -19,7 +19,7 @@ import com.quigglesproductions.secureimageviewer.databinding.FragmentFolderViewB
 import com.quigglesproductions.secureimageviewer.managers.ApplicationPreferenceManager
 import com.quigglesproductions.secureimageviewer.room.enums.FileSortType
 import com.quigglesproductions.secureimageviewer.ui.EnhancedMainMenuActivity
-import com.quigglesproductions.secureimageviewer.ui.SecureFragment
+import com.quigglesproductions.secureimageviewer.base.fragment.SecureFragment
 import com.quigglesproductions.secureimageviewer.ui.adapter.filelist.EnhancedFolderFilesListAdapter
 import com.quigglesproductions.secureimageviewer.ui.adapter.filelist.EnhancedFolderFilesListOnClickListener
 import com.quigglesproductions.secureimageviewer.ui.adapter.itemmodel.folderfileviewer.FolderFileViewerModel

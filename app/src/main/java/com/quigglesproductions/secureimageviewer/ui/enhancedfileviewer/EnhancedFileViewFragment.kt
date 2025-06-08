@@ -1,21 +1,17 @@
 package com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer
 
 import android.content.Context
-import android.os.Build
 import android.os.Bundle
 import android.view.ContextThemeWrapper
 import android.view.Gravity
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.PopupMenu
 import android.widget.TextView
 import android.widget.ToggleButton
-import androidx.activity.addCallback
 import androidx.annotation.OptIn
-import androidx.annotation.RequiresApi
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.ActionProvider
 import androidx.fragment.app.activityViewModels
@@ -33,7 +29,7 @@ import com.quigglesproductions.secureimageviewer.managers.VideoPlaybackManager
 import com.quigglesproductions.secureimageviewer.models.enhanced.file.IDisplayFile
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.relations.RoomUnifiedEmbeddedFile
 import com.quigglesproductions.secureimageviewer.ui.IFileViewer
-import com.quigglesproductions.secureimageviewer.ui.SecureFragment
+import com.quigglesproductions.secureimageviewer.base.fragment.SecureFragment
 import com.quigglesproductions.secureimageviewer.ui.compoundcontrols.FileViewerNavigator
 import com.quigglesproductions.secureimageviewer.ui.enhancedfolderlist.FolderListType
 import com.quigglesproductions.secureimageviewer.ui.enhancedfolderviewer.FolderViewerViewModel

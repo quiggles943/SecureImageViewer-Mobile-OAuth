@@ -20,19 +20,14 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.work.BackoffPolicy
 import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.ExistingWorkPolicy
-import androidx.work.OneTimeWorkRequest
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.OutOfQuotaPolicy
 import androidx.work.PeriodicWorkRequest
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.quigglesproductions.secureimageviewer.R
 import com.quigglesproductions.secureimageviewer.aurora.authentication.device.DeviceAuthenticationCheckWorker
-import com.quigglesproductions.secureimageviewer.downloader.FolderDownloadWorker
-import com.quigglesproductions.secureimageviewer.managers.ViewerConnectivityManager
+import com.quigglesproductions.secureimageviewer.base.activity.AuthenticationActivity
 import com.quigglesproductions.secureimageviewer.ui.EnhancedMainMenuActivity
-import com.quigglesproductions.secureimageviewer.ui.SecureActivity
+import com.quigglesproductions.secureimageviewer.base.activity.SecureActivity
 import com.quigglesproductions.secureimageviewer.ui.login.aurora.AuroraLoginActivity
 import kotlinx.coroutines.launch
 import okhttp3.ResponseBody
@@ -41,7 +36,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.util.concurrent.TimeUnit
 
-class EnhancedStartupScreen : SecureActivity() {
+class EnhancedStartupScreen : AuthenticationActivity() {
     private lateinit var infoTextView: TextView
     private lateinit var progressBar: ProgressBar
     private val viewModel: EnhancedStartupScreenViewModel by viewModels()

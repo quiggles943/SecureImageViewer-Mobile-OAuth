@@ -68,7 +68,7 @@ class FolderDownloadWorker @AssistedInject constructor (
         var progress = workDataOf(State to DownloadState.RETRIEVING_DATA.name)
         var completedSuccessfully = 0
         var hadError = 0
-        notificationManager.notify(embeddedFolder.id.toInt(),buildNotificationWithProgress(0,"Downloading folder "+folder.normalName))
+        fireNotification(embeddedFolder,buildNotificationWithProgress(0,"Downloading folder "+folder.normalName))
         setProgress(progress)
         if(retrieveThumbnailFile(folder)) {
             progress = workDataOf(ThumbnailDownloaded to true)
@@ -96,7 +96,8 @@ class FolderDownloadWorker @AssistedInject constructor (
                 ErrorCount to hadError)
             setProgress(update)
             val percentage = calculatePercentage(progressCount,databaseList.size)
-            fireNotification(embeddedFolder,buildNotificationWithProgress(percentage,"Downloading folder "+folder.normalName))
+            if(count % 3 == 0) // only fire the update notification for every 3 downloads
+                fireNotification(embeddedFolder,buildNotificationWithProgress(percentage,"Downloading folder "+folder.normalName))
             Log.d("PagedFolderDownloader","Folder ${folder.normalName} - $progressCount/${databaseList.size} downloaded")
         }
         Log.i("PagedFolderDownloader","Folder ${folder.normalName} - ${databaseList.size} downloaded ($completedSuccessfully successful, $hadError unsuccessful)")

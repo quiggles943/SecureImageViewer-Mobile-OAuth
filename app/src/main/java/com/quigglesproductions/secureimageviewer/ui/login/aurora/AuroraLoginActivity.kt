@@ -12,15 +12,16 @@ import androidx.activity.viewModels
 import androidx.lifecycle.Observer
 import com.quigglesproductions.secureimageviewer.aurora.authentication.AuroraUser
 import com.quigglesproductions.secureimageviewer.aurora.authentication.appauth.AuroraAuthenticationManager
+import com.quigglesproductions.secureimageviewer.base.activity.AuthenticationActivity
 import com.quigglesproductions.secureimageviewer.databinding.ActivityAuroraLoginBinding
 import com.quigglesproductions.secureimageviewer.ui.EnhancedMainMenuActivity
-import com.quigglesproductions.secureimageviewer.ui.SecureActivity
+import com.quigglesproductions.secureimageviewer.base.activity.SecureActivity
 import dagger.hilt.android.AndroidEntryPoint
 import net.openid.appauth.AuthorizationException
 import net.openid.appauth.AuthorizationResponse
 
 @AndroidEntryPoint
-class AuroraLoginActivity : SecureActivity() {
+class AuroraLoginActivity : AuthenticationActivity() {
     private lateinit var binding: ActivityAuroraLoginBinding
     private lateinit var mContext: Context
     private val viewModel: AuroraLoginViewModel by viewModels()

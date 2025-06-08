@@ -7,7 +7,7 @@ import androidx.hilt.navigation.fragment.hiltNavGraphViewModels
 import androidx.media3.common.util.UnstableApi
 import com.quigglesproductions.secureimageviewer.R
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.relations.RoomUnifiedEmbeddedFile
-import com.quigglesproductions.secureimageviewer.ui.SecureFragment
+import com.quigglesproductions.secureimageviewer.base.fragment.SecureFragment
 import com.quigglesproductions.secureimageviewer.ui.compoundcontrols.FileViewerNavigator
 import com.quigglesproductions.secureimageviewer.ui.enhancedfileviewer.EnhancedFileViewFragment
 import com.quigglesproductions.secureimageviewer.ui.enhancedfolderviewer.FolderViewerViewModel

@@ -1,10 +1,8 @@
-package com.quigglesproductions.secureimageviewer.ui;
+package com.quigglesproductions.secureimageviewer.base.activity;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -22,7 +20,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
-import androidx.preference.PreferenceManager;
 
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.material.snackbar.Snackbar;
@@ -35,20 +32,17 @@ import com.quigglesproductions.secureimageviewer.dagger.hilt.annotations.Caching
 import com.quigglesproductions.secureimageviewer.dagger.hilt.annotations.DownloadDatabase;
 import com.quigglesproductions.secureimageviewer.dagger.hilt.module.DownloadManager;
 import com.quigglesproductions.secureimageviewer.downloader.FolderDownloaderMediator;
-import com.quigglesproductions.secureimageviewer.downloader.PagedFolderDownloader;
 import com.quigglesproductions.secureimageviewer.managers.FolderManager;
 import com.quigglesproductions.secureimageviewer.managers.NotificationManager;
 import com.quigglesproductions.secureimageviewer.managers.SecurityManager;
 import com.quigglesproductions.secureimageviewer.managers.ViewerConnectivityManager;
-import com.quigglesproductions.secureimageviewer.models.LoginModel;
 import com.quigglesproductions.secureimageviewer.models.WebServerConfig;
 import com.quigglesproductions.secureimageviewer.retrofit.RequestManager;
 import com.quigglesproductions.secureimageviewer.room.databases.download.DownloadRecordDatabase;
 import com.quigglesproductions.secureimageviewer.room.databases.system.SystemDatabase;
 import com.quigglesproductions.secureimageviewer.room.databases.unified.UnifiedFileDatabase;
+import com.quigglesproductions.secureimageviewer.ui.EnhancedMainMenuActivity;
 import com.quigglesproductions.secureimageviewer.ui.login.ReauthenticateActivity;
-import com.quigglesproductions.secureimageviewer.ui.login.aurora.AuroraLoginActivity;
-import com.quigglesproductions.secureimageviewer.ui.startup.EnhancedStartupScreen;
 import com.techyourchance.threadposter.BackgroundThreadPoster;
 import com.techyourchance.threadposter.UiThreadPoster;
 
@@ -61,8 +55,17 @@ import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
+/**
+ * The base {@link Activity} class used for creating activities in the application.
+ * This should be extended as the basis for any activity in the application.
+ * <p>
+ * Note: This is not secure and any data displayed in an activity that inherits this class will show
+ * on the recent app screen and the device will not ask to re-authenticate if the app is backgrounded
+ * on this activity
+ * For secure activity pages, use {@link SecureActivity} instead
+ */
 @AndroidEntryPoint
-public class SecureActivity extends AppCompatActivity {
+public class BaseActivity extends AppCompatActivity {
     Context context;
     public static final int RC_BARCODE_CAPTURE = 9001;
 
@@ -77,7 +80,6 @@ public class SecureActivity extends AppCompatActivity {
     public DownloadManager downloadManager;
     @Inject
     public FolderManager folderManager;
-
     @Inject
     @CachingDatabase
     UnifiedFileDatabase cachingDatabase;
@@ -90,8 +92,6 @@ public class SecureActivity extends AppCompatActivity {
     SystemDatabase systemDatabase;
     @Inject
     AuroraAuthenticationManager auroraAuthenticationManager;
-    @Inject
-    PagedFolderDownloader pagedFolderDownloader;
 
     @Inject
     FolderDownloaderMediator folderDownloaderMediator;
@@ -104,31 +104,6 @@ public class SecureActivity extends AppCompatActivity {
         setupActivityResultLauncher();
         context = this;
         ((App)getApplicationContext()).registerActivityContextForAuthentication(context);
-        Configuration config = getResources().getConfiguration();
-        try {
-            Class<? extends Configuration> configClass = config.getClass();
-            if(configClass.getField("SEM_DESKTOP_MODE_ENABLED").getInt(configClass) == configClass.getField("semDesktopModeEnabled").getInt(config)) {
-                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-                boolean desktopAllowed = prefs.getBoolean("streaming_support",false);
-                if(desktopAllowed){
-
-                }
-                else
-                {
-                    getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
-                }
-            }
-            else
-            {
-                getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
-            }
-        } catch(NoSuchFieldException e) {
-            //Handle the NoSuchFieldException
-        } catch(IllegalAccessException e) {
-            //Handle the IllegalAccessException
-        } catch(IllegalArgumentException e) {
-            //Handle the IllegalArgumentException
-        }
         viewerConnectivityManager.setCallback(new ViewerConnectivityManager.ViewerConnectivityCallback() {
             @Override
             public void connectionEstablished() {
@@ -156,11 +131,6 @@ public class SecureActivity extends AppCompatActivity {
                 showToast(context,text,duration);
             }
         });
-        if(!auroraAuthenticationManager.isUserAuthenticated()){
-            if(!(this instanceof ReauthenticateActivity) && !(this instanceof EnhancedStartupScreen) && !(this instanceof AuroraLoginActivity)){
-                authenticateUser();
-            }
-        }
     }
     @Override
     protected void onResume() {
@@ -191,37 +161,14 @@ public class SecureActivity extends AppCompatActivity {
                 showToast(context,text,duration);
             }
         });
-        if(!auroraAuthenticationManager.isUserAuthenticated()){
-            if(!(this instanceof ReauthenticateActivity) && !(this instanceof EnhancedStartupScreen) && !(this instanceof AuroraLoginActivity)){
-                authenticateUser();
-            }
-        }
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        boolean desktopAllowed = prefs.getBoolean("streaming_support",false);
-        if(desktopAllowed){
-            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_SECURE);
-        }
         super.onResume();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
-
     }
 
     private void authenticateUser(){
         Intent passthroughIntent = getIntent();
         Intent loginIntent = new Intent(this, ReauthenticateActivity.class);
         loginIntent.putExtra(ReauthenticateActivity.EXTRA_PASSTHROUGH_INTENT, passthroughIntent);
-        startActivityForResult(loginIntent,SecurityManager.LOGIN);
+        startActivityForResult(loginIntent, SecurityManager.LOGIN);
     }
 
     public void showSnackbar(Context context, String text, int length){
@@ -290,19 +237,6 @@ public class SecureActivity extends AppCompatActivity {
                     Toast.makeText(getBaseContext(), "QR code scanned", Toast.LENGTH_SHORT).show();
                 }
                 break;
-            case SecurityManager.LOGIN:
-                if(data != null){
-                    LoginModel model = data.getParcelableExtra(SecurityManager.LoginObject);
-                    Intent passthrough = data.getParcelableExtra(ReauthenticateActivity.EXTRA_PASSTHROUGH_INTENT);
-                    if(model != null){
-                        SecurityManager.getInstance().setLogin(model);
-                        //startActivity(passthrough);
-                        //finish();
-                    }
-                }
-                else
-                    //finish();
-                break;
         }
 
     }
@@ -366,10 +300,6 @@ public class SecureActivity extends AppCompatActivity {
 
     public SystemDatabase getSystemDatabase() {
         return systemDatabase;
-    }
-
-    public PagedFolderDownloader getPagedFolderDownloader(){
-        return pagedFolderDownloader;
     }
 
     public FolderDownloaderMediator getFolderDownloaderMediator() {

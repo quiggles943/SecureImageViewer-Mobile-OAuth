@@ -21,7 +21,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import com.quigglesproductions.secureimageviewer.R;
 import com.quigglesproductions.secureimageviewer.databinding.FragmentDownloadViewerBinding;
 import com.quigglesproductions.secureimageviewer.room.databases.download.entity.FolderDownloadRecord;
-import com.quigglesproductions.secureimageviewer.ui.SecureFragment;
+import com.quigglesproductions.secureimageviewer.base.fragment.SecureFragment;
 
 import java.util.List;
 

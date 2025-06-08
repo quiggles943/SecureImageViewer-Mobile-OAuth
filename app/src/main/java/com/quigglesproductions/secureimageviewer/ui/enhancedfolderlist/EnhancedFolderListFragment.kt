@@ -12,7 +12,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
 import androidx.appcompat.app.AlertDialog
@@ -21,7 +20,6 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavDirections
 import androidx.navigation.Navigation.findNavController
-import androidx.paging.PagingData
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -38,16 +36,14 @@ import com.quigglesproductions.secureimageviewer.databinding.FragmentFolderListB
 import com.quigglesproductions.secureimageviewer.downloader.FolderDownloadWorker
 import com.quigglesproductions.secureimageviewer.enums.FileGroupBy
 import com.quigglesproductions.secureimageviewer.managers.ApplicationPreferenceManager
-import com.quigglesproductions.secureimageviewer.managers.FolderManager
 import com.quigglesproductions.secureimageviewer.managers.NotificationManager
-import com.quigglesproductions.secureimageviewer.managers.ViewerConnectivityManager
 import com.quigglesproductions.secureimageviewer.models.enhanced.folder.IDisplayFolder
 import com.quigglesproductions.secureimageviewer.observable.IFolderDownloadObserver
 import com.quigglesproductions.secureimageviewer.recycler.RecyclerViewSelectionMode
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedFolder
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.relations.RoomUnifiedEmbeddedFolder
 import com.quigglesproductions.secureimageviewer.ui.EnhancedMainMenuActivity
-import com.quigglesproductions.secureimageviewer.ui.SecureFragment
+import com.quigglesproductions.secureimageviewer.base.fragment.SecureFragment
 import com.quigglesproductions.secureimageviewer.ui.adapter.loadstate.MyLoadStateAdapter
 import com.quigglesproductions.secureimageviewer.ui.overview.OverviewViewModel
 import com.quigglesproductions.secureimageviewer.utils.ObjectUtils

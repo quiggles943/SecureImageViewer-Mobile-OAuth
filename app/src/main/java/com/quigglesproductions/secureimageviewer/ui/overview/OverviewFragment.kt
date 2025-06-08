@@ -21,14 +21,12 @@ import com.quigglesproductions.secureimageviewer.aurora.authentication.device.Co
 import com.quigglesproductions.secureimageviewer.databinding.ActivityOverviewUpdatedBinding
 import com.quigglesproductions.secureimageviewer.downloader.FolderUpdateWorker
 import com.quigglesproductions.secureimageviewer.managers.NotificationManager
-import com.quigglesproductions.secureimageviewer.managers.ViewerConnectivityManager
-import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateResponse
 import com.quigglesproductions.secureimageviewer.models.modular.ModularServerStatus
 import com.quigglesproductions.secureimageviewer.observable.IFolderDownloadObserver
 import com.quigglesproductions.secureimageviewer.room.databases.system.enums.SystemParameter
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedFolder
 import com.quigglesproductions.secureimageviewer.ui.EnhancedMainMenuViewModel
-import com.quigglesproductions.secureimageviewer.ui.SecureFragment
+import com.quigglesproductions.secureimageviewer.base.fragment.SecureFragment
 import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback

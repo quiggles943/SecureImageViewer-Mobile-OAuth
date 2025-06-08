@@ -1,50 +1,92 @@
-package com.quigglesproductions.secureimageviewer.ui.login;
+package com.quigglesproductions.secureimageviewer.ui.login
 
-import android.content.Intent;
-import android.content.res.ColorStateList;
-import android.graphics.PorterDuff;
-import android.os.Bundle;
-import android.view.View;
-import android.widget.ProgressBar;
-import android.widget.TextView;
+import android.content.Intent
+import android.content.res.ColorStateList
+import android.graphics.PorterDuff
+import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.preference.PreferenceManager
+import android.view.View
+import android.widget.ProgressBar
+import android.widget.TextView
+import android.widget.Toast
+import com.quigglesproductions.secureimageviewer.R
+import com.quigglesproductions.secureimageviewer.base.activity.AuthenticationActivity
+import com.quigglesproductions.secureimageviewer.models.LoginModel
+import com.quigglesproductions.secureimageviewer.base.activity.SecureActivity
+import java.util.Objects
 
-import androidx.annotation.Nullable;
-
-import com.quigglesproductions.secureimageviewer.R;
-import com.quigglesproductions.secureimageviewer.ui.SecureActivity;
-
-public class ReauthenticateActivity extends SecureActivity {
-    public static String EXTRA_PASSTHROUGH_INTENT = "secureimageviewer.intent.extra.passthroughintent";
-    private TextView infoTextView;
-    private ProgressBar progressBar;
-    @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_splash);
-        infoTextView = findViewById(R.id.infoTextView);
-        progressBar = findViewById(R.id.splashProgressBar);
-        progressBar.setIndeterminate(false);
-        progressBar.setProgress(1);
-        progressBar.setMax(1);
-        progressBar.setProgressTintList(ColorStateList.valueOf(getBaseContext().getResources().getColor(R.color.reauthenticate)));
-        progressBar.setProgressTintMode(PorterDuff.Mode.MULTIPLY);
-        progressBar.setVisibility(View.VISIBLE);
-        infoTextView.setText("Re-authenticate to continue");
-        Intent passthroughIntent = getIntent().getParcelableExtra(EXTRA_PASSTHROUGH_INTENT);
-        //SecurityManager.getInstance().setupBiometrics(this,passthroughIntent);
-        getAuroraAuthenticationManager().biometricAuthenticator.setupBiometrics(this,passthroughIntent);
-
+class ReauthenticateActivity : AuthenticationActivity() {
+    private lateinit var infoTextView: TextView
+    private lateinit var progressBar: ProgressBar
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_splash)
+        infoTextView = findViewById(R.id.infoTextView)
+        progressBar = findViewById(R.id.splashProgressBar)
+        progressBar.isIndeterminate = false
+        progressBar.progress = 1
+        progressBar.setMax(1)
+        progressBar.setProgressTintList(ColorStateList.valueOf(baseContext.resources.getColor(R.color.reauthenticate)))
+        progressBar.progressTintMode = PorterDuff.Mode.MULTIPLY
+        progressBar.visibility = View.VISIBLE
+        infoTextView.text = "Re-authenticate to continue"
+        val passthroughIntent = intent.getParcelableExtra<Intent>(
+            EXTRA_PASSTHROUGH_INTENT
+        )
+        setupBiometrics(passthroughIntent)
     }
 
-    @Override
-    public void onBackPressed() {
-        finishAffinity();
-        super.onBackPressed();
+    private fun setupBiometrics(passthroughIntent: Intent?) {
+        val uiHandler = Handler(Looper.getMainLooper())
+        uiHandler.post {
+            auroraAuthenticationManager.biometricAuthenticator.callBiometricLogin(this) { success, exception ->
+                if (success) {
+                    val preferences = PreferenceManager.getDefaultSharedPreferences(this)
+                    val editor = preferences.edit()
+                    editor.putBoolean("loggedIn", true)
+                    editor.commit()
+                    val loginModel = LoginModel()
+                    loginModel.isAuthenticated = true
+                    loginModel.isLoggedIn = true
+                    Objects.requireNonNull(auroraAuthenticationManager.user)!!.authenticated = true
+                    if (this.isTaskRoot) {
+                        //Intent intent = new Intent(context, clazz);
+                        this.startActivity(passthroughIntent)
+                        //attemptTokenRefresh();
+                    } else this.finish()
+                } else {
+                    if (exception != null) showReauthenticationFailed(exception.message)
+                }
+            }
+            //Intent intent = new Intent(requiresSecureActivity(), EnhancedMainMenuActivity.class);
+            //SecurityManager.getInstance().setupBiometricsForResult(requiresSecureActivity(), intent);
+        }
     }
 
-    @Override
-    public void finishAndRemoveTask() {
-        moveTaskToBack(true);
-        super.finishAndRemoveTask();
+    private fun showReauthenticationFailed(errorString: String?) {
+        if (errorString != null) {
+            Toast.makeText(
+                applicationContext,
+                errorString,
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
+    override fun onBackPressed() {
+        finishAffinity()
+        super.onBackPressed()
+    }
+
+    override fun finishAndRemoveTask() {
+        moveTaskToBack(true)
+        super.finishAndRemoveTask()
+    }
+
+    companion object {
+        @JvmField
+        var EXTRA_PASSTHROUGH_INTENT: String = "secureimageviewer.intent.extra.passthroughintent"
     }
 }

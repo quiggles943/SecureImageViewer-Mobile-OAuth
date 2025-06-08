@@ -17,12 +17,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.quigglesproductions.secureimageviewer.R
 import com.quigglesproductions.secureimageviewer.databinding.FragmentSearchViewBinding
-import com.quigglesproductions.secureimageviewer.managers.ViewerConnectivityManager
 import com.quigglesproductions.secureimageviewer.models.modular.ModularSearchItem
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.RoomUnifiedSearchItem
 import com.quigglesproductions.secureimageviewer.room.databases.unified.entity.relations.RoomUnifiedEmbeddedFile
 import com.quigglesproductions.secureimageviewer.ui.EnhancedMainMenuActivity
-import com.quigglesproductions.secureimageviewer.ui.SecureFragment
+import com.quigglesproductions.secureimageviewer.base.fragment.SecureFragment
 import com.quigglesproductions.secureimageviewer.ui.adapter.filelist.EnhancedFileListRecyclerAdapter
 import com.quigglesproductions.secureimageviewer.ui.enhancedfolderlist.FolderListType
 import com.quigglesproductions.secureimageviewer.ui.enhancedfolderviewer.FolderViewerViewModel

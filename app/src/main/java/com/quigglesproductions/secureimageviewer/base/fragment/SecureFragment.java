@@ -1,12 +1,12 @@
-package com.quigglesproductions.secureimageviewer.ui;
+package com.quigglesproductions.secureimageviewer.base.fragment;
 
 import androidx.fragment.app.Fragment;
 
 import com.google.gson.Gson;
+import com.quigglesproductions.secureimageviewer.base.activity.SecureActivity;
 import com.quigglesproductions.secureimageviewer.aurora.authentication.appauth.AuroraAuthenticationManager;
 import com.quigglesproductions.secureimageviewer.dagger.hilt.module.DownloadManager;
 import com.quigglesproductions.secureimageviewer.downloader.FolderDownloaderMediator;
-import com.quigglesproductions.secureimageviewer.downloader.PagedFolderDownloader;
 import com.quigglesproductions.secureimageviewer.managers.FolderManager;
 import com.quigglesproductions.secureimageviewer.managers.ViewerConnectivityManager;
 import com.quigglesproductions.secureimageviewer.retrofit.ModularRequestService;
@@ -70,10 +70,6 @@ public class SecureFragment extends Fragment {
         return requiresSecureActivity().getSystemDatabase();
     }
 
-    public PagedFolderDownloader getPagedFolderDownloaded() throws IllegalStateException {
-        return requiresSecureActivity().getPagedFolderDownloader();
-    }
-
     public FolderDownloaderMediator getFolderDownloaderMediator() throws IllegalStateException{
         return requiresSecureActivity().getFolderDownloaderMediator();
     }
@@ -83,6 +79,6 @@ public class SecureFragment extends Fragment {
     }
 
     public ViewerConnectivityManager getConnectivityManager() throws IllegalStateException{
-        return requiresSecureActivity().viewerConnectivityManager;
+        return requiresSecureActivity().getConnectivityManager();
     }
 }

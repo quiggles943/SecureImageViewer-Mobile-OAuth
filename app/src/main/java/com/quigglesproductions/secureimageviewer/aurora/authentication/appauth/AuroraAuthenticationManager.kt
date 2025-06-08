@@ -12,7 +12,7 @@ import com.quigglesproductions.secureimageviewer.aurora.authentication.Biometric
 import com.quigglesproductions.secureimageviewer.aurora.authentication.DeviceAuthenticator
 import com.quigglesproductions.secureimageviewer.retrofit.DeviceRegistrationRequestService
 import com.quigglesproductions.secureimageviewer.room.databases.system.SystemDatabase
-import com.quigglesproductions.secureimageviewer.ui.SecureActivity
+import com.quigglesproductions.secureimageviewer.base.activity.SecureActivity
 import com.quigglesproductions.secureimageviewer.ui.login.aurora.AuroraLoginActivity
 import com.quigglesproductions.secureimageviewer.utils.BooleanUtils
 import kotlinx.coroutines.runBlocking

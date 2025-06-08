@@ -9,7 +9,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.quigglesproductions.secureimageviewer.R
 import com.quigglesproductions.secureimageviewer.managers.FolderManager
 import com.quigglesproductions.secureimageviewer.managers.NotificationManager
-import com.quigglesproductions.secureimageviewer.ui.SecureActivity
+import com.quigglesproductions.secureimageviewer.base.activity.SecureActivity
 import com.quigglesproductions.secureimageviewer.ui.SecurePreferenceFragmentCompat
 import kotlinx.coroutines.runBlocking
 import java.io.File

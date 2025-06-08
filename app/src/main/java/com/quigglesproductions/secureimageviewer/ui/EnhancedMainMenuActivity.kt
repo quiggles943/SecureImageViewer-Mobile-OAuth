@@ -26,9 +26,9 @@ import com.bumptech.glide.load.model.LazyHeaders
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.quigglesproductions.secureimageviewer.R
+import com.quigglesproductions.secureimageviewer.base.activity.SecureActivity
 import com.quigglesproductions.secureimageviewer.aurora.authentication.device.ConnectivityState
 import com.quigglesproductions.secureimageviewer.databinding.ActivityMainNavigationBinding
-import com.quigglesproductions.secureimageviewer.managers.ViewerConnectivityManager
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -64,7 +64,7 @@ class EnhancedMainMenuActivity : SecureActivity() {
         ) { s: String ->
             if (supportActionBar != null) if (!s.isEmpty()) supportActionBar!!.title = s
         }
-        window.navigationBarColor = context.getColor(R.color.transparent)
+        window.navigationBarColor = this.getColor(R.color.transparent)
 
         val userIcon = binding!!.navView.getHeaderView(0).findViewById<ImageView>(R.id.user_icon)
         val glideUrl = GlideUrl(
@@ -184,7 +184,7 @@ class EnhancedMainMenuActivity : SecureActivity() {
         supportActionBar!!.setBackgroundDrawable(
             ColorDrawable(
                 ContextCompat.getColor(
-                    context,
+                    this,
                     color
                 )
             )
