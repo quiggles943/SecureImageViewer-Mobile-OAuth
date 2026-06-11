@@ -228,7 +228,7 @@ public abstract class UnifiedFileDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     abstract suspend fun _insert(artist: RoomUnifiedArtist): Long
     @Query("SELECT * FROM Artists WHERE onlineId = :onlineId")
-    abstract suspend fun getArtistByOnlineId(onlineId: Long): RoomUnifiedArtist
+    abstract suspend fun getArtistByOnlineId(onlineId: Long): RoomUnifiedArtist?
     @Update
     abstract suspend fun _update(artist: RoomUnifiedArtist)
     @Insert(onConflict = OnConflictStrategy.IGNORE)
@@ -246,7 +246,7 @@ public abstract class UnifiedFileDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     abstract suspend fun _insert(category: RoomUnifiedCategory): Long
     @Query("SELECT * FROM Categories WHERE OnlineId = :onlineId")
-    abstract suspend fun getCategoryByOnlineId(onlineId: Long): RoomUnifiedCategory
+    abstract suspend fun getCategoryByOnlineId(onlineId: Long): RoomUnifiedCategory?
     @Update
     abstract suspend fun _update(category: RoomUnifiedCategory)
     @Insert
@@ -264,7 +264,7 @@ public abstract class UnifiedFileDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     abstract suspend fun _insert(category: RoomUnifiedSubject): Long
     @Query("SELECT * FROM subjects WHERE OnlineId = :onlineId")
-    abstract suspend fun getSubjectByOnlineId(onlineId: Long): RoomUnifiedSubject
+    abstract suspend fun getSubjectByOnlineId(onlineId: Long): RoomUnifiedSubject?
 
     @Insert
     suspend fun insert(facescanModel: RoomUnifiedFaceScanModel): Long {
@@ -279,7 +279,7 @@ public abstract class UnifiedFileDao {
     }
 
     @Query("SELECT * FROM facescanmodel WHERE OnlineId = :onlineId")
-    abstract suspend fun getFaceScanModelByOnlineId(onlineId: Long): RoomUnifiedFaceScanModel
+    abstract suspend fun getFaceScanModelByOnlineId(onlineId: Long): RoomUnifiedFaceScanModel?
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     abstract suspend fun _insert(model: RoomUnifiedFaceScanModel): Long
     @Update
@@ -298,7 +298,7 @@ public abstract class UnifiedFileDao {
     }
 
     @Query("SELECT * FROM facescanlandmark WHERE OnlineId = :onlineId")
-    abstract suspend fun getFaceScanLandmarkByOnlineId(onlineId: Long): RoomUnifiedFaceScanLandmark
+    abstract suspend fun getFaceScanLandmarkByOnlineId(onlineId: Long): RoomUnifiedFaceScanLandmark?
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     abstract suspend fun _insert(model: RoomUnifiedFaceScanLandmark): Long
     @Update
@@ -387,7 +387,7 @@ public abstract class UnifiedFileDao {
 
     @Transaction
     @Query("SELECT * FROM files WHERE FileId = :fileId")
-    abstract operator fun get(fileId: Long): RoomUnifiedEmbeddedFile
+    abstract operator fun get(fileId: Long): RoomUnifiedEmbeddedFile?
 
     @Transaction
     @Query("DELETE FROM files WHERE FolderId = :folderId")
@@ -427,7 +427,7 @@ public abstract class UnifiedFileDao {
     @Query("SELECT * FROM Files WHERE FolderId = :folderId ORDER BY NormalName DESC")
     abstract fun getPagingFilesByNameDesc(folderId: Long): PagingSource<Int, RoomUnifiedEmbeddedFile>
     @Query("SELECT RetrievedDate FROM files WHERE FolderId = :folderId ORDER BY RetrievedDate DESC LIMIT 1 ")
-    abstract suspend fun lastUpdated(folderId: Int): LocalDateTime
+    abstract suspend fun lastUpdated(folderId: Int): LocalDateTime?
     @Query("SELECT EXISTS(SELECT * FROM files WHERE OnlineId = :onlineId)")
     abstract suspend fun exists(onlineId: Int): Boolean
 

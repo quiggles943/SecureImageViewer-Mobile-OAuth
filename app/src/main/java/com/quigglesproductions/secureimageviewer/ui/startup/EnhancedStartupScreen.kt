@@ -250,6 +250,7 @@ class EnhancedStartupScreen : AuthenticationActivity() {
             }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         when (requestCode) {
             1245 -> {

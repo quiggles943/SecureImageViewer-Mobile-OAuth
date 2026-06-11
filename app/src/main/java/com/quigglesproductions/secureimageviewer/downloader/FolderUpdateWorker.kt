@@ -17,11 +17,16 @@ import com.google.gson.Gson
 import com.quigglesproductions.secureimageviewer.R
 import com.quigglesproductions.secureimageviewer.dagger.hilt.annotations.DownloadDatabase
 import com.quigglesproductions.secureimageviewer.enums.FileSyncStatus
+import com.quigglesproductions.secureimageviewer.gson.ViewerGson
+import com.quigglesproductions.secureimageviewer.managers.ApplicationPreferenceManager
 import com.quigglesproductions.secureimageviewer.managers.FolderManager
 import com.quigglesproductions.secureimageviewer.models.FileUpdateTracker
+import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateFolder
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateLog
 import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateResponse
+import com.quigglesproductions.secureimageviewer.models.enhanced.EnhancedFileUpdateSendModel
 import com.quigglesproductions.secureimageviewer.retrofit.DownloadService
+import com.quigglesproductions.secureimageviewer.retrofit.ModularRequestService
 import com.quigglesproductions.secureimageviewer.room.databases.system.SystemDatabase
 import com.quigglesproductions.secureimageviewer.room.databases.system.enums.SystemParameter
 import com.quigglesproductions.secureimageviewer.room.databases.unified.UnifiedFileDatabase
@@ -55,6 +60,8 @@ class FolderUpdateWorker @AssistedInject constructor (
     @Inject
     lateinit var downloadService: DownloadService
     @Inject
+    lateinit var requestService: ModularRequestService
+    @Inject
     lateinit var gson: Gson
     @Inject
     lateinit var folderManager: FolderManager
@@ -69,12 +76,17 @@ class FolderUpdateWorker @AssistedInject constructor (
         status.valueRaw = FileSyncStatus.IN_PROGRESS.name
         systemDatabase.systemParameterDao().update(status)
         fireNotification(id.hashCode(),buildNotificationWithMessage("Retrieving folders to update"))
-        val fileUpdateTrackerString = inputData.getString(FileInputTrackerInput) ?: return Result.failure()
-        val fileUpdateTracker = gson.fromJson(fileUpdateTrackerString,FileUpdateTracker().javaClass)
+        //val fileUpdateTracker = gson.fromJson(fileUpdateTrackerString,FileUpdateTracker().javaClass)
+
+        val fileUpdateTracker = getFolderUpdates()
+        if(fileUpdateTracker == null)
+            return Result.success()
         val folderIdsWithUpdates = fileUpdateTracker.getFolderIdsWithUpdates()
         for((count, onlineFolderId: Long) in folderIdsWithUpdates.withIndex()){
             val percentage = calculatePercentage(count,folderIdsWithUpdates.size)
             val folder = database.folderDao().loadFolderByOnlineId(onlineFolderId)
+            if(folder == null)
+                return Result.failure()
             fireNotification(id.hashCode(),buildNotificationWithProgress(percentage,"Updating folder "+folder.name))
             val updateResponse = fileUpdateTracker.getUpdateResponse(onlineFolderId)
 
@@ -101,6 +113,33 @@ class FolderUpdateWorker @AssistedInject constructor (
             fireNotification(id.hashCode(),buildNotificationWithMessage("Folder update failed"))
             Result.failure()
         }
+    }
+
+    private suspend fun getFolderUpdates(): FileUpdateTracker?{
+        val sendModel = EnhancedFileUpdateSendModel()
+
+        val folders = database.folderDao().getAllFolders()
+        for (folder in folders) {
+            if(folder.getLastUpdateTime() != null) {
+                sendModel.folders.add(
+                    EnhancedFileUpdateFolder(
+                        folder.getOnlineId(),
+                        folder.getLastUpdateTime()!!
+                    )
+                )
+            }
+        }
+        val response = requestService.doGetFileUpdates(sendModel)!!.awaitResponse()
+        if (response.isSuccessful) {
+            val updateLogs = response.body()!!
+            ApplicationPreferenceManager.getInstance().setPreferenceString(
+                ApplicationPreferenceManager.ManagedPreference.SYNC_VALUES,
+                ViewerGson.getGson().toJson(updateLogs)
+            )
+            val fileTracker = FileUpdateTracker(updateLogs)
+            return fileTracker
+        }
+        return null
     }
 
     private suspend fun updateFolder(folder: RoomUnifiedFolder, updateResponse: EnhancedFileUpdateResponse):Boolean{

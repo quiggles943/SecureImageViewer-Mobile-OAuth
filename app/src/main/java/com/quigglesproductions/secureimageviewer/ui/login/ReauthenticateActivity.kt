@@ -75,6 +75,7 @@ class ReauthenticateActivity : AuthenticationActivity() {
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         finishAffinity()
         super.onBackPressed()

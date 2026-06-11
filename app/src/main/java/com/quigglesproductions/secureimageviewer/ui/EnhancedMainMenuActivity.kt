@@ -85,10 +85,10 @@ class EnhancedMainMenuActivity : SecureActivity() {
             }
 
             override fun onResourceReady(
-                resource: Any,
-                model: Any,
-                target: Target<Any?>,
-                dataSource: DataSource,
+                resource: Any?,
+                model: Any?,
+                target: Target<Any?>?,
+                dataSource: DataSource?,
                 isFirstResource: Boolean
             ): Boolean {
                 return false

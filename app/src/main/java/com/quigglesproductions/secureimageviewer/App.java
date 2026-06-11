@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatDelegate;
@@ -17,7 +18,6 @@ import com.gu.toolargetool.TooLargeTool;
 import com.quigglesproductions.secureimageviewer.aurora.authentication.appauth.AuroraAuthenticationManager;
 import com.quigglesproductions.secureimageviewer.lifecycle.ViewerLifecycleObserver;
 import com.quigglesproductions.secureimageviewer.managers.ApplicationPreferenceManager;
-import com.quigglesproductions.secureimageviewer.managers.FolderManager;
 import com.quigglesproductions.secureimageviewer.managers.SecurityManager;
 import com.quigglesproductions.secureimageviewer.managers.ViewerConnectivityManager;
 import com.quigglesproductions.secureimageviewer.receiver.NetworkStateReceiver;
@@ -146,9 +146,18 @@ public class App extends Application implements Configuration.Provider {
     @NonNull
     @Override
     public Configuration getWorkManagerConfiguration() {
-        return new Configuration.Builder()
-                .setWorkerFactory(workerFactory)
-                .build();
+        Configuration configuration;
+        if (BuildConfig.DEBUG){
+            configuration = new Configuration.Builder()
+                    .setMinimumLoggingLevel(Log.DEBUG)
+                    .setWorkerFactory(workerFactory)
+                    .build();
+        } else {
+            configuration = new Configuration.Builder()
+                    .setWorkerFactory(workerFactory)
+                    .build();
+        }
+        return configuration;
     }
 
     /*@OnLifecycleEvent(Lifecycle.Event.ON_STOP)

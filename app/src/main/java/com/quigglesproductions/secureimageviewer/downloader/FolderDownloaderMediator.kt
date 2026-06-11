@@ -133,6 +133,8 @@ class FolderDownloaderMediator @Inject  constructor(@ApplicationContext val appC
                     runBlocking {
                         val status = systemDatabase.folderDownloadWorkerStatusDao().getFolderDownloadWorkerStatus(workerId = workerId.toString())
                         val folder = downloadedDatabase.folderDao().loadFolderById(status.folderId)
+                        if(folder == null)
+                            return@runBlocking
                         val progress: Data
                         if(workInfo.state == WorkInfo.State.SUCCEEDED || workInfo.state == WorkInfo.State.FAILED || workInfo.state == WorkInfo.State.CANCELLED)
                             progress = workInfo.outputData

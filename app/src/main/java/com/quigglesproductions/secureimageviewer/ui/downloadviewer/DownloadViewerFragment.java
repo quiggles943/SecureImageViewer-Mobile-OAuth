@@ -59,32 +59,28 @@ public class DownloadViewerFragment extends SecureFragment {
     @SuppressLint("NonConstantResourceId")
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()){
-            case R.id.download_viewer_delete_all:
-                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                builder.setTitle("Delete Download Records");
-                builder.setMessage("Are you sure you want to delete all completed download records");
-                builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        getBackgroundThreadPoster().post(()->{
-                            getRecordDatabase().downloadRecordDao().deleteAllComplete();
-                        });
-                        dialog.dismiss();
-                    }
-                });
-                builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
-                builder.show();
-
-
-                break;
-            default:
-                return false;
+        if (item.getItemId() == R.id.download_viewer_delete_all) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+            builder.setTitle("Delete Download Records");
+            builder.setMessage("Are you sure you want to delete all completed download records");
+            builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    getBackgroundThreadPoster().post(() -> {
+                        getRecordDatabase().downloadRecordDao().deleteAllComplete();
+                    });
+                    dialog.dismiss();
+                }
+            });
+            builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+            builder.show();
+        } else {
+            return false;
         }
         return true;
     }

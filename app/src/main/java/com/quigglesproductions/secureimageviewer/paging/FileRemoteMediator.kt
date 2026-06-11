@@ -35,7 +35,7 @@ class FileRemoteMediator(
 
     override suspend fun initialize(): InitializeAction {
         val cacheTimeout = TimeUnit.MILLISECONDS.convert(15, TimeUnit.MINUTES)
-        val updatedDate: LocalDateTime = fileDao.lastUpdated(folderId)
+        val updatedDate: LocalDateTime? = fileDao.lastUpdated(folderId)
         var updatedMillis: Long = 0
         if(updatedDate != null)
             updatedMillis = updatedDate.toInstant(ZoneOffset.UTC).toEpochMilli()

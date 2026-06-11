@@ -74,10 +74,10 @@ class FolderFilesListAdapter @Inject constructor(@ActivityContext context: Conte
                                 }
 
                                 override fun onResourceReady(
-                                    resource: Any,
-                                    model: Any,
+                                    resource: Any?,
+                                    model: Any?,
                                     target: Target<Any?>?,
-                                    dataSource: DataSource,
+                                    dataSource: DataSource?,
                                     isFirstResource: Boolean
                                 ): Boolean {
                                     return false

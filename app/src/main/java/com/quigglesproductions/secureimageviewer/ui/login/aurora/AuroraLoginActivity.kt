@@ -97,6 +97,7 @@ class AuroraLoginActivity : AuthenticationActivity() {
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         when (requestCode) {
             AuroraAuthenticationManager.AUTH_REQUEST_CODE -> if (data != null) {

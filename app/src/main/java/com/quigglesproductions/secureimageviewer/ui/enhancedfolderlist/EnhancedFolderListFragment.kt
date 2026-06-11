@@ -333,13 +333,13 @@ class EnhancedFolderListFragment : SecureFragment() {
                 lifecycleScope.launch {
                     if(selectedFolder.id != null) {
                         val databaseFolder: RoomUnifiedEmbeddedFolder =
-                            downloadFileDatabase.folderDao().loadFolderByOnlineId(selectedFolder.onlineId.toLong())
-                        runBlocking {
-                            folderManager.removeLocalFolder(
-                                fileDatabase = downloadFileDatabase,
-                                folder = databaseFolder
-                            )
-                        }
+                            downloadFileDatabase.folderDao()
+                                .loadFolderByOnlineId(selectedFolder.onlineId.toLong())
+                                ?: return@launch
+                        folderManager.removeLocalFolder(
+                            fileDatabase = downloadFileDatabase,
+                            folder = databaseFolder
+                        )
                     }
                     adapter.refresh()
                 }

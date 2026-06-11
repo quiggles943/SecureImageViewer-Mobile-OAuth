@@ -214,10 +214,10 @@ class OverviewFragment : SecureFragment() {
     }
 
     private fun syncFolders() {
-        val inputData = Data.Builder().putString(FolderUpdateWorker.FileInputTrackerInput,gson.toJson(viewModel.fileUpdates.value)).build()
+        //val inputData = Data.Builder().putString(FolderUpdateWorker.FileInputTrackerInput,gson.toJson(viewModel.fileUpdates.value)).build()
         val updateWorkRequest: OneTimeWorkRequest =
             OneTimeWorkRequestBuilder<FolderUpdateWorker>()
-                .setInputData(inputData)
+                //.setInputData(inputData)
                 .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
                 .build()
         val groupName = "Folder updater"

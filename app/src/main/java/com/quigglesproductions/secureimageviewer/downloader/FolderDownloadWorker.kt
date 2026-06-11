@@ -36,22 +36,24 @@ import javax.inject.Inject
 
 @HiltWorker
 class FolderDownloadWorker @AssistedInject constructor (
+    private val downloadService: DownloadService,
     @Assisted appContext: Context,
     @Assisted workerParams: WorkerParameters
-):
-    CoroutineWorker(appContext,workerParams) {
+): CoroutineWorker(appContext,workerParams) {
     private val pageSize = 25
     private val context = appContext
 
     @Inject
     @DownloadDatabase
     lateinit var database: UnifiedFileDatabase
-    @Inject
-    lateinit var downloadService: DownloadService
+    //@Inject
+    //lateinit var downloadService: DownloadService
 
     private val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
     private var notificationBuilder = NotificationCompat.Builder(applicationContext, "Download_Channel")
+
+    private val fileDownloadHelper = FileDownloadHelper(downloadService,context)
 
     override suspend fun doWork(): Result {
         val folderId = inputData.getLong("folderId",0)
@@ -61,6 +63,8 @@ class FolderDownloadWorker @AssistedInject constructor (
 
     private suspend fun downloadFolder(folderId: Long):Result{
         val embeddedFolder = database.folderDao().loadFolderById(folderId)
+        if(embeddedFolder == null)
+            return Result.failure()
         val folder = embeddedFolder.folder
         var pageCount = 1
         var hasMoreFiles = true
@@ -154,8 +158,9 @@ class FolderDownloadWorker @AssistedInject constructor (
 
     }
 
-    private suspend fun downloadFileContent(folder: RoomUnifiedFolder, file: RoomUnifiedEmbeddedFile) :Boolean{
-        val existingFile = database.fileDao().getByOnlineId(file.onlineId)
+    suspend fun downloadFileContent(folder: RoomUnifiedFolder, file: RoomUnifiedEmbeddedFile) :Boolean{
+        return fileDownloadHelper.downloadFileContent(folder,file,database.fileDao())
+        /*val existingFile = database.fileDao().getByOnlineId(file.onlineId)
         var existingFileDownloaded = false
         var existingFileContentDownloaded = false
         if(existingFile != null){
@@ -182,8 +187,9 @@ class FolderDownloadWorker @AssistedInject constructor (
                         database.fileDao().update(file.file)
                         database.fileDao().update(file.metadata.metadata)
                         return true
-                    } else
+                    } else {
                         return false
+                    }
                 }
                 else
                     return true
@@ -193,7 +199,7 @@ class FolderDownloadWorker @AssistedInject constructor (
             }
         }
         else
-            return true
+            return true*/
     }
 
     private fun fireNotification(folder: RoomUnifiedEmbeddedFolder,message: Notification){

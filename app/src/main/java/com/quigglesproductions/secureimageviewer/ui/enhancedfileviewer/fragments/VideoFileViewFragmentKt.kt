@@ -103,6 +103,7 @@ class VideoFileViewFragmentKt : BaseFileViewFragmentKt() {
                         mPlayer = player
                         videoView!!.player = mPlayer
                         mPlayer!!.addListener(object : Player.Listener {
+                            @Deprecated("Deprecated in Java")
                             @OptIn(UnstableApi::class)
                             override fun onPlayerStateChanged(
                                 playWhenReady: Boolean,

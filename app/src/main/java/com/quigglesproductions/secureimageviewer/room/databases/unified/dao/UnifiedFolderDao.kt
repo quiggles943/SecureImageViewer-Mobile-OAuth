@@ -32,9 +32,9 @@ abstract class UnifiedFolderDao {
      */
     @Transaction
     @Query("SELECT * from folders WHERE FolderId = :folderId")
-    abstract suspend fun loadFolderById(folderId: Long): RoomUnifiedEmbeddedFolder
+    abstract suspend fun loadFolderById(folderId: Long): RoomUnifiedEmbeddedFolder?
     @Query("SELECT * from folders WHERE FolderId = :folderId")
-    abstract suspend fun loadPagingFolderById(folderId: Long): RoomUnifiedFolder
+    abstract suspend fun loadPagingFolderById(folderId: Long): RoomUnifiedFolder?
 
     /**
      * Retrieves the folder identified by the proviced online id
@@ -43,7 +43,7 @@ abstract class UnifiedFolderDao {
      */
     @Transaction
     @Query("SELECT * FROM folders WHERE OnlineId = :onlineFolderId")
-    abstract suspend fun loadFolderByOnlineId(onlineFolderId: Long): RoomUnifiedEmbeddedFolder
+    abstract suspend fun loadFolderByOnlineId(onlineFolderId: Long): RoomUnifiedEmbeddedFolder?
 
     /**
      * Inserts the folder into database. If a folder with the same online id exists it will update
